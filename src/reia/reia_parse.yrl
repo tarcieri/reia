@@ -18,10 +18,10 @@ Nonterminals
   
 Terminals
   float integer not true false nil
-  '+' '-' '*' '/' '%' '~' % ':' '!' '*=' '/=' '%=' '+=' '-='
+  '+' '-' '*' '**' '/' '%' '~' % ':' '!' '*=' '/=' '%=' '+=' '-='
   ';' % '&=' '^=' '|=' '=' '?' '<<' '>>' '<' '>' 
   '(' ')' % '[' ']' '.' ',' '&&' '===' '==' '<=' '>=' '<>' 
-%  '{' '}' '&' '^' '||' '|' '||=' '**'
+%  '{' '}' '&' '^' '||' '|' '||='
   .
   
 % Left 100 FunctionExpression.
@@ -53,6 +53,7 @@ UnaryExpression -> 'not' UnaryExpression : {op, '$1', '$2'}.
 %% Multiplicative Operators
 MultiplicativeExpression -> UnaryExpression : '$1'.
 MultiplicativeExpression -> MultiplicativeExpression '*' UnaryExpression : {op, '$2', '$1', '$3'}.
+MultiplicativeExpression -> MultiplicativeExpression '**' UnaryExpression : {op, '$2', '$1', '$3'}.
 MultiplicativeExpression -> MultiplicativeExpression '/' UnaryExpression : {op, '$2', '$1', '$3'}.
 MultiplicativeExpression -> MultiplicativeExpression '%' UnaryExpression : {op, '$2', '$1', '$3'}.
 

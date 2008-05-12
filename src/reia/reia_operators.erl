@@ -8,6 +8,8 @@ ast('-' = Op, Ast) ->
   
 ast('*' = Op, Ast1, Ast2) ->
   {op, 1, Op, Ast1, Ast2};
+ast('**', Ast1, Ast2) ->
+  {call,1,{remote,1,{atom,1,math},{atom,1,pow}},[Ast1, Ast2]};
 ast('/' = Op, Ast1, Ast2) ->
   {op, 1, Op, Ast1, Ast2};
 ast('+' = Op, Ast1, Ast2) ->
