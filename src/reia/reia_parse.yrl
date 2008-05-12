@@ -84,4 +84,4 @@ ExpressionStatement -> Expression : '$1'.
 
 Program -> Statements : '$1'.
 Statements -> '$empty' : [].
-Statements -> Statement Statements : ['$1'|'$2'].
+Statements -> Statements Statement: '$1' ++ ['$2'].
