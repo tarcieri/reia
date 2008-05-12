@@ -2,7 +2,7 @@
 -export([ast/2, ast/3]).
 
 ast('-' = Op, Ast) ->
-  {op, 1, Op, {integer, 1, 0}, Ast}.
+  {op, 1, Op, Ast}.
 %ast('~' = Op, Ast) ->
 %  erl_syntax:prefix_expr(erl_syntax:operator('bnot'), Ast).
   
