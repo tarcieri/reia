@@ -1,5 +1,8 @@
 -module(reia_eval).
--export([exprs/1]).
+-export([exprs/2, new_binding/0]).
 
-exprs(Expressions) ->
-  erl_eval:exprs(reia_compiler:compile(Expressions), erl_eval:new_bindings()).
+exprs(Expressions, Binding) ->
+  erl_eval:exprs(reia_compiler:compile(Expressions), Binding).
+  
+new_binding() ->
+  erl_eval:new_bindings().
