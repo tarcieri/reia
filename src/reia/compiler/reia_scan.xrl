@@ -5,10 +5,57 @@ Whitespace = [\000-\s]
 
 Rules.   
 
-(\+|\-)?{Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
-(\+|\-)?{Digit}+ : build_integer(TokenChars, TokenLine).
+{Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
+{Digit}+ : build_integer(TokenChars, TokenLine).
 
 {Whitespace}+ : skip_token.
+
+%% special characters and single character operators
+\* :                  {token,{'*',TokenLine}}.
+/ :                   {token,{'/',TokenLine}}.
+\+ :                  {token,{'+',TokenLine}}.
+- :                   {token,{'-',TokenLine}}.
+\^ :                  {token,{'^',TokenLine}}.
+& :                   {token,{'&',TokenLine}}.
+\| :                  {token,{'|',TokenLine}}.
+\< :                  {token,{'<',TokenLine}}.
+\> :                  {token,{'>',TokenLine}}.
+= :                   {token,{'=',TokenLine}}.
+\. :                  {token,{'.',TokenLine}}.
+, :                   {token,{',',TokenLine}}.
+: :                   {token,{':',TokenLine}}.
+! :                   {token,{'!',TokenLine}}.
+\? :                  {token,{'?',TokenLine}}.
+; :                   {token,{';',TokenLine}}.
+\( :                  {token,{'(',TokenLine}}.
+\) :                  {token,{')',TokenLine}}.
+\{ :                  {token,{'{',TokenLine}}.
+} :                   {token,{'}',TokenLine}}.
+\[ :                  {token,{'[',TokenLine}}.
+\] :                  {token,{']',TokenLine}}.
+\% :                  {token,{'%',TokenLine}}.
+\~ :                  {token,{'~',TokenLine}}.
+
+%% multi character operators
+<< :                  {token,{'<<',TokenLine}}.
+>> :                  {token,{'>>',TokenLine}}.
+== :                  {token,{'==',TokenLine}}.
+!= :                  {token,{'!=',TokenLine}}.
+=== :                 {token,{'===',TokenLine}}.
+!== :                 {token,{'!==',TokenLine}}.
+&& :                  {token,{'&&',TokenLine}}.
+\|\| :                {token,{'||',TokenLine}}.
+\*= :                 {token,{'*=',TokenLine}}.
+/= :                  {token,{'/=',TokenLine}}.
+\%= :                 {token,{'%=',TokenLine}}.
+\+= :                 {token,{'+=',TokenLine}}.
+-= :                  {token,{'-=',TokenLine}}.
+&= :                  {token,{'&=',TokenLine}}.
+\^= :                 {token,{'^=',TokenLine}}.
+\|= :                 {token,{'|=',TokenLine}}.
+\|\|= :               {token,{'||=',TokenLine}}.
+<= :                  {token,{'<=',TokenLine}}.
+>= :                  {token,{'>=',TokenLine}}.
 
 Erlang code.  
 
