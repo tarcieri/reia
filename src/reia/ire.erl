@@ -5,13 +5,17 @@ start() ->
   run(reia_eval:new_binding()).
   
 run(Binding) ->
-  String = read(),
-  NewBinding = try
-     eval_print(String, Binding)
-  catch
-    error:X -> print_error(X), Binding
-  end,
-  run(NewBinding).
+  case read() of
+    eof -> io:format("~n"); % print a newline then exit
+    String ->
+      NewBinding = try
+        eval_print(String, Binding)
+      catch
+        error:X -> print_error(X), 
+        Binding
+      end,
+      run(NewBinding)
+  end.
   
 read() -> 
   io:get_line('>> ').

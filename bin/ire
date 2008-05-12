@@ -1,0 +1,5 @@
+#!/usr/bin/env escript
+
+main(_) ->
+  code:add_patha("./src/reia"),
+  ire:start().
