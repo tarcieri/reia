@@ -8,6 +8,8 @@ Rules.
 (\+|\-)?{Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
 (\+|\-)?{Digit}+ : build_integer(TokenChars, TokenLine).
 
+{Whitespace}+ : skip_token.
+
 Erlang code.  
 
 -export([build_integer/2, build_float/2]).
