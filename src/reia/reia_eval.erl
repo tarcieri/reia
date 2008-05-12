@@ -3,6 +3,7 @@
 
 exprs(ReiaAst, Binding) ->
   ErlangAst = reia_compiler:compile(ReiaAst),
+  io:format("Erlang AST: ~p~n", [ErlangAst]),
   erl_eval:exprs(ErlangAst, Binding).
   
 new_binding() ->

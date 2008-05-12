@@ -5,6 +5,7 @@ Nonterminals
   SimpleExpression
   ParenthesizedExpression
   UnaryExpression
+  ExponentialExpression
   MultiplicativeExpression
   AdditiveExpression
   Expression
@@ -12,8 +13,7 @@ Nonterminals
   OptionalSemicolon
   EmptyStatement
   ExpressionStatement
-  TopStatement
-  TopStatements
+  Statements
   .
   
 Terminals
@@ -50,12 +50,15 @@ UnaryExpression -> '-' UnaryExpression : {op, '$1', '$2'}.
 UnaryExpression -> '~' UnaryExpression : {op, '$1', '$2'}.
 UnaryExpression -> 'not' UnaryExpression : {op, '$1', '$2'}.
 
+%% Exponential Operators
+ExponentialExpression -> UnaryExpression : '$1'.
+ExponentialExpression -> ExponentialExpression '**' UnaryExpression : {op, '$2', '$1', '$3'}.
+
 %% Multiplicative Operators
-MultiplicativeExpression -> UnaryExpression : '$1'.
-MultiplicativeExpression -> MultiplicativeExpression '*' UnaryExpression : {op, '$2', '$1', '$3'}.
-MultiplicativeExpression -> MultiplicativeExpression '**' UnaryExpression : {op, '$2', '$1', '$3'}.
-MultiplicativeExpression -> MultiplicativeExpression '/' UnaryExpression : {op, '$2', '$1', '$3'}.
-MultiplicativeExpression -> MultiplicativeExpression '%' UnaryExpression : {op, '$2', '$1', '$3'}.
+MultiplicativeExpression -> ExponentialExpression : '$1'.
+MultiplicativeExpression -> MultiplicativeExpression '*' ExponentialExpression : {op, '$2', '$1', '$3'}.
+MultiplicativeExpression -> MultiplicativeExpression '/' ExponentialExpression : {op, '$2', '$1', '$3'}.
+MultiplicativeExpression -> MultiplicativeExpression '%' ExponentialExpression : {op, '$2', '$1', '$3'}.
 
 %% Additive Operators
 AdditiveExpression -> MultiplicativeExpression : '$1'.
@@ -79,11 +82,6 @@ ExpressionStatement -> Expression : '$1'.
 
 %% Programs
 
-Program -> TopStatements : '$1'.
-TopStatements -> '$empty' : [].
-TopStatements -> TopStatements TopStatement : '$1' ++ ['$2'].
-TopStatement -> Statement : '$1'.
-%TopStatement -> FunctionDefinition : '$1'.
-
-Erlang code.
-
+Program -> Statements : '$1'.
+Statements -> '$empty' : [].
+Statements -> Statement Statements : ['$1'|'$2'].

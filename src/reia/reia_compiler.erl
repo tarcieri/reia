@@ -14,6 +14,6 @@ ast(Ast = {integer, _, _}) ->
 ast(Ast = {float, _, Value}) ->
   Ast;
 ast({op, {Op, _}, In}) ->
-  reia_operators:ast(Op, In);
+  reia_operators:ast(Op, ast(In));
 ast({op, {Op, _}, In1, In2}) ->
-  reia_operators:ast(Op, In1, In2).
+  reia_operators:ast(Op, ast(In1), ast(In2)).
