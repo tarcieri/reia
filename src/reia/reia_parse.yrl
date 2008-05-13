@@ -4,22 +4,25 @@ Nonterminals
   statement
   statement_ending
   ending_token
-  expression
-  additive_expression
-  multiplicative_expression
-  exponential_expression
-  unary_expression
-  simple_expression
-  parenthesized_expression
+  expr
+  additive_expr
+  multiplicative_expr
+  exponential_expr
+  unary_expr
+  simple_expr
+  parenthesized_expr
   number
+  list
+  tail
   .
   
 Terminals
   true false nil float integer string regexp eol not
-  '+' '-' '*' '**' '/' '%' '~' % ':' '!' '*=' '/=' '%=' '+=' '-='
-  ';' % '&=' '^=' '|=' '=' '?' '<<' '>>' '<' '>' 
-  '(' ')' % '[' ']' '.' ',' '&&' '===' '==' '<=' '>=' '<>' 
-%  '{' '}' '&' '^' '||' '|' '||='
+  '+' '-' '*' '**' '/' '%' '~' ';' '(' ')' '[' ']'  ',' 
+  % '.' '&&' '===' '==' '<=' '>=' '<>' 
+  % '&=' '^=' '|=' '=' '?' '<<' '>>' '<' '>' 
+  % '{' '}' '&' '^' '||' '|' '||='
+  % ':' '!' '*=' '/=' '%=' '+=' '-='
   .
 
 Rootsymbol grammar.
@@ -31,7 +34,7 @@ statements -> statement statement_ending : ['$1'].
 statements -> statement statement_ending statements : ['$1'|'$3'].
 
 %% statements
-statement -> expression : '$1'.
+statement -> expr : '$1'.
 
 %% statement endings
 statement_ending -> ending_token : '$1'.
@@ -39,41 +42,54 @@ statement_ending -> statement_ending ending_token : '$1'.
 ending_token -> ';' : '$1'.
 ending_token -> eol : '$1'.
 
-%% expressions
-expression -> additive_expression : '$1'.
+%% exprs
+expr -> additive_expr : '$1'.
 
 %% additive operators
-additive_expression -> multiplicative_expression : '$1'.
-additive_expression -> additive_expression '+' multiplicative_expression : {op, '$2', '$1', '$3'}.
-additive_expression -> additive_expression '-' multiplicative_expression : {op, '$2', '$1', '$3'}.
+additive_expr -> multiplicative_expr : '$1'.
+additive_expr -> additive_expr '+' multiplicative_expr : {op, '$2', '$1', '$3'}.
+additive_expr -> additive_expr '-' multiplicative_expr : {op, '$2', '$1', '$3'}.
 
 %% multiplicative operators
-multiplicative_expression -> exponential_expression : '$1'.
-multiplicative_expression -> multiplicative_expression '*' exponential_expression : {op, '$2', '$1', '$3'}.
-multiplicative_expression -> multiplicative_expression '/' exponential_expression : {op, '$2', '$1', '$3'}.
-multiplicative_expression -> multiplicative_expression '%' exponential_expression : {op, '$2', '$1', '$3'}.
+multiplicative_expr -> exponential_expr : '$1'.
+multiplicative_expr -> multiplicative_expr '*' exponential_expr : {op, '$2', '$1', '$3'}.
+multiplicative_expr -> multiplicative_expr '/' exponential_expr : {op, '$2', '$1', '$3'}.
+multiplicative_expr -> multiplicative_expr '%' exponential_expr : {op, '$2', '$1', '$3'}.
 
 %% exponential operators
-exponential_expression -> unary_expression : '$1'.
-exponential_expression -> exponential_expression '**' unary_expression : {op, '$2', '$1', '$3'}.
+exponential_expr -> unary_expr : '$1'.
+exponential_expr -> exponential_expr '**' unary_expr : {op, '$2', '$1', '$3'}.
 
 %% unary operators
-unary_expression -> simple_expression : '$1'.
-unary_expression -> '+' unary_expression : {op, '$1', '$2'}.
-unary_expression -> '-' unary_expression : {op, '$1', '$2'}.
-unary_expression -> '~' unary_expression : {op, '$1', '$2'}.
-unary_expression -> 'not' unary_expression : {op, '$1', '$2'}.
+unary_expr -> simple_expr : '$1'.
+unary_expr -> '+' unary_expr : {op, '$1', '$2'}.
+unary_expr -> '-' unary_expr : {op, '$1', '$2'}.
+unary_expr -> '~' unary_expr : {op, '$1', '$2'}.
+unary_expr -> 'not' unary_expr : {op, '$1', '$2'}.
 
-%% simple expressions 
-simple_expression -> nil    : '$1'.
-simple_expression -> true   : '$1'.
-simple_expression -> false  : '$1'.
-simple_expression -> number : '$1'.
-simple_expression -> string : '$1'.
-simple_expression -> regexp : '$1'.
-simple_expression -> parenthesized_expression : '$1'.
-parenthesized_expression -> '(' expression ')' : '$2'.
+%% simple exprs 
+simple_expr -> nil    : '$1'.
+simple_expr -> true   : '$1'.
+simple_expr -> false  : '$1'.
+simple_expr -> number : '$1'.
+simple_expr -> string : '$1'.
+simple_expr -> regexp : '$1'.
+simple_expr -> list : '$1'.
+simple_expr -> parenthesized_expr : '$1'.
+parenthesized_expr -> '(' expr ')' : '$2'.
 
 %% number
 number -> float : '$1'.
 number -> integer : '$1'.
+
+%% lists
+list -> '[' ']' : {nil,line('$1')}.
+list -> '[' expr tail : {cons, line('$1'), '$2', '$3'}.
+
+tail -> ']' : {nil, line('$1')}.
+tail -> ',' expr tail : {cons, line('$2'), '$2', '$3'}.
+
+Erlang code.
+
+%% keep track of line info in tokens
+line(Tup) -> element(2, Tup).

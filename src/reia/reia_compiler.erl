@@ -9,16 +9,21 @@ compile([Expression|Rest], Output) ->
   NewExpression = ast(Expression),
   compile(Rest, [NewExpression|Output]).
 
+% primitives
 ast({nil, Line}) ->
   {atom, Line, nil};
 ast({true, Line}) ->
   {atom, Line, true};
 ast({false, Line}) ->
-  {atom, Line, false};  
+  {atom, Line, false};
+  
+% numerical types
 ast(Ast = {integer, _, _}) ->
   Ast;
 ast(Ast = {float, _, _}) ->
   Ast;
+  
+% strings, regexes
 ast(Ast = {string, Line, String}) ->
   {tuple, Line, [
     {atom, Line, string},
@@ -29,6 +34,14 @@ ast({regexp, Line, Pattern}) ->
     {atom, Line, regexp}, 
     {bin, Line, [{bin_element, Line, {string, Line, Pattern}, default, default}]}
   ]};
+
+% lists
+ast({cons, Line, In1, Nil = {nil, _}}) ->
+  {cons, Line, ast(In1), Nil};
+ast({cons, Line, In1, In2}) ->
+  {cons, Line, ast(In1), ast(In2)};
+  
+% operators
 ast({op, {Op, Line}, In}) ->
   reia_operators:ast(Op, Line, ast(In));
 ast({op, {Op, Line}, In1, In2}) ->
