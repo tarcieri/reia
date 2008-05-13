@@ -2,10 +2,11 @@ Definitions.
 
 Digit = [0-9]
 UpperCase = [A-Z]
-LowerC = [a-z]
+LowerCase = [a-z]
 Whitespace = [\s]
 Quote = '(\\\^.|\\.|[^\'])*'
 String = "(\\\^.|\\.|[^\"])*"
+Comment = #.*?\n
 
 Rules.   
 
@@ -13,7 +14,8 @@ Rules.
 {Digit}+ : build_integer(TokenChars, TokenLine).
 {String} : build_string(TokenChars, TokenLine, TokenLen).
 {Quote} : build_string(TokenChars, TokenLine, TokenLen).
-({UpperCase}|{LowerC}|_|\$)({UpperCase}|{Digit}|{LowerC}|_|\$)* : build_identifier(TokenChars, TokenLine). 
+({UpperCase}|{LowerCase}|_|\$)({UpperCase}|{Digit}|{LowerCase}|_|\$)* : build_identifier(TokenChars, TokenLine).
+{Comment} : skip_token.
 {Whitespace}+ : skip_token.
 
 %% special characters and single character operators
