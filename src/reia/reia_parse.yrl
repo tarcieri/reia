@@ -33,10 +33,9 @@ statements -> statement statement_ending statements : ['$1'|'$3'].
 %% statements
 statement -> expression : '$1'.
 
+%% statement endings
 statement_ending -> ending_token : '$1'.
 statement_ending -> statement_ending ending_token : '$1'.
-
-%% statement endings
 ending_token -> ';' : '$1'.
 ending_token -> eol : '$1'.
 
