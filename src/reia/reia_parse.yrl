@@ -1,19 +1,17 @@
 Nonterminals
-  Grammar
-  Statements
-  Statement
-  StatementEnding
-  EmptyStatement
-  ExpressionStatement
-  Expression
-  AdditiveExpression
-  MultiplicativeExpression
-  ExponentialExpression
-  UnaryExpression
-  PrimaryExpression
-  SimpleExpression
-  ParenthesizedExpression
-  Number
+  grammar
+  statements
+  statement
+  statement_ending
+  empty_statement
+  expression
+  additive_expression
+  multiplicative_expression
+  exponential_expression
+  unary_expression
+  simple_expression
+  parenthesized_expression
+  number
   .
   
 Terminals
@@ -24,58 +22,54 @@ Terminals
 %  '{' '}' '&' '^' '||' '|' '||='
   .
 
-Rootsymbol Grammar.
+Rootsymbol grammar.
 
-Grammar -> Statements : '$1'.
-Statements -> '$empty' : [].
-Statements -> Statements Statement: '$1' ++ ['$2'].
+grammar -> statements : '$1'.
+statements -> '$empty' : [].
+statements -> statements statement: '$1' ++ ['$2'].
 
-%% Statements
-Statement -> EmptyStatement : '$1'.
-Statement -> ExpressionStatement StatementEnding : '$1'.
-StatementEnding -> 'eol' : '$1'.
-StatementEnding -> ';' : '$1'.
+%% statements
+statement -> empty_statement : '$1'.
+statement -> expression statement_ending : '$1'.
+statement_ending -> 'eol' : '$1'.
+statement_ending -> ';' : '$1'.
 
-%% Empty Statement 
-EmptyStatement -> ';'. 
+%% empty statement 
+empty_statement -> ';'. 
 
-%% Expression Statement 
-ExpressionStatement -> Expression : '$1'.
+%% expressions
+expression -> additive_expression : '$1'.
 
-%% Expressions
-Expression -> AdditiveExpression : '$1'.
+%% additive operators
+additive_expression -> multiplicative_expression : '$1'.
+additive_expression -> additive_expression '+' multiplicative_expression : {op, '$2', '$1', '$3'}.
+additive_expression -> additive_expression '-' multiplicative_expression : {op, '$2', '$1', '$3'}.
 
-%% Additive Operators
-AdditiveExpression -> MultiplicativeExpression : '$1'.
-AdditiveExpression -> AdditiveExpression '+' MultiplicativeExpression : {op, '$2', '$1', '$3'}.
-AdditiveExpression -> AdditiveExpression '-' MultiplicativeExpression : {op, '$2', '$1', '$3'}.
+%% multiplicative operators
+multiplicative_expression -> exponential_expression : '$1'.
+multiplicative_expression -> multiplicative_expression '*' exponential_expression : {op, '$2', '$1', '$3'}.
+multiplicative_expression -> multiplicative_expression '/' exponential_expression : {op, '$2', '$1', '$3'}.
+multiplicative_expression -> multiplicative_expression '%' exponential_expression : {op, '$2', '$1', '$3'}.
 
-%% Multiplicative Operators
-MultiplicativeExpression -> ExponentialExpression : '$1'.
-MultiplicativeExpression -> MultiplicativeExpression '*' ExponentialExpression : {op, '$2', '$1', '$3'}.
-MultiplicativeExpression -> MultiplicativeExpression '/' ExponentialExpression : {op, '$2', '$1', '$3'}.
-MultiplicativeExpression -> MultiplicativeExpression '%' ExponentialExpression : {op, '$2', '$1', '$3'}.
+%% exponential operators
+exponential_expression -> unary_expression : '$1'.
+exponential_expression -> exponential_expression '**' unary_expression : {op, '$2', '$1', '$3'}.
 
-%% Exponential Operators
-ExponentialExpression -> UnaryExpression : '$1'.
-ExponentialExpression -> ExponentialExpression '**' UnaryExpression : {op, '$2', '$1', '$3'}.
+%% unary operators
+unary_expression -> simple_expression : '$1'.
+unary_expression -> '+' unary_expression : {op, '$1', '$2'}.
+unary_expression -> '-' unary_expression : {op, '$1', '$2'}.
+unary_expression -> '~' unary_expression : {op, '$1', '$2'}.
+unary_expression -> 'not' unary_expression : {op, '$1', '$2'}.
 
-%% Unary Operators
-UnaryExpression -> PrimaryExpression : '$1'.
-UnaryExpression -> '+' UnaryExpression : {op, '$1', '$2'}.
-UnaryExpression -> '-' UnaryExpression : {op, '$1', '$2'}.
-UnaryExpression -> '~' UnaryExpression : {op, '$1', '$2'}.
-UnaryExpression -> 'not' UnaryExpression : {op, '$1', '$2'}.
+%% simple expressions 
+simple_expression -> nil : '$1'.
+simple_expression -> true : '$1'.
+simple_expression -> false : '$1'.
+simple_expression -> number : '$1'.
+simple_expression -> parenthesized_expression : '$1'.
+parenthesized_expression -> '(' expression ')' : '$2'.
 
-%% Primary Expressions 
-PrimaryExpression -> SimpleExpression : '$1'.
-SimpleExpression -> nil : '$1'.
-SimpleExpression -> true : '$1'.
-SimpleExpression -> false : '$1'.
-SimpleExpression -> Number : '$1'.
-SimpleExpression -> ParenthesizedExpression : '$1'.
-ParenthesizedExpression -> '(' Expression ')' : '$2'.
-
-%% Number
-Number -> float : '$1'.
-Number -> integer : '$1'.
+%% number
+number -> float : '$1'.
+number -> integer : '$1'.
