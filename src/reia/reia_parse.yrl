@@ -15,7 +15,7 @@ Nonterminals
   .
   
 Terminals
-  true false nil float integer string not eol
+  true false nil float integer string regexp eol not
   '+' '-' '*' '**' '/' '%' '~' % ':' '!' '*=' '/=' '%=' '+=' '-='
   ';' % '&=' '^=' '|=' '=' '?' '<<' '>>' '<' '>' 
   '(' ')' % '[' ']' '.' ',' '&&' '===' '==' '<=' '>=' '<>' 
@@ -65,11 +65,12 @@ unary_expression -> '~' unary_expression : {op, '$1', '$2'}.
 unary_expression -> 'not' unary_expression : {op, '$1', '$2'}.
 
 %% simple expressions 
-simple_expression -> nil : '$1'.
-simple_expression -> true : '$1'.
-simple_expression -> false : '$1'.
+simple_expression -> nil    : '$1'.
+simple_expression -> true   : '$1'.
+simple_expression -> false  : '$1'.
 simple_expression -> number : '$1'.
 simple_expression -> string : '$1'.
+simple_expression -> regexp : '$1'.
 simple_expression -> parenthesized_expression : '$1'.
 parenthesized_expression -> '(' expression ')' : '$2'.
 

@@ -4,8 +4,9 @@ Digit = [0-9]
 UpperCase = [A-Z]
 LowerCase = [a-z]
 Whitespace = [\s]
-Quote = '(\\\^.|\\.|[^\'])*'
 String = "(\\\^.|\\.|[^\"])*"
+Quote = '(\\\^.|\\.|[^\'])*'
+Regexp = /(\\\^.|\\.|[^\\])*/
 Comment = #.*?\n
 
 Rules.   
@@ -13,7 +14,8 @@ Rules.
 {Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
 {Digit}+ : build_integer(TokenChars, TokenLine).
 {String} : build_string(TokenChars, TokenLine, TokenLen).
-{Quote} : build_string(TokenChars, TokenLine, TokenLen).
+{Quote}  : build_string(TokenChars, TokenLine, TokenLen).
+{Regexp} : build_regexp(TokenChars, TokenLine, TokenLen).
 ({UpperCase}|{LowerCase}|_|\$)({UpperCase}|{Digit}|{LowerCase}|_|\$)* : build_identifier(TokenChars, TokenLine).
 {Comment} : skip_token.
 {Whitespace}+ : skip_token.
@@ -79,6 +81,10 @@ build_float(Chars, Line) ->
 build_string(Chars, Line, Len) ->
   S = lists:sublist(Chars, 2, Len - 2), 
   {token, {string, Line, S}}.
+  
+build_regexp(Chars, Line, Len) ->
+  S = lists:sublist(Chars, 2, Len - 2), 
+  {token, {regexp, Line, S}}.
   
 build_identifier(Chars, Line) ->  
     Atom = list_to_atom(Chars),
