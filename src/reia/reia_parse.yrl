@@ -10,23 +10,19 @@ Nonterminals
   AdditiveExpression
   Expression
   Statement
-  OptionalSemicolon
+  StatementEnding
   EmptyStatement
   ExpressionStatement
   Statements
   .
   
 Terminals
-  float integer not true false nil
+  float integer not true false nil eol
   '+' '-' '*' '**' '/' '%' '~' % ':' '!' '*=' '/=' '%=' '+=' '-='
   ';' % '&=' '^=' '|=' '=' '?' '<<' '>>' '<' '>' 
   '(' ')' % '[' ']' '.' ',' '&&' '===' '==' '<=' '>=' '<>' 
 %  '{' '}' '&' '^' '||' '|' '||='
   .
-  
-% Left 100 FunctionExpression.
-% Left 100 LiteralField.
-% Left 100 PostfixExpression.
 
 Rootsymbol Program.
 
@@ -70,9 +66,9 @@ Expression -> AdditiveExpression : '$1'.
 
 %% Statements
 Statement -> EmptyStatement : '$1'.
-Statement -> ExpressionStatement OptionalSemicolon : '$1'.
-OptionalSemicolon -> ';' : '$1'. 
-OptionalSemicolon -> '$empty' : [].
+Statement -> ExpressionStatement StatementEnding : '$1'.
+StatementEnding -> 'eol' : '$1'.
+StatementEnding -> ';' : '$1'.
 
 %% Empty Statement 
 EmptyStatement -> ';'. 

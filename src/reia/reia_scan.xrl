@@ -1,7 +1,7 @@
 Definitions.
 
 Digit = [0-9]
-Whitespace = [\000-\s]
+Whitespace = [\s]
 
 Rules.   
 
@@ -11,6 +11,7 @@ Rules.
 {Whitespace}+ : skip_token.
 
 %% special characters and single character operators
+\n :                  {token,{eol,TokenLine}}.
 \* :                  {token,{'*',TokenLine}}.
 / :                   {token,{'/',TokenLine}}.
 \+ :                  {token,{'+',TokenLine}}.
