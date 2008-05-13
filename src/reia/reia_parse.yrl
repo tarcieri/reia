@@ -3,7 +3,6 @@ Nonterminals
   statements
   statement
   statement_ending
-  empty_statement
   expression
   additive_expression
   multiplicative_expression
@@ -25,17 +24,17 @@ Terminals
 Rootsymbol grammar.
 
 grammar -> statements : '$1'.
-statements -> '$empty' : [].
-statements -> statements statement: '$1' ++ ['$2'].
+
+statements -> statement : ['$1'].
+statements -> statement statement_ending : ['$1'].
+statements -> statement statement_ending statements : ['$1'|'$3'].
+
+%% statement endings
+statement_ending -> ';' : '$1'.
+statement_ending -> eol : '$1'.
 
 %% statements
-statement -> empty_statement : '$1'.
-statement -> expression statement_ending : '$1'.
-statement_ending -> 'eol' : '$1'.
-statement_ending -> ';' : '$1'.
-
-%% empty statement 
-empty_statement -> ';'. 
+statement -> expression : '$1'.
 
 %% expressions
 expression -> additive_expression : '$1'.
