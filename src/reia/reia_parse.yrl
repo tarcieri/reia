@@ -3,6 +3,7 @@ Nonterminals
   statements
   statement
   statement_ending
+  ending_token
   expression
   additive_expression
   multiplicative_expression
@@ -29,12 +30,15 @@ statements -> statement : ['$1'].
 statements -> statement statement_ending : ['$1'].
 statements -> statement statement_ending statements : ['$1'|'$3'].
 
-%% statement endings
-statement_ending -> ';' : '$1'.
-statement_ending -> eol : '$1'.
-
 %% statements
 statement -> expression : '$1'.
+
+statement_ending -> ending_token : '$1'.
+statement_ending -> statement_ending ending_token : '$1'.
+
+%% statement endings
+ending_token -> ';' : '$1'.
+ending_token -> eol : '$1'.
 
 %% expressions
 expression -> additive_expression : '$1'.
