@@ -78,7 +78,7 @@ build_float(Chars, Line) ->
   
 build_string(Chars, Line, Len) ->
   S = lists:sublist(Chars, 2, Len - 2), 
-  {token, {string, Line, list_to_binary(S)}}.
+  {token, {string, Line, S}}.
   
 build_identifier(Chars, Line) ->  
     Atom = list_to_atom(Chars),
@@ -87,4 +87,7 @@ build_identifier(Chars, Line) ->
         false -> {token, {identifier, Line, Atom}}
     end.
 
+reserved_word('nil') -> true;
+reserved_word('true') -> true;
+reserved_word('false') -> true;
 reserved_word(_) -> false.

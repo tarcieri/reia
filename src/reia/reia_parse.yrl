@@ -14,7 +14,7 @@ Nonterminals
   .
   
 Terminals
-  float integer not true false nil eol
+  true false nil float integer string not eol
   '+' '-' '*' '**' '/' '%' '~' % ':' '!' '*=' '/=' '%=' '+=' '-='
   ';' % '&=' '^=' '|=' '=' '?' '<<' '>>' '<' '>' 
   '(' ')' % '[' ']' '.' ',' '&&' '===' '==' '<=' '>=' '<>' 
@@ -66,6 +66,7 @@ simple_expression -> nil : '$1'.
 simple_expression -> true : '$1'.
 simple_expression -> false : '$1'.
 simple_expression -> number : '$1'.
+simple_expression -> string : '$1'.
 simple_expression -> parenthesized_expression : '$1'.
 parenthesized_expression -> '(' expression ')' : '$2'.
 
