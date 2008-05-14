@@ -74,4 +74,4 @@ stringify_list_members([Term|Rest], Acc) ->
   stringify_list_members(Rest, NewAcc).
 
 print_error(Error) ->
-  io:format("Error: ~p~n", [Error]).
+  io:format("Error: ~s~n", [Error]).

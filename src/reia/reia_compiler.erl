@@ -56,4 +56,17 @@ ast({tuple, Line, Elements}) ->
 ast({op, {Op, Line}, In}) ->
   reia_operators:ast(Op, Line, ast(In));
 ast({op, {Op, Line}, In1, In2}) ->
-  reia_operators:ast(Op, Line, ast(In1), ast(In2)).
+  reia_operators:ast(Op, Line, ast(In1), ast(In2));
+  
+% Erlang function calls
+ast({erl_funcall, Line, Module, Function, Arguments}) ->
+  {call,Line,
+    {remote,Line,{atom,Line,reia_erl},{atom,Line,erl_funcall}},
+    [Module,Function,list_to_ast(Arguments, Line)]
+  }.
+
+% Convert a list to its AST representation
+list_to_ast([], Line) ->
+  {nil,Line};
+list_to_ast([Term|Rest], Line) ->
+  {cons,Line,ast(Term),list_to_ast(Rest,Line)}.

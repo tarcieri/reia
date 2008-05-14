@@ -11,6 +11,7 @@ task :compiler => %w[
   src/reia/reia_compiler.beam
   src/reia/reia_operators.beam
   src/reia/reia_eval.beam
+  src/reia/reia_erl.beam
 ]
 
 task :ire => 'src/reia/ire.beam'
@@ -34,6 +35,7 @@ end
 file "src/reia/reia_compiler.beam" => "src/reia/reia_compiler.erl"
 file "src/reia/reia_operators.beam" => "src/reia/reia_operators.erl"
 file "src/reia/reia_eval.beam" => "src/reia/reia_eval.erl"
+file "src/reia/reia_erl.beam" => "src/reia/reia_erl.erl"
 
 # Compile ire
 file "src/reia/ire.beam" => "src/reia/ire.erl"
@@ -47,5 +49,6 @@ task :clean do
   rm_f 'src/reia/reia_compiler.beam'
   rm_f 'src/reia/reia_operators.beam'
   rm_f 'src/reia/reia_eval.beam'
+  rm_f 'src/reia/reia_erl.beam'
   rm_f 'src/reia/ire.beam'
 end
