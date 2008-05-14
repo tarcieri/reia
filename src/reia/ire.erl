@@ -11,7 +11,7 @@ run(Binding) ->
       NewBinding = try
         eval_print(String, Binding)
       catch
-        error:X -> print_error(X), 
+        Class:Reason -> print_error(Class, Reason), 
         Binding
       end,
       run(NewBinding)
@@ -73,6 +73,11 @@ stringify_list_members([Term|Rest], Acc) ->
   end,
   stringify_list_members(Rest, NewAcc).
 
-print_error(Error) ->
-  io:format("Error: ~s~n", [stringify_term(reia_erl:e2r_printable(Error))]),
-  io:format("Backtrace: ~s~n", [stringify_term(reia_erl:e2r_printable(erlang:get_stacktrace()))]).
+print_error(Class, Reason) ->
+  PF = fun(Term, I) ->
+    io_lib:format("~." ++ integer_to_list(I) ++ "P", [Term, 50]) 
+  end,
+  StackTrace = erlang:get_stacktrace(),
+  StackFun = fun(M, _F, _A) -> (M =:= erl_eval) or (M =:= ?MODULE) end,
+  Error = lib:format_exception(1, Class, Reason, StackTrace, StackFun, PF),
+  io:format("~s~n", [Error]).
