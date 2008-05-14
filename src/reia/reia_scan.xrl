@@ -11,31 +11,31 @@ Comment = #.*?\n
 
 Rules.
 
-% numbers
+%% Numbers
 {Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
 {Digit}+ : build_integer(TokenChars, TokenLine).
 
-% strings
+%% Strings
 {DoubleQuoted} : build_token(string, TokenChars, TokenLine, TokenLen).
 {SingleQuoted} : build_token(string, TokenChars, TokenLine, TokenLen).
 
-% regexp
+%% Regular expressions
 {Regexp} : build_token(regexp, TokenChars, TokenLine, TokenLen).
 
-% atoms
+%% Atoms
 \$({UpperCase}|{LowerCase}|_)({UpperCase}|{Digit}|{LowerCase}|_)* : build_atom(TokenChars, TokenLine, TokenLen).
 \${DoubleQuoted} : build_quoted_atom(TokenChars, TokenLine, TokenLen).
 \${SingleQuoted} : build_quoted_atom(TokenChars, TokenLine, TokenLen).
 
-% identifiers and constants
+%% Identifiers and constants
 {UpperCase}({UpperCase}|{Digit}|{LowerCase}|_)* : build_constant(TokenChars, TokenLine).
 {LowerCase}({UpperCase}|{Digit}|{LowerCase}|_)* : build_identifier(TokenChars, TokenLine).
 
-% ignored
+%% Ignored
 {Comment} : skip_token.
 {Whitespace}+ : skip_token.
 
-%% special characters and single character operators
+%% Special single-character tokens
 \n :                  {token,{eol,TokenLine}}.
 \* :                  {token,{'*',TokenLine}}.
 / :                   {token,{'/',TokenLine}}.
@@ -62,7 +62,7 @@ Rules.
 \% :                  {token,{'%',TokenLine}}.
 \~ :                  {token,{'~',TokenLine}}.
 
-%% multi character operators
+%% Special multi-character tokens
 << :                  {token,{'<<',TokenLine}}.
 >> :                  {token,{'>>',TokenLine}}.
 == :                  {token,{'==',TokenLine}}.
