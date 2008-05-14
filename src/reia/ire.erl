@@ -74,4 +74,5 @@ stringify_list_members([Term|Rest], Acc) ->
   stringify_list_members(Rest, NewAcc).
 
 print_error(Error) ->
-  io:format("Error: ~s~n", [stringify_term(reia_erl:e2r_printable(Error))]).
+  io:format("Error: ~s~n", [stringify_term(reia_erl:e2r_printable(Error))]),
+  io:format("Backtrace: ~s~n", [stringify_term(reia_erl:e2r_printable(erlang:get_stacktrace()))]).
