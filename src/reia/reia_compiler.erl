@@ -23,6 +23,9 @@ ast(Ast = {integer, _, _}) ->
 ast(Ast = {float, _, _}) ->
   Ast;
   
+% atoms
+%ast({atom, Line, })
+  
 % strings, regexes
 ast(Ast = {string, Line, String}) ->
   {tuple, Line, [

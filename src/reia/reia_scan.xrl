@@ -16,7 +16,8 @@ Rules.
 {String} : build_string(TokenChars, TokenLine, TokenLen).
 {Quote}  : build_string(TokenChars, TokenLine, TokenLen).
 {Regexp} : build_regexp(TokenChars, TokenLine, TokenLen).
-({UpperCase}|{LowerCase}|_|\$)({UpperCase}|{Digit}|{LowerCase}|_|\$)* : build_identifier(TokenChars, TokenLine).
+{UpperCase}({UpperCase}|{Digit}|{LowerCase}|_)* : build_constant(TokenChars, TokenLine).
+{LowerCase}({UpperCase}|{Digit}|{LowerCase}|_)* : build_identifier(TokenChars, TokenLine).
 {Comment} : skip_token.
 {Whitespace}+ : skip_token.
 
@@ -37,6 +38,7 @@ Rules.
 : :                   {token,{':',TokenLine}}.
 ! :                   {token,{'!',TokenLine}}.
 \? :                  {token,{'?',TokenLine}}.
+\$ :                  {token,{'$',TokenLine}}.
 ; :                   {token,{';',TokenLine}}.
 \( :                  {token,{'(',TokenLine}}.
 \) :                  {token,{')',TokenLine}}.
@@ -85,6 +87,10 @@ build_string(Chars, Line, Len) ->
 build_regexp(Chars, Line, Len) ->
   S = lists:sublist(Chars, 2, Len - 2), 
   {token, {regexp, Line, S}}.
+  
+build_constant(Chars, Line) ->
+  Atom = list_to_atom(Chars),
+  {token, {constant, Line, Atom}}.
   
 build_identifier(Chars, Line) ->  
     Atom = list_to_atom(Chars),
