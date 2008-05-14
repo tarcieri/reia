@@ -4,20 +4,34 @@ Digit = [0-9]
 UpperCase = [A-Z]
 LowerCase = [a-z]
 Whitespace = [\s]
-String = "(\\\^.|\\.|[^\"])*"
-Quote = '(\\\^.|\\.|[^\'])*'
+DoubleQuoted = "(\\\^.|\\.|[^\"])*"
+SingleQuoted = '(\\\^.|\\.|[^\'])*'
 Regexp = /(\\\^.|\\.|[^/])*/
 Comment = #.*?\n
 
-Rules.   
+Rules.
 
+% numbers
 {Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
 {Digit}+ : build_integer(TokenChars, TokenLine).
-{String} : build_string(TokenChars, TokenLine, TokenLen).
-{Quote}  : build_string(TokenChars, TokenLine, TokenLen).
-{Regexp} : build_regexp(TokenChars, TokenLine, TokenLen).
+
+% strings
+{DoubleQuoted} : build_token(string, TokenChars, TokenLine, TokenLen).
+{SingleQuoted} : build_token(string, TokenChars, TokenLine, TokenLen).
+
+% regexp
+{Regexp} : build_token(regexp, TokenChars, TokenLine, TokenLen).
+
+% atoms
+\$({UpperCase}|{LowerCase}|_)({UpperCase}|{Digit}|{LowerCase}|_)* : build_atom(TokenChars, TokenLine, TokenLen).
+\${DoubleQuoted} : build_quoted_atom(TokenChars, TokenLine, TokenLen).
+\${SingleQuoted} : build_quoted_atom(TokenChars, TokenLine, TokenLen).
+
+% identifiers and constants
 {UpperCase}({UpperCase}|{Digit}|{LowerCase}|_)* : build_constant(TokenChars, TokenLine).
 {LowerCase}({UpperCase}|{Digit}|{LowerCase}|_)* : build_identifier(TokenChars, TokenLine).
+
+% ignored
 {Comment} : skip_token.
 {Whitespace}+ : skip_token.
 
@@ -38,7 +52,6 @@ Rules.
 : :                   {token,{':',TokenLine}}.
 ! :                   {token,{'!',TokenLine}}.
 \? :                  {token,{'?',TokenLine}}.
-\$ :                  {token,{'$',TokenLine}}.
 ; :                   {token,{';',TokenLine}}.
 \( :                  {token,{'(',TokenLine}}.
 \) :                  {token,{')',TokenLine}}.
@@ -79,14 +92,18 @@ build_integer(Chars, Line) ->
   
 build_float(Chars, Line) ->
   {token, {float, Line, list_to_float(Chars)}}.
+    
+build_token(Type, Chars, Line, Len) ->
+  String = lists:sublist(Chars, 2, Len - 2), 
+  {token, {Type, Line, String}}.
   
-build_string(Chars, Line, Len) ->
-  S = lists:sublist(Chars, 2, Len - 2), 
-  {token, {string, Line, S}}.
+build_atom(Chars, Line, Len) ->
+  String = lists:sublist(Chars, 2, Len - 1),
+  {token, {atom, Line, list_to_atom(String)}}.
   
-build_regexp(Chars, Line, Len) ->
-  S = lists:sublist(Chars, 2, Len - 2), 
-  {token, {regexp, Line, S}}.
+build_quoted_atom(Chars, Line, Len) ->
+  String = lists:sublist(Chars, 2, Len - 2),
+  build_atom(String, Line, Len - 2).
   
 build_constant(Chars, Line) ->
   Atom = list_to_atom(Chars),

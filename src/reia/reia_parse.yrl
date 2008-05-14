@@ -11,7 +11,6 @@ Nonterminals
   simple_expr
   parenthesized_expr
   number
-%  atom
   list
   tail
   tuple
@@ -19,7 +18,7 @@ Nonterminals
   .
   
 Terminals
-  true false nil float integer string regexp eol not
+  true false nil float integer string regexp atom eol not
   '+' '-' '*' '**' '/' '%' '~' ';' '(' ')' '[' ']'  ','
   % '.' '&&' '===' '==' '<=' '>=' '<>' 
   % '&=' '^=' '|=' '=' '?' '<<' '>>' '<' '>' 
@@ -72,7 +71,7 @@ simple_expr -> nil    : '$1'.
 simple_expr -> true   : '$1'.
 simple_expr -> false  : '$1'.
 simple_expr -> number : '$1'.
-%simple_expr -> atom   : '$1'.
+simple_expr -> atom   : '$1'.
 simple_expr -> string : '$1'.
 simple_expr -> regexp : '$1'.
 simple_expr -> list   : '$1'.
@@ -83,10 +82,6 @@ parenthesized_expr -> '(' expr ')' : '$2'.
 %% number
 number -> float : '$1'.
 number -> integer : '$1'.
-
-%% atoms
-%atom -> '$' identifier : {atom, line('$1'), $2}.
-%atom -> '$' string     : {atom, line('$1'), $2}.
 
 %% lists
 list -> '[' ']' : {nil,line('$1')}.

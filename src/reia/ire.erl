@@ -42,7 +42,13 @@ stringify_float(Float) ->
 
 stringify_atom(nil)   -> "nil";
 stringify_atom(true)  -> "true";
-stringify_atom(false) -> "false".
+stringify_atom(false) -> "false";
+stringify_atom(Atom)  -> 
+  String = atom_to_list(Atom),
+  case regexp:match(String, "^[A-Za-z0-9_]+$") of
+    nomatch -> "$\"" ++ String ++ "\"";
+    _       -> "$" ++ String
+  end.
   
 stringify_compound(Term = {Type, Data}) ->
   case Type of

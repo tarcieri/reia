@@ -24,7 +24,8 @@ ast(Ast = {float, _, _}) ->
   Ast;
   
 % atoms
-%ast({atom, Line, })
+ast(Ast = {atom, _, _}) ->
+  Ast;
   
 % strings, regexes
 ast(Ast = {string, Line, String}) ->
