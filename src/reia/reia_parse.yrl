@@ -1,6 +1,6 @@
 Nonterminals
   grammar
-  prog_exprs
+  statements
   exprs
   expr
   expr_ending
@@ -29,12 +29,12 @@ Terminals
 
 Rootsymbol grammar.
 
-grammar -> prog_exprs : '$1'.
+grammar -> statements : '$1'.
 
 %% Program expressions
-prog_exprs -> expr : ['$1'].
-prog_exprs -> expr expr_ending : ['$1'].
-prog_exprs -> expr expr_ending prog_exprs : ['$1'|'$3'].
+statements -> expr : ['$1'].
+statements -> expr expr_ending : ['$1'].
+statements -> expr expr_ending statements : ['$1'|'$3'].
 
 %% Expression endings
 expr_ending -> ending_token : '$1'.
