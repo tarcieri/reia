@@ -41,6 +41,13 @@ ast({cons, Line, In1, Nil = {nil, _}}) ->
 ast({cons, Line, In1, In2}) ->
   {cons, Line, ast(In1), ast(In2)};
   
+% tuples
+ast({tuple, Line, Elements}) ->
+  {tuple, Line, [
+    {atom, Line, tuple},
+    {tuple, Line, lists:map(fun(Element) -> ast(Element) end, Elements)}
+  ]};
+  
 % operators
 ast({op, {Op, Line}, In}) ->
   reia_operators:ast(Op, Line, ast(In));

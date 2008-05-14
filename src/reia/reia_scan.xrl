@@ -6,7 +6,7 @@ LowerCase = [a-z]
 Whitespace = [\s]
 String = "(\\\^.|\\.|[^\"])*"
 Quote = '(\\\^.|\\.|[^\'])*'
-Regexp = /(\\\^.|\\.|[^\\])*/
+Regexp = /(\\\^.|\\.|[^/])*/
 Comment = #.*?\n
 
 Rules.   

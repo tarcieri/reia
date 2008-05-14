@@ -1,10 +1,9 @@
 Nonterminals
   grammar
-  statements
-  statement
-  statement_ending
-  ending_token
+  exprs
   expr
+  expr_ending
+  ending_token
   additive_expr
   multiplicative_expr
   exponential_expr
@@ -14,6 +13,8 @@ Nonterminals
   number
   list
   tail
+  tuple
+  elements
   .
   
 Terminals
@@ -27,18 +28,16 @@ Terminals
 
 Rootsymbol grammar.
 
-grammar -> statements : '$1'.
+grammar -> exprs : '$1'.
 
-statements -> statement : ['$1'].
-statements -> statement statement_ending : ['$1'].
-statements -> statement statement_ending statements : ['$1'|'$3'].
+%% exprs
+exprs -> expr : ['$1'].
+exprs -> expr expr_ending : ['$1'].
+exprs -> expr expr_ending exprs : ['$1'|'$3'].
 
-%% statements
-statement -> expr : '$1'.
-
-%% statement endings
-statement_ending -> ending_token : '$1'.
-statement_ending -> statement_ending ending_token : '$1'.
+%% expr endings
+expr_ending -> ending_token : '$1'.
+expr_ending -> expr_ending ending_token : '$1'.
 ending_token -> ';' : '$1'.
 ending_token -> eol : '$1'.
 
@@ -74,7 +73,8 @@ simple_expr -> false  : '$1'.
 simple_expr -> number : '$1'.
 simple_expr -> string : '$1'.
 simple_expr -> regexp : '$1'.
-simple_expr -> list : '$1'.
+simple_expr -> list   : '$1'.
+simple_expr -> tuple  : '$1'.
 simple_expr -> parenthesized_expr : '$1'.
 parenthesized_expr -> '(' expr ')' : '$2'.
 
@@ -88,6 +88,14 @@ list -> '[' expr tail : {cons, line('$1'), '$2', '$3'}.
 
 tail -> ']' : {nil, line('$1')}.
 tail -> ',' expr tail : {cons, line('$2'), '$2', '$3'}.
+
+%% tuples
+tuple -> '(' ')' : {tuple, line('$1'), []}.
+tuple -> '(' expr ',' ')' : {tuple, line('$1'), ['$2']}.
+tuple -> '(' expr ',' elements ')': {tuple, line('$1'), ['$2'|'$4']}.
+
+elements -> expr : ['$1'].
+elements -> expr ',' elements : ['$1' | '$3'].
 
 Erlang code.
 
