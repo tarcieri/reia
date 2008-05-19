@@ -9,7 +9,7 @@ ast('-' = Op, Line, Ast) ->
 ast('*' = Op, Line, Ast1, Ast2) ->
   {op, Line, Op, Ast1, Ast2};
 ast('**', Line, Ast1, Ast2) ->
-  {call, Line, {remote, 1, {atom, 1, math},{atom, 1, pow}}, [Ast1, Ast2]};
+  {call, Line, {remote, 1, {atom, 1, reia_numeric},{atom, 1, pow}}, [Ast1, Ast2]};
 ast('/' = Op, Line, Ast1, Ast2) ->
   {op, Line, Op, Ast1, Ast2};
 ast('+' = Op, Line, Ast1, Ast2) ->
