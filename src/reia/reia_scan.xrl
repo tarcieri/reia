@@ -125,9 +125,9 @@ process_indentation([], Tokens, State) ->
 %% Ignore blank lines (two indentation tokens in a row)
 process_indentation([{indentation, _, _}, Token = {indentation, _, _}|Rest], Tokens, State) ->
   process_indentation([Token|Rest], Tokens, State);
-process_indentation([{indentation, _, _}, Token = {eol, _}|Rest], Tokens, State) ->
-  process_indentation([Token|Rest], Tokens, State);
-process_indentation([{eol, _}, Token = {eol, _}|Rest], Tokens, State) ->
+process_indentation([{indentation, Line, _}, Token = {eol, _}|Rest], Tokens, State) ->
+  process_indentation([{eol, Line}|Rest], Tokens, State);
+process_indentation([Token = {eol, _}, {eol, _}|Rest], Tokens, State) ->
   process_indentation([Token|Rest], Tokens, State);
       
 %% Convert EOL tokens to indentation tokens
