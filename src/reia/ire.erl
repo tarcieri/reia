@@ -21,7 +21,7 @@ read() ->
   io:get_line('>> ').
 
 eval_print(String, Binding) ->
-  {ok, Scanned, _} = reia_scan:string(String),
+  {ok, Scanned, _} = reia_scan:scan(String),
   {ok, Parsed} = reia_parse:parse(Scanned),
   {value, Value, NewBinding} = reia_eval:exprs(Parsed, Binding),
   print(Value),
@@ -46,7 +46,7 @@ stringify_atom(false) -> "false";
 stringify_atom(Atom)  -> 
   String = atom_to_list(Atom),
   case regexp:match(String, "^[A-Za-z0-9_]+$") of
-    nomatch -> "$\"" ++ String ++ "\"";
+    nomatch -> "$'" ++ String ++ "'";
     _       -> "$" ++ String
   end.
   

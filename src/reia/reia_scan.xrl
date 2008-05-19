@@ -11,6 +11,9 @@ Comment = #.*?\n
 
 Rules.
 
+%% Indentation
+\n\s+ : build_indentation(TokenLine, TokenLen).
+
 %% Numbers
 {Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
 {Digit}+ : build_integer(TokenChars, TokenLine).
@@ -85,7 +88,84 @@ Rules.
 
 Erlang code.  
 
--export([build_integer/2, build_float/2]).
+-export([scan/1, scan/2]).
+
+%% Scan the string for tokens
+scan(String) ->
+  scan(String, 1).
+  
+%% Scan the string for tokens, providing a starting line
+scan(String, Line) ->
+  case string(String, Line) of
+    {ok, Tokens, Lines} ->
+      process_indentation(Tokens, Lines);
+    Result ->
+      Result
+  end.
+
+%% Process indentation tokens, converting them to indent/dedent      
+process_indentation(Tokens, Lines) ->
+  case process_indentation(Tokens, [], [0]) of
+    {ok, NewTokens, State} -> 
+      {ok, eof_dedents(NewTokens, Lines, State), Lines};
+    Result ->
+      Result
+  end.
+  
+%% Generate dedents for all remaining indentation levels when EOF is reached
+eof_dedents(Tokens, Lines, [0]) ->
+  lists:reverse(Tokens);
+eof_dedents(Tokens, Lines, [_|State]) ->
+  eof_dedents([{dedent, Lines}|Tokens], Lines, State).
+
+%% Indentation processing finished
+process_indentation([], Tokens, State) -> 
+  {ok, Tokens, State};
+
+%% Ignore blank lines (two indentation tokens in a row)
+process_indentation([{indentation, _, _}, Token = {indentation, _, _}|Rest], Tokens, State) ->
+  process_indentation([Token|Rest], Tokens, State);
+process_indentation([{indentation, _, _}, Token = {eol, _}|Rest], Tokens, State) ->
+  process_indentation([Token|Rest], Tokens, State);
+process_indentation([{eol, _}, Token = {eol, _}|Rest], Tokens, State) ->
+  process_indentation([Token|Rest], Tokens, State);
+      
+%% Convert EOL tokens to indentation tokens
+process_indentation([{eol, Line}|Rest], Tokens, State) ->
+  process_indentation([{indentation, Line, 0}|Rest], Tokens, State);
+  
+%% Handle indents or dedents  
+process_indentation([{indentation, Line, Amount}|Rest], Tokens, [Current|State]) ->
+  if
+    Amount == Current ->
+      process_indentation(Rest, [{eol, Line - 1}|Tokens], [Current|State]);
+    Amount > Current ->
+      process_indentation(Rest, [{indent, Line},{eol, Line - 1}|Tokens], [Amount,Current|State]);
+    Amount < Current ->
+      case build_dedent([{eol, Line - 1}|Tokens], Amount, Line, [Current|State]) of
+        {ok, NewTokens, NewState} ->
+          process_indentation(Rest, NewTokens, NewState);
+        nomatch ->
+          {error, {Line, ?MODULE,{illegal,dedent}},Line}
+      end
+  end;
+  
+%% Pass through all other tokens
+process_indentation([Token|Rest], Tokens, State) ->
+  process_indentation(Rest, [Token|Tokens], State).
+  
+build_dedent(Tokens, Amount, Line, [Current|State]) ->
+  if
+    Amount == Current ->
+      {ok, [{dedent,Line}|Tokens], [Current|State]};
+    Amount > Current ->
+      nomatch;  
+    true ->
+      build_dedent([{dedent, Line}|Tokens], Amount, Line, State)
+  end.
+  
+build_indentation(Line, Length) ->
+  {token, {indentation, Line, Length - 1}}.
 
 build_integer(Chars, Line) ->
   {token, {integer, Line, list_to_integer(Chars)}}.
