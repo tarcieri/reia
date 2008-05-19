@@ -1,5 +1,5 @@
 task :default => :build
-task :build => %w[compiler ire]
+task :build => %w[compiler ire copy_ebin]
 
 rule ".beam" => ".erl" do |t|
   sh "erlc +nowarn_unused_vars -o #{File.dirname(t.name)} #{t.source}"
@@ -14,7 +14,7 @@ task :compiler => %w[
   src/reia/reia_erl.beam
 ]
 
-task :ire => 'src/reia/ire.beam'
+task :ire => "src/reia/ire.beam"
 
 # Compile leex
 file "src/leex/leex.beam" => "src/leex/leex.erl"
@@ -40,15 +40,25 @@ file "src/reia/reia_erl.beam" => "src/reia/reia_erl.erl"
 # Compile ire
 file "src/reia/ire.beam" => "src/reia/ire.erl"
 
+# Create the ebin directory if it doesn't exist
+directory "ebin"
+
+# Copy all output BEAM files into the ebin directory
+task "copy_ebin" => "ebin" do
+  FileList["src/reia/*.beam"].each do |file|
+    cp file, "ebin"
+  end
+end
+
 task :clean do
-  rm_f 'src/leex/leex.beam'
-  rm_f 'src/reia/reia_scan.erl'
-  rm_f 'src/reia/reia_scan.beam'
-  rm_f 'src/reia/reia_parse.erl'
-  rm_f 'src/reia/reia_parse.beam'
-  rm_f 'src/reia/reia_compiler.beam'
-  rm_f 'src/reia/reia_operators.beam'
-  rm_f 'src/reia/reia_eval.beam'
-  rm_f 'src/reia/reia_erl.beam'
-  rm_f 'src/reia/ire.beam'
+  rm_f "src/leex/leex.beam"
+  rm_f "src/reia/reia_scan.erl"
+  rm_f "src/reia/reia_scan.beam"
+  rm_f "src/reia/reia_parse.erl"
+  rm_f "src/reia/reia_parse.beam"
+  rm_f "src/reia/reia_compiler.beam"
+  rm_f "src/reia/reia_operators.beam"
+  rm_f "src/reia/reia_eval.beam"
+  rm_f "src/reia/reia_erl.beam"
+  rm_f "src/reia/ire.beam"
 end
