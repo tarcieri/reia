@@ -6,6 +6,7 @@ Nonterminals
   expr_ending
   ending_token
   erlang_funcall
+  funcall
   add_op
   multi_op
   pow_op
@@ -14,13 +15,12 @@ Nonterminals
   parenthesized_expr
   number
   list
-  tail
   tuple
   .
   
 Terminals
   true false nil float integer string regexp atom identifier eol not
-  '+' '-' '*' '**' '/' '%' '~' ';' '(' ')' '[' ']'  ',' ':' % '.'
+  '+' '-' '*' '**' '/' '%' '~' ';' '(' ')' '[' ']'  ',' ':' '.'
   % '&&' '===' '==' '<=' '>=' '<>' 
   % '&=' '^=' '|=' '=' '?' '<<' '>>' '<' '>' 
   % '{' '}' '&' '^' '||' '|' '||='
@@ -47,15 +47,16 @@ exprs -> expr : ['$1'].
 exprs -> expr ',' exprs : ['$1' | '$3'].
 
 expr -> erlang_funcall : '$1'.
-%%expr -> funcall : '$1'.
+expr -> funcall : '$1'.
 expr -> add_op : '$1'.
-
-%% Function calls
-%%expr -> expr '.' identifier
 
 %% Erlang function calls
 erlang_funcall -> identifier ':' identifier '(' ')' : {erl_funcall, line('$2'), '$1', '$3', []}.
 erlang_funcall -> identifier ':' identifier '(' exprs ')' : {erl_funcall, line('$2'), '$1', '$3', '$5'}.
+
+%% Function calls
+funcall -> expr '.' identifier '(' ')' : {funcall, line('$2'), '$1', '$3', []}.
+funcall -> expr '.' identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3', '$5'}.
 
 %% Additive operators
 add_op -> multi_op : '$1'.
@@ -99,11 +100,8 @@ number -> float : '$1'.
 number -> integer : '$1'.
 
 %% Lists
-list -> '[' ']' : {nil,line('$1')}.
-list -> '[' expr tail : {cons, line('$1'), '$2', '$3'}.
-
-tail -> ']' : {nil, line('$1')}.
-tail -> ',' expr tail : {cons, line('$2'), '$2', '$3'}.
+list -> '[' ']' : {list, line('$1'), []}.
+list -> '[' exprs ']' : {list, line('$1'), '$2'}.
 
 %% Tuples
 tuple -> '(' ')' : {tuple, line('$1'), []}.

@@ -40,10 +40,11 @@ ast({regexp, Line, Pattern}) ->
   ]};
 
 % Lists
-ast({cons, Line, In1, Nil = {nil, _}}) ->
-  {cons, Line, ast(In1), Nil};
-ast({cons, Line, In1, In2}) ->
-  {cons, Line, ast(In1), ast(In2)};
+ast({list, Line, Elements}) ->
+  {tuple, Line, [
+    {atom, Line, list},
+    list_to_ast(Elements, Line)
+  ]};
   
 % Tuples
 ast({tuple, Line, Elements}) ->
@@ -58,6 +59,13 @@ ast({op, {Op, Line}, In}) ->
 ast({op, {Op, Line}, In1, In2}) ->
   reia_operators:ast(Op, Line, ast(In1), ast(In2));
   
+% Reia function calls
+ast({funcall, Line, Receiver, {identifier, _, Method}, Arguments}) ->
+  {call,Line,
+    {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, funcall}},
+    [ast(Receiver), {atom, Line, Method}, list_to_ast(Arguments, Line)]
+  };
+    
 % Erlang function calls
 ast({erl_funcall, Line, {identifier, _, Module}, {identifier, _, Function}, Arguments}) ->
   {call,Line,
@@ -65,8 +73,8 @@ ast({erl_funcall, Line, {identifier, _, Module}, {identifier, _, Function}, Argu
     [{atom, Line, Module}, {atom, Line, Function}, list_to_ast(Arguments, Line)]
   }.
 
-% Convert a list to its AST representation
+% Generate AST representing lists
 list_to_ast([], Line) ->
-  {nil,Line};
-list_to_ast([Term|Rest], Line) ->
-  {cons,Line,ast(Term),list_to_ast(Rest,Line)}.
+  {nil, Line};
+list_to_ast([Element|Rest], Line) ->
+  {cons, Line, ast(Element), list_to_ast(Rest, Line)}.
