@@ -19,9 +19,9 @@ Nonterminals
   .
   
 Terminals
-  true false nil float integer string regexp atom eol not
-  '+' '-' '*' '**' '/' '%' '~' ';' '(' ')' '[' ']'  ',' ':'
-  % '.' '&&' '===' '==' '<=' '>=' '<>' 
+  true false nil float integer string regexp atom identifier eol not
+  '+' '-' '*' '**' '/' '%' '~' ';' '(' ')' '[' ']'  ',' ':' % '.'
+  % '&&' '===' '==' '<=' '>=' '<>' 
   % '&=' '^=' '|=' '=' '?' '<<' '>>' '<' '>' 
   % '{' '}' '&' '^' '||' '|' '||='
   % '!' '*=' '/=' '%=' '+=' '-='
@@ -47,11 +47,15 @@ exprs -> expr : ['$1'].
 exprs -> expr ',' exprs : ['$1' | '$3'].
 
 expr -> erlang_funcall : '$1'.
+%%expr -> funcall : '$1'.
 expr -> add_op : '$1'.
 
+%% Function calls
+%%expr -> expr '.' identifier
+
 %% Erlang function calls
-erlang_funcall -> atom ':' atom '(' ')' : {erl_funcall, line('$2'), '$1', '$3', []}.
-erlang_funcall -> atom ':' atom '(' exprs ')' : {erl_funcall, line('$2'), '$1', '$3', '$5'}.
+erlang_funcall -> identifier ':' identifier '(' ')' : {erl_funcall, line('$2'), '$1', '$3', []}.
+erlang_funcall -> identifier ':' identifier '(' exprs ')' : {erl_funcall, line('$2'), '$1', '$3', '$5'}.
 
 %% Additive operators
 add_op -> multi_op : '$1'.

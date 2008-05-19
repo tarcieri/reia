@@ -9,7 +9,7 @@ compile([Expression|Rest], Output) ->
   NewExpression = ast(Expression),
   compile(Rest, [NewExpression|Output]).
 
-% primitives
+% Primitives
 ast({nil, Line}) ->
   {atom, Line, nil};
 ast({true, Line}) ->
@@ -17,17 +17,17 @@ ast({true, Line}) ->
 ast({false, Line}) ->
   {atom, Line, false};
   
-% numerical types
+% Numerical types
 ast(Ast = {integer, _, _}) ->
   Ast;
 ast(Ast = {float, _, _}) ->
   Ast;
   
-% atoms
+% Atoms
 ast(Ast = {atom, _, _}) ->
   Ast;
   
-% strings, regexes
+% Strings and regular expressions
 ast(Ast = {string, Line, String}) ->
   {tuple, Line, [
     {atom, Line, string},
@@ -39,30 +39,30 @@ ast({regexp, Line, Pattern}) ->
     {bin, Line, [{bin_element, Line, {string, Line, Pattern}, default, default}]}
   ]};
 
-% lists
+% Lists
 ast({cons, Line, In1, Nil = {nil, _}}) ->
   {cons, Line, ast(In1), Nil};
 ast({cons, Line, In1, In2}) ->
   {cons, Line, ast(In1), ast(In2)};
   
-% tuples
+% Tuples
 ast({tuple, Line, Elements}) ->
   {tuple, Line, [
     {atom, Line, tuple},
     {tuple, Line, lists:map(fun(Element) -> ast(Element) end, Elements)}
   ]};
   
-% operators
+% Operators
 ast({op, {Op, Line}, In}) ->
   reia_operators:ast(Op, Line, ast(In));
 ast({op, {Op, Line}, In1, In2}) ->
   reia_operators:ast(Op, Line, ast(In1), ast(In2));
   
 % Erlang function calls
-ast({erl_funcall, Line, Module, Function, Arguments}) ->
+ast({erl_funcall, Line, {identifier, _, Module}, {identifier, _, Function}, Arguments}) ->
   {call,Line,
-    {remote,Line,{atom,Line,reia_erl},{atom,Line,erl_funcall}},
-    [Module,Function,list_to_ast(Arguments, Line)]
+    {remote, Line, {atom, Line, reia_erl}, {atom, Line, erl_funcall}},
+    [{atom, Line, Module}, {atom, Line, Function}, list_to_ast(Arguments, Line)]
   }.
 
 % Convert a list to its AST representation
