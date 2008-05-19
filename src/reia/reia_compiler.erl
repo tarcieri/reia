@@ -43,7 +43,10 @@ ast({regexp, Line, Pattern}) ->
 ast({list, Line, Elements}) ->
   {tuple, Line, [
     {atom, Line, list},
-    list_to_ast(Elements, Line)
+    {tuple, Line, [
+      list_to_ast(Elements, Line),
+      {atom, Line, normal}
+    ]}
   ]};
   
 % Tuples

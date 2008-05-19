@@ -54,17 +54,21 @@ stringify_compound({string, Binary}) ->
 stringify_compound({regexp, Binary}) -> 
   "/" ++ binary_to_list(Binary) ++ "/";
 stringify_compound({tuple, Tuple}) ->
-  "(" ++ lists:concat(stringify_list_members(tuple_to_list(Tuple), [])) ++ ")";
+  "(" ++ lists:concat(stringify_list_members({tuple_to_list(Tuple), normal})) ++ ")";
 stringify_compound({list, List}) -> 
-  "[" ++ lists:concat(stringify_list_members(List, [])) ++ "]".
+  "[" ++ lists:concat(stringify_list_members(List)) ++ "]".
 
-stringify_list_members([], Acc) -> lists:reverse(Acc);
-stringify_list_members([Term|Rest], Acc) ->
+stringify_list_members({Elements, Order}) ->
+  stringify_list_members(Elements, [], Order).
+  
+stringify_list_members([], Acc, normal) -> lists:reverse(Acc);
+stringify_list_members([], Acc, reverse) -> Acc;
+stringify_list_members([Term|Rest], Acc, Order) ->
   NewAcc = if 
     Rest == [] -> [stringify_term(Term)|Acc];
     true       -> [",",stringify_term(Term)|Acc]
   end,
-  stringify_list_members(Rest, NewAcc).
+  stringify_list_members(Rest, NewAcc, Order).
 
 print_error(Class, Reason) ->
   PF = fun(Term, I) ->
