@@ -15,9 +15,39 @@ funcall({list, {Elements, Order}}, push, Values) ->
       push(lists:reverse(Elements), Values);
     reverse ->
       push(Elements, Values)
-  end.
+  end;
+  
+%% List#pop
+funcall({list, {Elements, Order}}, pop, []) ->
+  [Element|_] = case Order of
+    normal -> lists:reverse(Elements);
+    reverse -> Elements
+  end,
+  Element;
+  
+%% List#unshift
+funcall({list, {Elements, Order}}, unshift, Values) ->
+  case Order of
+    normal ->
+      unshift(Elements, Values);
+    reverse ->
+      unshift(lists:reverse(Elements), Values)
+  end;
+  
+%% List#shift
+funcall({list, {Elements, Order}}, shift, []) ->
+  [Element|_] = case Order of
+    normal -> Elements;
+    reverse -> lists:reverse(Elements)
+  end,
+  Element.
   
 push(Elements, []) ->
   {list, {Elements, reverse}};
 push(Elements, [Value|Rest]) ->
   push([Value|Elements], Rest).
+  
+unshift(Elements, []) ->
+  {list, {Elements, normal}};
+unshift(Elements, [Value|Rest]) ->
+  unshift([Value|Elements], Rest).
