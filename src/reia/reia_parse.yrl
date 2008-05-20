@@ -3,8 +3,10 @@ Nonterminals
   statements
   exprs
   expr
+  expr2
   expr_ending
   ending_token
+  match
   erlang_funcall
   funcall
   add_op
@@ -23,7 +25,8 @@ Terminals
   float integer string regexp atom identifier eol
   '(' ')' '[' ']' % '{' '}' '<<' '>>'
   '+' '-' '*' '/' '**'
-  '.' ',' ':' ';' 
+  '.' ',' ':' ';'
+  '='
   .
 
 Rootsymbol grammar.
@@ -45,17 +48,22 @@ ending_token -> eol : '$1'.
 exprs -> expr : ['$1'].
 exprs -> expr ',' exprs : ['$1' | '$3'].
 
-expr -> erlang_funcall : '$1'.
-expr -> funcall : '$1'.
-expr -> add_op : '$1'.
+expr -> match : '$1'.
+expr -> expr2 : '$1'.
+
+expr2 -> erlang_funcall : '$1'.
+expr2 -> funcall : '$1'.
+expr2 -> add_op : '$1'.
+
+match -> expr2 '=' expr : {match, line('$2'), '$1', '$3'}.
 
 %% Erlang function calls
 erlang_funcall -> identifier ':' identifier '(' ')' : {erl_funcall, line('$2'), '$1', '$3', []}.
 erlang_funcall -> identifier ':' identifier '(' exprs ')' : {erl_funcall, line('$2'), '$1', '$3', '$5'}.
 
 %% Function calls
-funcall -> expr '.' identifier '(' ')' : {funcall, line('$2'), '$1', '$3', []}.
-funcall -> expr '.' identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3', '$5'}.
+funcall -> expr2 '.' identifier '(' ')' : {funcall, line('$2'), '$1', '$3', []}.
+funcall -> expr2 '.' identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3', '$5'}.
 
 %% Additive operators
 add_op -> multi_op : '$1'.
@@ -76,16 +84,17 @@ unary_expr -> simple_expr : '$1'.
 unary_expr -> '+' unary_expr : {op, '$1', '$2'}.
 unary_expr -> '-' unary_expr : {op, '$1', '$2'}.
 
-%% Simple exprs 
-simple_expr -> nil    : '$1'.
-simple_expr -> true   : '$1'.
-simple_expr -> false  : '$1'.
-simple_expr -> number : '$1'.
-simple_expr -> string : '$1'.
-simple_expr -> regexp : '$1'.
-simple_expr -> list   : '$1'.
-simple_expr -> tuple  : '$1'.
-simple_expr -> atom   : '$1'.
+%% Simple exprs
+simple_expr -> identifier : '$1'.
+simple_expr -> nil        : '$1'.
+simple_expr -> true       : '$1'.
+simple_expr -> false      : '$1'.
+simple_expr -> number     : '$1'.
+simple_expr -> string     : '$1'.
+simple_expr -> regexp     : '$1'.
+simple_expr -> list       : '$1'.
+simple_expr -> tuple      : '$1'.
+simple_expr -> atom       : '$1'.
 
 %% Parens for explicit order of operation
 simple_expr -> parenthesized_expr : '$1'.
