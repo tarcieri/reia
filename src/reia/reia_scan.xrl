@@ -38,53 +38,25 @@ Rules.
 {Comment} : skip_token.
 {Whitespace}+ : skip_token.
 
-%% Special single-character tokens
-\n :                  {token,{eol,TokenLine}}.
-\* :                  {token,{'*',TokenLine}}.
-/ :                   {token,{'/',TokenLine}}.
-\+ :                  {token,{'+',TokenLine}}.
-- :                   {token,{'-',TokenLine}}.
-\^ :                  {token,{'^',TokenLine}}.
-& :                   {token,{'&',TokenLine}}.
-\| :                  {token,{'|',TokenLine}}.
-\< :                  {token,{'<',TokenLine}}.
-\> :                  {token,{'>',TokenLine}}.
-= :                   {token,{'=',TokenLine}}.
-\. :                  {token,{'.',TokenLine}}.
-, :                   {token,{',',TokenLine}}.
-: :                   {token,{':',TokenLine}}.
-! :                   {token,{'!',TokenLine}}.
-\? :                  {token,{'?',TokenLine}}.
-; :                   {token,{';',TokenLine}}.
-\( :                  {token,{'(',TokenLine}}.
-\) :                  {token,{')',TokenLine}}.
-\{ :                  {token,{'{',TokenLine}}.
-} :                   {token,{'}',TokenLine}}.
-\[ :                  {token,{'[',TokenLine}}.
-\] :                  {token,{']',TokenLine}}.
-\% :                  {token,{'%',TokenLine}}.
-\~ :                  {token,{'~',TokenLine}}.
-
-%% Special multi-character tokens
-<< :                  {token,{'<<',TokenLine}}.
->> :                  {token,{'>>',TokenLine}}.
-== :                  {token,{'==',TokenLine}}.
-<> :                  {token,{'<>',TokenLine}}.
-=== :                 {token,{'===',TokenLine}}.
-&& :                  {token,{'&&',TokenLine}}.
-\|\| :                {token,{'||',TokenLine}}.
-\*= :                 {token,{'*=',TokenLine}}.
-/= :                  {token,{'/=',TokenLine}}.
-\%= :                 {token,{'%=',TokenLine}}.
-\+= :                 {token,{'+=',TokenLine}}.
--= :                  {token,{'-=',TokenLine}}.
-&= :                  {token,{'&=',TokenLine}}.
-\^= :                 {token,{'^=',TokenLine}}.
-\|= :                 {token,{'|=',TokenLine}}.
-\|\|= :               {token,{'||=',TokenLine}}.
-<= :                  {token,{'<=',TokenLine}}.
->= :                  {token,{'>=',TokenLine}}.
-\*\* :                {token,{'**',TokenLine}}.
+\n    : {token,{eol,TokenLine}}.
+\(    : {token,{'(',TokenLine}}.
+\)    : {token,{')',TokenLine}}.
+\[    : {token,{'[',TokenLine}}.
+\]    : {token,{']',TokenLine}}.
+\{    : {token,{'{',TokenLine}}.
+}     : {token,{'}',TokenLine}}.
+<<    : {token,{'<<',TokenLine}}.
+>>    : {token,{'>>',TokenLine}}.
+\+    : {token,{'+',TokenLine}}.
+-     : {token,{'-',TokenLine}}.
+\*    : {token,{'*',TokenLine}}.
+/     : {token,{'/',TokenLine}}.
+\*\*  : {token,{'**',TokenLine}}.
+=     : {token,{'=',TokenLine}}.
+\.    : {token,{'.',TokenLine}}.
+,     : {token,{',',TokenLine}}.
+:     : {token,{':',TokenLine}}.
+;     : {token,{';',TokenLine}}.
 
 Erlang code.  
 

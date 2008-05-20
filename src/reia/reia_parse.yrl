@@ -19,12 +19,11 @@ Nonterminals
   .
   
 Terminals
-  true false nil float integer string regexp atom identifier eol not
-  '+' '-' '*' '**' '/' '%' '~' ';' '(' ')' '[' ']'  ',' ':' '.'
-  % '&&' '===' '==' '<=' '>=' '<>' 
-  % '&=' '^=' '|=' '=' '?' '<<' '>>' '<' '>' 
-  % '{' '}' '&' '^' '||' '|' '||='
-  % '!' '*=' '/=' '%=' '+=' '-='
+  true false nil 
+  float integer string regexp atom identifier eol
+  '(' ')' '[' ']' % '{' '}' '<<' '>>'
+  '+' '-' '*' '/' '**'
+  '.' ',' ':' ';' 
   .
 
 Rootsymbol grammar.
@@ -67,7 +66,6 @@ add_op -> add_op '-' multi_op : {op, '$2', '$1', '$3'}.
 multi_op -> pow_op : '$1'.
 multi_op -> multi_op '*' pow_op : {op, '$2', '$1', '$3'}.
 multi_op -> multi_op '/' pow_op : {op, '$2', '$1', '$3'}.
-multi_op -> multi_op '%' pow_op : {op, '$2', '$1', '$3'}.
 
 %% Exponent operator
 pow_op -> unary_expr : '$1'.
@@ -77,8 +75,6 @@ pow_op -> pow_op '**' unary_expr : {op, '$2', '$1', '$3'}.
 unary_expr -> simple_expr : '$1'.
 unary_expr -> '+' unary_expr : {op, '$1', '$2'}.
 unary_expr -> '-' unary_expr : {op, '$1', '$2'}.
-unary_expr -> '~' unary_expr : {op, '$1', '$2'}.
-unary_expr -> 'not' unary_expr : {op, '$1', '$2'}.
 
 %% Simple exprs 
 simple_expr -> nil    : '$1'.
