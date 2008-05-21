@@ -56,7 +56,9 @@ stringify_compound({regexp, Binary}) ->
 stringify_compound({tuple, Tuple}) ->
   "(" ++ lists:concat(stringify_list_members({tuple_to_list(Tuple), normal})) ++ ")";
 stringify_compound({list, List}) -> 
-  "[" ++ lists:concat(stringify_list_members(List)) ++ "]".
+  "[" ++ lists:concat(stringify_list_members(List)) ++ "]";
+stringify_compound({dict, Dict}) ->
+  "{" ++ lists:concat(stringify_dict_members(Dict)) ++ "}".
 
 stringify_list_members({Elements, Order}) ->
   stringify_list_members(Elements, [], Order).
@@ -66,9 +68,21 @@ stringify_list_members([], Acc, reverse) -> Acc;
 stringify_list_members([Term|Rest], Acc, Order) ->
   NewAcc = if 
     Rest == [] -> [stringify_term(Term)|Acc];
-    true       -> [",",stringify_term(Term)|Acc]
+    true       -> [",", stringify_term(Term)|Acc]
   end,
   stringify_list_members(Rest, NewAcc, Order).
+  
+stringify_dict_members(Dict) ->
+  stringify_dict_members(dict:to_list(Dict), []).
+  
+stringify_dict_members([], Acc) ->
+  lists:reverse(Acc);
+stringify_dict_members([{Key,Value}|Rest], Acc) ->
+  NewAcc = if
+    Rest == [] -> [stringify_term(Key) ++ ":" ++ stringify_term(Value)|Acc];
+    true       -> [",", stringify_term(Key) ++ ":" ++ stringify_term(Value)|Acc]
+  end,
+  stringify_dict_members(Rest, NewAcc).
 
 print_error(Class, Reason) ->
   PF = fun(Term, I) ->

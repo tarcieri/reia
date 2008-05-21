@@ -120,8 +120,8 @@ tuple -> '(' expr ',' exprs ')': {tuple, line('$1'), ['$2'|'$4']}.
 dict -> '{' '}' : {dict, line('$1'), []}.
 dict -> '{' entries : {dict, line('$1'), '$2'}.
 
-entries -> 'expr3' ':' expr '}' : [{tuple, line('$2'), ['$1','$3']}].
-entries -> expr3 ':' expr ',' entries : [{tuple, line('$2'), ['$1','$3']}|'$5'].
+entries -> 'expr3' ':' expr '}' : [{'$1','$3'}].
+entries -> expr3 ':' expr ',' entries : [{'$1','$3'}|'$5'].
 
 Erlang code.
 

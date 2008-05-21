@@ -67,10 +67,13 @@ ast({tuple, Line, Elements}) ->
   
 %% Dicts
 ast({dict, Line, Elements}) ->
-  {call, Line,
-    {remote, Line, {atom, Line, dict}, {atom, Line, from_list}},
-    [list_to_ast(Elements, Line)]
-  };  
+  {tuple, Line, [
+    {atom, Line, dict},
+    {call, Line,
+      {remote, Line, {atom, Line, dict}, {atom, Line, from_list}},
+      [dict_elements_ast(Elements, Line)]
+    }
+  ]};
   
 %% Operators
 ast({op, {Op, Line}, In}) ->
@@ -97,3 +100,9 @@ list_to_ast([], Line) ->
   {nil, Line};
 list_to_ast([Element|Rest], Line) ->
   {cons, Line, ast(Element), list_to_ast(Rest, Line)}.
+  
+%% Generate AST representing dict elements
+dict_elements_ast([], Line) ->
+  {nil, Line};
+dict_elements_ast([{Key,Value}|Rest], Line) ->
+  {cons, Line, {tuple, Line, [ast(Key), ast(Value)]}, dict_elements_ast(Rest, Line)}.
