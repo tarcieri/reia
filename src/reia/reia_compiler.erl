@@ -65,6 +65,13 @@ ast({tuple, Line, Elements}) ->
     {tuple, Line, lists:map(fun(Element) -> ast(Element) end, Elements)}
   ]};
   
+%% Dicts
+ast({dict, Line, Elements}) ->
+  {call, Line,
+    {remote, Line, {atom, Line, dict}, {atom, Line, from_list}},
+    [list_to_ast(Elements, Line)]
+  };  
+  
 %% Operators
 ast({op, {Op, Line}, In}) ->
   reia_operators:ast(Op, Line, ast(In));
@@ -73,14 +80,14 @@ ast({op, {Op, Line}, In1, In2}) ->
   
 %% Reia function calls
 ast({funcall, Line, Receiver, {identifier, _, Method}, Arguments}) ->
-  {call,Line,
+  {call, Line,
     {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, funcall}},
     [ast(Receiver), {atom, Line, Method}, list_to_ast(Arguments, Line)]
   };
     
 %% Erlang function calls
 ast({erl_funcall, Line, {identifier, _, Module}, {identifier, _, Function}, Arguments}) ->
-  {call,Line,
+  {call, Line,
     {remote, Line, {atom, Line, reia_erl}, {atom, Line, erl_funcall}},
     [{atom, Line, Module}, {atom, Line, Function}, list_to_ast(Arguments, Line)]
   }.
