@@ -6,7 +6,6 @@ Nonterminals
   expr2
   expr_ending
   ending_token
-  match
   erlang_funcall
   funcall
   add_op
@@ -48,14 +47,12 @@ ending_token -> eol : '$1'.
 exprs -> expr : ['$1'].
 exprs -> expr ',' exprs : ['$1' | '$3'].
 
-expr -> match : '$1'.
+expr -> expr2 '=' expr : {match, line('$2'), '$1', '$3'}.
 expr -> expr2 : '$1'.
 
 expr2 -> erlang_funcall : '$1'.
 expr2 -> funcall : '$1'.
 expr2 -> add_op : '$1'.
-
-match -> expr2 '=' expr : {match, line('$2'), '$1', '$3'}.
 
 %% Erlang function calls
 erlang_funcall -> identifier ':' identifier '(' ')' : {erl_funcall, line('$2'), '$1', '$3', []}.
