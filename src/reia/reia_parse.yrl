@@ -20,11 +20,12 @@ Nonterminals
   tuple
   dict
   entries
+  lambda
   .
   
 Terminals
   true false nil 
-  float integer string regexp atom identifier eol
+  float integer string regexp atom fun identifier eol
   '(' ')' '[' ']' '{' '}' % '<<' '>>'
   '+' '-' '*' '/' '**'
   '.' ',' ':' '::' ';'
@@ -98,6 +99,7 @@ primitive -> list       : '$1'.
 primitive -> tuple      : '$1'.
 primitive -> dict       : '$1'.
 primitive -> atom       : '$1'.
+primitive -> lambda     : '$1'.
 
 %% Parens for explicit order of operation
 primitive -> parenthesized_expr : '$1'.
@@ -122,6 +124,10 @@ dict -> '{' entries : {dict, line('$1'), '$2'}.
 
 entries -> 'expr3' ':' expr '}' : [{'$1','$3'}].
 entries -> expr3 ':' expr ',' entries : [{'$1','$3'}|'$5'].
+
+%% Lambdas
+lambda -> fun '(' ')' '{' statements '}' : {lambda, line('$1'), [], '$5'}.
+lambda -> fun '(' exprs ')' '{' statements '}' : {lambda, line('$1'), '$3', '$5'}.
 
 Erlang code.
 

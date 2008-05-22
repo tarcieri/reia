@@ -58,7 +58,9 @@ stringify_compound({tuple, Tuple}) ->
 stringify_compound({list, List}) -> 
   "[" ++ lists:concat(stringify_list_members(List)) ++ "]";
 stringify_compound({dict, Dict}) ->
-  "{" ++ lists:concat(stringify_dict_members(Dict)) ++ "}".
+  "{" ++ lists:concat(stringify_dict_members(Dict)) ++ "}";
+stringify_compound({lambda, _}) ->
+  "#Fun".
 
 stringify_list_members({Elements, Order}) ->
   stringify_list_members(Elements, [], Order).

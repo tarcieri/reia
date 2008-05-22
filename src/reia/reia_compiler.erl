@@ -1,5 +1,5 @@
 -module(reia_compiler).
--export([compile/1]).
+-export([compile/1, ast/1]).
 
 compile(Expressions) ->
   compile(Expressions, []).
@@ -73,6 +73,17 @@ ast({dict, Line, Elements}) ->
       {remote, Line, {atom, Line, dict}, {atom, Line, from_list}},
       [dict_elements_ast(Elements, Line)]
     }
+  ]};
+  
+%% Lambdas
+ast({lambda, Line, Args, Statements}) ->
+  {tuple, Line, [
+    {atom, Line, lambda},
+    {'fun', Line, {clauses,[{clause, Line,
+      lists:map(fun reia_compiler:ast/1, Args),
+      [],
+      lists:map(fun reia_compiler:ast/1, Statements)
+    }]}}
   ]};
   
 %% Operators
