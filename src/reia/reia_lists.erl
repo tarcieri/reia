@@ -1,5 +1,5 @@
 -module(reia_lists).
--export([funcall/3]).
+-export([funcall/3, funcall/4]).
 
 %% List#reverse
 funcall({list, {Elements, Order}}, reverse, []) ->
@@ -51,3 +51,6 @@ unshift(Elements, []) ->
   {list, {Elements, normal}};
 unshift(Elements, [Value|Rest]) ->
   unshift([Value|Elements], Rest).
+  
+funcall({list, {Elements, Order}}, map, [], {lambda, Block}) ->
+  {list, {lists:map(Block, Elements), Order}}.

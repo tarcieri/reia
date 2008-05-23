@@ -98,6 +98,13 @@ ast({funcall, Line, Receiver, {identifier, _, Method}, Arguments}) ->
     {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, funcall}},
     [ast(Receiver), {atom, Line, Method}, list_to_ast(Arguments, Line)]
   };
+  
+%% Reia function calls with pseudo-blocks
+ast({funcall, Line, Receiver, {identifier, _, Method}, Arguments, Block}) ->
+  {call, Line,
+    {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, funcall}},
+    [ast(Receiver), {atom, Line, Method}, list_to_ast(Arguments, Line), ast(Block)]
+  };
     
 %% Erlang function calls
 ast({erl_funcall, Line, {identifier, _, Module}, {identifier, _, Function}, Arguments}) ->

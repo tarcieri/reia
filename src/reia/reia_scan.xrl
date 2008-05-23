@@ -58,6 +58,7 @@ Rules.
 :     : {token,{':',TokenLine}}.
 ::    : {token,{'::',TokenLine}}.
 ;     : {token,{';',TokenLine}}.
+\|    : {token,{'|',TokenLine}}.
 
 Erlang code.  
 
@@ -173,4 +174,5 @@ reserved_word('nil')   -> true;
 reserved_word('true')  -> true;
 reserved_word('false') -> true;
 reserved_word('fun')   -> true;
+reserved_word('do')    -> do;
 reserved_word(_)       -> false.

@@ -9,6 +9,7 @@ Nonterminals
   ending_token
   erlang_funcall
   funcall
+  inline_block
   add_op
   multi_op
   pow_op
@@ -25,8 +26,9 @@ Nonterminals
   
 Terminals
   true false nil 
-  float integer string regexp atom fun identifier eol
-  '(' ')' '[' ']' '{' '}' % '<<' '>>'
+  float integer string regexp atom identifier 
+  eol indent dedent fun do 
+  '(' ')' '[' ']' '{' '}' '|' % '<<' '>>'
   '+' '-' '*' '/' '**'
   '.' ',' ':' '::' ';'
   '='
@@ -49,7 +51,7 @@ ending_token -> eol : '$1'.
 
 %% Expressions
 exprs -> expr : ['$1'].
-exprs -> expr ',' exprs : ['$1' | '$3'].
+exprs -> expr ',' exprs : ['$1'|'$3'].
 
 expr -> expr2 '=' expr : {match, line('$2'), '$1', '$3'}.
 expr -> expr2 : '$1'.
@@ -66,7 +68,18 @@ erlang_funcall -> identifier '::' identifier '(' exprs ')' : {erl_funcall, line(
 
 %% Function calls
 funcall -> expr2 '.' identifier '(' ')' : {funcall, line('$2'), '$1', '$3', []}.
+funcall -> expr2 '.' identifier '(' ')' '{' inline_block '}' : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), [], '$7'}}.
+funcall -> expr2 '.' identifier '(' ')' '{' '|' exprs '|' inline_block '}' : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), '$8', '$10'}}.
 funcall -> expr2 '.' identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3', '$5'}.
+funcall -> expr2 '.' identifier '(' exprs ')' '{' inline_block '}' : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), [], '$8'}}.
+funcall -> expr2 '.' identifier '(' exprs ')' '{' '|' exprs '|' inline_block '}' : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), '$9', '$11'}}.
+funcall -> expr2 '.' identifier '(' ')' do eol indent statements dedent : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), [], '$9'}}.
+funcall -> expr2 '.' identifier '(' ')' do '|' exprs '|' eol indent statements dedent : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), '$8', '$12'}}.
+funcall -> expr2 '.' identifier '(' exprs ')' do eol indent statements dedent : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), [], '$10'}}.
+funcall -> expr2 '.' identifier '(' exprs ')' do '|' exprs '|' eol indent statements dedent : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), [], '$10'}}.
+
+inline_block -> expr : ['$1'].
+inline_block -> expr ';' exprs : ['$1'|'$3'].
 
 %% Additive operators
 add_op -> multi_op : '$1'.
@@ -126,8 +139,10 @@ entries -> 'expr3' ':' expr '}' : [{'$1','$3'}].
 entries -> expr3 ':' expr ',' entries : [{'$1','$3'}|'$5'].
 
 %% Lambdas
-lambda -> fun '(' ')' '{' statements '}' : {lambda, line('$1'), [], '$5'}.
-lambda -> fun '(' exprs ')' '{' statements '}' : {lambda, line('$1'), '$3', '$5'}.
+lambda -> fun '(' ')' '{' inline_block '}' : {lambda, line('$1'), [], '$5'}.
+lambda -> fun '(' exprs ')' '{' inline_block '}' : {lambda, line('$1'), '$3', '$5'}.
+lambda -> fun do indent statements dedent : {lambda, line('$1'), [], '$4'}.
+lambda -> fun '(' exprs ')' do indent statements dedent : {lambda, line('$1'), '$3', '$7'}.
 
 Erlang code.
 
