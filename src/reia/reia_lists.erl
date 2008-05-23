@@ -1,6 +1,10 @@
 -module(reia_lists).
 -export([funcall/3, funcall/4]).
 
+%%
+%% Functions which don't take a block
+%%
+
 %% List#reverse
 funcall({list, {Elements, Order}}, reverse, []) ->
   case Order of
@@ -51,6 +55,16 @@ unshift(Elements, []) ->
   {list, {Elements, normal}};
 unshift(Elements, [Value|Rest]) ->
   unshift([Value|Elements], Rest).
-  
+
+%%
+%% Functions which take a block
+%%
+
 funcall({list, {Elements, Order}}, map, [], {lambda, Block}) ->
-  {list, {lists:map(Block, Elements), Order}}.
+  {list, {lists:map(Block, Elements), Order}};
+  
+funcall({list, {Elements, Order}}, filter, [], {lambda, Block}) ->
+  {list, {lists:filter(Block, Elements), Order}};
+  
+funcall({list, {Elements, _}}, reduce, [Acc0], {lambda, Block}) ->
+  lists:foldl(Block, Acc0, Elements).
