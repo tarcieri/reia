@@ -26,9 +26,9 @@ Rules.
 {Regexp} : build_token(regexp, TokenChars, TokenLine, TokenLen).
 
 %% Atoms
-\$({UpperCase}|{LowerCase}|_)({UpperCase}|{Digit}|{LowerCase}|_)* : build_atom(TokenChars, TokenLine, TokenLen).
-\${DoubleQuoted} : build_quoted_atom(TokenChars, TokenLine, TokenLen).
-\${SingleQuoted} : build_quoted_atom(TokenChars, TokenLine, TokenLen).
+\~({UpperCase}|{LowerCase}|_)({UpperCase}|{Digit}|{LowerCase}|_)* : build_atom(TokenChars, TokenLine, TokenLen).
+\~{DoubleQuoted} : build_quoted_atom(TokenChars, TokenLine, TokenLen).
+\~{SingleQuoted} : build_quoted_atom(TokenChars, TokenLine, TokenLen).
 
 %% Identifiers and constants
 {UpperCase}({UpperCase}|{Digit}|{LowerCase}|_)* : build_constant(TokenChars, TokenLine).

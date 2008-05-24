@@ -45,8 +45,8 @@ stringify_atom(false) -> "false";
 stringify_atom(Atom)  -> 
   String = atom_to_list(Atom),
   case regexp:match(String, "^[A-Za-z0-9_]+$") of
-    nomatch -> "$'" ++ String ++ "'";
-    _       -> "$" ++ String
+    nomatch -> "~'" ++ String ++ "'";
+    _       -> "~" ++ String
   end.
   
 stringify_compound({string, Binary}) -> 
