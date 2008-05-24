@@ -5,11 +5,13 @@ Nonterminals
   expr
   expr2
   expr3
+  expr4
   expr_ending
   ending_token
   erlang_funcall
   funcall
   inline_block
+  comp_op
   add_op
   multi_op
   pow_op
@@ -31,7 +33,7 @@ Terminals
   '(' ')' '[' ']' '{' '}' '|' % '<<' '>>'
   '+' '-' '*' '/' '**'
   '.' ',' ':' '::' ';'
-  '='
+  '=' '==' '!=' '>' '<' '<=' '>='
   .
 
 Rootsymbol grammar.
@@ -60,7 +62,10 @@ expr2 -> erlang_funcall : '$1'.
 expr2 -> expr3 : '$1'.
 
 expr3 -> funcall : '$1'.
-expr3 -> add_op : '$1'.
+expr3 -> expr4 comp_op expr4 : {op, '$2', '$1', '$3'}.
+expr3 -> expr4 : '$1'.
+
+expr4 -> add_op : '$1'.
 
 %% Erlang function calls
 erlang_funcall -> identifier '::' identifier '(' ')' : {erl_funcall, line('$2'), '$1', '$3', []}.
@@ -80,6 +85,14 @@ funcall -> expr2 '.' identifier '(' exprs ')' do '|' exprs '|' eol indent statem
 
 inline_block -> expr : ['$1'].
 inline_block -> expr ';' exprs : ['$1'|'$3'].
+
+%% Comparison operators
+comp_op -> '==' : '$1'.
+comp_op -> '!=' : '$1'.
+comp_op -> '>'  : '$1'.
+comp_op -> '<'  : '$1'.
+comp_op -> '>=' : '$1'.
+comp_op -> '<=' : '$1'.
 
 %% Additive operators
 add_op -> multi_op : '$1'.
