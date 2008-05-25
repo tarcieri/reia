@@ -14,6 +14,8 @@ ast('*' = Op, Line, Ast1, Ast2) ->
   {op, Line, Op, Ast1, Ast2};
 ast('/' = Op, Line, Ast1, Ast2) ->
   {op, Line, Op, Ast1, Ast2};
+ast('%', Line, Ast1, Ast2) ->
+  {op, Line, 'rem', Ast1, Ast2};
   
 %% Addition
 ast('+' = Op, Line, Ast1, Ast2) ->
