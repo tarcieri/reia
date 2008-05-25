@@ -86,6 +86,19 @@ ast({lambda, Line, Args, Statements}) ->
     }]}}
   ]};
   
+%% Ranges
+ast({range, Line, Begin, End}) ->
+  {tuple, Line, [
+    {atom, Line, list},
+    {tuple, Line, [
+      {call, Line,
+        {remote, Line, {atom, Line, lists}, {atom, Line, seq}},
+        [ast(Begin), ast(End)]
+      },
+      {atom, Line, normal}
+    ]}
+  ]};
+  
 %% Operators
 ast({op, {Op, Line}, In}) ->
   reia_operators:ast(Op, Line, ast(In));

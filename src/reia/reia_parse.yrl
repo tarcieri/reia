@@ -32,7 +32,7 @@ Terminals
   eol indent dedent fun do 
   '(' ')' '[' ']' '{' '}' '|' % '<<' '>>'
   '+' '-' '*' '/' '%' '**'
-  '.' ',' ':' '::' ';'
+  '.' '..' ',' ':' '::' ';'
   '=' '==' '!=' '>' '<' '<=' '>='
   .
 
@@ -63,6 +63,7 @@ expr2 -> expr3 : '$1'.
 
 expr3 -> funcall : '$1'.
 expr3 -> expr4 comp_op expr4 : {op, '$2', '$1', '$3'}.
+expr3 -> expr4 '..' expr4 : {range, line('$2'), '$1', '$3'}.
 expr3 -> expr4 : '$1'.
 
 expr4 -> add_op : '$1'.
