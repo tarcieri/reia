@@ -1,12 +1,15 @@
 Nonterminals
   grammar
   statements
+  module_decl
+  functions
+  function
   exprs
   expr
   expr2
   expr3
   expr4
-  expr_ending
+  statement_ending
   ending_token
   erlang_funcall
   funcall
@@ -27,9 +30,9 @@ Nonterminals
   .
   
 Terminals
-  true false nil 
-  float integer string regexp atom identifier 
-  eol indent dedent fun do 
+  true false nil
+  float integer string regexp atom identifier constant module
+  eol indent dedent def fun do 
   '(' ')' '[' ']' '{' '}' '|' % '<<' '>>'
   '+' '-' '*' '/' '%' '**'
   '.' '..' ',' ':' '::' ';'
@@ -40,16 +43,27 @@ Rootsymbol grammar.
 
 grammar -> statements : '$1'.
 
-%% Program expressions
+%% Program statements
+statements -> module_decl : ['$1'].
 statements -> expr : ['$1'].
-statements -> expr expr_ending : ['$1'].
-statements -> expr expr_ending statements : ['$1'|'$3'].
+statements -> expr statement_ending : ['$1'].
+statements -> expr statement_ending statements : ['$1'|'$3'].
 
-%% Expression endings
-expr_ending -> ending_token : '$1'.
-expr_ending -> expr_ending ending_token : '$1'.
+%% Statement endings
+statement_ending -> ending_token : '$1'.
+statement_ending -> statement_ending ending_token : '$1'.
 ending_token -> ';' : '$1'.
 ending_token -> eol : '$1'.
+
+%% Module declaration
+module_decl -> module constant eol indent functions dedent : {module, line('$1'), '$2', '$5'}.
+
+%% Functions
+functions -> function : ['$1'].
+functions -> function statement_ending : ['$1'].
+functions -> function statement_ending functions : ['$1'|'$3'].
+
+function -> def identifier '(' exprs ')' eol indent statements dedent : {function, line('$1'), '$2', '$4', '$8'}.
 
 %% Expressions
 exprs -> expr : ['$1'].

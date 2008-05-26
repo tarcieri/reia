@@ -178,9 +178,11 @@ build_identifier(Chars, Line) ->
         false -> {token, {identifier, Line, Atom}}
     end.
 
-reserved_word('nil')   -> true;
-reserved_word('true')  -> true;
-reserved_word('false') -> true;
-reserved_word('fun')   -> true;
-reserved_word('do')    -> do;
-reserved_word(_)       -> false.
+reserved_word('nil')     -> true;
+reserved_word('true')    -> true;
+reserved_word('false')   -> true;
+reserved_word('module')  -> true;
+reserved_word('def')     -> true;
+reserved_word('fun')     -> true;
+reserved_word('do')      -> true;
+reserved_word(_)         -> false.
