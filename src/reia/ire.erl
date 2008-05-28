@@ -28,8 +28,8 @@ eval_print(String, Binding) ->
   NewBinding.
 
 print(Value) ->
-  {string, Binary} = reia_dispatch:funcall(Value, to_s, []),
-  io:format("~s~n", [binary_to_list(Binary)]).
+  String = reia_dispatch:funcall(Value, to_s, []),
+  io:format("~s~n", [reia_erl:r2e(String)]).
 
 print_error(Class, Reason) ->
   PF = fun(Term, I) ->
