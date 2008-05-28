@@ -19,5 +19,4 @@ stringify_members([{Key,Value}|Rest], Acc) ->
   stringify_members(Rest, NewAcc).
   
 stringify_term(Value) ->
-  {string, Binary} = reia_dispatch:funcall(Value, to_s, []),
-  binary_to_list(Binary).
+  reia_erl:r2e(reia_dispatch:funcall(Value, to_s, [])).
