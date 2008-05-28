@@ -53,7 +53,13 @@ funcall({list, {List, Order}}, to_string, []) ->
   case Order of
     normal  -> {string, list_to_binary(List)};
     reverse -> {string, list_to_binary(lists:reverse(List))}
-  end.
+  end;
+  
+%% Lists#to_s
+%%   Generate a string representing a list
+funcall({list, {List, Order}}, to_s, []) ->
+  String = "[" ++ stringify_list_members(List, Order) ++ "]",
+  funcall(reia_erl:e2r(String), to_string, []).
   
 push(Elements, []) ->
   {list, {Elements, reverse}};
@@ -64,6 +70,20 @@ unshift(Elements, []) ->
   {list, {Elements, normal}};
 unshift(Elements, [Value|Rest]) ->
   unshift([Value|Elements], Rest).
+  
+stringify_list_members(Elements, Order) ->
+  stringify_list_members(Elements, [], Order).
+
+stringify_list_members([], Acc, normal) ->  lists:concat(lists:reverse(Acc));
+stringify_list_members([], Acc, reverse) ->  lists:concat(Acc);
+stringify_list_members([Term|Rest], Acc, Order) ->
+  {string, Binary} = reia_dispatch:funcall(Term, to_s, []),
+  String = binary_to_list(Binary),
+  NewAcc = if 
+    Rest == [] -> [String|Acc];
+    true       -> [",", String|Acc]
+  end,
+  stringify_list_members(Rest, NewAcc, Order).
 
 %%
 %% Functions which take a block

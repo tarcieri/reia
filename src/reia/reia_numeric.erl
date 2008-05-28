@@ -7,7 +7,7 @@ pow(Base, Exponent) ->
   math:pow(Base, Exponent).
   
 funcall(Int, to_s, []) when is_integer(Int) ->
-  reia_lists:funcall(reia_erl:e2r(erlang:integer_to_list(Int)), to_string, []);
+  reia_list:funcall(reia_erl:e2r(erlang:integer_to_list(Int)), to_string, []);
   
 funcall(Float, to_s, []) when is_float(Float) ->
   [String|_] = io_lib:format("~f", [Float]),

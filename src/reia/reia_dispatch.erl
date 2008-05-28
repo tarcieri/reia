@@ -11,5 +11,5 @@ funcall(Receiver, Method, Arguments) when is_atom(Receiver) ->
   
 %% Funcalls that take blocks
 funcall(Receiver = {list, _}, Method, Arguments, Block) ->
-  reia_lists:funcall(Receiver, Method, Arguments, Block).
+  reia_list:funcall(Receiver, Method, Arguments, Block).
   
