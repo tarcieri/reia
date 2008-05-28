@@ -5,7 +5,9 @@
 funcall(Receiver = {list, _}, Method, Arguments) ->
   reia_list:funcall(Receiver, Method, Arguments);
 funcall(Receiver, Method, Arguments) when is_integer(Receiver) or is_float(Receiver) ->
-  reia_numeric:funcall(Receiver, Method, Arguments).
+  reia_numeric:funcall(Receiver, Method, Arguments);
+funcall(Receiver, Method, Arguments) when is_atom(Receiver) ->
+  reia_atom:funcall(Receiver, Method, Arguments).
   
 %% Funcalls that take blocks
 funcall(Receiver = {list, _}, Method, Arguments, Block) ->

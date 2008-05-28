@@ -11,4 +11,4 @@ funcall(Int, to_s, []) when is_integer(Int) ->
   
 funcall(Float, to_s, []) when is_float(Float) ->
   [String|_] = io_lib:format("~f", [Float]),
-  reia_lists:funcall(reia_erl:e2r(String), to_string, []).
+  reia_list:funcall(reia_erl:e2r(String), to_string, []).
