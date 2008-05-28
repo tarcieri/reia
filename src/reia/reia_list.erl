@@ -81,8 +81,7 @@ stringify_members(Elements, Order) ->
 stringify_members([], Acc, normal) ->  lists:concat(lists:reverse(Acc));
 stringify_members([], Acc, reverse) ->  lists:concat(Acc);
 stringify_members([Term|Rest], Acc, Order) ->
-  {string, Binary} = reia_dispatch:funcall(Term, to_s, []),
-  String = binary_to_list(Binary),
+  String = reia_erl:r2e(reia_dispatch:funcall(Term, to_s, [])),
   NewAcc = if 
     Rest == [] -> [String|Acc];
     true       -> [",", String|Acc]
