@@ -16,6 +16,7 @@ task :compiler => %w[
   src/reia/reia_list.beam
   src/reia/reia_numeric.beam
   src/reia/reia_atom.beam
+  src/reia/reia_regexp.beam
 ]
 
 task :ire => "src/reia/ire.beam"
@@ -57,5 +58,6 @@ task :clean do
   rm_f "src/reia/reia_list.beam"
   rm_f "src/reia/reia_numeric.beam"
   rm_f "src/reia/reia_atom.beam"
+  rm_f "src/reia/reia_regexp.beam"
   rm_f "src/reia/ire.beam"
 end
