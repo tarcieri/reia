@@ -10,6 +10,8 @@ funcall(Receiver = {list, _}, Method, Arguments) ->
   reia_list:funcall(Receiver, Method, Arguments);
 funcall(Receiver = {tuple, _}, Method, Arguments) ->
   reia_tuple:funcall(Receiver, Method, Arguments);
+funcall(Receiver = {lambda, _}, Method, Arguments) ->
+  reia_lambda:funcall(Receiver, Method, Arguments);
 funcall(Receiver = {regexp, _}, Method, Arguments) ->
   reia_regexp:funcall(Receiver, Method, Arguments).
   
