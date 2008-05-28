@@ -15,6 +15,7 @@ task :reia => %w[
   src/reia/reia_eval.beam
   src/reia/reia_list.beam
   src/reia/reia_tuple.beam
+  src/reia/reia_dict.beam
   src/reia/reia_numeric.beam
   src/reia/reia_atom.beam
   src/reia/reia_lambda.beam
@@ -59,6 +60,7 @@ task :clean do
   rm_f "src/reia/reia_eval.beam"
   rm_f "src/reia/reia_list.beam"
   rm_f "src/reia/reia_tuple.beam"
+  rm_f "src/reia/reia_dict.beam"
   rm_f "src/reia/reia_numeric.beam"
   rm_f "src/reia/reia_atom.beam"
   rm_f "src/reia/reia_lambda.beam"

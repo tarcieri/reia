@@ -27,64 +27,9 @@ eval_print(String, Binding) ->
   print(Value),
   NewBinding.
 
-print(Value) -> io:format("~s~n", [stringify_term(Value)]).
-
-stringify_term(Term) when is_integer(Term) -> stringify_integer(Term);
-stringify_term(Term) when is_float(Term)   -> stringify_float(Term);
-stringify_term(Term) when is_atom(Term)    -> stringify_atom(Term);
-stringify_term(Term) when is_tuple(Term)   -> stringify_compound(Term).
-
-stringify_integer(Int) -> integer_to_list(Int).
-stringify_float(Float) ->
-  [String|_] = io_lib:format("~f", [Float]),
-  String.
-
-stringify_atom(nil)   -> "nil";
-stringify_atom(true)  -> "true";
-stringify_atom(false) -> "false";
-stringify_atom(Atom)  -> 
-  String = atom_to_list(Atom),
-  case regexp:match(String, "^[A-Za-z0-9_]+$") of
-    nomatch -> "~'" ++ String ++ "'";
-    _       -> "~" ++ String
-  end.
-  
-stringify_compound({string, Binary}) -> 
-  "\"" ++ binary_to_list(Binary) ++ "\"";
-stringify_compound({regexp, Binary}) -> 
-  "/" ++ binary_to_list(Binary) ++ "/";
-stringify_compound({tuple, Tuple}) ->
-  "(" ++ lists:concat(stringify_list_members({tuple_to_list(Tuple), normal})) ++ ")";
-stringify_compound({list, List}) -> 
-  "[" ++ lists:concat(stringify_list_members(List)) ++ "]";
-stringify_compound({dict, Dict}) ->
-  "{" ++ lists:concat(stringify_dict_members(Dict)) ++ "}";
-stringify_compound({lambda, _}) ->
-  "#Fun".
-
-stringify_list_members({Elements, Order}) ->
-  stringify_list_members(Elements, [], Order).
-  
-stringify_list_members([], Acc, normal) -> lists:reverse(Acc);
-stringify_list_members([], Acc, reverse) -> Acc;
-stringify_list_members([Term|Rest], Acc, Order) ->
-  NewAcc = if 
-    Rest == [] -> [stringify_term(Term)|Acc];
-    true       -> [",", stringify_term(Term)|Acc]
-  end,
-  stringify_list_members(Rest, NewAcc, Order).
-  
-stringify_dict_members(Dict) ->
-  stringify_dict_members(dict:to_list(Dict), []).
-  
-stringify_dict_members([], Acc) ->
-  lists:reverse(Acc);
-stringify_dict_members([{Key,Value}|Rest], Acc) ->
-  NewAcc = if
-    Rest == [] -> [stringify_term(Key) ++ ":" ++ stringify_term(Value)|Acc];
-    true       -> [",", stringify_term(Key) ++ ":" ++ stringify_term(Value)|Acc]
-  end,
-  stringify_dict_members(Rest, NewAcc).
+print(Value) ->
+  {string, Binary} = reia_dispatch:funcall(Value, to_s, []),
+  io:format("~s~n", [binary_to_list(Binary)]).
 
 print_error(Class, Reason) ->
   PF = fun(Term, I) ->
