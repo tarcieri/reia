@@ -13,7 +13,7 @@ task :compiler => %w[
   src/reia/reia_dispatch.beam
   src/reia/reia_erl.beam
   src/reia/reia_eval.beam
-  src/reia/reia_lists.beam
+  src/reia/reia_list.beam
   src/reia/reia_numeric.beam
 ]
 
@@ -53,7 +53,7 @@ task :clean do
   rm_f "src/reia/reia_dispatch.beam"
   rm_f "src/reia/reia_erl.beam"
   rm_f "src/reia/reia_eval.beam"
-  rm_f "src/reia/reia_lists.beam"
+  rm_f "src/reia/reia_list.beam"
   rm_f "src/reia/reia_numeric.beam"
   rm_f "src/reia/ire.beam"
 end

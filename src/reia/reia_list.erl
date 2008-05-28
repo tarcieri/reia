@@ -1,4 +1,4 @@
--module(reia_lists).
+-module(reia_list).
 -export([funcall/3, funcall/4]).
 
 %%
