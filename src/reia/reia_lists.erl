@@ -24,7 +24,7 @@ funcall({list, {Elements, Order}}, push, Values) ->
 %% List#pop
 funcall({list, {Elements, Order}}, pop, []) ->
   [Element|_] = case Order of
-    normal -> lists:reverse(Elements);
+    normal  -> lists:reverse(Elements);
     reverse -> Elements
   end,
   Element;
@@ -32,7 +32,7 @@ funcall({list, {Elements, Order}}, pop, []) ->
 %% List#unshift
 funcall({list, {Elements, Order}}, unshift, Values) ->
   case Order of
-    normal ->
+    normal  ->
       unshift(Elements, Values);
     reverse ->
       unshift(lists:reverse(Elements), Values)
@@ -41,10 +41,19 @@ funcall({list, {Elements, Order}}, unshift, Values) ->
 %% List#shift
 funcall({list, {Elements, Order}}, shift, []) ->
   [Element|_] = case Order of
-    normal -> Elements;
+    normal  -> Elements;
     reverse -> lists:reverse(Elements)
   end,
-  Element.
+  Element;
+  
+%% Lists#to_string
+%%   Explicitly cast a list to a string.  Useful for converting Erlang "strings"
+%%   to Reia strings.
+funcall({list, {List, Order}}, to_string, []) ->
+  case Order of
+    normal  -> {string, list_to_binary(List)};
+    reverse -> {string, list_to_binary(lists:reverse(List))}
+  end.
   
 push(Elements, []) ->
   {list, {Elements, reverse}};
