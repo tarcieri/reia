@@ -17,7 +17,7 @@ compile([Expression|Rest], Output) ->
 ast({module, Line, {constant, _, Constant}, Functions}) ->
   Name = constant_to_module_name(Constant),
   Module = {attribute, Line, module, Name},
-  NewFunctions = [ast(Function) || Function <- Functions],
+  NewFunctions = group_clauses([ast(Function) || Function <- Functions]),
   [Module|NewFunctions];
   
 %% Functions
@@ -152,6 +152,21 @@ constant_to_module_name(Constant) ->
   Fragments = [string:to_lower(lists:sublist(String, Start, Length)) || {Start, Length} <- Matches],
   [_|NewName] = lists:flatten(lists:zipwith(fun(A,B) -> [A,B] end, lists:duplicate(length(Fragments), "_"), Fragments)),
   list_to_atom(NewName).
+  
+%% Group clauses of functions with the same name and arity
+group_clauses(Functions) ->
+  group_clauses(Functions, dict:new()).
+
+group_clauses([], Dict) ->
+  [{function, Line, Name, Arity, lists:reverse(Clauses)} || {{Name, Arity},{Line, Clauses}} <- dict:to_list(Dict)];
+group_clauses([Function|Rest], Dict) ->
+  {function, Line, Name, Arity, [Clause]} = Function,
+  case dict:find({Name, Arity}, Dict) of
+    {ok, {Line2, Clauses}} ->
+      group_clauses(Rest, dict:store({Name, Arity}, {Line2, [Clause|Clauses]}, Dict));
+    error ->
+      group_clauses(Rest, dict:store({Name, Arity}, {Line, [Clause]}, Dict))
+  end.
 
 %% Generate AST representing lists
 list_to_ast([], Line) ->
