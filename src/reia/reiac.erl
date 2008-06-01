@@ -1,5 +1,5 @@
 -module(reiac).
--export([file/1]).
+-export([file/1,file/2]).
 
 file(Filename) ->
   case filename:extension(Filename) of

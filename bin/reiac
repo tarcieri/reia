@@ -1,8 +1,24 @@
 #!/usr/bin/env escript
 
-main([File|_]) ->
-  code:add_patha("./ebin"),
-  code:add_patha("../ebin"),
-  reiac:file(File);
 main([]) ->
-  io:format("Must specify a file to compile~n").
+  usage();
+main([File]) ->
+  init(),
+  reiac:file(File);
+main(Options) ->
+  init(),
+  case Options of
+    ["-o", Outfile, Infile] ->
+      reiac:file(Infile, Outfile);
+    _ ->
+      usage()
+  end.
+
+init() ->
+  code:add_patha("./ebin"),
+  code:add_patha("../ebin").
+  
+usage() ->
+  io:format("Usage: reiac [options] file.ra~n"),
+  io:format("Options:~n"),
+  io:format("  -o filename    location of output file~n").
