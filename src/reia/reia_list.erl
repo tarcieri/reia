@@ -1,11 +1,12 @@
 -module(reia_list).
--export([funcall/3, funcall/4, stringify_members/1]).
+-export([funcall/3, funcall/4]).
 
 %%
 %% Functions which don't take a block
 %%
 
 %% List#reverse
+%%   Reverse the order of a list
 funcall({list, {Elements, Order}}, reverse, []) ->
   case Order of
     normal  -> {list, {Elements, reverse}};
@@ -13,6 +14,7 @@ funcall({list, {Elements, Order}}, reverse, []) ->
   end;
   
 %% List#push
+%%   Add an element to the tail of a list
 funcall({list, {Elements, Order}}, push, Values) ->
   case Order of
     normal ->
@@ -46,7 +48,7 @@ funcall({list, {Elements, Order}}, shift, []) ->
   end,
   Element;
   
-%% Lists#to_string
+%% List#to_string
 %%   Explicitly cast a list to a string.  Useful for converting Erlang "strings"
 %%   to Reia strings.
 funcall({list, {List, Order}}, to_string, []) ->
@@ -55,10 +57,17 @@ funcall({list, {List, Order}}, to_string, []) ->
     reverse -> {string, list_to_binary(lists:reverse(List))}
   end;
   
-%% Lists#to_s
+%% List#join
+%%   Join all elements of a list together with the given separator
+funcall(List = {list, _}, join, []) ->
+  funcall(List, join, [""]);
+funcall({list, {List, Order}}, join, [Sep]) ->
+  funcall(reia_erl:e2r(join(List, reia_erl:r2e(Sep), Order)), to_string, []);
+  
+%% List#to_s
 %%   Generate a string representing a list
 funcall({list, {List, Order}}, to_s, []) ->
-  String = "[" ++ stringify_members(List, Order) ++ "]",
+  String = "[" ++ join(List, ",", Order) ++ "]",
   funcall(reia_erl:e2r(String), to_string, []).
   
 push(Elements, []) ->
@@ -70,23 +79,19 @@ unshift(Elements, []) ->
   {list, {Elements, normal}};
 unshift(Elements, [Value|Rest]) ->
   unshift([Value|Elements], Rest).
-
-%% Used by reia_tuple for stringification
-stringify_members(Elements) ->
-  stringify_members(Elements, normal).
     
-stringify_members(Elements, Order) ->
-  stringify_members(Elements, [], Order).
+join(Elements, Sep, Order) ->
+  join(Elements, Sep, [], Order).
 
-stringify_members([], Acc, normal) ->  lists:concat(lists:reverse(Acc));
-stringify_members([], Acc, reverse) ->  lists:concat(Acc);
-stringify_members([Term|Rest], Acc, Order) ->
+join([], _, Acc, normal) ->  lists:concat(lists:reverse(Acc));
+join([], _, Acc, reverse) ->  lists:concat(Acc);
+join([Term|Rest], Sep, Acc, Order) ->
   String = reia_erl:r2e(reia_dispatch:funcall(Term, to_s, [])),
   NewAcc = if 
     Rest == [] -> [String|Acc];
-    true       -> [",", String|Acc]
+    true       -> [Sep, String|Acc]
   end,
-  stringify_members(Rest, NewAcc, Order).
+  join(Rest, Sep, NewAcc, Order).
 
 %%
 %% Functions which take a block

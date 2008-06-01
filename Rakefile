@@ -2,7 +2,7 @@ task :default => :build
 task :build => %w[reia ire copy_ebin]
 
 rule ".beam" => ".erl" do |t|
-  sh "erlc +nowarn_unused_vars -o #{File.dirname(t.name)} #{t.source}"
+  sh "erlc +debug_info +nowarn_unused_vars -o #{File.dirname(t.name)} #{t.source}"
 end
 
 task :reia => %w[
