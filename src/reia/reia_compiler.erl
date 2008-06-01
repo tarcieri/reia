@@ -12,10 +12,10 @@ compile([Expression|Rest], Output) ->
     NewExpression ->
       compile(Rest, [NewExpression|Output])
   end.
-
+  
 %% Module declarations
-ast({module, Line, {constant, _, NameAtom}, Functions}) ->
-  Name = list_to_atom(string:to_lower(atom_to_list(NameAtom))),
+ast({module, Line, {constant, _, Constant}, Functions}) ->
+  Name = constant_to_module_name(Constant),
   Module = {attribute, Line, module, Name},
   NewFunctions = [ast(Function) || Function <- Functions],
   [Module|NewFunctions];
@@ -56,7 +56,7 @@ ast(Ast = {atom, _, _}) ->
   Ast;
   
 %% Strings and regular expressions
-ast(Ast = {string, Line, String}) ->
+ast({string, Line, String}) ->
   {tuple, Line, [
     {atom, Line, string},
     {bin, Line, [{bin_element, Line, {string, Line, String}, default, default}]}
@@ -144,6 +144,14 @@ ast({erl_funcall, Line, {identifier, _, Module}, {identifier, _, Function}, Argu
     {remote, Line, {atom, Line, reia_erl}, {atom, Line, erl_funcall}},
     [{atom, Line, Module}, {atom, Line, Function}, list_to_ast(Arguments, Line)]
   }.
+  
+%% Generate a module name from a module declaration
+constant_to_module_name(Constant) ->
+  String = atom_to_list(Constant),
+  {match, Matches} = regexp:matches(String, "[A-Z][a-z]+"),
+  Fragments = [string:to_lower(lists:sublist(String, Start, Length)) || {Start, Length} <- Matches],
+  [_|NewName] = lists:flatten(lists:zipwith(fun(A,B) -> [A,B] end, lists:duplicate(length(Fragments), "_"), Fragments)),
+  list_to_atom(NewName).
 
 %% Generate AST representing lists
 list_to_ast([], Line) ->
