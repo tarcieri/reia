@@ -17,7 +17,7 @@ funcall(Receiver = {string, _}, Method, Arguments) ->
 funcall(Receiver = {lambda, _}, Method, Arguments) ->
   reia_lambda:funcall(Receiver, Method, Arguments);
 funcall(Receiver = {regexp, _}, Method, Arguments) ->
-  reia_regexp:funcall(Receiver, Method, Arguments).
+  reia_regexp:funcall(Receiver, Method, reia_erl:e2r(Arguments)).
   
 %% Funcalls that take blocks
 funcall(Receiver = {list, _}, Method, Arguments, Block) ->

@@ -5,6 +5,10 @@ rule ".beam" => ".erl" do |t|
   sh "erlc +debug_info +nowarn_unused_vars -o #{File.dirname(t.name)} #{t.source}"
 end
 
+rule ".beam" => ".ra" do |t|
+  sh "bin/reiac -o #{t.name} #{t.source}"
+end
+
 task :reia => %w[
   src/reia/reia_scan.beam 
   src/reia/reia_parse.beam

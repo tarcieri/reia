@@ -1,0 +1,4 @@
+module ReiaRegexp
+  def funcall(regexp, ~to_s, [])
+    [~regexp, bin] = erlang::tuple_to_list(regexp)
+    ["/", erlang::binary_to_list(bin).to_string(), "/"].join()

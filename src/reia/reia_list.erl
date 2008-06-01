@@ -86,7 +86,12 @@ join(Elements, Sep, Order) ->
 join([], _, Acc, normal) ->  lists:concat(lists:reverse(Acc));
 join([], _, Acc, reverse) ->  lists:concat(Acc);
 join([Term|Rest], Sep, Acc, Order) ->
-  String = reia_erl:r2e(reia_dispatch:funcall(Term, to_s, [])),
+  String = case Term of
+    {string, Bin} ->
+      binary_to_list(Bin);
+    _ ->
+      reia_erl:r2e(reia_dispatch:funcall(Term, to_s, []))
+  end,
   NewAcc = if 
     Rest == [] -> [String|Acc];
     true       -> [Sep, String|Acc]
