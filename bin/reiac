@@ -2,14 +2,18 @@
 
 main([]) ->
   usage();
+main(["-h"]) ->
+  usage();
+main(["--help"]) ->
+  usage();
 main([File]) ->
   init(),
-  reiac:file(File);
+  result(reiac:file(File));
 main(Options) ->
   init(),
   case Options of
     ["-o", Outfile, Infile] ->
-      reiac:file(Infile, Outfile);
+      result(reiac:file(Infile, Outfile));
     _ ->
       usage()
   end.
@@ -21,4 +25,14 @@ init() ->
 usage() ->
   io:format("Usage: reiac [options] file.ra~n"),
   io:format("Options:~n"),
-  io:format("  -o filename    location of output file~n").
+  io:format("    -o filename    location of output file~n"),
+  halt(1).
+  
+result(Result) ->
+  case Result of
+    {ok, _} ->
+      void;
+    Err ->
+      io:format("Error: ~p~n", [Err]),
+      halt(1)
+  end.
