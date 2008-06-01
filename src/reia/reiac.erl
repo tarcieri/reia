@@ -10,12 +10,29 @@ file(Filename) ->
   end.
   
 file(Filename, Outfile) ->
-  {ok, Data} = file:read_file(Filename),
-  {ok, Scanned, _} = reia_scan:scan(binary_to_list(Data)),
-  {ok, Parsed} = reia_parse:parse(Scanned),
-  {ok, _Module, Bin} = forms(Parsed),
-  file:write_file(Outfile, Bin),
-  {ok, Outfile}.
+  case parse(Filename) of
+    {ok, Forms = [{module, _, _, _}]} ->
+      {ok, _Module, Bin} = forms(Forms),
+      file:write_file(Outfile, Bin),
+      {ok, Outfile};
+    {ok, _} ->
+      {error, "compiled Reia must define exactly one module"};
+    Err ->
+      Err
+  end.
+  
+parse(Filename) ->
+  case file:read_file(Filename) of
+    {ok, Data} ->
+      case reia_scan:scan(binary_to_list(Data)) of
+        {ok, Scanned, _} -> 
+          reia_parse:parse(Scanned);
+        Err ->
+          Err
+      end;
+    Err ->
+      Err
+  end.
   
 forms(Forms) ->
   ErlForms = reia_compiler:compile(Forms),
