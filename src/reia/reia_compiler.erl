@@ -6,8 +6,27 @@ compile(Expressions) ->
   
 compile([], Output) -> lists:reverse(Output);
 compile([Expression|Rest], Output) ->
-  NewExpression = ast(Expression),
-  compile(Rest, [NewExpression|Output]).
+  case ast(Expression) of
+    Expressions when is_list(Expressions) ->
+      compile(Rest, lists:reverse(Expressions) ++ Output);
+    NewExpression ->
+      compile(Rest, [NewExpression|Output])
+  end.
+
+%% Module declarations
+ast({module, Line, {constant, _, NameAtom}, Functions}) ->
+  Name = list_to_atom(string:to_lower(atom_to_list(NameAtom))),
+  Module = {attribute, Line, module, Name},
+  NewFunctions = [ast(Function) || Function <- Functions],
+  [Module|NewFunctions];
+  
+%% Functions
+ast({function, Line, {identifier, _, Name}, Arguments, Expressions}) ->
+  {function, Line, Name, erlang:length(Arguments), [{clause, Line, 
+    [ast(Argument) || Argument <- Arguments],
+    [],
+    [ast(Expression) || Expression <- Expressions]
+  }]};
   
 %% Pattern matching
 ast({match, Line, In1, In2}) ->
@@ -62,7 +81,7 @@ ast({list, Line, Elements}) ->
 ast({tuple, Line, Elements}) ->
   {tuple, Line, [
     {atom, Line, tuple},
-    {tuple, Line, lists:map(fun(Element) -> ast(Element) end, Elements)}
+    {tuple, Line, [ast(Element) || Element <- Elements]}
   ]};
   
 %% Dicts
@@ -80,9 +99,9 @@ ast({lambda, Line, Args, Statements}) ->
   {tuple, Line, [
     {atom, Line, lambda},
     {'fun', Line, {clauses,[{clause, Line,
-      lists:map(fun reia_compiler:ast/1, Args),
+      [ast(Arg) || Arg <- Args],
       [],
-      lists:map(fun reia_compiler:ast/1, Statements)
+      [ast(Statement) || Statement <- Statements]
     }]}}
   ]};
   

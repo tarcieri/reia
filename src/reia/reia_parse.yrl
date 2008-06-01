@@ -60,9 +60,9 @@ module_decl -> module constant eol indent functions dedent : {module, line('$1')
 
 %% Functions
 functions -> function : ['$1'].
-functions -> function statement_ending : ['$1'].
-functions -> function statement_ending functions : ['$1'|'$3'].
+functions -> function functions : ['$1'|'$2'].
 
+function -> def identifier eol indent statements dedent : {function, line('$1'), '$2', [], '$5'}.
 function -> def identifier '(' exprs ')' eol indent statements dedent : {function, line('$1'), '$2', '$4', '$8'}.
 
 %% Expressions

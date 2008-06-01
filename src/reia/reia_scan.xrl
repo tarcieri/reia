@@ -70,7 +70,7 @@ Rules.
 
 Erlang code.  
 
--export([scan/1, scan/2]).
+-export([scan/1, scan/2, process_indentation/2]).
 
 %% Scan the string for tokens
 scan(String) ->
@@ -117,14 +117,14 @@ process_indentation([{eol, Line}|Rest], Tokens, State) ->
   process_indentation([{indentation, Line, 0}|Rest], Tokens, State);
   
 %% Handle indents or dedents  
-process_indentation([{indentation, Line, Amount}|Rest], Tokens, [Current|State]) ->
+process_indentation([{indentation, Line, Amount}|Rest], Tokens, State = [Current|_]) ->
   if
     Amount == Current ->
-      process_indentation(Rest, [{eol, Line - 1}|Tokens], [Current|State]);
+      process_indentation(Rest, [{eol, Line - 1}|Tokens], State);
     Amount > Current ->
-      process_indentation(Rest, [{indent, Line},{eol, Line - 1}|Tokens], [Amount,Current|State]);
+      process_indentation(Rest, [{indent, Line},{eol, Line - 1}|Tokens], [Amount|State]);
     Amount < Current ->
-      case build_dedent([{eol, Line - 1}|Tokens], Amount, Line, [Current|State]) of
+      case build_dedent([{eol, Line - 1}|Tokens], Amount, Line, State) of
         {ok, NewTokens, NewState} ->
           process_indentation(Rest, NewTokens, NewState);
         nomatch ->
@@ -139,7 +139,7 @@ process_indentation([Token|Rest], Tokens, State) ->
 build_dedent(Tokens, Amount, Line, [Current|State]) ->
   if
     Amount == Current ->
-      {ok, [{dedent,Line}|Tokens], [Current|State]};
+      {ok, Tokens, [Current|State]};
     Amount > Current ->
       nomatch;  
     true ->

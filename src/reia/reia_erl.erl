@@ -3,7 +3,7 @@
 
 % Make an Erlang function call with Reia arguments, and return Reia values
 erl_funcall(Module, Function, Arguments) ->
-  ErlangArguments = lists:map(fun reia_erl:r2e/1, Arguments),
+  ErlangArguments = [r2e(Argument) || Argument <- Arguments],
   Value = apply(Module, Function, ErlangArguments),
   e2r(Value).
     
@@ -11,7 +11,7 @@ erl_funcall(Module, Function, Arguments) ->
 r2e({string, Value}) -> 
   binary_to_list(Value);
 r2e({tuple, Elements}) ->
-  list_to_tuple(lists:map(fun reia_erl:r2e/1, tuple_to_list(Elements)));
+  list_to_tuple([r2e(Element) || Element <- Elements]);
 r2e({list, {Elements, Order}}) ->
   rlist2elist(Elements, [], Order);
 r2e(Term) -> Term.
@@ -26,17 +26,17 @@ rlist2elist([Term|Rest], Acc, Order) ->
 
 % Convert an Erlang term to a Reia term
 e2r(Term) when is_list(Term) ->
-  {list, {lists:map(fun reia_erl:e2r/1, Term), normal}};
+  {list, {[e2r(Element) || Element <- Term], normal}};
 e2r(Term) when is_tuple(Term) -> 
-  {tuple, list_to_tuple(lists:map(fun reia_erl:e2r/1, tuple_to_list(Term)))};
+  {tuple, list_to_tuple([e2r(Element) || Element <- Term])};
 e2r(Term) -> Term.
 
 % Convert an Erlang term to a Reia term, converting printable strings
 e2r_printable(Term) when is_list(Term) ->
   case io_lib:printable_list(Term) of
     true -> {string, list_to_binary(Term)};
-    false -> lists:map(fun reia_erl:e2r_printable/1, Term)
+    false -> [e2r_printable(Element) || Element <- Term]
   end;
 e2r_printable(Term) when is_tuple(Term) ->
-  {tuple, list_to_tuple(lists:map(fun reia_erl:e2r_printable/1, tuple_to_list(Term)))};
+  {tuple, list_to_tuple([e2r_printable(Element) || Element <- Term])};
 e2r_printable(Term) -> Term.

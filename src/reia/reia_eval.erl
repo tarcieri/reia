@@ -3,9 +3,9 @@
 
 exprs(ReiaAst, Binding) ->
   %% io:format("Reia AST: ~p~n", [ReiaAst]),
-  ErlangAst = reia_compiler:compile(ReiaAst),
+  Forms = reia_compiler:compile(ReiaAst),
   %% io:format("Erlang AST: ~p~n", [ErlangAst]),
-  Value = erl_eval:exprs(ErlangAst, Binding),
+  Value = erl_eval:exprs(Forms, Binding),
   %% io:format("Result: ~p~n", [Value]),
   Value.
   

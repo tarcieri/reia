@@ -1,0 +1,8 @@
+#!/usr/bin/env escript
+
+main([File|_]) ->
+  code:add_patha("./ebin"),
+  code:add_patha("../ebin"),
+  reiac:file(File);
+main([]) ->
+  io:format("Must specify a file to compile~n").
