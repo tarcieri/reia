@@ -12,3 +12,10 @@ module ReiaRegexp
         lists::sublist(string, start, len).to_string()
       ~nomatch:
         nil
+        
+  def funcall(regexp, ~matches, [string])
+    [~regexp, bin] = erlang::tuple_to_list(regexp)
+    pattern = erlang::binary_to_list(bin)
+    
+    (~match, matches) = regexp::matches(string, pattern)
+    matches.map { |(start, len)| lists::sublist(string, start, len).to_string() }
