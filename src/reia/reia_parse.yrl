@@ -30,7 +30,7 @@ Nonterminals
   list
   tuple
   dict
-  entries
+  dict_entries
   lambda
   .
   
@@ -184,10 +184,10 @@ tuple -> '(' expr ',' exprs ')': {tuple, line('$1'), ['$2'|'$4']}.
 
 %% Dicts
 dict -> '{' '}' : {dict, line('$1'), []}.
-dict -> '{' entries : {dict, line('$1'), '$2'}.
+dict -> '{' dict_entries '}' : {dict, line('$1'), '$2'}.
 
-entries -> 'comp_expr' ':' expr '}' : [{'$1','$3'}].
-entries -> comp_expr ':' expr ',' entries : [{'$1','$3'}|'$5'].
+dict_entries -> comp_expr ':' expr : [{'$1','$3'}].
+dict_entries -> comp_expr ':' expr ',' dict_entries : [{'$1','$3'}|'$5'].
 
 %% Lambdas
 lambda -> fun '(' ')' '{' inline_statements '}' : {lambda, line('$1'), [], '$5'}.
