@@ -17,8 +17,10 @@ run(Binding) ->
       run(NewBinding)
   end.
   
-read() -> 
-  io:get_line('>> ').
+read() ->
+  read('>> ').
+read(Prompt) ->
+  io:get_line(Prompt).
   
 eval_print(String, Binding) ->
   case reia_parse:string(String) of
@@ -26,6 +28,12 @@ eval_print(String, Binding) ->
       {value, Value, NewBinding} = reia_eval:exprs(Exprs, Binding),
       print(Value),
       NewBinding;
+      
+    %% Need more tokens
+    {error, {999999, _}} ->
+      NextLine = read('.. '),
+      eval_print(lists:concat([String, NextLine]), Binding);
+      
     {error, Error} ->
       parse_error(Error),
       Binding
