@@ -2,3 +2,13 @@ module ReiaRegexp
   def funcall(regexp, ~to_s, [])
     [~regexp, bin] = erlang::tuple_to_list(regexp)
     ["/", erlang::binary_to_list(bin).to_string(), "/"].join()
+  
+  def funcall(regexp, ~match, [string])
+    [~regexp, bin] = erlang::tuple_to_list(regexp)
+    pattern = erlang::binary_to_list(bin)
+
+    case regexp::match(string, pattern)
+      (~match, start, len):
+        lists::sublist(string, start, len).to_string()
+      ~nomatch:
+        nil
