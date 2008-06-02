@@ -1,0 +1,26 @@
+
+This is a parse transform to give more informative exceptions. There is also
+support for invoking an "exit handler module" instead of just exiting.
+
+See smart_exceptions.erl for a bit more info.
+
+smart_exceptions.erl	The parse transform.
+smart_handler_b.erl	Behaviour specification for smart handlers.
+smart_exc_rt.erl	An example smart handler module that tries to
+			analyze what went wrong.
+mapform0.erl		Map function over forms, used by parse transform
+
+How to use:
+
+  erlc +'{parse_transform, smart_exceptions}' -pa $(SMART_EXC_EBIN) file.erl
+
+where 
+
+  SMART_EXC_EBIN=$(JUNGERL_ROOT)/lib/smart_exceptions/ebin
+
+I currently use only the smart_exceptions transform myself, so smart_exc_rt
+is less well tested.
+
+Enjoy!
+
+Thomas Lindgren
