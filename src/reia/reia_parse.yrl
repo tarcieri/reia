@@ -24,7 +24,7 @@ Nonterminals
   funcall_expr
   funcall
   range_expr
-  primitive
+  literal_expr
   inline_statements
   number
   list
@@ -105,21 +105,21 @@ unary_expr -> unary_op unary_expr : {op, '$1', '$2'}.
 unary_expr -> erl_funcall_expr : '$1'.
 
 erl_funcall_expr -> erl_funcall : '$1'.
-erl_funcall_expr -> primitive : '$1'.
+erl_funcall_expr -> literal_expr : '$1'.
 
-primitive -> identifier : '$1'.
-primitive -> nil        : '$1'.
-primitive -> true       : '$1'.
-primitive -> false      : '$1'.
-primitive -> number     : '$1'.
-primitive -> string     : '$1'.
-primitive -> regexp     : '$1'.
-primitive -> list       : '$1'.
-primitive -> tuple      : '$1'.
-primitive -> dict       : '$1'.
-primitive -> atom       : '$1'.
-primitive -> lambda     : '$1'.
-primitive -> '(' expr ')' : '$2'.
+literal_expr -> identifier : '$1'.
+literal_expr -> nil        : '$1'.
+literal_expr -> true       : '$1'.
+literal_expr -> false      : '$1'.
+literal_expr -> number     : '$1'.
+literal_expr -> string     : '$1'.
+literal_expr -> regexp     : '$1'.
+literal_expr -> list       : '$1'.
+literal_expr -> tuple      : '$1'.
+literal_expr -> dict       : '$1'.
+literal_expr -> atom       : '$1'.
+literal_expr -> lambda     : '$1'.
+literal_expr -> '(' expr ')' : '$2'.
 
 %% Comparison operators
 comp_op -> '==' : '$1'.
