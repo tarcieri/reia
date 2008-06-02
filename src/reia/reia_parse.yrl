@@ -3,6 +3,7 @@ Nonterminals
   statements
   statement_ending
   ending_token
+  inline_statements
   module_decl
   functions
   function
@@ -25,7 +26,9 @@ Nonterminals
   funcall
   range_expr
   literal_expr
-  inline_statements
+  case_expr
+  case_clauses
+  case_clause
   number
   list
   tuple
@@ -37,7 +40,7 @@ Nonterminals
 Terminals
   true false nil
   float integer string regexp atom identifier constant module
-  eol indent dedent def fun do 
+  eol indent dedent def fun do 'case'
   '(' ')' '[' ']' '{' '}' '|' % '<<' '>>'
   '+' '-' '*' '/' '%' '**'
   '.' '..' ',' ':' '::' ';'
@@ -119,7 +122,16 @@ literal_expr -> tuple      : '$1'.
 literal_expr -> dict       : '$1'.
 literal_expr -> atom       : '$1'.
 literal_expr -> lambda     : '$1'.
+literal_expr -> case_expr  : '$1'.
 literal_expr -> '(' expr ')' : '$2'.
+
+%% Case expressions
+case_expr -> 'case' expr eol indent case_clauses dedent : {'case', line('$1'), '$2', '$5'}.
+
+case_clauses -> case_clause case_clauses : ['$1'|'$2'].
+case_clauses -> case_clause : ['$1'].
+
+case_clause -> expr ':' eol indent statements dedent : {clause, line('$2'), '$1', '$5'}.
 
 %% Comparison operators
 comp_op -> '==' : '$1'.

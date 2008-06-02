@@ -185,4 +185,5 @@ reserved_word('module')  -> true;
 reserved_word('def')     -> true;
 reserved_word('fun')     -> true;
 reserved_word('do')      -> true;
+reserved_word('case')    -> true;
 reserved_word(_)         -> false.

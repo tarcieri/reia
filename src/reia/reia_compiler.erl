@@ -143,7 +143,14 @@ ast({erl_funcall, Line, {identifier, _, Module}, {identifier, _, Function}, Argu
   {call, Line,
     {remote, Line, {atom, Line, reia_erl}, {atom, Line, erl_funcall}},
     [{atom, Line, Module}, {atom, Line, Function}, list_to_ast(Arguments, Line)]
-  }.
+  };
+  
+%% Case expressions
+ast({'case', Line, Expression, Clauses}) ->
+  {'case', Line, ast(Expression), [ast(Clause) || Clause <- Clauses]};
+    
+ast({clause, Line, Expression, Statements}) ->
+  {clause, Line, [ast(Expression)], [], [ast(Statement) || Statement <- Statements]}.
   
 %% Generate a module name from a module declaration
 constant_to_module_name(Constant) ->
