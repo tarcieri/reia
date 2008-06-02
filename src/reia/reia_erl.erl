@@ -11,7 +11,7 @@ erl_funcall(Module, Function, Arguments) ->
 r2e({string, Value}) -> 
   binary_to_list(Value);
 r2e({tuple, Elements}) ->
-  list_to_tuple([r2e(Element) || Element <- Elements]);
+  list_to_tuple([r2e(Element) || Element <- tuple_to_list(Elements)]);
 r2e({list, {Elements, Order}}) ->
   rlist2elist(Elements, [], Order);
 r2e(Term) -> Term.
