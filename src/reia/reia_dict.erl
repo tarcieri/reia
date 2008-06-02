@@ -1,6 +1,16 @@
 -module(reia_dict).
 -export([funcall/3]).
 
+%% Dict#[]
+%%   Retrieve an element from a Dict
+funcall({dict, Dict}, '[]', [Key]) ->
+  case dict:find(Key, Dict) of
+    {ok, Value} -> Value;
+    error -> nil
+  end;
+
+%% Dict#to_s
+%%   Convert a Dict to a string representation
 funcall({dict, Dict}, to_s, []) ->
   String = "{" ++ stringify_members(Dict) ++ "}",
   reia_list:funcall(reia_erl:e2r(String), to_string, []).
