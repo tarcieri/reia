@@ -24,7 +24,7 @@ end
 
 # Compile reia_scan using leex
 file "src/reia/reia_scan.erl" => %w[src/reia/reia_scan.xrl src/leex/leex.beam] do
-  sh "erl -eval 'leex:file(\"src/reia/reia_scan.xrl\")' -pa src/leex -noshell -s init stop"
+  sh "bin/leex src/reia/reia_scan.xrl"
 end
 
 file "src/reia/reia_scan.beam" => "src/reia/reia_scan.erl" do
