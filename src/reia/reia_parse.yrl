@@ -23,8 +23,8 @@ Nonterminals
   pow_op
   unary_expr
   unary_op
+  range_expr
   primitive
-  parenthesized_expr
   number
   list
   tuple
@@ -81,22 +81,38 @@ expr2 -> expr3 : '$1'.
 
 expr3 -> funcall : '$1'.
 expr3 -> expr4 comp_op expr4 : {op, '$2', '$1', '$3'}.
-expr3 -> expr4 '..' expr4 : {range, line('$2'), '$1', '$3'}.
 expr3 -> expr4 : '$1'.
 
 expr4 -> add_expr : '$1'.
 
-add_expr -> mult_expr : '$1'.
 add_expr -> add_expr add_op mult_expr : {op, '$2', '$1', '$3'}.
+add_expr -> mult_expr : '$1'.
 
-mult_expr -> pow_expr : '$1'.
 mult_expr -> mult_expr mult_op pow_expr : {op, '$2', '$1', '$3'}.
+mult_expr -> pow_expr : '$1'.
 
-pow_expr -> unary_expr : '$1'.
 pow_expr -> pow_expr pow_op unary_expr : {op, '$2', '$1', '$3'}.
+pow_expr -> unary_expr : '$1'.
 
-unary_expr -> primitive : '$1'.
 unary_expr -> unary_op unary_expr : {op, '$1', '$2'}.
+unary_expr -> range_expr : '$1'.
+
+range_expr -> range_expr '..' primitive : {range, line('$2'), '$1', '$3'}.
+range_expr -> primitive : '$1'.
+
+primitive -> identifier : '$1'.
+primitive -> nil        : '$1'.
+primitive -> true       : '$1'.
+primitive -> false      : '$1'.
+primitive -> number     : '$1'.
+primitive -> string     : '$1'.
+primitive -> regexp     : '$1'.
+primitive -> list       : '$1'.
+primitive -> tuple      : '$1'.
+primitive -> dict       : '$1'.
+primitive -> atom       : '$1'.
+primitive -> lambda     : '$1'.
+primitive -> '(' expr ')' : '$2'.
 
 %% Comparison operators
 comp_op -> '==' : '$1'.
@@ -148,24 +164,6 @@ funcall -> expr2 '.' identifier '(' ')' do eol indent statements dedent : {funca
 funcall -> expr2 '.' identifier '(' ')' do '|' exprs '|' eol indent statements dedent : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), '$8', '$12'}}.
 funcall -> expr2 '.' identifier '(' exprs ')' do eol indent statements dedent : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), [], '$10'}}.
 funcall -> expr2 '.' identifier '(' exprs ')' do '|' exprs '|' eol indent statements dedent : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), [], '$10'}}.
-
-%% Simple exprs
-primitive -> identifier : '$1'.
-primitive -> nil        : '$1'.
-primitive -> true       : '$1'.
-primitive -> false      : '$1'.
-primitive -> number     : '$1'.
-primitive -> string     : '$1'.
-primitive -> regexp     : '$1'.
-primitive -> list       : '$1'.
-primitive -> tuple      : '$1'.
-primitive -> dict       : '$1'.
-primitive -> atom       : '$1'.
-primitive -> lambda     : '$1'.
-
-%% Parens for explicit order of operation
-primitive -> parenthesized_expr : '$1'.
-parenthesized_expr -> '(' expr ')' : '$2'.
 
 %% Numbers
 number -> float : '$1'.
