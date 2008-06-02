@@ -8,6 +8,11 @@ funcall({dict, Dict}, '[]', [Key]) ->
     {ok, Value} -> Value;
     error -> nil
   end;
+  
+%% Dict#to_list()
+%%   Convert a Dict to a list representation
+funcall({dict, Dict}, to_list, []) ->
+  reia_erl:e2r(dict:to_list(Dict));
 
 %% Dict#to_s
 %%   Convert a Dict to a string representation
