@@ -67,7 +67,7 @@ funcall({list, {List, Order}}, join, [Sep]) ->
 %% List#to_s
 %%   Generate a string representing a list
 funcall({list, {List, Order}}, to_s, []) ->
-  String = "[" ++ join(List, ",", Order) ++ "]",
+  String = "[" ++ join([reia_dispatch:funcall(Element, to_s, []) || Element <- List], ",", Order) ++ "]",
   funcall(reia_erl:e2r(String), to_string, []).
   
 push(Elements, []) ->
