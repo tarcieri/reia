@@ -32,7 +32,7 @@ result(Result) ->
   case Result of
     {ok, _} ->
       void;
-    Err ->
-      io:format("Error: ~p~n", [Err]),
+    {error, Err} ->
+      io:format("Error: ~s~n", [Err]),
       halt(1)
   end.

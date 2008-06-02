@@ -10,28 +10,20 @@ file(Filename) ->
   end.
   
 file(Filename, Outfile) ->
-  case parse(Filename) of
-    {ok, Forms = [{module, _, _, _}]} ->
-      {ok, _Module, Bin} = forms(Forms),
-      file:write_file(Outfile, Bin),
-      {ok, Outfile};
-    {ok, _} ->
-      {error, "compiled Reia must define exactly one module"};
-    Err ->
-      Err
-  end.
-  
-parse(Filename) ->
   case file:read_file(Filename) of
     {ok, Data} ->
-      case reia_scan:scan(binary_to_list(Data)) of
-        {ok, Scanned, _} -> 
-          reia_parse:parse(Scanned);
-        Err ->
-          Err
+      case reia_parse:string(binary_to_list(Data)) of
+        {ok, Forms = [{module, _, _, _}]} ->
+          {ok, _Module, Bin} = forms(Forms),
+          file:write_file(Outfile, Bin),
+          {ok, Outfile};
+        {ok, _} ->
+          {error, "compiled Reia must define exactly one module"};
+        {error, {Line, Message}} ->
+          {error, io_lib:format("Line ~w: ~s", [Line, Message])}
       end;
-    Err ->
-      Err
+    {error, Err} ->
+      {error, io_lib:format("~p", [Err])}
   end.
   
 forms(Forms) ->
