@@ -15,7 +15,7 @@ funcall({tuple, Tuple}, to_list, []) ->
 %%   Generate a string representation of a Tuple
 funcall({tuple, Tuple}, to_s, []) ->
   Elements = [reia_dispatch:funcall(Element, to_s, []) || Element <- erlang:tuple_to_list(Tuple)],
-  String = reia_erl:r2e(reia_list:funcall({list, {Elements, normal}}, join, [reia_erl:e2r(",")])),
-  reia_list:funcall({list, {lists:concat(["(", String, ")"]), normal}}, to_string, []).
+  String = "(" ++ reia_erl:r2e(reia_list:funcall({list, {Elements, normal}}, join, [reia_erl:e2r(",")])) ++ ")",
+  reia_list:funcall(reia_erl:e2r(String), to_string, []).
   
   
