@@ -102,7 +102,7 @@ mult_expr -> pow_expr : '$1'.
 pow_expr -> pow_expr pow_op index_expr : {op, '$2', '$1', '$3'}.
 pow_expr -> index_expr : '$1'.
 
-index_expr -> funcall_expr '[' expr ']' : {funcall, line('$2'), '$1', {identifier, line('$2'), '[]'}, ['$3']}.
+index_expr -> index_expr '[' expr ']' : {funcall, line('$2'), '$1', {identifier, line('$2'), '[]'}, ['$3']}.
 index_expr -> funcall_expr : '$1'.
 
 funcall_expr -> funcall : '$1'.
