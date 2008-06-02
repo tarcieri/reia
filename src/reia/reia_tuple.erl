@@ -1,6 +1,11 @@
 -module(reia_tuple).
 -export([funcall/3]).
 
+%% Tuple#[]
+%%   Retrieve an element from a Tuple
+funcall({tuple, Tuple}, '[]', [Index]) ->
+  reia_dispatch:funcall({list, {erlang:tuple_to_list(Tuple), normal}}, '[]', [Index]);
+
 %% Tuple#to_list
 %%   Convert a tuple to a list
 funcall({tuple, Tuple}, to_list, []) ->
