@@ -19,18 +19,38 @@ run(Binding) ->
   
 read() -> 
   io:get_line('>> ').
-
+  
 eval_print(String, Binding) ->
-  {ok, Scanned, _} = reia_scan:scan(String),
-  {ok, Parsed} = reia_parse:parse(Scanned),
-  {value, Value, NewBinding} = reia_eval:exprs(Parsed, Binding),
-  print(Value),
-  NewBinding.
+  case parse(String) of
+    {ok, Exprs} ->
+      {value, Value, NewBinding} = reia_eval:exprs(Exprs, Binding),
+      print(Value),
+      NewBinding;
+    {error, Error} ->
+      parse_error(Error),
+      Binding
+  end.
+  
+parse(String) ->
+  case reia_scan:scan(String) of
+    {ok, Tokens, _} -> 
+      case reia_parse:parse(Tokens) of
+        {ok, Exprs} ->
+          {ok, Exprs};
+        {error, {Line, _, [Message, Token]}} ->
+          {error, {Line, io_lib:format("~s~s", [Message, Token])}}
+      end;
+    {error, {Line, _, {Message, Token}}, _} ->
+      {error, {Line, io_lib:format("~p ~p", [Message, Token])}}
+  end.
 
 print(Value) ->
   String = reia_dispatch:funcall(Value, to_s, []),
   io:format("~s~n", [reia_erl:r2e(String)]).
-
+  
+parse_error({Line, Error}) ->
+  io:format("Error: Line ~w: ~s~n", [Line, Error]).
+  
 print_error(Class, Reason) ->
   PF = fun(Term, I) ->
     io_lib:format("~." ++ integer_to_list(I) ++ "P", [Term, 50]) 
