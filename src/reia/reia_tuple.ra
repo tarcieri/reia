@@ -1,0 +1,4 @@
+module ReiaTuple
+  def funcall(tuple, ~to_s, [])
+    members = erlang::tuple_to_list(tuple).join(",")
+    ["(", members, ")"].join()
