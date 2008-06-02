@@ -15,10 +15,14 @@ Nonterminals
   funcall
   inline_block
   comp_op
+  add_expr
   add_op
-  multi_op
+  mult_expr
+  mult_op
+  pow_expr
   pow_op
   unary_expr
+  unary_op
   primitive
   parenthesized_expr
   number
@@ -80,7 +84,43 @@ expr3 -> expr4 comp_op expr4 : {op, '$2', '$1', '$3'}.
 expr3 -> expr4 '..' expr4 : {range, line('$2'), '$1', '$3'}.
 expr3 -> expr4 : '$1'.
 
-expr4 -> add_op : '$1'.
+expr4 -> add_expr : '$1'.
+
+add_expr -> mult_expr : '$1'.
+add_expr -> add_expr add_op mult_expr : {op, '$2', '$1', '$3'}.
+
+mult_expr -> pow_expr : '$1'.
+mult_expr -> mult_expr mult_op pow_expr : {op, '$2', '$1', '$3'}.
+
+pow_expr -> unary_expr : '$1'.
+pow_expr -> pow_expr pow_op unary_expr : {op, '$2', '$1', '$3'}.
+
+unary_expr -> primitive : '$1'.
+unary_expr -> unary_op unary_expr : {op, '$1', '$2'}.
+
+%% Comparison operators
+comp_op -> '==' : '$1'.
+comp_op -> '!=' : '$1'.
+comp_op -> '>'  : '$1'.
+comp_op -> '<'  : '$1'.
+comp_op -> '>=' : '$1'.
+comp_op -> '<=' : '$1'.
+
+%% Addition operators
+add_op -> '+' : '$1'.
+add_op -> '-' : '$1'.
+
+%% Multiplication operators
+mult_op -> '*' : '$1'.
+mult_op -> '/' : '$1'.
+mult_op -> '%' : '$1'.
+
+%% Exponentation operator
+pow_op -> '**' : '$1'.
+
+%% Unary operators
+unary_op -> '+' : '$1'.
+unary_op -> '-' : '$1'.
 
 %% Erlang function calls
 erlang_funcall -> identifier '::' identifier '(' ')' : {erl_funcall, line('$2'), '$1', '$3', []}.
@@ -108,34 +148,6 @@ funcall -> expr2 '.' identifier '(' ')' do eol indent statements dedent : {funca
 funcall -> expr2 '.' identifier '(' ')' do '|' exprs '|' eol indent statements dedent : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), '$8', '$12'}}.
 funcall -> expr2 '.' identifier '(' exprs ')' do eol indent statements dedent : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), [], '$10'}}.
 funcall -> expr2 '.' identifier '(' exprs ')' do '|' exprs '|' eol indent statements dedent : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), [], '$10'}}.
-
-%% Comparison operators
-comp_op -> '==' : '$1'.
-comp_op -> '!=' : '$1'.
-comp_op -> '>'  : '$1'.
-comp_op -> '<'  : '$1'.
-comp_op -> '>=' : '$1'.
-comp_op -> '<=' : '$1'.
-
-%% Additive operators
-add_op -> multi_op : '$1'.
-add_op -> add_op '+' multi_op : {op, '$2', '$1', '$3'}.
-add_op -> add_op '-' multi_op : {op, '$2', '$1', '$3'}.
-
-%% Multiplicative operators
-multi_op -> pow_op : '$1'.
-multi_op -> multi_op '*' pow_op : {op, '$2', '$1', '$3'}.
-multi_op -> multi_op '/' pow_op : {op, '$2', '$1', '$3'}.
-multi_op -> multi_op '%' pow_op : {op, '$2', '$1', '$3'}.
-
-%% Exponent operator
-pow_op -> unary_expr : '$1'.
-pow_op -> pow_op '**' unary_expr : {op, '$2', '$1', '$3'}.
-
-%% Unary operators
-unary_expr -> primitive : '$1'.
-unary_expr -> '+' unary_expr : {op, '$1', '$2'}.
-unary_expr -> '-' unary_expr : {op, '$1', '$2'}.
 
 %% Simple exprs
 primitive -> identifier : '$1'.
