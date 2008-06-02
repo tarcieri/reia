@@ -1,0 +1,19 @@
+#!/usr/bin/env escript
+
+main([]) ->
+  usage();
+main(["-h"]) ->
+  usage();
+main(["--help"]) ->
+  usage();
+main([File]) ->
+  case yecc:file(File, [verbose]) of
+    {ok, _} ->
+      void;
+    error ->
+      halt(1)
+  end.
+  
+usage() ->
+  io:format("Usage: yecc file.yrl~n").
+  

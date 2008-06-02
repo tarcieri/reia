@@ -33,7 +33,7 @@ end
 
 # Compile reia_parse using yecc
 file "src/reia/reia_parse.erl" => "src/reia/reia_parse.yrl" do
-  sh "erl -eval 'yecc:file(\"src/reia/reia_parse.yrl\",[verbose])' -noshell -s init stop"
+  sh "bin/yecc src/reia/reia_parse.yrl"
 end
 
 # Create the ebin directory if it doesn't exist
