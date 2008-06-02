@@ -5,6 +5,19 @@
 %% Functions which don't take a block
 %%
 
+%% List#[]
+%%   Retrieve an element in the list
+funcall({list, {Elements, Order}}, '[]', [Index]) ->
+  List = case Order of
+    normal -> Elements;
+    reverse -> lists:reverse(Elements)
+  end,
+  try 
+    lists:nth(Index + 1, List)
+  catch
+    error:function_clause -> nil
+  end;
+
 %% List#reverse
 %%   Reverse the order of a list
 funcall({list, {Elements, Order}}, reverse, []) ->
