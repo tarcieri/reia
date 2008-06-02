@@ -9,7 +9,7 @@ funcall(Receiver, Method, Arguments) when is_atom(Receiver) ->
 funcall(Receiver = {list, _}, Method, Arguments) ->
   reia_list:funcall(Receiver, Method, Arguments);
 funcall(Receiver = {tuple, _}, Method, Arguments) ->
-  reia_tuple:funcall(Receiver, Method, silly_list_hack(Arguments));
+  reia_tuple:funcall(Receiver, Method, Arguments);
 funcall(Receiver = {dict, _}, Method, Arguments) ->
   reia_dict:funcall(Receiver, Method, Arguments);
 funcall(Receiver = {string, _}, Method, Arguments) ->
