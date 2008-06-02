@@ -1,21 +1,18 @@
 module ReiaRegexp
-  def funcall(regexp, ~to_s, [])
+  def funcall(regexp, ~to_string, [])
     [~regexp, bin] = erlang::tuple_to_list(regexp)
-    ["/", erlang::binary_to_list(bin).to_string(), "/"].join()
+    erlang::binary_to_list(bin).to_string()
+    
+  def funcall(regexp, ~to_s, [])
+    ["/", regexp.to_string(), "/"].join()
   
   def funcall(regexp, ~match, [string])
-    [~regexp, bin] = erlang::tuple_to_list(regexp)
-    pattern = erlang::binary_to_list(bin)
-
-    case regexp::match(string, pattern)
+    case regexp::match(string, regexp.to_string())
       (~match, start, len):
         lists::sublist(string, start, len).to_string()
       ~nomatch:
         nil
         
   def funcall(regexp, ~matches, [string])
-    [~regexp, bin] = erlang::tuple_to_list(regexp)
-    pattern = erlang::binary_to_list(bin)
-    
-    (~match, matches) = regexp::matches(string, pattern)
+    (~match, matches) = regexp::matches(string, regexp.to_string())
     matches.map { |(start, len)| lists::sublist(string, start, len).to_string() }
