@@ -1,37 +1,26 @@
 task :default => :build
-task :build => %w[reia ire copy_ebin]
+task :build => %w[reia copy_ebin]
 
 rule ".beam" => ".erl" do |t|
-  sh "erlc +debug_info +nowarn_unused_vars -o #{File.dirname(t.name)} #{t.source}"
+  sh "erlc +debug_info -o #{File.dirname(t.name)} #{t.source}"
 end
 
 rule ".beam" => ".ra" do |t|
   sh "bin/reiac -o #{t.name} #{t.source}"
 end
 
-task :reia => %w[
-  src/reia/reia_scan.beam 
-  src/reia/reia_parse.beam
-  src/reia/reia_compiler.beam
-  src/reia/reia_operators.beam
-  src/reia/reia_dispatch.beam
-  src/reia/reia_erl.beam
-  src/reia/reia_eval.beam
-  src/reia/reia_list.beam
-  src/reia/reia_tuple.beam
-  src/reia/reia_dict.beam
-  src/reia/reia_numeric.beam
-  src/reia/reia_atom.beam
-  src/reia/reia_string.beam
-  src/reia/reia_lambda.beam
-  src/reia/reia_regexp.beam
-  src/reia/reiac.beam
-]
+SOURCES = FileList.new('src/reia/*') do |fl|
+  fl.include %w[*.erl *.ra *.xrl *.yrl]
+end
 
-task :ire => "src/reia/ire.beam"
+BEAMS = SOURCES.sub(/\.\w+$/, '.beam')
+
+task :reia => BEAMS
 
 # Compile leex
-file "src/leex/leex.beam" => "src/leex/leex.erl"
+file "src/leex/leex.beam" => "src/leex/leex.erl" do |t|
+  sh "erlc +nowarn_unused_vars -o #{File.dirname(t.name)} src/leex/leex.erl"
+end
 
 # Compile reia_scan using leex
 file "src/reia/reia_scan.erl" => %w[src/reia/reia_scan.xrl src/leex/leex.beam] do
@@ -40,7 +29,7 @@ end
 
 # Compile reia_parse using yecc
 file "src/reia/reia_parse.erl" => "src/reia/reia_parse.yrl" do
-  sh "erl -eval 'yecc:file(\"src/reia/reia_parse.yrl\")' -noshell -s init stop"
+  sh "erl -eval 'yecc:file(\"src/reia/reia_parse.yrl\",[verbose])' -noshell -s init stop"
 end
 
 # Create the ebin directory if it doesn't exist
@@ -54,24 +43,8 @@ task "copy_ebin" => "ebin" do
 end
 
 task :clean do
-  rm_f "src/leex/leex.beam"
   rm_f "src/reia/reia_scan.erl"
-  rm_f "src/reia/reia_scan.beam"
   rm_f "src/reia/reia_parse.erl"
-  rm_f "src/reia/reia_parse.beam"
-  rm_f "src/reia/reia_compiler.beam"
-  rm_f "src/reia/reia_operators.beam"
-  rm_f "src/reia/reia_dispatch.beam"
-  rm_f "src/reia/reia_erl.beam"
-  rm_f "src/reia/reia_eval.beam"
-  rm_f "src/reia/reia_list.beam"
-  rm_f "src/reia/reia_tuple.beam"
-  rm_f "src/reia/reia_dict.beam"
-  rm_f "src/reia/reia_numeric.beam"
-  rm_f "src/reia/reia_atom.beam"
-  rm_f "src/reia/reia_string.beam"
-  rm_f "src/reia/reia_lambda.beam"
-  rm_f "src/reia/reia_regexp.beam"
-  rm_f "src/reia/reiac.beam"
-  rm_f "src/reia/ire.beam"
+  
+  BEAMS.each { |beam| rm_f beam }
 end
