@@ -21,7 +21,7 @@ read() ->
   io:get_line('>> ').
   
 eval_print(String, Binding) ->
-  case parse(String) of
+  case reia_parse:string(String) of
     {ok, Exprs} ->
       {value, Value, NewBinding} = reia_eval:exprs(Exprs, Binding),
       print(Value),
@@ -29,19 +29,6 @@ eval_print(String, Binding) ->
     {error, Error} ->
       parse_error(Error),
       Binding
-  end.
-  
-parse(String) ->
-  case reia_scan:scan(String) of
-    {ok, Tokens, _} -> 
-      case reia_parse:parse(Tokens) of
-        {ok, Exprs} ->
-          {ok, Exprs};
-        {error, {Line, _, [Message, Token]}} ->
-          {error, {Line, io_lib:format("~s~s", [Message, Token])}}
-      end;
-    {error, {Line, _, {Message, Token}}, _} ->
-      {error, {Line, io_lib:format("~p ~p", [Message, Token])}}
   end.
 
 print(Value) ->

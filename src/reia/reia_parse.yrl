@@ -213,5 +213,21 @@ lambda -> fun '(' exprs ')' do indent statements dedent : {lambda, line('$1'), '
 
 Erlang code.
 
-%% keep track of line info in tokens
+-export([string/1]).
+
+%% Easy interface for parsing a given string with nicely formatted errors
+string(String) ->
+  case reia_scan:scan(String) of
+    {ok, Tokens, _} -> 
+      case reia_parse:parse(Tokens) of
+        {ok, Exprs} ->
+          {ok, Exprs};
+        {error, {Line, _, [Message, Token]}} ->
+          {error, {Line, io_lib:format("~s~s", [Message, Token])}}
+      end;
+    {error, {Line, _, {Message, Token}}, _} ->
+      {error, {Line, io_lib:format("~p ~p", [Message, Token])}}
+  end.
+
+%% Keep track of line info in tokens
 line(Tup) -> element(2, Tup).
