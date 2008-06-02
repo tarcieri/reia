@@ -1,4 +1,4 @@
-task :default => :build
+task :default => :build 
 task :build => %w[reia copy_ebin]
 
 rule ".beam" => ".erl" do |t|
@@ -18,13 +18,17 @@ BEAMS = SOURCES.sub(/\.\w+$/, '.beam')
 task :reia => BEAMS
 
 # Compile leex
-file "src/leex/leex.beam" => "src/leex/leex.erl" do |t|
-  sh "erlc +nowarn_unused_vars -o #{File.dirname(t.name)} src/leex/leex.erl"
+file "src/leex/leex.beam" => "src/leex/leex.erl" do
+  sh "erlc +nowarn_unused_vars -o src/leex src/leex/leex.erl"
 end
 
 # Compile reia_scan using leex
 file "src/reia/reia_scan.erl" => %w[src/reia/reia_scan.xrl src/leex/leex.beam] do
   sh "erl -eval 'leex:file(\"src/reia/reia_scan.xrl\")' -pa src/leex -noshell -s init stop"
+end
+
+file "src/reia/reia_scan.beam" => "src/reia/reia_scan.erl" do
+  sh "erlc +debug_info +nowarn_unused_vars -o src/reia src/reia/reia_scan.erl"
 end
 
 # Compile reia_parse using yecc
