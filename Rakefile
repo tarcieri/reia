@@ -47,6 +47,7 @@ task "copy_ebin" => "ebin" do
 end
 
 task :clean do
+  rm_f "src/leex/leex.beam"
   rm_f "src/reia/reia_scan.erl"
   rm_f "src/reia/reia_parse.erl"
   
