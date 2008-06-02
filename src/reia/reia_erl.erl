@@ -28,7 +28,7 @@ rlist2elist([Term|Rest], Acc, Order) ->
 e2r(Term) when is_list(Term) ->
   {list, {[e2r(Element) || Element <- Term], normal}};
 e2r(Term) when is_tuple(Term) -> 
-  {tuple, list_to_tuple([e2r(Element) || Element <- Term])};
+  {tuple, list_to_tuple([e2r(Element) || Element <- tuple_to_list(Term)])};
 e2r(Term) -> Term.
 
 % Convert an Erlang term to a Reia term, converting printable strings
