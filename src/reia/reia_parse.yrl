@@ -83,8 +83,11 @@ expr -> match_expr : '$1'.
 match_expr -> comp_expr '=' match_expr : {match, line('$2'), '$1', '$3'}.
 match_expr -> comp_expr : '$1'.
 
-comp_expr -> add_expr comp_op add_expr : {op, '$2', '$1', '$3'}.
-comp_expr -> add_expr : '$1'.
+comp_expr -> range_expr comp_op range_expr : {op, '$2', '$1', '$3'}.
+comp_expr -> range_expr : '$1'.
+
+range_expr -> range_expr '..' add_expr : {range, line('$2'), '$1', '$3'}.
+range_expr -> add_expr : '$1'.
 
 add_expr -> add_expr add_op mult_expr : {op, '$2', '$1', '$3'}.
 add_expr -> mult_expr : '$1'.
@@ -93,10 +96,7 @@ mult_expr -> mult_expr mult_op pow_expr : {op, '$2', '$1', '$3'}.
 mult_expr -> pow_expr : '$1'.
 
 pow_expr -> pow_expr pow_op funcall_expr : {op, '$2', '$1', '$3'}.
-pow_expr -> range_expr : '$1'.
-
-range_expr -> range_expr '..' funcall_expr : {range, line('$2'), '$1', '$3'}.
-range_expr -> funcall_expr : '$1'.
+pow_expr -> funcall_expr : '$1'.
 
 funcall_expr -> funcall : '$1'.
 funcall_expr -> unary_expr : '$1'.
