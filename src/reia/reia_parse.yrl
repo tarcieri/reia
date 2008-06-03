@@ -12,20 +12,19 @@ Nonterminals
   match_expr
   comp_expr
   comp_op
+  range_expr
   add_expr
   add_op
   mult_expr
   mult_op
   pow_expr
   pow_op
-  index_expr
-  erl_funcall_expr
-  erl_funcall
   funcall_expr
   funcall
   unary_expr
-  unary_op
-  range_expr
+  unary_op  
+  erl_funcall_expr
+  erl_funcall
   literal_expr
   case_expr
   case_clauses
@@ -103,10 +102,8 @@ pow_expr -> pow_expr pow_op funcall_expr : {op, '$2', '$1', '$3'}.
 pow_expr -> funcall_expr : '$1'.
 
 funcall_expr -> funcall : '$1'.
-funcall_expr -> index_expr : '$1'.
-
-index_expr -> funcall_expr '[' expr ']' : {funcall, line('$2'), '$1', {identifier, line('$2'), '[]'}, ['$3']}.
-index_expr -> unary_expr : '$1'.
+funcall_expr -> funcall_expr '[' expr ']' : {funcall, line('$2'), '$1', {identifier, line('$2'), '[]'}, ['$3']}.
+funcall_expr -> unary_expr : '$1'.
 
 unary_expr -> unary_op unary_expr : {op, '$1', '$2'}.
 unary_expr -> erl_funcall_expr : '$1'.
