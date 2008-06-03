@@ -99,14 +99,14 @@ add_expr -> mult_expr : '$1'.
 mult_expr -> mult_expr mult_op pow_expr : {op, '$2', '$1', '$3'}.
 mult_expr -> pow_expr : '$1'.
 
-pow_expr -> pow_expr pow_op index_expr : {op, '$2', '$1', '$3'}.
-pow_expr -> index_expr : '$1'.
-
-index_expr -> index_expr '[' expr ']' : {funcall, line('$2'), '$1', {identifier, line('$2'), '[]'}, ['$3']}.
-index_expr -> funcall_expr : '$1'.
+pow_expr -> pow_expr pow_op funcall_expr : {op, '$2', '$1', '$3'}.
+pow_expr -> funcall_expr : '$1'.
 
 funcall_expr -> funcall : '$1'.
-funcall_expr -> unary_expr : '$1'.
+funcall_expr -> index_expr : '$1'.
+
+index_expr -> funcall_expr '[' expr ']' : {funcall, line('$2'), '$1', {identifier, line('$2'), '[]'}, ['$3']}.
+index_expr -> unary_expr : '$1'.
 
 unary_expr -> unary_op unary_expr : {op, '$1', '$2'}.
 unary_expr -> erl_funcall_expr : '$1'.
