@@ -1,8 +1,8 @@
 task :default => :build 
-task :build => %w[smart_exceptions reia copy_ebin]
+task :build => %w[reia copy_ebin]
 
 rule ".beam" => ".erl" do |t|
-  sh "erlc +debug_info -o #{File.dirname(t.name)} #{t.source}"
+  sh "bin/erlc -o #{File.dirname(t.name)} #{t.source}"
 end
 
 rule ".beam" => ".ra" do |t|
@@ -26,7 +26,7 @@ end
 
 BEAMS = SOURCES.sub(/\.\w+$/, '.beam')
 
-task :reia => BEAMS
+task :reia => [:smart_exceptions] + BEAMS
 
 # Compile leex
 file "src/leex/leex.beam" => "src/leex/leex.erl" do

@@ -28,4 +28,11 @@ file(Filename, Outfile) ->
   
 forms(Forms) ->
   ErlForms = reia_compiler:compile(Forms),
-  compile:forms(ErlForms, [debug_info, export_all, verbose, report_errors, report_warnings]).
+  compile:forms(ErlForms, [
+    debug_info, 
+    export_all, 
+    verbose, 
+    report_errors, 
+    report_warnings, 
+    {parse_transform, smart_exceptions}
+  ]).
