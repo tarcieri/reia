@@ -158,10 +158,6 @@ pow_op -> '**' : '$1'.
 unary_op -> '+' : '$1'.
 unary_op -> '-' : '$1'.
 
-%% Erlang function calls
-erl_funcall -> identifier '::' identifier '(' ')' : {erl_funcall, line('$2'), '$1', '$3', []}.
-erl_funcall -> identifier '::' identifier '(' exprs ')' : {erl_funcall, line('$2'), '$1', '$3', '$5'}.
-
 %% Function calls
 funcall -> funcall_expr '.' identifier '(' ')' : {funcall, line('$2'), '$1', '$3', []}.
 funcall -> funcall_expr '.' identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3', '$5'}.
@@ -181,6 +177,10 @@ funcall -> funcall_expr '.' identifier '(' ')' do eol indent statements dedent :
 funcall -> funcall_expr '.' identifier '(' ')' do '|' exprs '|' eol indent statements dedent : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), '$8', '$12'}}.
 funcall -> funcall_expr '.' identifier '(' exprs ')' do eol indent statements dedent : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), [], '$10'}}.
 funcall -> funcall_expr '.' identifier '(' exprs ')' do '|' exprs '|' eol indent statements dedent : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), [], '$10'}}.
+
+%% Erlang function calls
+erl_funcall -> identifier '::' identifier '(' ')' : {erl_funcall, line('$2'), '$1', '$3', []}.
+erl_funcall -> identifier '::' identifier '(' exprs ')' : {erl_funcall, line('$2'), '$1', '$3', '$5'}.
 
 %% Numbers
 number -> float : '$1'.
