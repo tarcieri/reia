@@ -34,6 +34,7 @@ Nonterminals
   tuple
   dict
   dict_entries
+  binary
   lambda
   .
   
@@ -41,7 +42,7 @@ Terminals
   true false nil
   float integer string regexp atom identifier constant module
   eol indent dedent def fun do 'case'
-  '(' ')' '[' ']' '{' '}' '|' % '<<' '>>'
+  '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**'
   '.' '..' ',' ':' '::' ';'
   '=' '==' '!=' '>' '<' '<=' '>='
@@ -121,6 +122,7 @@ literal_expr -> regexp     : '$1'.
 literal_expr -> list       : '$1'.
 literal_expr -> tuple      : '$1'.
 literal_expr -> dict       : '$1'.
+literal_expr -> binary     : '$1'.
 literal_expr -> atom       : '$1'.
 literal_expr -> lambda     : '$1'.
 literal_expr -> case_expr  : '$1'.
@@ -201,6 +203,9 @@ dict -> '{' dict_entries '}' : {dict, line('$1'), '$2'}.
 
 dict_entries -> comp_expr ':' expr : [{'$1','$3'}].
 dict_entries -> comp_expr ':' expr ',' dict_entries : [{'$1','$3'}|'$5'].
+
+%% Binaries
+binary -> '<<' string '>>' : {binary, line('$1'), '$2'}.
 
 %% Lambdas
 lambda -> fun '(' ')' '{' inline_statements '}' : {lambda, line('$1'), [], '$5'}.

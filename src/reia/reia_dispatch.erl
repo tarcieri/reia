@@ -6,6 +6,8 @@ funcall(Receiver, Method, Arguments) when is_integer(Receiver) or is_float(Recei
   reia_numeric:funcall(Receiver, Method, Arguments);
 funcall(Receiver, Method, Arguments) when is_atom(Receiver) ->
   reia_atom:funcall(Receiver, Method, Arguments);
+funcall(Receiver, Method, Arguments) when is_binary(Receiver) ->
+  reia_binary:funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver = {list, _}, Method, Arguments) ->
   reia_list:funcall(Receiver, Method, Arguments);
 funcall(Receiver = {tuple, _}, Method, Arguments) ->

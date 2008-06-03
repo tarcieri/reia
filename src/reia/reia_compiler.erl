@@ -94,6 +94,10 @@ ast({dict, Line, Elements}) ->
     }
   ]};
   
+%% Binaries
+ast({binary, Line, String = {string, _, _}}) ->
+  {bin, Line, [{bin_element, Line, String, default, default}]};
+  
 %% Lambdas
 ast({lambda, Line, Args, Statements}) ->
   {tuple, Line, [
