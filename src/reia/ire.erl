@@ -40,8 +40,8 @@ eval_print(String, Binding) ->
   end.
 
 print(Value) ->
-  String = reia_dispatch:funcall(Value, to_s, []),
-  io:format("~s~n", [reia_erl:r2e(String)]).
+  {string, String} = reia_dispatch:funcall(Value, to_s, []),
+  io:format("~s~n", [binary_to_list(String)]).
   
 parse_error({Line, Error}) ->
   io:format("Error: Line ~w: ~s~n", [Line, Error]).

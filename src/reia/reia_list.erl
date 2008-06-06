@@ -73,9 +73,9 @@ funcall({list, {List, Order}}, to_string, []) ->
 %% List#join
 %%   Join all elements of a list together with the given separator
 funcall(List = {list, _}, join, []) ->
-  funcall(List, join, [""]);
-funcall({list, {List, Order}}, join, [Sep]) ->
-  funcall(reia_erl:e2r(join(List, reia_erl:r2e(Sep), Order)), to_string, []);
+  funcall(List, join, [{string, <<"">>}]);
+funcall({list, {List, Order}}, join, [{string, Sep}]) ->
+  funcall(reia_erl:e2r(join(List, binary_to_list(Sep), Order)), to_string, []);
   
 %% List#to_s
 %%   Generate a string representing a list
@@ -99,12 +99,14 @@ join(Elements, Sep, Order) ->
 join([], _, Acc, normal) ->  lists:concat(lists:reverse(Acc));
 join([], _, Acc, reverse) ->  lists:concat(Acc);
 join([Term|Rest], Sep, Acc, Order) ->
-  String = case Term of
-    {string, Bin} ->
-      binary_to_list(Bin);
+  Bin = case Term of
+    {string, X} ->
+      X;
     _ ->
-      reia_erl:r2e(reia_dispatch:funcall(Term, to_s, []))
+      {string, X} = reia_dispatch:funcall(Term, to_s, []),
+      X
   end,
+  String = binary_to_list(Bin),
   NewAcc = if 
     Rest == [] -> [String|Acc];
     true       -> [Sep, String|Acc]

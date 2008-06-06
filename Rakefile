@@ -47,6 +47,10 @@ file "src/reia/reia_parse.erl" => "src/reia/reia_parse.yrl" do
   sh "bin/yecc src/reia/reia_parse.yrl"
 end
 
+file "src/reia/reia_parse.beam" => "src/reia/reia_parse.erl" do
+  sh "erlc +debug_info -o src/reia src/reia/reia_parse.erl"
+end
+
 # Create the ebin directory if it doesn't exist
 directory "ebin"
 
