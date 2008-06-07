@@ -12,7 +12,7 @@ funcall(Receiver, to_internal, []) ->
 
 %% Funcalls that don't take blocks
 funcall(Receiver, Method, Arguments) when is_integer(Receiver) or is_float(Receiver) ->
-  reia_numeric:funcall(Receiver, Method, Arguments);
+  reia_numeric:funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver, Method, Arguments) when is_atom(Receiver) ->
   reia_atom:funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver, Method, Arguments) when is_binary(Receiver) ->
