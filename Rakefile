@@ -5,7 +5,7 @@ rule ".beam" => ".erl" do |t|
   sh "bin/erlc -o #{File.dirname(t.name)} #{t.source}"
 end
 
-rule ".beam" => ".ra" do |t|
+rule ".beam" => ".re" do |t|
   sh "bin/reiac -o #{t.name} #{t.source}"
 end
 
@@ -21,7 +21,7 @@ SMEX_BEAM.each do |beam|
 end
 
 SOURCES = FileList.new('src/reia/*') do |fl|
-  fl.include %w[*.erl *.ra *.xrl *.yrl]
+  fl.include %w[*.erl *.re *.xrl *.yrl]
 end
 
 BEAMS = SOURCES.sub(/\.\w+$/, '.beam')
