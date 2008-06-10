@@ -1,15 +1,13 @@
 module ReiaNumeric
   def pow(base, exponent)
-    case erlang::is_integer(base)
-      true:
-        erlang::round(math::pow(base, exponent))
-      false:
-        math::pow(base, exponent)
+    if erlang::is_integer(base)
+      erlang::round(math::pow(base, exponent))
+    else
+      math::pow(base, exponent)
         
   def funcall(number, ~to_s, [])
-    case erlang::is_integer(number)
-      true:
-        erlang::integer_to_list(number).to_string()
-      false:
-        [list] = io_lib::format("~f".to_list(), [number])
-        list.to_string()
+    if erlang::is_integer(number)
+      erlang::integer_to_list(number).to_string() 
+    else
+      [list] = io_lib::format("~f".to_list(), [number])
+      list.to_string()
