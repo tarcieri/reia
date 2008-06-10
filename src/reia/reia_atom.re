@@ -13,5 +13,5 @@ module ReiaAtom
     case /^[A-Za-z0-9_]+$/.match(atom)
       nil:
         ["~'", atom, "'"].join()
-      string:
+      _:
         ["~", atom].join()

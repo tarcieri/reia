@@ -32,7 +32,7 @@ Rules.
 
 %% Identifiers and constants
 {UpperCase}({UpperCase}|{Digit}|{LowerCase}|_)* : build_constant(TokenChars, TokenLine).
-{LowerCase}({UpperCase}|{Digit}|{LowerCase}|_)* : build_identifier(TokenChars, TokenLine).
+({LowerCase}|_)({UpperCase}|{Digit}|{LowerCase}|_)* : build_identifier(TokenChars, TokenLine).
 
 %% Ignored
 {Comment} : skip_token.

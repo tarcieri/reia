@@ -1,3 +1,3 @@
 module ReiaLambda
-  def funcall(lambda, ~to_s, [])
+  def funcall(_lambda, ~to_s, [])
     "#Fun"
