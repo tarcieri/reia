@@ -79,6 +79,7 @@ functions -> function : ['$1'].
 functions -> function functions : ['$1'|'$2'].
 
 function -> def identifier eol indent statements dedent : {function, line('$1'), '$2', [], '$5'}.
+function -> def identifier '(' ')' eol indent statements dedent : {function, line('$1'), '$2', [], '$7'}.
 function -> def identifier '(' exprs ')' eol indent statements dedent : {function, line('$1'), '$2', '$4', '$8'}.
 
 %% Expressions
