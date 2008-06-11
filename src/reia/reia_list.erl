@@ -5,6 +5,10 @@
 %% Functions which don't take a block
 %%
 
+%% Shim to translate Erlang lists into Reia ones
+funcall(List, Method, Arguments) when is_list(List) ->
+  funcall({list, {List, normal}}, Method, Arguments);
+
 %% List#[]
 %%   Retrieve an element in the list
 funcall({list, {Elements, Order}}, '[]', [Index]) ->
