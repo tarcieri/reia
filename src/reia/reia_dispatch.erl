@@ -1,6 +1,14 @@
 -module(reia_dispatch).
 -export([funcall/3, funcall/4]).
 
+%%
+%% Funcalls that don't take blocks
+%%
+
+%% Shim to translate Erlang lists into Reia ones
+funcall(List, Method, Arguments) when is_list(List) ->
+  reia_list:funcall({list, {List, normal}}, Method, Arguments);
+
 %% Convert a Reia term to its internal representation
 funcall(Receiver, to_internal, []) ->
   case Receiver of
@@ -10,7 +18,6 @@ funcall(Receiver, to_internal, []) ->
       reia_erl:e2r(Receiver)
   end;
 
-%% Funcalls that don't take blocks
 funcall(Receiver, Method, Arguments) when is_integer(Receiver) or is_float(Receiver) ->
   reia_numeric:funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver, Method, Arguments) when is_atom(Receiver) ->
@@ -32,7 +39,14 @@ funcall(Receiver = {regexp, _}, Method, Arguments) ->
 funcall(_, _, _) ->
   throw(unknown_receiver).
   
+%%  
 %% Funcalls that take blocks
+%%
+
+%% Shim to translate Erlang lists into Reia ones
+funcall(List, Method, Arguments, Block) when is_list(List) ->
+  reia_list:funcall({list, {List, normal}}, Method, Arguments, Block);
+  
 funcall(Receiver = {list, _}, Method, Arguments, Block) ->
   reia_list:funcall(Receiver, Method, Arguments, Block).
   

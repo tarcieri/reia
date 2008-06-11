@@ -25,7 +25,7 @@ read(Prompt) ->
 eval_print(String, Binding) ->
   case reia_parse:string(String) of
     {ok, Exprs} ->
-      {value, Value, NewBinding} = reia_eval:exprs(Exprs, Binding),
+      {value, Value, NewBinding} = reia_erl:r2e(reia_eval:exprs(Exprs, Binding)),
       print(Value),
       NewBinding;
       
