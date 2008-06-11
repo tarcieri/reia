@@ -1,0 +1,3 @@
+#!/bin/sh
+
+erl -pa ebin -pa ../ebin -noshell +K true -s reia start $* -s init stop 
