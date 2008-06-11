@@ -44,7 +44,7 @@ Nonterminals
 Terminals
   true false nil
   float integer string regexp atom identifier constant module
-  eol indent dedent def fun do 'case' else 'if' unless
+  eol indent dedent def fun do 'case' else 'if' unless 'not'
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**'
   '.' '..' ',' ':' '::' ';'
@@ -173,8 +173,9 @@ mult_op -> '%' : '$1'.
 pow_op -> '**' : '$1'.
 
 %% Unary operators
-unary_op -> '+' : '$1'.
-unary_op -> '-' : '$1'.
+unary_op -> '+'   : '$1'.
+unary_op -> '-'   : '$1'.
+unary_op -> 'not' : '$1'.
 
 %% Function calls
 funcall -> funcall_expr '.' identifier '(' ')' : {funcall, line('$2'), '$1', '$3', []}.
