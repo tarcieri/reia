@@ -7,9 +7,14 @@ module ReiaTuple
   # Tuple#[]
   #   Retrieve an element from a Tuple
   def funcall(tuple, ~'[]', [index])
-    tuple.to_list()[index]
+    erlang::element(index - 1, tuple)
   
   # Tuple#to_s
   #   Generate a string representation of a Tuple  
   def funcall(tuple, ~to_s, [])
     ["(", tuple.to_list().join(","), ")"].join()
+    
+  # Tuple#size
+  #   Return the number of elements in a Tuple
+  def funcall(tuple, ~size, [])
+    erlang::tuple_size(tuple)
