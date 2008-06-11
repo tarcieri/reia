@@ -31,6 +31,7 @@ Nonterminals
   case_clause
   else_clause
   if_expr
+  if_op
   number
   list
   tuple
@@ -43,7 +44,7 @@ Nonterminals
 Terminals
   true false nil
   float integer string regexp atom identifier constant module
-  eol indent dedent def fun do 'case' else 'if'
+  eol indent dedent def fun do 'case' else 'if' unless
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**'
   '.' '..' ',' ':' '::' ';'
@@ -144,8 +145,11 @@ else_clause -> else inline_statements eol : {else_clause, line('$1'), '$2'}.
 else_clause -> else eol indent statements dedent : {else_clause, line('$1'), '$4'}.
 
 %% If expressions
-if_expr -> 'if' expr eol indent statements dedent : {'if', line('$1'), '$2', '$5'}.
-if_expr -> 'if' expr eol indent statements dedent else_clause : {'if', line('$1'), '$2', '$5', '$7'}.
+if_expr -> if_op expr eol indent statements dedent : {'$1', line('$3'), '$2', '$5'}.
+if_expr -> if_op expr eol indent statements dedent else_clause : {'$1', line('$3'), '$2', '$5', '$7'}.
+
+if_op -> 'if'   : '$1'.
+if_op -> unless : '$1'.
 
 %% Comparison operators
 comp_op -> '==' : '$1'.

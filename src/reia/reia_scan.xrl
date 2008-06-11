@@ -188,4 +188,5 @@ reserved_word('do')     -> true;
 reserved_word('case')   -> true;
 reserved_word('else')   -> true;
 reserved_word('if')     -> true;
+reserved_word('unless') -> true;
 reserved_word(_)        -> false.

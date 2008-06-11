@@ -168,7 +168,13 @@ forms({'if', Line, Expression, Statements}) ->
 forms({'if', Line, Expression, Statements, ElseClause}) ->
   {'case', Line, forms(Expression), 
     [{clause, Line, [{atom, Line, true}], [], [forms(Statement) || Statement <- Statements]}] ++ [forms(ElseClause)]
-  }.
+  };
+  
+forms({unless, Line, Expression, Statements}) ->
+  forms({'if', Line, {op, {'not', Line}, Expression}, Statements});
+
+forms({unless, Line, Expression, Statements, ElseClause}) ->
+  forms({'if', Line, {op, {'not', Line}, Expression}, Statements, ElseClause}).
   
 %% Generate a module name from a module declaration
 constant_to_module_name(Constant) ->

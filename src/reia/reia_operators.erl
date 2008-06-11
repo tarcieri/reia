@@ -3,6 +3,10 @@
 
 %% Unary operators
 forms('-' = Op, Line, Ast) ->
+  {op, Line, Op, Ast};
+forms('+' = Op, Line, Ast) ->
+  {op, Line, Op, Ast};
+forms('not' = Op, Line, Ast) ->
   {op, Line, Op, Ast}.
 
 %% Exponentation
