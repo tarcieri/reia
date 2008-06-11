@@ -145,8 +145,8 @@ else_clause -> else inline_statements eol : {else_clause, line('$1'), '$2'}.
 else_clause -> else eol indent statements dedent : {else_clause, line('$1'), '$4'}.
 
 %% If expressions
-if_expr -> if_op expr eol indent statements dedent : {'$1', line('$3'), '$2', '$5'}.
-if_expr -> if_op expr eol indent statements dedent else_clause : {'$1', line('$3'), '$2', '$5', '$7'}.
+if_expr -> if_op expr eol indent statements dedent : {'$1', '$2', '$5'}.
+if_expr -> if_op expr eol indent statements dedent else_clause : {'$1', '$2', '$5', '$7'}.
 
 if_op -> 'if'   : '$1'.
 if_op -> unless : '$1'.
