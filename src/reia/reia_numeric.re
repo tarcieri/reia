@@ -1,9 +1,10 @@
 module ReiaNumeric
   def pow(base, exponent)
+    result = math::pow(base, exponent)
     if erlang::is_integer(base)
-      erlang::round(math::pow(base, exponent))
+      erlang::round(result)
     else
-      math::pow(base, exponent)
+      result
         
   def funcall(number, ~to_s, [])
     if erlang::is_integer(number)
