@@ -3,6 +3,15 @@
 Welcome to Reia (pronounced RAY-uh), a Ruby/Python-like scripting language for
 the Erlang virtual machine (BEAM).
 
+== Installation
+
+Reia cannot presently be installed in the traditional sense.  Instead, 
+programs must presently be executed from the toplevel directory of the Reia
+distribution.
+
+Reia also depends on a working Erlang installation, and requires a minimum 
+Erlang version of R12B.
+
 == Usage
 
 Reia provides three ways to execute programs:
