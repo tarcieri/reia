@@ -31,6 +31,7 @@ Nonterminals
   case_clause
   else_clause
   if_expr
+  inline_if_expr
   if_op
   number
   list
@@ -86,7 +87,10 @@ function -> def identifier '(' exprs ')' eol indent statements dedent : {functio
 exprs -> expr : ['$1'].
 exprs -> expr ',' exprs : ['$1'|'$3'].
 
-expr -> match_expr : '$1'.
+expr -> inline_if_expr : '$1'.
+
+inline_if_expr -> match_expr if_op match_expr : if_forms({'$2', '$3', '$1'}).
+inline_if_expr -> match_expr : '$1'.
 
 match_expr -> comp_expr '=' match_expr : {match, line('$2'), '$1', '$3'}.
 match_expr -> comp_expr : '$1'.
@@ -146,8 +150,8 @@ else_clause -> else inline_statements eol : {else_clause, line('$1'), '$2'}.
 else_clause -> else eol indent statements dedent : {else_clause, line('$1'), '$4'}.
 
 %% If expressions
-if_expr -> if_op expr eol indent statements dedent : {'$1', '$2', '$5'}.
-if_expr -> if_op expr eol indent statements dedent else_clause : {'$1', '$2', '$5', '$7'}.
+if_expr -> if_op expr eol indent statements dedent : if_forms({'$1', '$2', '$5'}).
+if_expr -> if_op expr eol indent statements dedent else_clause : if_forms({'$1', '$2', '$5', '$7'}).
 
 if_op -> 'if'   : '$1'.
 if_op -> unless : '$1'.
@@ -250,3 +254,13 @@ string(String) ->
 
 %% Keep track of line info in tokens
 line(Tup) -> element(2, Tup).
+
+%% Generate proper forms for if statements
+if_forms({{'if', Line}, Expression, Statements}) ->
+  {'if', Line, Expression, Statements};
+if_forms({{'if', Line}, Expression, Statements, ElseClause}) ->
+  {'if', Line, Expression, Statements, ElseClause};
+if_forms({{'unless', Line}, Expression, Statements}) ->
+  {'if', Line, Expression, {nil, Line}, {else_clause, Line, Statements}};
+if_forms({{'unless', Line}, Expression, Statements, {else_clause, _, ElseStatements}}) ->
+  {'if', Line, Expression, ElseStatements, {else_clause, Line, Statements}}.
