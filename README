@@ -1,0 +1,28 @@
+= Reia
+
+Welcome to Reia (pronounced RAY-uh), a Ruby/Python-like scripting language for
+the Erlang virtual machine (BEAM).
+
+== Usage
+
+Reia provides three ways to execute programs:
+
+* The Reia interpreter, located in bin/reia.  This runs Reia programs from the
+  command line without needing to compile them first.
+  
+* The interactive Reia interpreter, located in bin/ire.  This provides an
+  interactive environment (a read-eval-print loop) for running Reia programs,
+  or just exploring the language.
+  
+* The Reia compiler, located in bin/reiac.  This compiles Reia to .beam files
+  which may be used in conjunction with Erlang code.  The main use of the Reia
+  compiler is for compiling the self-hosted parts of Reia itself.  Programs
+  compiled with it are more limited than ones run with the standard Reia
+  interpreter.
+
+== Programming Reia
+
+Reia is under active development and therefore changing constantly.  For the
+most up-to-date information on how to program in Reia, consult the Wiki:
+
+http://wiki.reia-lang.org/
