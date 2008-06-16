@@ -242,10 +242,10 @@ string(String) ->
         {ok, Exprs} ->
           {ok, Exprs};
         {error, {Line, _, [Message, Token]}} ->
-          {error, {Line, io_lib:format("~s~s", [Message, Token])}}
+          {error, {Line, lists:flatten(io_lib:format("~s~s", [Message, Token]))}}
       end;
     {error, {Line, _, {Message, Token}}, _} ->
-      {error, {Line, io_lib:format("~p ~p", [Message, Token])}}
+      {error, {Line, lists:flatten(io_lib:format("~p ~p", [Message, Token]))}}
   end.
 
 %% Keep track of line info in tokens
