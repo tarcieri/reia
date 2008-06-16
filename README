@@ -10,7 +10,9 @@ programs must presently be executed from the toplevel directory of the Reia
 distribution.
 
 Reia also depends on a working Erlang installation, and requires a minimum 
-Erlang version of R12B.
+Erlang version of R12B.  The latest version of Erlang is available here:
+
+http://www.erlang.org/download.html
 
 == Usage
 
