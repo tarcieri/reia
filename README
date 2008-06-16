@@ -19,6 +19,28 @@ Reia provides three ways to execute programs:
   compiler is for compiling the self-hosted parts of Reia itself.  Programs
   compiled with it are more limited than ones run with the standard Reia
   interpreter.
+  
+== Compiling Reia
+
+Compiling Reia yourself is typically unnecessary since it already comes 
+compiled.  However, if you are interested in helping to develop Reia, you 
+should be aware of the following caveats.
+
+Reia is partly self-hosted.  This means that if you wish to compile Reia, you
+must have a working copy of Reia available.  Reia ships with known-working 
+.beam files of all the Reia core modules under the ebin/ directory.  These
+must be available in order for the compiler to work.
+
+To compile Reia, you will need the "rake" tool.  Instructions for installing
+Rake are available at:
+
+http://rake.rubyforge.org/
+
+Once you've installed rake, type:
+
+rake
+
+under the Reia source tree to build Reia.
 
 == Programming Reia
 
