@@ -165,9 +165,14 @@ forms({else_clause, Line, Statements}) ->
 forms({'if', Line, Expression, Statements}) ->
   forms({'if', Line, Expression, Statements, {else_clause, Line, [{atom, Line, nil}]}});
 
-forms({'if', Line, Expression, Statements, ElseClause}) ->
-  {'case', Line, forms(Expression), 
-    [{clause, Line, [{atom, Line, true}], [], [forms(Statement) || Statement <- Statements]}] ++ [forms(ElseClause)]
+forms({'if', Line, Expression, Statements, {else_clause, ElseLine, ElseStatements}}) ->
+  ElseForms = [forms(Statement) || Statement <- ElseStatements],
+  {'case', Line, forms(Expression),
+    [
+      {clause, ElseLine, [{atom, Line, false}], [], ElseForms},
+      {clause, ElseLine, [{atom, Line, nil}],   [], ElseForms},
+      {clause, Line, [{var, Line, '_'}], [], [forms(Statement) || Statement <- Statements]}
+    ]
   }.
     
 %% Generate a module name from a module declaration
