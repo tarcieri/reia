@@ -89,7 +89,7 @@ exprs -> expr ',' exprs : ['$1'|'$3'].
 
 expr -> inline_if_expr : '$1'.
 
-inline_if_expr -> match_expr if_op match_expr : if_forms({'$2', '$3', '$1'}).
+inline_if_expr -> match_expr if_op match_expr : if_forms({'$2', '$3', ['$1']}).
 inline_if_expr -> match_expr : '$1'.
 
 match_expr -> comp_expr '=' match_expr : {match, line('$2'), '$1', '$3'}.
@@ -261,6 +261,6 @@ if_forms({{'if', Line}, Expression, Statements}) ->
 if_forms({{'if', Line}, Expression, Statements, ElseClause}) ->
   {'if', Line, Expression, Statements, ElseClause};
 if_forms({{'unless', Line}, Expression, Statements}) ->
-  {'if', Line, Expression, {nil, Line}, {else_clause, Line, Statements}};
+  {'if', Line, Expression, [{nil, Line}], {else_clause, Line, Statements}};
 if_forms({{'unless', Line}, Expression, Statements, {else_clause, _, ElseStatements}}) ->
   {'if', Line, Expression, ElseStatements, {else_clause, Line, Statements}}.
