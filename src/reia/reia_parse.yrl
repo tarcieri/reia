@@ -184,6 +184,8 @@ unary_op -> 'not' : '$1'.
 %% Function calls
 funcall -> funcall_expr '.' identifier '(' ')' : {funcall, line('$2'), '$1', '$3', []}.
 funcall -> funcall_expr '.' identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3', '$5'}.
+funcall -> identifier '(' ')' : {funcall, line('$2'), '$1', []}.
+funcall -> identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3'}.
 
 %% Function calls with inline blocks
 funcall -> funcall_expr '.' identifier '{' inline_statements '}' : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), [], '$5'}}.
