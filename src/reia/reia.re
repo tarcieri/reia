@@ -1,9 +1,11 @@
 module Reia
   def start
-    reia::read_input([])
+    read_input([])
     
-  def start(_args)
-    reia::read_input([])
+  def start(args)
+    (~ok, input) = file::read_file(args[0])
+    reia_eval::string(input.to_string())
+    erlang::halt(0)
 
   def read_input(data)
     case io::get_line(~'')
@@ -12,4 +14,4 @@ module Reia
         reia_eval::string(input)
         erlang::halt(0)
       string:
-        reia::read_input(data.push(string))
+        read_input(data.push(string))
