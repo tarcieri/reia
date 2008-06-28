@@ -53,6 +53,15 @@ rake
 
 under the Reia source tree to build Reia.
 
+== Implementation
+
+Here's some thoroughly interesting implementation trivia about Reia:
+
+* Leex-based scanner (with second pass for indentation sensitivity)
+* Yecc-based grammar
+* Compiler transforms Reia abstract forms to Erlang abstract forms or BEAM bytecode
+* Mostly self-hosted: ~3/4 of Reia modules are written in Reia
+
 == Programming Reia
 
 Reia is under active development and therefore changing constantly.  For the
