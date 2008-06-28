@@ -22,6 +22,14 @@ read() ->
 read(Prompt) ->
   io:get_line(Prompt).
   
+read_until_blank(Input, Prompt) ->
+  case read(Prompt) of
+    "\n" ->
+      lists:flatten(lists:reverse(Input));
+    Line ->
+      read_until_blank([Line|Input], Prompt)
+  end.
+  
 eval_print(String, Binding) ->
   case reia_parse:string(String) of
     {ok, Exprs} ->
@@ -30,9 +38,8 @@ eval_print(String, Binding) ->
       NewBinding;
       
     %% Need more tokens
-    {error, {999999, _}} ->
-      NextLine = read('.. '),
-      eval_print(lists:concat([String, NextLine]), Binding);
+    {error, {999999, _}} ->      
+      eval_print(read_until_blank([String], '.. '), Binding);
       
     {error, Error} ->
       parse_error(Error),
