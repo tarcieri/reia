@@ -11,14 +11,14 @@ funcall({string, String}, to_s, []) ->
 funcall({string, String}, to_list, []) ->
   reia_erl:e2r(binary_to_list(String));
   
-%% String#to_upper
+%% String#downcase
 %%   Capitalize all letters string
-funcall({string, String}, to_upper, []) ->
+funcall({string, String}, downcase, []) ->
   NewString = string:to_upper(binary_to_list(String)),
   reia_list:funcall(reia_erl:e2r(NewString), to_string, []);
   
-%% String#to_lower
+%% String#upcase
 %%   Remove capitalization from a string
-funcall({string, String}, to_lower, []) ->
+funcall({string, String}, upcase, []) ->
   NewString = string:to_lower(binary_to_list(String)),
   reia_list:funcall(reia_erl:e2r(NewString), to_string, []).
