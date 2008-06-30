@@ -25,7 +25,7 @@ Nonterminals
   unary_op  
   erl_funcall_expr
   erl_funcall
-  literal_expr
+  max_expr
   case_expr
   case_clauses
   case_clause
@@ -33,6 +33,9 @@ Nonterminals
   if_expr
   inline_if_expr
   if_op
+  try_expr
+  catch_clauses
+  catch_clause
   number
   list
   tuple
@@ -45,7 +48,7 @@ Nonterminals
 Terminals
   true false nil
   float integer string regexp atom identifier constant module
-  eol indent dedent def fun do 'case' else 'if' unless 'not'
+  eol indent dedent def fun do 'case' else 'if' unless 'not' 'try' 'catch'
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**'
   '.' '..' ',' ':' '::' ';'
@@ -118,24 +121,25 @@ unary_expr -> unary_op unary_expr : {op, '$1', '$2'}.
 unary_expr -> erl_funcall_expr : '$1'.
 
 erl_funcall_expr -> erl_funcall : '$1'.
-erl_funcall_expr -> literal_expr : '$1'.
+erl_funcall_expr -> max_expr : '$1'.
 
-literal_expr -> identifier : '$1'.
-literal_expr -> nil        : '$1'.
-literal_expr -> true       : '$1'.
-literal_expr -> false      : '$1'.
-literal_expr -> number     : '$1'.
-literal_expr -> string     : '$1'.
-literal_expr -> regexp     : '$1'.
-literal_expr -> list       : '$1'.
-literal_expr -> tuple      : '$1'.
-literal_expr -> dict       : '$1'.
-literal_expr -> binary     : '$1'.
-literal_expr -> atom       : '$1'.
-literal_expr -> lambda     : '$1'.
-literal_expr -> case_expr  : '$1'.
-literal_expr -> if_expr    : '$1'.
-literal_expr -> '(' expr ')' : '$2'.
+max_expr -> identifier : '$1'.
+max_expr -> nil        : '$1'.
+max_expr -> true       : '$1'.
+max_expr -> false      : '$1'.
+max_expr -> number     : '$1'.
+max_expr -> string     : '$1'.
+max_expr -> regexp     : '$1'.
+max_expr -> list       : '$1'.
+max_expr -> tuple      : '$1'.
+max_expr -> dict       : '$1'.
+max_expr -> binary     : '$1'.
+max_expr -> atom       : '$1'.
+max_expr -> lambda     : '$1'.
+max_expr -> case_expr  : '$1'.
+max_expr -> if_expr    : '$1'.
+max_expr -> try_expr   : '$1'.
+max_expr -> '(' expr ')' : '$2'.
 
 %% Case expressions
 case_expr -> 'case' expr eol indent case_clauses dedent : {'case', line('$1'), '$2', '$5'}.
@@ -155,6 +159,14 @@ if_expr -> if_op expr eol indent statements dedent else_clause : if_forms({'$1',
 
 if_op -> 'if'   : '$1'.
 if_op -> unless : '$1'.
+
+%% Try expressions
+try_expr -> 'try' eol indent statements dedent catch_clauses : {'try', line('$1'), '$4', '$6'}.
+
+catch_clauses -> catch_clause catch_clauses : ['$1'|'$2'].
+catch_clauses -> catch_clause : ['$1'].
+
+catch_clause -> 'catch' expr eol indent statements dedent : {'catch', line('$1'), '$2', '$5'}.
 
 %% Comparison operators
 comp_op -> '==' : '$1'.
