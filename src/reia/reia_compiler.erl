@@ -175,8 +175,24 @@ forms({'if', Line, Expression, Statements, {else_clause, ElseLine, ElseStatement
       {clause, ElseLine, [{atom, Line, nil}],   [], ElseForms},
       {clause, Line, [{var, Line, '_'}], [], [forms(Statement) || Statement <- Statements]}
     ]
+  };
+  
+%% Try statements
+forms({'try', Line, Statements, CatchClauses}) ->
+  {'try', Line, 
+    [forms(Statement) || Statement <- Statements],
+    [],
+    [forms(CatchClause) || CatchClause <- CatchClauses],
+    []
+  };
+
+forms({'catch', Line, Pattern, Statements}) ->
+  {clause, Line, 
+    [{tuple, Line, [{var, Line, '_'}, forms(Pattern), {var, Line, '_'}]}], 
+    [], 
+    [forms(Statement) || Statement <- Statements]
   }.
-    
+  
 %% Generate a module name from a module declaration
 constant_to_module_name(Constant) ->
   String = atom_to_list(Constant),
