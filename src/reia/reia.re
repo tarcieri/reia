@@ -15,5 +15,8 @@ module Reia
         read_input(data.push(string))
   
   def eval_input(input)
-    reia_eval::string(input)
-    erlang::halt(0)
+    try
+      reia_eval::string(input)
+      erlang::halt(0)
+    catch ex
+      io::format("~p~n".to_list(), [ex])
