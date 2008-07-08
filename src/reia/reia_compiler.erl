@@ -188,9 +188,17 @@ forms({'try', Line, Statements, CatchClauses}) ->
 
 forms({'catch', Line, Pattern, Statements}) ->
   {clause, Line, 
-    [{tuple, Line, [{var, Line, '_'}, forms(Pattern), {var, Line, '_'}]}], 
-    [], 
-    [forms(Statement) || Statement <- Statements]
+    [{tuple, Line, [{var, Line, 'ExceptionType'}, {var, Line, 'ExceptionReason'}, {var, Line, '_Lint'}]}], 
+    [],
+    [
+      {match, Line, forms(Pattern), {tuple, Line, [
+        {atom, Line, exception},
+        {tuple, Line, [
+          {var, Line, 'ExceptionType'},
+          {var, Line, 'ExceptionReason'}
+        ]}
+      ]}}|[forms(Statement) || Statement <- Statements]
+    ]
   }.
   
 %% Generate a module name from a module declaration
