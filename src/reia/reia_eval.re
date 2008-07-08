@@ -16,4 +16,5 @@ module ReiaEval
   def local(name, args)
     case name
       ~puts:
-        reia_kernel::puts(args[0])
+        args.each { |arg| reia_kernel::puts(arg) }
+        nil
