@@ -8,7 +8,12 @@ module ReiaEval
     
   def exprs(forms, binding)
     erl_forms = reia_compiler::compile(forms)
-    erl_eval::exprs(erl_forms, binding)
+    erl_eval::exprs(erl_forms, binding, (~value, fun(name, arguments) { local(name, arguments) }))
   
   def new_binding
     erl_eval::new_bindings()
+    
+  def local(name, args)
+    case name
+      ~puts:
+        reia_kernel::puts(args[0])
