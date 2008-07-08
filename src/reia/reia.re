@@ -19,4 +19,4 @@ module Reia
       reia_eval::string(input)
       erlang::halt(0)
     catch ex
-      io::format("~p~n".to_list(), [ex])
+      io::format("exception: ~p~n".to_list(), [ex])

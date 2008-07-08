@@ -2,7 +2,7 @@ module ReiaEval
   def string(str)
     case reia_parse::string(str.to_list())
       (~ok, forms):
-        exprs(forms, reia_eval::new_binding())
+        exprs(forms, new_binding())
       error:
         error
     
