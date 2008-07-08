@@ -117,6 +117,10 @@ join([Term|Rest], Sep, Acc, Order) ->
 %% Functions which take a block
 %%
 
+funcall(List = {list, {Elements, _Order}}, each, [], {lambda, Block}) ->
+  lists:foreach(Block, Elements),
+  List;
+
 funcall({list, {Elements, Order}}, map, [], {lambda, Block}) ->
   {list, {lists:map(Block, Elements), Order}};
   
