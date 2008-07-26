@@ -1,5 +1,5 @@
 task :default => :build 
-task :build => %w[reia copy_ebin]
+task :build => %w[reia copy_ebin test]
 
 rule ".beam" => ".erl" do |t|
   sh "bin/erlc -o #{File.dirname(t.name)} #{t.source}"
@@ -59,6 +59,10 @@ task "copy_ebin" => "ebin" do
   FileList["src/reia/*.beam"].each do |file|
     cp file, "ebin"
   end
+end
+
+task :test do
+  sh "bin/reia test/runner.re"
 end
 
 task :clean do
