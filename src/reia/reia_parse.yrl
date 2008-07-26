@@ -1,3 +1,10 @@
+%
+% reia_parse: Yecc grammar for the Reia language
+% Copyright (C)2008 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 Nonterminals
   grammar
   statements

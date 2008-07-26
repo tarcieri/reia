@@ -1,3 +1,10 @@
+%
+% reia_compiler: Compiles Reia abstract syntax to Erlang abstract forms
+% Copyright (C)2008 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(reia_compiler).
 -export([compile/1, forms/1]).
 

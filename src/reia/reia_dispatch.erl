@@ -1,3 +1,10 @@
+%
+% reia_dispatch: Dispatch logic for all Reia method invocations
+% Copyright (C)2008 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(reia_dispatch).
 -export([funcall/3, funcall/4]).
 

@@ -1,3 +1,10 @@
+%
+% reia_list: Methods for the List pseudo-class
+% Copyright (C)2008 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(reia_list).
 -export([funcall/3, funcall/4]).
 

@@ -1,3 +1,10 @@
+%
+% reia_operators: Compiles Reia operator abstract syntax to Erlang forms
+% Copyright (C)2008 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(reia_operators).
 -export([forms/3, forms/4]).
 

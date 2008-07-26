@@ -1,3 +1,10 @@
+%
+% reia_string: Methods for the String pseudo-class
+% Copyright (C)2008 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(reia_string).
 -export([funcall/3]).
 

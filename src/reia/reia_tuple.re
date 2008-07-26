@@ -1,3 +1,9 @@
+#
+# reia_tuple: Methods for the Tuple pseudo-class
+# Copyright (C)2008 Tony Arcieri
+# 
+# Redistribution is permitted under the MIT license.  See LICENSE for details.
+#
 module ReiaTuple
   # Tuple#to_list
   #   Convert a tuple to a list

@@ -1,3 +1,10 @@
+%
+% reia_erl: Functions for interfacing between Reia and Erlang
+% Copyright (C)2008 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(reia_erl).
 -export([erl_funcall/3, r2e/1, e2r/1]).
 

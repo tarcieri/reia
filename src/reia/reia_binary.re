@@ -1,3 +1,9 @@
+#
+# reia_binary: Methods for the Binary pseudo-class
+# Copyright (C)2008 Tony Arcieri
+# 
+# Redistribution is permitted under the MIT license.  See LICENSE for details.
+#
 module ReiaBinary
   def funcall(binary, ~to_list, [])
     erlang::binary_to_list(binary)

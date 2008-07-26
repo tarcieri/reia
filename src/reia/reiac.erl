@@ -1,3 +1,10 @@
+%
+% reiac: Command-line compiler for producing .beam files from .re files
+% Copyright (C)2008 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(reiac).
 -export([file/1,file/2]).
 

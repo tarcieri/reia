@@ -1,3 +1,9 @@
+#
+# reia_dict: Methods for the Dict pseudo-class
+# Copyright (C)2008 Tony Arcieri
+# 
+# Redistribution is permitted under the MIT license.  See LICENSE for details.
+#
 module ReiaDict
   # Dict#[]
   #   Retrieve an element from a Dict

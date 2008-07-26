@@ -1,3 +1,10 @@
+%
+% ire: Interactive Reia, a Read Eval Print Loop for the Reia language
+% Copyright (C)2008 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(ire).
 -export([start/0]).
 
