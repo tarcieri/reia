@@ -21,6 +21,6 @@ module ReiaKernel
   def load(path)
     case file::read_file(path)
       (~ok, data):
-        eval(data.to_string())
+        reia_eval::string(data.to_string())
       error:
         error
