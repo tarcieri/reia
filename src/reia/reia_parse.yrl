@@ -8,6 +8,7 @@
 Nonterminals
   grammar
   statements
+  statement
   statement_ending
   ending_token
   inline_statements
@@ -65,12 +66,15 @@ Terminals
 Rootsymbol grammar.
 
 grammar -> statements : '$1'.
+grammar -> statement_ending statements : '$2'.
 
 %% Program statements
-statements -> module_decl : ['$1'].
-statements -> expr : ['$1'].
-statements -> expr statement_ending : ['$1'].
-statements -> expr statement_ending statements : ['$1'|'$3'].
+statements -> statement : ['$1'].
+statements -> statement statement_ending : ['$1'].
+statements -> statement statement_ending statements : ['$1'|'$3'].
+
+statement -> module_decl : '$1'.
+statement -> expr : '$1'.
 
 %% Statement endings
 statement_ending -> ending_token : '$1'.
