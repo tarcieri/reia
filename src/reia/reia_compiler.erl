@@ -6,26 +6,42 @@
 %
 
 -module(reia_compiler).
--export([compile/1, forms/1]).
+-export([compile/1, compile/2, r2e/1, dynamic/1, static/1, forms/1]).
 
 compile(Expressions) ->
-  compile(Expressions, []).
-  
-compile([], Output) -> lists:reverse(Output);
-compile([Expression|Rest], Output) ->
+  compile(Expressions, [r2e, dynamic]).
+
+compile(Expressions, []) ->
+  Expressions;
+compile(Expressions, [Pass|Passes]) ->
+  compile(?MODULE:Pass(Expressions), Passes).
+
+%% Convert Reia forms to Erlang forms
+r2e(Expressions) ->
+  r2e(Expressions, []).
+    
+r2e([], Output) -> lists:reverse(Output);
+r2e([Expression|Rest], Output) ->
   case forms(Expression) of
     Expressions when is_list(Expressions) ->
-      compile(Rest, lists:reverse(Expressions) ++ Output);
+      r2e(Rest, lists:reverse(Expressions) ++ Output);
     NewExpression ->
-      compile(Rest, [NewExpression|Output])
+      r2e(Rest, [NewExpression|Output])
   end.
   
-%% Module declarations
-forms({module, Line, {constant, _, Constant}, Functions}) ->
+%% Dynamic evaluation (supporting multiple module declarations)
+dynamic(Expressions) ->
+  Expressions.
+  
+%% Static module declarations
+static([{module, Line, Constant, Functions}]) ->
   Name = constant_to_module_name(Constant),
   Module = {attribute, Line, module, Name},
-  NewFunctions = group_clauses([forms(Function) || Function <- Functions]),
-  [Module|NewFunctions];
+  [Module|Functions].
+
+%% Module declarations
+forms({module, Line, {constant, _, Name}, Functions}) ->
+  {module, Line, Name, group_clauses([forms(Function) || Function <- Functions])};
   
 %% Functions
 forms({function, Line, {identifier, _, Name}, Arguments, Expressions}) ->

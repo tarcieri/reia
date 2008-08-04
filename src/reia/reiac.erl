@@ -34,7 +34,7 @@ file(Filename, Outfile) ->
   end.
   
 forms(Forms) ->
-  ErlForms = reia_compiler:compile(Forms),
+  ErlForms = reia_compiler:compile(Forms, [r2e, static]),
   compile:forms(ErlForms, [
     debug_info, 
     export_all, 
