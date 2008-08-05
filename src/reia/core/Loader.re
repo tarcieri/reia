@@ -1,11 +1,11 @@
 #
-# Reia: The Reia interpreter
+# Loader: Loads the Reia interpreter
 # Copyright (C)2008 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-module Reia
+module Loader
   def start
     read_input([])
     

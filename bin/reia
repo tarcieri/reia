@@ -1,3 +1,3 @@
 #!/bin/sh
 
-erl -smp -pa ebin -pa ../ebin -noshell +K true -s 'Reia' start $* -s init stop 
+erl -smp -pa ebin -pa ../ebin -noshell +K true -s Loader start $* -s init stop 
