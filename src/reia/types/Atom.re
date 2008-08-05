@@ -1,10 +1,11 @@
 #
-# reia_atom: Methods for the Atom pseudo-class
+# Atom: Methods for the Atom pseudo-class
 # Copyright (C)2008 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
-module ReiaAtom
+
+module Atom
   def funcall(nil, ~to_s, [])
     "nil"
     
