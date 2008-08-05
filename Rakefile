@@ -9,6 +9,16 @@ rule ".beam" => ".re" do |t|
   sh "bin/reiac -o #{t.name} #{t.source}"
 end
 
+# Reia sources
+SOURCES = FileList.new('src/reia/*') do |fl|
+  fl.include %w[*.erl *.re *.xrl *.yrl]
+end
+
+BEAMS = SOURCES.sub(/\.\w+$/, '.beam')
+
+task :reia => [:smerl, :leex, :smart_exceptions] + BEAMS
+
+# Smart exceptions
 SMEX_BEAM = FileList['src/smart_exceptions/*.erl'].sub(/.erl$/, '.beam')
 
 task :smart_exceptions => SMEX_BEAM
@@ -20,15 +30,16 @@ SMEX_BEAM.each do |beam|
   end
 end
 
-SOURCES = FileList.new('src/reia/*') do |fl|
-  fl.include %w[*.erl *.re *.xrl *.yrl]
+# Compile smerl
+task :smerl => "src/smerl/smerl.beam"
+
+file "src/smerl/smerl.beam" => "src/smerl/smerl.erl" do
+  sh "erlc -W0 -o src/smerl src/smerl/smerl.erl"
 end
 
-BEAMS = SOURCES.sub(/\.\w+$/, '.beam')
-
-task :reia => [:smart_exceptions] + BEAMS
-
 # Compile leex
+task :leex => "src/leex/leex.beam"
+
 file "src/leex/leex.beam" => "src/leex/leex.erl" do
   sh "erlc -W0 -o src/leex src/leex/leex.erl"
 end
@@ -56,7 +67,7 @@ directory "ebin"
 
 # Copy all output BEAM files into the ebin directory
 task "copy_ebin" => "ebin" do
-  FileList["src/reia/*.beam"].each do |file|
+  FileList["src/{reia,smerl}/*.beam"].each do |file|
     cp file, "ebin"
   end
 end
@@ -68,6 +79,7 @@ end
 task :clean do
   FileList['src/smart_exceptions/*.beam'].each { |beam| rm_f beam }
   
+  rm_f "src/smerl/smerl.beam"
   rm_f "src/leex/leex.beam"
   rm_f "src/reia/reia_scan.erl"
   rm_f "src/reia/reia_parse.erl"
