@@ -10,8 +10,8 @@
 
 file(Filename) ->
   case filename:extension(Filename) of
-    ".ra" ->
-      file(Filename, filename:basename(Filename, ".ra") ++ ".beam");
+    ".re" ->
+      file(Filename, filename:basename(Filename, ".re") ++ ".beam");
     Ext ->
       {error, {bad_extension, Ext}}
   end.
