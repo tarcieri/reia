@@ -4,6 +4,7 @@
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
+
 module Reia
   def start
     read_input([])
@@ -26,3 +27,4 @@ module Reia
       erlang::halt(0)
     catch ex
       io::format("exception: ~p~n".to_list(), [ex])
+      io::format("stacktrace: ~p~n".to_list(), [erlang::get_stacktrace()])
