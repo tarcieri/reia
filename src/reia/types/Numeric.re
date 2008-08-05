@@ -1,10 +1,11 @@
 #
-# reia_numeric: Methods for the Numeric pseudo-class
+# Numeric: Methods for the Numeric pseudo-class
 # Copyright (C)2008 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
-module ReiaNumeric
+
+module Numeric
   def pow(base, exponent)
     result = math::pow(base, exponent)
     if erlang::is_integer(base)

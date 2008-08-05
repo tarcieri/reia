@@ -26,7 +26,7 @@ funcall(Receiver, to_internal, []) ->
   end;
 
 funcall(Receiver, Method, Arguments) when is_integer(Receiver) or is_float(Receiver) ->
-  reia_numeric:funcall(Receiver, Method, silly_list_hack(Arguments));
+  'Numeric':funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver, Method, Arguments) when is_atom(Receiver) ->
   'Atom':funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver, Method, Arguments) when is_binary(Receiver) ->
