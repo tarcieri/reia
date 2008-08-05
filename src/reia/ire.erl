@@ -40,7 +40,7 @@ read_until_blank(Input, Prompt) ->
 eval_print(String, Binding) ->
   case reia_parse:string(String) of
     {ok, Exprs} ->
-      {value, Value, NewBinding} = reia_erl:r2e('ReiaEval':exprs(Exprs, Binding)),
+      {tuple, {value, Value, NewBinding}} = 'ReiaEval':exprs(Exprs, Binding),
       print(Value),
       NewBinding;
       

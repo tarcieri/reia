@@ -21,11 +21,13 @@ funcall(Receiver, to_internal, []) ->
   case Receiver of
     {dict, _} ->
       {tuple, Receiver};
+    {regexp, _} ->
+      {tuple, Receiver};
     _ ->
       reia_erl:e2r(Receiver)
   end;
 
-funcall(Receiver = {constant, Name}, Method, Arguments) ->
+funcall({constant, Name}, Method, Arguments) ->
   apply(Name, Method, Arguments);
 funcall(Receiver, Method, Arguments) when is_integer(Receiver) or is_float(Receiver) ->
   'Numeric':funcall(Receiver, Method, silly_list_hack(Arguments));
@@ -45,8 +47,8 @@ funcall(Receiver = {lambda, _}, Method, Arguments) ->
   'Lambda':funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver = {regexp, _}, Method, Arguments) ->
   'Regex':funcall(Receiver, Method, silly_list_hack(Arguments));
-funcall(_, _, _) ->
-  throw({error, unknown_receiver}).
+funcall(Receiver, _, _) ->
+  throw({error, unknown_receiver, Receiver}).
   
 %%  
 %% Funcalls that take blocks
