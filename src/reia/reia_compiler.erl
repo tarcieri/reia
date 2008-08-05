@@ -44,10 +44,10 @@ dynamic_expression(Expression) ->
   Expression.
   
 %% Static module declarations
-static([{module, Line, Constant, Functions}]) ->
-  Name = constant_to_module_name(Constant),
-  Module = {attribute, Line, module, Name},
-  [Module|Functions].
+static([{module, Line, Name, Functions}]) ->
+  [{attribute, Line, module, Name}|Functions];
+static(_) ->
+  throw({error, "Statically compiled modules must contain one and only one module declaration"}).
 
 %% Module declarations
 forms({module, Line, {constant, _, Name}, Functions}) ->
@@ -233,14 +233,6 @@ forms({'catch', Line, Pattern, Statements}) ->
       ]}}|[forms(Statement) || Statement <- Statements]
     ]
   }.
-  
-%% Generate a module name from a module declaration
-constant_to_module_name(Constant) ->
-  String = atom_to_list(Constant),
-  {match, Matches} = regexp:matches(String, "[A-Z][a-z]+"),
-  Fragments = [string:to_lower(lists:sublist(String, Start, Length)) || {Start, Length} <- Matches],
-  [_|NewName] = lists:flatten(lists:zipwith(fun(A,B) -> [A,B] end, lists:duplicate(length(Fragments), "_"), Fragments)),
-  list_to_atom(NewName).
   
 %% Group clauses of functions with the same name and arity
 group_clauses(Functions) ->
