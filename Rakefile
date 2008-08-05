@@ -10,7 +10,7 @@ rule ".beam" => ".re" do |t|
 end
 
 # Reia sources
-SOURCES = FileList.new('src/reia/*') do |fl|
+SOURCES = FileList.new('src/reia/**/*') do |fl|
   fl.include %w[*.erl *.re *.xrl *.yrl]
 end
 
@@ -67,7 +67,7 @@ directory "ebin"
 
 # Copy all output BEAM files into the ebin directory
 task "copy_ebin" => "ebin" do
-  FileList["src/{reia,smerl}/*.beam"].each do |file|
+  FileList["src/{reia,smerl}/**/*.beam"].each do |file|
     cp file, "ebin"
   end
 end
