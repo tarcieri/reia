@@ -1,10 +1,10 @@
 #
-# reia_regexp: Methods for the Regexp pseudo-class
+# Regex: Methods for the Regexp pseudo-class
 # Copyright (C)2008 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
-module ReiaRegexp
+module Regex
   def funcall(regexp, ~to_list, [])
     (~regexp, bin) = regexp.to_internal()
     erlang::binary_to_list(bin)
