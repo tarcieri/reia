@@ -4,6 +4,7 @@
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
+
 module Regex
   def funcall(regexp, ~to_list, [])
     (~regexp, bin) = regexp.to_internal()
