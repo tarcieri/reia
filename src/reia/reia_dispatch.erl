@@ -40,7 +40,7 @@ funcall(Receiver = {dict, _}, Method, Arguments) ->
 funcall(Receiver = {string, _}, Method, Arguments) ->
   reia_string:funcall(Receiver, Method, Arguments);
 funcall(Receiver = {lambda, _}, Method, Arguments) ->
-  reia_lambda:funcall(Receiver, Method, silly_list_hack(Arguments));
+  'Lambda':funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver = {regexp, _}, Method, Arguments) ->
   reia_regexp:funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(_, _, _) ->
