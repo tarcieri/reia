@@ -18,7 +18,7 @@ forms('not' = Op, Line, Ast) ->
 
 %% Exponentation
 forms('**', Line, Ast1, Ast2) ->
-  {call, Line, {remote, Line, {atom, Line, reia_numeric},{atom, Line, pow}}, [Ast1, Ast2]};
+  {call, Line, {remote, Line, {atom, Line, reia_numeric}, {atom, Line, pow}}, [Ast1, Ast2]};
 
 %% Multiplication  
 forms('*' = Op, Line, Ast1, Ast2) ->
