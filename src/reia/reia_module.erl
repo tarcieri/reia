@@ -8,5 +8,12 @@
 -module(reia_module).
 -export([build/1]).
 
-build(Module) ->
-  io:format("w00t, module: ~p~n", [Module]).
+build({module, _Line, Name, Functions}) ->
+  {ok, Module} = lists:foldl(
+    fun(Func, Mod) -> smerl:add_func(Mod, Func) end, 
+    smerl:set_export_all(smerl:new(Name), true), 
+    Functions
+  ),
+  smerl:compile(Module);
+build(_) ->
+  {error, "invalid module"}.
