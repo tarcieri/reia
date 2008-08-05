@@ -9,7 +9,7 @@
 -export([start/0]).
 
 start() ->
-  run(reia_eval:new_binding()).
+  run('ReiaEval':new_binding()).
   
 run(Binding) ->
   case read() of
@@ -40,7 +40,7 @@ read_until_blank(Input, Prompt) ->
 eval_print(String, Binding) ->
   case reia_parse:string(String) of
     {ok, Exprs} ->
-      {value, Value, NewBinding} = reia_erl:r2e(reia_eval:exprs(Exprs, Binding)),
+      {value, Value, NewBinding} = reia_erl:r2e('ReiaEval':exprs(Exprs, Binding)),
       print(Value),
       NewBinding;
       
@@ -55,7 +55,7 @@ eval_print(String, Binding) ->
 
 print(Value) ->
   {string, String} = reia_dispatch:funcall(Value, to_s, []),
-  io:format("~s~n", [binary_to_list(String)]).
+  io:format("=> ~s~n", [binary_to_list(String)]).
   
 parse_error({Line, Error}) ->
   io:format("Error: Line ~w: ~s~n", [Line, Error]).

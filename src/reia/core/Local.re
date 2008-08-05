@@ -1,10 +1,10 @@
 #
-# reia_kernel: Methods available locally within any scope
+# Local: Methods available locally within any scope
 # Copyright (C)2008 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
-module ReiaKernel
+module Local
   # Print a string (with newline) to standard output
   def puts(string)
     io::format("~s~n".to_list(), [string.to_list()])
@@ -16,11 +16,11 @@ module ReiaKernel
     nil
   
   def eval(string)
-    reia_eval::string(string)
+    ReiaEval.string(string)
     
   def load(path)
     case file::read_file(path.to_list())
       (~ok, data):
-        reia_eval::string(data.to_string())
+        ReiaEval.string(data.to_string())
       error:
         error
