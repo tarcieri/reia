@@ -19,10 +19,10 @@ main(Options) ->
   end.
 
 init() ->
-  code:add_patha("./ebin"),
-  code:add_patha("../ebin"),
-  code:add_patha("./src/smart_exceptions"),
-  code:add_patha("../src/smart_exceptions").
+  code:add_pathz("./ebin"),
+  code:add_pathz("../ebin"),
+  code:add_pathz("./src/smart_exceptions"),
+  code:add_pathz("../src/smart_exceptions").
   
 usage() ->
   io:format("Usage: reiac [options] file.ra~n"),

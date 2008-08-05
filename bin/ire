@@ -1,6 +1,6 @@
 #!/usr/bin/env escript
 
 main(_) ->
-  code:add_patha("./ebin"),
-  code:add_patha("../ebin"),
+  code:add_pathz("./ebin"),
+  code:add_pathz("../ebin"),
   ire:start().
