@@ -25,6 +25,8 @@ funcall(Receiver, to_internal, []) ->
       reia_erl:e2r(Receiver)
   end;
 
+funcall(Receiver = {constant, Name}, Method, Arguments) ->
+  apply(Name, Method, Arguments);
 funcall(Receiver, Method, Arguments) when is_integer(Receiver) or is_float(Receiver) ->
   'Numeric':funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver, Method, Arguments) when is_atom(Receiver) ->
@@ -44,7 +46,7 @@ funcall(Receiver = {lambda, _}, Method, Arguments) ->
 funcall(Receiver = {regexp, _}, Method, Arguments) ->
   'Regex':funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(_, _, _) ->
-  throw(unknown_receiver).
+  throw({error, unknown_receiver}).
   
 %%  
 %% Funcalls that take blocks

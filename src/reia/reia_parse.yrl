@@ -146,6 +146,7 @@ max_expr -> tuple      : '$1'.
 max_expr -> dict       : '$1'.
 max_expr -> binary     : '$1'.
 max_expr -> atom       : '$1'.
+max_expr -> constant   : '$1'.
 max_expr -> lambda     : '$1'.
 max_expr -> case_expr  : '$1'.
 max_expr -> if_expr    : '$1'.

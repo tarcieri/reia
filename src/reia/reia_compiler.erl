@@ -88,12 +88,18 @@ forms(Ast = {float, _, _}) ->
 forms(Ast = {atom, _, _}) ->
   Ast;
   
-%% Strings and regular expressions
+%% Constants
+forms({constant, Line, Name}) ->
+  {tuple, Line, [{atom, Line, constant}, {atom, Line, Name}]};
+  
+%% Strings
 forms({string, Line, String}) ->
   {tuple, Line, [
     {atom, Line, string},
     {bin, Line, [{bin_element, Line, {string, Line, String}, default, default}]}
   ]};
+  
+%% Regexes
 forms({regexp, Line, Pattern}) ->
   {tuple, Line, [
     {atom, Line, regexp}, 
