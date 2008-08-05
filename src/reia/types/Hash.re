@@ -25,5 +25,5 @@ module Hash
   # Hash#to_s
   #   Convert a hash to a string representation
   def funcall(hash, ~to_s, [])
-    members = hash.to_list().map { |(k, v)| [k, v].join(":") }
+    members = hash.to_list().map { |(k, v)| [k.to_s(), v.to_s()].join(":") }
     ["{", members.join(","), "}"].join()
