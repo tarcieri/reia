@@ -31,7 +31,17 @@ r2e([Expression|Rest], Output) ->
   
 %% Dynamic evaluation (supporting multiple module declarations)
 dynamic(Expressions) ->
-  Expressions.
+  [dynamic_expression(Expression) || Expression <- Expressions].
+  
+%% Pass dynamic module declarations to reia_module:build/1
+dynamic_expression(Module = {module, Line, _Constant, _Functions}) ->
+  %% Convert the module to an Erlang forms representation to pass as a call to reia_module
+  Arg = erl_syntax:revert(erl_syntax:abstract(Module)),
+  {call, Line, {remote, Line, {atom, Line, reia_module}, {atom, Line, build}}, [Arg]};
+  
+%% Leave other toplevel expressions alone
+dynamic_expression(Expression) ->
+  Expression.
   
 %% Static module declarations
 static([{module, Line, Constant, Functions}]) ->
