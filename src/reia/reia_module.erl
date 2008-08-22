@@ -6,7 +6,7 @@
 %
 
 -module(reia_module).
--export([build/1]).
+-export([build/1, hipe_available/0]).
 
 build({module, _Line, Name, Functions}) ->
   {ok, Module} = lists:foldl(
@@ -17,3 +17,9 @@ build({module, _Line, Name, Functions}) ->
   smerl:compile(Module);
 build(_) ->
   {error, "invalid module"}.
+  
+hipe_available() ->
+  case string:str(erlang:system_info(system_version), "[hipe]") of
+    0 -> false;
+    _ -> true
+  end.
