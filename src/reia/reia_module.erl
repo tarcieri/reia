@@ -19,7 +19,7 @@ build(_) ->
   {error, "invalid module"}.
   
 hipe_available() ->
-  case string:str(erlang:system_info(system_version), "[hipe]") of
-    0 -> false;
-    _ -> true
+  case erlang:system_info(hipe_architecture) of
+    undefined -> false;
+    _         -> true
   end.
