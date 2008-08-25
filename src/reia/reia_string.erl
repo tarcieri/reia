@@ -18,6 +18,11 @@ funcall({string, String}, to_s, []) ->
 funcall({string, String}, to_list, []) ->
   reia_erl:e2r(binary_to_list(String));
   
+%% String#to_binary
+%%   Cast a string explicitly to a binary
+funcall({string, String}, to_binary, []) ->
+  String;
+  
 %% String#upcase
 %%   Capitalize all letters string
 funcall({string, String}, upcase, []) ->
