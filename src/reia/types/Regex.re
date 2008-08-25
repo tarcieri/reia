@@ -17,14 +17,8 @@ module Regex
     ["/", regexp.to_string(), "/"].join()
   
   def funcall(regexp, ~match, [string])
-    list = string.to_list()
-    case regexp::match(list, regexp.to_list())
-      (~match, start, len):
-        lists::sublist(list, start, len).to_string()
+    case re::run(string.to_binary(), regexp.to_list(), [(~capture, ~all, ~binary)])
+      (~match, results):
+        results.map { |result| result.to_string() }
       ~nomatch:
         nil
-        
-  def funcall(regexp, ~matches, [string])
-    list = string.to_list()
-    (~match, matches) = regexp::matches(list, regexp.to_list())
-    matches.map { |(start, len)| lists::sublist(list, start, len).to_string() }
