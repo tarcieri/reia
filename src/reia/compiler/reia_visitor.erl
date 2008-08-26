@@ -1,5 +1,10 @@
 -module(reia_visitor).
 -export([transform/2]).
 
-transform(Ast, _Fun) ->
+transform(Expressions, Fun) ->
+  lists:flatten([ast(Expression, Fun) || Expression <- Expressions]).
+
+ast({module, Line, Name, Expressions}, Fun) ->
+  Fun({module, Line, Name, lists:flatten([ast(Expression, Fun) || Expression <- Expressions])});
+ast(Ast, _Fun) ->
   Ast.
