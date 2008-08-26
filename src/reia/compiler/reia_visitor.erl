@@ -11,6 +11,13 @@ ast({module, Line, Name, Expressions}, Fun) ->
     ast(Name, Fun), 
     lists:flatten([ast(Expression, Fun) || Expression <- Expressions])
   });
+ast({funcall, Line, Name, Expressions}, Fun) ->
+  Fun({
+    funcall,
+    Line,
+    ast(Name, Fun),
+    lists:flatten([ast(Expression, Fun) || Expression <- Expressions])
+  });
 ast({funcall, Line, Module, Name, Expressions}, Fun) ->
   Fun({
     funcall, 
