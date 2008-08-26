@@ -45,21 +45,21 @@ file "src/leex/leex.beam" => "src/leex/leex.erl" do
 end
 
 # Compile reia_scan using leex
-file "src/reia/reia_scan.erl" => %w[src/reia/reia_scan.xrl src/leex/leex.beam] do
-  sh "bin/leex src/reia/reia_scan.xrl"
+file "src/reia/compiler/reia_scan.erl" => %w[src/reia/compiler/reia_scan.xrl src/leex/leex.beam] do
+  sh "bin/leex src/reia/compiler/reia_scan.xrl"
 end
 
-file "src/reia/reia_scan.beam" => "src/reia/reia_scan.erl" do
-  sh "erlc +debug_info +nowarn_unused_vars -o src/reia src/reia/reia_scan.erl"
+file "src/reia/compiler/reia_scan.beam" => "src/reia/compiler/reia_scan.erl" do
+  sh "erlc +debug_info +nowarn_unused_vars -o src/reia/compiler src/reia/compiler/reia_scan.erl"
 end
 
 # Compile reia_parse using yecc
-file "src/reia/reia_parse.erl" => "src/reia/reia_parse.yrl" do
-  sh "bin/yecc src/reia/reia_parse.yrl"
+file "src/reia/compiler/reia_parse.erl" => "src/reia/compiler/reia_parse.yrl" do
+  sh "bin/yecc src/reia/compiler/reia_parse.yrl"
 end
 
-file "src/reia/reia_parse.beam" => "src/reia/reia_parse.erl" do
-  sh "erlc +debug_info -o src/reia src/reia/reia_parse.erl"
+file "src/reia/compiler/reia_parse.beam" => "src/reia/compiler/reia_parse.erl" do
+  sh "erlc +debug_info -o src/reia/compiler src/reia/compiler/reia_parse.erl"
 end
 
 # Create the ebin directory if it doesn't exist
