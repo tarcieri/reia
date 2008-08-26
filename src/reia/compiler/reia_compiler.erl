@@ -6,15 +6,19 @@
 %
 
 -module(reia_compiler).
--export([compile/1, compile/2, r2e/1, dynamic/1, static/1, forms/1]).
+-export([compile/1, compile/2, ssa/1, r2e/1, dynamic/1, static/1, forms/1]).
 
 compile(Expressions) ->
-  compile(Expressions, [r2e, dynamic]).
+  compile(Expressions, [ssa, r2e, dynamic]).
 
 compile(Expressions, []) ->
   Expressions;
 compile(Expressions, [Pass|Passes]) ->
   compile(?MODULE:Pass(Expressions), Passes).
+
+%% Convert Reia forms into SSA form
+ssa(Expressions) ->
+  reia_ssa:ast(Expressions).
 
 %% Convert Reia forms to Erlang forms
 r2e(Expressions) ->
