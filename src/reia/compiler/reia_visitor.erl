@@ -5,6 +5,6 @@ transform(Expressions, Fun) ->
   lists:flatten([ast(Expression, Fun) || Expression <- Expressions]).
 
 ast({module, Line, Name, Expressions}, Fun) ->
-  Fun({module, Line, Name, lists:flatten([ast(Expression, Fun) || Expression <- Expressions])});
+  Fun({module, Line, ast(Name, Fun), lists:flatten([ast(Expression, Fun) || Expression <- Expressions])});
 ast(Ast, _Fun) ->
   Ast.
