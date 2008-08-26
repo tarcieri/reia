@@ -35,4 +35,5 @@ ast({funcall, Line, Module, Name, Expressions}, Fun) ->
     lists:flatten([ast(Expression, Fun) || Expression <- Expressions])
   });
 ast(Ast, _Fun) ->
+  io:format("warning: unrecognized AST node: ~p~n", [Ast]),
   Ast.
