@@ -255,10 +255,12 @@ dict_entries -> comp_expr ':' expr ',' dict_entries : [{'$1','$3'}|'$5'].
 binary -> '<<' string '>>' : {binary, line('$1'), '$2'}.
 
 %% Lambdas
+lambda -> fun '{' inline_statements '}' : {lambda, line('$1'), [], '$3'}.
 lambda -> fun '(' ')' '{' inline_statements '}' : {lambda, line('$1'), [], '$5'}.
 lambda -> fun '(' exprs ')' '{' inline_statements '}' : {lambda, line('$1'), '$3', '$6'}.
-lambda -> fun do indent statements dedent : {lambda, line('$1'), [], '$4'}.
-lambda -> fun '(' exprs ')' do indent statements dedent : {lambda, line('$1'), '$3', '$7'}.
+lambda -> fun do eol indent statements dedent : {lambda, line('$1'), [], '$5'}.
+lambda -> fun do '(' ')' eol indent statements dedent : {lambda, line('$1'), [], '$7'}.
+lambda -> fun '(' exprs ')' do eol indent statements dedent : {lambda, line('$1'), '$3', '$8'}.
 
 Erlang code.
 
