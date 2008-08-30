@@ -41,5 +41,5 @@ ast(Node = {identifier, _Line, _Name}, Fun) ->
 ast(Node = {string, _Line, _Value}, Fun) ->
   Fun(Node);  
 ast(Ast, _Fun) ->
-  io:format("warning: unrecognized AST node: ~p~n", [Ast]),
+  % io:format("warning: unrecognized AST node: ~p~n", [Ast]),
   Ast.
