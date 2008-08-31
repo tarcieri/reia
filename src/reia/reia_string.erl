@@ -9,13 +9,8 @@
 -export([funcall/3]).
 
 %% String#to_s
-%%   Strings are already strings, so just stay the same
-funcall({string, _} = String, to_s, []) ->
-  String;
-  
-%% String#inspect
-%%   Throw some quotes on so people know we're a string
-funcall({string, String}, inspect, []) ->
+%%   Generate a string representation of a string
+funcall({string, String}, to_s, []) ->
   {string, list_to_binary("\"" ++ binary_to_list(String) ++ "\"")};
   
 %% String#to_list

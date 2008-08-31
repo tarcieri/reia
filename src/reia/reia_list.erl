@@ -86,7 +86,9 @@ funcall(List = {list, _}, join, [{string, Sep}]) ->
   Elements = [element_to_string(Element) || Element <- to_erl(List)],
   String = string:join(Elements, binary_to_list(Sep)),
   funcall(reia_erl:e2r(String), to_string, []).
-  
+
+element_to_string({string, Binary}) ->
+  binary_to_list(Binary);
 element_to_string(Element) ->
   {list, {List, []}} = reia_dispatch:funcall(reia_dispatch:funcall(Element, to_s, []), to_list, []),
   List.
