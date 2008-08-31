@@ -5,6 +5,7 @@ module ListTest
     nth_test()
     reverse_test()  
     push_test()
+    pop_test()
     unshift_test()
     join_test()
     
@@ -25,8 +26,14 @@ module ListTest
   def push_test
     assert_equal("appends elements with push", [1,2,3,4], [1,2,3].push(4))
     
+  def pop_test
+    assert_equal("removes last element with pop", 3, [1,2,3].pop())
+    
   def unshift_test
     assert_equal("prepends elements with unshift", [1,2,3,4], [2,3,4].unshift(1))
+    
+  def shift_test
+    assert_equal("removes first element with shift", 1, [1,2,3])
     
   def join_test
     assert_equal("joins into a string", "1,2,3", [1,2,3].join(','))
