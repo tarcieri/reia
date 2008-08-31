@@ -74,8 +74,8 @@ funcall({list, _} = List, to_string, []) ->
 %% List#to_s
 %%   Generate a string representing a list
 funcall({list, _} = List, to_s, []) ->
-  {string, Elements} = funcall(List, join, [{string, <<",">>}]),
-  String = lists:concat(["[", binary_to_list(Elements), "]"]),
+  Elements = [element_to_string2(Element) || Element <- to_erl(List)],
+  String = lists:concat(["[", string:join(Elements, ","), "]"]),
   funcall(reia_erl:e2r(String), to_string, []);
   
 %% List#join
@@ -90,6 +90,9 @@ funcall({list, _} = List, join, [{string, Sep}]) ->
 element_to_string({string, Binary}) ->
   binary_to_list(Binary);
 element_to_string(Element) ->
+  element_to_string2(Element).
+  
+element_to_string2(Element) ->
   {list, {List, []}} = reia_dispatch:funcall(reia_dispatch:funcall(Element, to_s, []), to_list, []),
   List.
   
