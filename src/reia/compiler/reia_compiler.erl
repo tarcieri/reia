@@ -116,7 +116,7 @@ forms({list, Line, Elements}) ->
     {atom, Line, list},
     {tuple, Line, [
       list_to_forms(Elements, Line),
-      {atom, Line, normal}
+      list_to_forms([], Line)
     ]}
   ]};
   
@@ -161,7 +161,7 @@ forms({range, Line, Begin, End}) ->
         {remote, Line, {atom, Line, lists}, {atom, Line, seq}},
         [forms(Begin), forms(End)]
       },
-      {atom, Line, normal}
+      list_to_forms([], Line)
     ]}
   ]};
   
