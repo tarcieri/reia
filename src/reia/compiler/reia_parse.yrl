@@ -20,6 +20,8 @@ Nonterminals
   match_expr
   bool_expr
   bool_op
+  comp_expr
+  comp_op
   range_expr
   add_expr
   add_op
@@ -109,8 +111,11 @@ inline_if_expr -> match_expr : '$1'.
 match_expr -> bool_expr '=' match_expr : {match, line('$2'), '$1', '$3'}.
 match_expr -> bool_expr : '$1'.
 
-bool_expr -> range_expr bool_op range_expr : {op, '$2', '$1', '$3'}.
-bool_expr -> range_expr : '$1'.
+bool_expr -> comp_expr bool_op bool_expr : {op, '$2', '$1', '$3'}.
+bool_expr -> comp_expr : '$1'.
+
+comp_expr -> range_expr comp_op range_expr : {op, '$2', '$1', '$3'}.
+comp_expr -> range_expr : '$1'.
 
 range_expr -> range_expr '..' add_expr : {range, line('$2'), '$1', '$3'}.
 range_expr -> add_expr : '$1'.
@@ -183,12 +188,14 @@ catch_clause -> 'catch' expr eol indent statements dedent : {'catch', line('$1')
 %% Boolean operators
 bool_op -> 'and' : '$1'.
 bool_op -> 'or' : '$1'.
-bool_op -> '==' : '$1'.
-bool_op -> '!=' : '$1'.
-bool_op -> '>'  : '$1'.
-bool_op -> '<'  : '$1'.
-bool_op -> '>=' : '$1'.
-bool_op -> '<=' : '$1'.
+
+%% Comparison operators
+comp_op -> '==' : '$1'.
+comp_op -> '!=' : '$1'.
+comp_op -> '>'  : '$1'.
+comp_op -> '<'  : '$1'.
+comp_op -> '>=' : '$1'.
+comp_op -> '<=' : '$1'.
 
 %% Addition operators
 add_op -> '+' : '$1'.

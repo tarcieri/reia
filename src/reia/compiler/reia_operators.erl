@@ -34,7 +34,13 @@ forms('+' = Op, Line, Ast1, Ast2) ->
 forms('-' = Op, Line, Ast1, Ast2) ->
   {op, Line, Op, Ast1, Ast2};
   
-%% Comparisons
+%% Boolean operators
+forms('and', Line, Ast1, Ast2) ->
+  {op, Line, 'andalso', Ast1, Ast2};
+forms('or', Line, Ast1, Ast2) ->
+  {op, Line, 'orelse', Ast1, Ast2};
+  
+%% Comparison operators
 forms('==' = Op, Line, Ast1, Ast2) ->
   {op, Line, Op, Ast1, Ast2};
 forms('!=', Line, Ast1, Ast2) ->

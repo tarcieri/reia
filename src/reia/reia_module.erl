@@ -7,6 +7,7 @@
 
 -module(reia_module).
 -export([build/1]).
+-define(COMPILE_OPTIONS, [report_errors, report_warnings, return_errors]).
 
 build({module, _Line, Name, Functions}) ->
   {ok, Module} = lists:foldl(
@@ -19,7 +20,7 @@ build(_) ->
   {error, "invalid module"}.
   
 compile_options() ->
-  compile_options([report_errors, report_warnings, return_errors]).
+  compile_options(?COMPILE_OPTIONS).
   
 compile_options(Defaults) ->
   case hipe_available() of
