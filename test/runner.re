@@ -1,2 +1,2 @@
-puts(load("test/core/list.re").to_s())
+load("test/core/list.re")
 ListTest.run()
