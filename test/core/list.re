@@ -2,11 +2,11 @@ module ListTest
   def run
     Local.puts("List")
     
-    
     nth_test()
     reverse_test()  
     push_test()
     unshift_test()
+    join_test()
     
   # retrieves the nth element correctly
   def nth_test
@@ -27,6 +27,9 @@ module ListTest
     
   def unshift_test
     assert_equal("prepends elements with unshift", [1,2,3,4], [2,3,4].unshift(1))
+    
+  def join_test
+    assert_equal("joins into a string", "1,2,3", [1,2,3].join(','))
     
   def assert_equal(reason, expected, actual)
     io::format("- ~s: ".to_list(), [reason.to_list()])
