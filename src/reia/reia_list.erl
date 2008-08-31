@@ -97,18 +97,18 @@ element_to_string(Element) ->
 %% Functions which take a block
 %%
 
-funcall({list, {Elements, _Order}} = List, each, [], {lambda, Block}) ->
-  lists:foreach(Block, Elements),
+funcall({list, _} = List, each, [], {lambda, Block}) ->
+  lists:foreach(Block, to_erl(List)),
   List;
 
-funcall({list, {Elements, Order}}, map, [], {lambda, Block}) ->
-  {list, {lists:map(Block, Elements), Order}};
+funcall({list, _} = List, map, [], {lambda, Block}) ->
+  {list, {lists:map(Block, to_erl(List)), []}};
   
-funcall({list, {Elements, Order}}, filter, [], {lambda, Block}) ->
-  {list, {lists:filter(Block, Elements), Order}};
+funcall({list, _} = List, filter, [], {lambda, Block}) ->
+  {list, {lists:filter(Block, to_erl(List)), []}};
   
-funcall({list, {Elements, _}}, reduce, [Acc0], {lambda, Block}) ->
-  lists:foldl(Block, Acc0, Elements).
+funcall({list, _} = List, reduce, [Acc0], {lambda, Block}) ->
+  lists:foldl(Block, Acc0, to_erl(List)).
   
 %% Convert a Reia list to its Erlang equivalent
 to_erl({list, {Forward, Reverse}}) ->
