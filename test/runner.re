@@ -1,2 +1,2 @@
-load("test/parser/newline_test.re")
-NewlineTest.run()
+load("test/core/list.re")
+ListTest.run()
