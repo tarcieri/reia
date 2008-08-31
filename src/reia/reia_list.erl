@@ -68,21 +68,21 @@ funcall({list, {[Value|_Forward], _Reverse}}, shift, []) ->
 %% List#to_string
 %%   Explicitly cast a list to a string.  Useful for converting Erlang "strings"
 %%   to Reia strings.
-funcall(List = {list, _}, to_string, []) ->
+funcall({list, _} = List, to_string, []) ->
   {string, list_to_binary(to_erl(List))};
 
 %% List#to_s
 %%   Generate a string representing a list
-funcall(List = {list, _}, to_s, []) ->
+funcall({list, _} = List, to_s, []) ->
   {string, Elements} = funcall(List, join, [{string, <<",">>}]),
   String = lists:concat(["[", binary_to_list(Elements), "]"]),
   funcall(reia_erl:e2r(String), to_string, []);
   
 %% List#join
 %%   Join all elements of a list together with the given separator
-funcall(List = {list, _}, join, []) ->
+funcall({list, _} = List, join, []) ->
   funcall(List, join, [{string, <<"">>}]);
-funcall(List = {list, _}, join, [{string, Sep}]) ->
+funcall({list, _} = List, join, [{string, Sep}]) ->
   Elements = [element_to_string(Element) || Element <- to_erl(List)],
   String = string:join(Elements, binary_to_list(Sep)),
   funcall(reia_erl:e2r(String), to_string, []).
@@ -97,7 +97,7 @@ element_to_string(Element) ->
 %% Functions which take a block
 %%
 
-funcall(List = {list, {Elements, _Order}}, each, [], {lambda, Block}) ->
+funcall({list, {Elements, _Order}} = List, each, [], {lambda, Block}) ->
   lists:foreach(Block, Elements),
   List;
 
