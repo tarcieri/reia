@@ -2,16 +2,21 @@ module ListTest
   def run
     Local.puts("List")
     
-    Local.print("- retrieves the nth element correctly: ")
-    Local.puts(nth_test().to_s())
     
+    nth_test()
     reverse_test()  
     push_test()
+    unshift_test()
     
   # retrieves the nth element correctly
   def nth_test
+    Local.print("- retrieves the nth element correctly: ")
+    
     list = [1,2,3,4,5]
-    list[0] == 1 and list[1] == 2 and list[4] == 5
+    if list[0] == 1 and list[1] == 2 and list[4] == 5
+      Local.puts("ok")
+    else
+      Local.puts("FAILED")
     
   # reverses the order of a list
   def reverse_test
@@ -20,10 +25,13 @@ module ListTest
   def push_test
     assert_equal("appends elements with push", [1,2,3,4], [1,2,3].push(4))
     
+  def unshift_test
+    assert_equal("prepends elements with unshift", [1,2,3,4], [2,3,4].unshift(1))
+    
   def assert_equal(reason, expected, actual)
     io::format("- ~s: ".to_list(), [reason.to_list()])
     if expected.to_s() == actual.to_s()
-      Local.puts("ok.")
+      Local.puts("ok")
     else
       Local.puts("FAILED")
       io::format("  expected: ~s, actual: ~s~n".to_list(), [expected.to_s().to_list(), actual.to_s().to_list()])
