@@ -10,14 +10,20 @@
 -define(COMPILE_OPTIONS, [report_errors, report_warnings, return_errors]).
 
 build({module, _Line, Name, Functions}) ->
-  {ok, Module} = lists:foldl(
-    fun(Func, Mod) -> smerl:add_func(Mod, Func) end, 
-    smerl:set_export_all(smerl:new(Name), true), 
+  Module = lists:foldl(
+    fun(Func, Mod) -> 
+      {ok, Mod2} = smerl:add_func(Mod, Func),
+      Mod2
+    end, 
+    new_module(Name), 
     Functions
   ),
   smerl:compile(Module, compile_options());
 build(_) ->
   {error, "invalid module"}.
+
+new_module(Name) ->
+  smerl:set_export_all(smerl:new(Name), true).
   
 compile_options() ->
   compile_options(?COMPILE_OPTIONS).
