@@ -42,6 +42,7 @@ funcall({list, {Forward, Reverse}}, push, [Value]) ->
   {list, {Forward, [Value|Reverse]}};
   
 %% List#pop
+%%   Pop an element from the tail of a list
 funcall({list, {[], []}}, pop, []) ->
   nil;
 funcall({list, {Forward, []}}, pop, []) ->
@@ -52,10 +53,12 @@ funcall({list, {_Forward, [Value|_Reverse]}}, pop, []) ->
   Value;
 
 %% List#unshift
+%%   Unshift an element onto the front of a list
 funcall({list, {Forward, Reverse}}, unshift, [Value]) ->
   {list, {[Value|Forward], Reverse}};
   
 %% List#shift
+%%   Shift an element off the front of a list
 funcall({list, {[], []}}, shift, []) ->
   nil;
 funcall({list, {[], Reverse}}, shift, []) ->
@@ -64,6 +67,11 @@ funcall({list, {[], Reverse}}, shift, []) ->
   Value;
 funcall({list, {[Value|_Forward], _Reverse}}, shift, []) ->
   Value;
+  
+%% List#size
+%%   Number of items in a list
+funcall({list, {Forward, Reverse}}, size, []) ->
+  length(Forward) + length(Reverse);
   
 %% List#to_string
 %%   Explicitly cast a list to a string.  Useful for converting Erlang "strings"
