@@ -16,11 +16,11 @@ module Local
     nil
   
   def eval(string)
-    ReiaEval.string(string)
+    Eval.string(string)
     
   def load(path)
     case file::read_file(path.to_list())
       (~ok, data):
-        ReiaEval.string(data.to_string())
+        Eval.string(data.to_string())
       error:
         error

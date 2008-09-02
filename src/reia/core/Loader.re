@@ -23,7 +23,7 @@ module Loader
   
   def eval_input(input)
     try
-      ReiaEval.string(input)
+      Eval.string(input)
       erlang::halt(0)
     catch ex
       io::format("exception: ~p~n".to_list(), [ex])

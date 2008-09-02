@@ -1,10 +1,10 @@
 #
-# ReiaEval: Methods for evaluating Reia expressions or abstract syntax
+# Eval: Methods for evaluating Reia expressions or abstract syntax
 # Copyright (C)2008 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
-module ReiaEval
+module Eval
   def string(str)
     case reia_parse::string(str.to_list())
       (~ok, forms):
