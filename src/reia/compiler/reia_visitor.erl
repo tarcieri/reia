@@ -1,8 +1,8 @@
 -module(reia_visitor).
--export([transform/3, transform_node/2]).
+-export([transform/3]).
 
 transform(Expressions, State, Fun) when is_list(Expressions) ->
-  {Expressions2, {State2, _Fun}} = lists:mapfoldl(fun reia_visitor:transform_node/2, {State, Fun}, Expressions),
+  {Expressions2, {State2, _Fun}} = lists:mapfoldl(fun transform_node/2, {State, Fun}, Expressions),
   {ok, State2, Expressions2};
   
 transform(Node, State, Fun) ->
@@ -17,7 +17,7 @@ transform(Node, State, Fun) ->
   
 walk(Node, State, Fun) when is_tuple(Node) ->
   [Type, Line | Elements] = tuple_to_list(Node),
-  {Elements2, {State2, _Fun}} = lists:mapfoldl(fun reia_visitor:transform_node/2, {State, Fun}, Elements),
+  {Elements2, {State2, _Fun}} = lists:mapfoldl(fun transform_node/2, {State, Fun}, Elements),
   {ok, State2, list_to_tuple([Type, Line | Elements2])};
 walk(Node, State, _Fun) when is_atom(Node) or is_integer(Node) or is_float(Node) ->
   {ok, State, Node};
