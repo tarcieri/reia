@@ -1,8 +1,8 @@
 -module(reia_visitor).
--export([transform/3, transformer/2]).
+-export([transform/3, transform_node/2]).
 
 transform(Expressions, State, Fun) when is_list(Expressions) ->
-  {Expressions2, {State2, _Fun}} = lists:mapfoldl(fun reia_visitor:transformer/2, {State, Fun}, Expressions),
+  {Expressions2, {State2, _Fun}} = lists:mapfoldl(fun reia_visitor:transform_node/2, {State, Fun}, Expressions),
   {ok, State2, Expressions2};
   
 transform(Node, State, Fun) ->
@@ -15,34 +15,15 @@ transform(Node, State, Fun) ->
       throw({error, {"invalid_transform result", Value}})
   end.
   
-transformer(Node, {State, Fun}) ->
+walk(Node, State, Fun) when is_tuple(Node) ->
+  [Type, Line | Elements] = tuple_to_list(Node),
+  {Elements2, {State2, _Fun}} = lists:mapfoldl(fun reia_visitor:transform_node/2, {State, Fun}, Elements),
+  {ok, State2, list_to_tuple([Type, Line | Elements2])};
+walk(Node, State, _Fun) when is_atom(Node) or is_integer(Node) or is_float(Node) ->
+  {ok, State, Node};
+walk(Node, _State, _Fun) ->
+  throw({error, {"unrecognized term in AST", Node}}).
+  
+transform_node(Node, {State, Fun}) ->
   {ok, State2, Node2} = transform(Node, State, Fun),
   {Node2, {State2, Fun}}.
-
-walk({module, Line, Name, Expressions}, State, Fun) ->
-  {ok, State2, Name2} = transform(Name, State, Fun),
-  {ok, State3, Expressions2} = transform(Expressions, State2, Fun),
-  {ok, State3, {module, Line, Name2, Expressions2}};
-walk({function, Line, Name, Arguments, Expressions}, State, Fun) ->
-  {ok, State2, Name2} = transform(Name, State, Fun),
-  {ok, State3, Arguments2} = transform(Arguments, State2, Fun),
-  {ok, State4, Expressions2} = transform(Expressions, State3, Fun),  
-  {ok, State4, {function, Line, Name2, Arguments2, Expressions2}};
-walk({funcall, Line, Name, Expressions}, State, Fun) ->
-  {ok, State2, Name2} = transform(Name, State, Fun),
-  {ok, State3, Expressions2} = transform(Expressions, State2, Fun),
-  {ok, State3, {funcall, Line, Name2, Expressions2}};
-walk({funcall, Line, Module, Name, Expressions}, State, Fun) ->
-  {ok, State2, Module2} = transform(Module, State, Fun),
-  {ok, State3, Name2} = transform(Name, State2, Fun),
-  {ok, State4, Expressions2} = transform(Expressions, State3, Fun),
-  {ok, State4, {funcall, Line, Module2, Name2, Expressions2}};
-walk({constant, _Line, _Name} = Node, State, _Fun) ->
-  {ok, State, Node};
-walk({identifier, _Line, _Name} = Node, State, _Fun) ->
-  {ok, State, Node};
-walk({string, _Line, _Value} = Node, State, _Fun) ->
-  {ok, State, Node};
-walk(Ast, State, _Fun) ->
-  % io:format("warning: unrecognized AST node: ~p~n", [Ast]),
-  {ok, State, Ast}.
