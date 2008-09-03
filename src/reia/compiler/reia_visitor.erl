@@ -1,6 +1,29 @@
+%
+% reia_visitor: Automagical walker/transformer for Reia AST
+% Copyright (C)2008 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(reia_visitor).
 -export([transform/3]).
 
+% Want to transform some Reia AST using the arbitrary function of your 
+% choosing?  It's easy!  And you can even pass some state around while
+% you're doing it.  Just hand reia_visitor:transform/3 a list of AST
+% nodes or a single node, some seed state, and a function.  Here's the
+% crazy Erlang type signature:
+%
+% transform(Expressions, State, Fun) -> {ok, NewState, NewExpressions}
+%
+% Types  Expressions = [term()]
+%        State = term()
+%        Fun = fun(State, Node)
+%
+% Fun must return one of the following:
+% * {walk, NewState, NewNode} - keep traversing the AST, starting from NewNode
+% * {stop, NewState, NewNode} - stop traversing the AST
+%
 transform(Expressions, State, Fun) when is_list(Expressions) ->
   {Expressions2, {State2, _Fun}} = lists:mapfoldl(fun transform_node/2, {State, Fun}, Expressions),
   {ok, State2, Expressions2};

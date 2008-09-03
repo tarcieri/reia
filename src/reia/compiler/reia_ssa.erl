@@ -1,3 +1,10 @@
+%
+% reia_ssa: Static single assignment transformation for Reia's compiler
+% Copyright (C)2008 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(reia_ssa).
 -export([ast/1, transform/2]).
 
