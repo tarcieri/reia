@@ -245,6 +245,10 @@ forms({'catch', Line, Pattern, Statements}) ->
     ]
   };
   
+%% Throw statements
+forms({throw, Line, Term}) ->
+  {call, Line, {atom, Line, throw}, [forms(Term)]};
+  
 %% List comprehensions
 forms({'lc', Line, Transform, Expressions}) ->
   {lc, Line, forms(Transform), [forms(Expression) || Expression <- Expressions]};
