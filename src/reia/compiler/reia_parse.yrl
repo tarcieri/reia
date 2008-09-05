@@ -31,6 +31,8 @@ Nonterminals
   pow_op
   funcall_expr
   funcall
+  block
+  inline_block
   unary_expr
   unary_op  
   erl_funcall_expr
@@ -230,20 +232,21 @@ funcall -> identifier '(' ')' : {funcall, line('$2'), '$1', []}.
 funcall -> identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3'}.
 
 %% Function calls with inline blocks
-funcall -> funcall_expr '.' identifier '{' inline_statements '}' : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), [], '$5'}}.
-funcall -> funcall_expr '.' identifier '{' '|' exprs '|' inline_statements '}' : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), '$6', '$8'}}.
-funcall -> funcall_expr '.' identifier '(' ')' '{' inline_statements '}' : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), [], '$7'}}.
-funcall -> funcall_expr '.' identifier '(' ')' '{' '|' exprs '|' inline_statements '}' : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), '$8', '$10'}}.
-funcall -> funcall_expr '.' identifier '(' exprs ')' '{' inline_statements '}' : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), [], '$8'}}.
-funcall -> funcall_expr '.' identifier '(' exprs ')' '{' '|' exprs '|' inline_statements '}' : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), '$9', '$11'}}.
+funcall -> funcall_expr '.' identifier inline_block : {funcall, line('$2'), '$1', '$3', [], '$4'}.
+funcall -> funcall_expr '.' identifier '(' ')' inline_block : {funcall, line('$2'), '$1', '$3', [], '$6'}.
+funcall -> funcall_expr '.' identifier '(' exprs ')' inline_block : {funcall, line('$2'), '$1', '$3', '$5', '$7'}.
 
 %% Function calls with multi-line blocks
-funcall -> funcall_expr '.' identifier do eol indent statements dedent : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), [], '$7'}}.
-funcall -> funcall_expr '.' identifier do '|' exprs '|' eol indent statements dedent : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), '$6', '$10'}}.
-funcall -> funcall_expr '.' identifier '(' ')' do eol indent statements dedent : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), [], '$9'}}.
-funcall -> funcall_expr '.' identifier '(' ')' do '|' exprs '|' eol indent statements dedent : {funcall, line('$2'), '$1', '$3', [], {lambda, line('$2'), '$8', '$12'}}.
-funcall -> funcall_expr '.' identifier '(' exprs ')' do eol indent statements dedent : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), [], '$10'}}.
-funcall -> funcall_expr '.' identifier '(' exprs ')' do '|' exprs '|' eol indent statements dedent : {funcall, line('$2'), '$1', '$3', '$5', {lambda, line('$2'), [], '$10'}}.
+funcall -> funcall_expr '.' identifier block : {funcall, line('$2'), '$1', '$3', [], '$4'}.
+funcall -> funcall_expr '.' identifier '(' ')' block : {funcall, line('$2'), '$1', '$3', [], '$6'}.
+funcall -> funcall_expr '.' identifier '(' exprs ')' block : {funcall, line('$2'), '$1', '$3', '$5', '$7'}.
+
+%% Blocks
+block -> do eol indent statements dedent : {lambda, line('$1'), [], '$4'}.
+block -> do '|' exprs '|' eol indent statements dedent : {lambda, line('$1'), '$3', '$7'}.
+
+inline_block -> '{' inline_statements '}' : {lambda, line('$1'), [], $2}.
+inline_block -> '{' '|' exprs '|' inline_statements '}' : {lambda, line('$1'), '$3', '$5'}.
 
 %% Erlang function calls
 erl_funcall -> identifier '::' identifier '(' ')' : {erl_funcall, line('$2'), '$1', '$3', []}.
