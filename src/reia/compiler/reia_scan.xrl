@@ -209,4 +209,5 @@ reserved_word('not')    -> true;
 reserved_word('in')     -> true;
 reserved_word('try')    -> true;
 reserved_word('catch')  -> true;
+reserved_word('throw')  -> true;
 reserved_word(_)        -> false.

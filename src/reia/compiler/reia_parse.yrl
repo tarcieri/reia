@@ -46,6 +46,7 @@ Nonterminals
   try_expr
   catch_clauses
   catch_clause
+  throw_expr
   number
   list
   tuple
@@ -62,7 +63,7 @@ Terminals
   true false nil
   float integer string regexp atom identifier constant module
   eol indent dedent def fun do 'case' else 'if' unless 
-  'and' 'or' 'not' 'try' 'catch' in
+  'and' 'or' 'not' 'try' 'catch' throw in
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**'
   '.' '..' ',' ':' '::' ';'
@@ -130,8 +131,11 @@ add_expr -> mult_expr : '$1'.
 mult_expr -> pow_expr mult_op mult_expr : {op, '$2', '$1', '$3'}.
 mult_expr -> pow_expr : '$1'.
 
-pow_expr -> unary_expr pow_op pow_expr : {op, '$2', '$1', '$3'}.
-pow_expr -> unary_expr : '$1'.
+pow_expr -> throw_expr pow_op pow_expr : {op, '$2', '$1', '$3'}.
+pow_expr -> throw_expr : '$1'.
+
+throw_expr -> throw unary_expr : {throw, line('$1'), '$2'}.
+throw_expr -> unary_expr : '$1'.
 
 unary_expr -> unary_op unary_expr : {op, '$1', '$2'}.
 unary_expr -> funcall_expr : '$1'.
