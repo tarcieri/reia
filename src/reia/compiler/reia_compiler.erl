@@ -229,6 +229,7 @@ forms({'try', Line, Statements, CatchClauses}) ->
     []
   };
 
+%% Catch clauses
 forms({'catch', Line, Pattern, Statements}) ->
   {clause, Line, 
     [{tuple, Line, [{var, Line, 'ExceptionType'}, {var, Line, 'ExceptionReason'}, {var, Line, '_Lint'}]}], 
@@ -242,8 +243,18 @@ forms({'catch', Line, Pattern, Statements}) ->
         ]}
       ]}}|[forms(Statement) || Statement <- Statements]
     ]
-  }.
+  };
   
+%% List comprehensions
+forms({'lc', Line, Transform, Expressions}) ->
+  {lc, Line, forms(Transform), [forms(Expression) || Expression <- Expressions]};
+  
+%% List comprehension generators
+forms({'generate', Line, Term, List}) ->
+  {generate, Line, forms(Term), 
+    {call, Line, {remote, Line, {atom, Line, reia_list}, {atom, Line, to_erl}}, [forms(List)]}
+  }.
+    
 %% Group clauses of functions with the same name and arity
 group_clauses(Functions) ->
   group_clauses(Functions, dict:new()).
