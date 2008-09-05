@@ -65,7 +65,6 @@ Rules.
 :     : {token,{':',TokenLine}}.
 ::    : {token,{'::',TokenLine}}.
 ;     : {token,{';',TokenLine}}.
-\|    : {token,{'|',TokenLine}}.
 =     : {token,{'=',TokenLine}}.
 ==    : {token,{'==',TokenLine}}.
 !=    : {token,{'!=',TokenLine}}.
@@ -74,8 +73,9 @@ Rules.
 <=    : {token,{'<=',TokenLine}}.
 >=    : {token,{'>=',TokenLine}}.
 \.\.  : {token,{'..',TokenLine}}.
+\|    : {token,{'|',TokenLine}}.
+\|\|  : {token,{'or',TokenLine}}.
 &&    : {token,{'and',TokenLine}}.
-\|\|    : {token,{'or',TokenLine}}.
 !     : {token,{'not',TokenLine}}.
 
 Erlang code.  
@@ -202,6 +202,7 @@ reserved_word('unless') -> true;
 reserved_word('and')    -> true;
 reserved_word('or')     -> true;
 reserved_word('not')    -> true;
+reserved_word('in')     -> true;
 reserved_word('try')    -> true;
 reserved_word('catch')  -> true;
 reserved_word(_)        -> false.

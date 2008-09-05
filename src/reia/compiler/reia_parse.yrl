@@ -53,12 +53,16 @@ Nonterminals
   dict_entries
   binary
   lambda
+  list_comprehension
+  lc_exprs
+  lc_expr
   .
   
 Terminals
   true false nil
   float integer string regexp atom identifier constant module
-  eol indent dedent def fun do 'case' else 'if' unless 'and' 'or' 'not' 'try' 'catch'
+  eol indent dedent def fun do 'case' else 'if' unless 
+  'and' 'or' 'not' 'try' 'catch' in
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**'
   '.' '..' ',' ':' '::' ';'
@@ -156,6 +160,7 @@ max_expr -> lambda     : '$1'.
 max_expr -> case_expr  : '$1'.
 max_expr -> if_expr    : '$1'.
 max_expr -> try_expr   : '$1'.
+max_expr -> list_comprehension : '$1'.
 max_expr -> '(' expr ')' : '$2'.
 
 %% Case expressions
@@ -270,6 +275,15 @@ lambda -> fun '(' exprs ')' '{' inline_statements '}' : {lambda, line('$1'), '$3
 lambda -> fun do eol indent statements dedent : {lambda, line('$1'), [], '$5'}.
 lambda -> fun do '(' ')' eol indent statements dedent : {lambda, line('$1'), [], '$7'}.
 lambda -> fun '(' exprs ')' do eol indent statements dedent : {lambda, line('$1'), '$3', '$8'}.
+  
+%% List comprehensions
+list_comprehension -> '[' expr '|' lc_exprs ']' : {lc, line('$1'), '$2', '$4'}.
+
+lc_exprs -> lc_expr : ['$1'].
+lc_exprs -> lc_expr ',' lc_exprs: ['$1'|'$3'].
+
+lc_expr -> expr : '$1'.
+lc_expr -> expr 'in' expr : {generate, line('$2'), '$1', '$3'}.
 
 Erlang code.
 
