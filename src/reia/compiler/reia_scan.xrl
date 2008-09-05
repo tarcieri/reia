@@ -22,8 +22,8 @@ Rules.
 \n\s+ : build_indentation(TokenLine, TokenLen).
 
 %% Numbers
-{Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
-{Digit}+ : build_integer(TokenChars, TokenLine).
+-?{Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
+-?{Digit}+ : build_integer(TokenChars, TokenLine).
 
 %% Strings
 {DoubleQuoted} : build_token(string, TokenChars, TokenLine, TokenLen).
@@ -159,9 +159,13 @@ build_dedent(Tokens, Amount, Line, [Current|State]) ->
 build_indentation(Line, Length) ->
   {token, {indentation, Line, Length - 1}}.
 
+build_integer([$-|Chars], Line) ->
+  {token, {integer, Line, -list_to_integer(Chars)}};
 build_integer(Chars, Line) ->
   {token, {integer, Line, list_to_integer(Chars)}}.
-  
+
+build_float([$-|Chars], Line) ->
+  {token, {float, Line, -list_to_float(Chars)}};
 build_float(Chars, Line) ->
   {token, {float, Line, list_to_float(Chars)}}.
     
