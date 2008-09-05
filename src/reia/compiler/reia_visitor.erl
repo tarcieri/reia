@@ -35,7 +35,7 @@ transform(Node, State, Fun) ->
     {stop, State2, Node2} ->
       {ok, State2, Node2};
     Value ->
-      throw({error, {"invalid_transform result", Value}})
+      throw({error, {"invalid transform result", Value}})
   end.
   
 walk(Node, State, Fun) when is_tuple(Node) ->
