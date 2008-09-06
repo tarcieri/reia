@@ -17,7 +17,7 @@ REIA_SRC = FileList.new('src/reia/**/*.re')
 REIA_SRC.each do |input|
   output = output_file(input)
   file output => input do
-    sh "bin/reiac -o artifacts/beam/#{File.basename(output, ".re")}.beam #{input}"
+    sh "bin/reiac -o artifacts/beam/#{File.basename(output, ".re")} #{input}"
   end
 end
 
@@ -65,7 +65,7 @@ end
 
 # Copy all output BEAM files into the ebin directory
 task :ebin do
-  FileList["artifacts/*.beam"].each { |file| cp file, "ebin" }
+  FileList["artifacts/beam/*.beam"].each { |file| cp file, "ebin" }
 end
 
 task :test do
