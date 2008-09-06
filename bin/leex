@@ -16,8 +16,8 @@ main([File]) ->
   end.
   
 init() ->
-  code:add_patha("./src/leex"),
-  code:add_patha("../src/leex").
+  code:add_patha("./ebin"),
+  code:add_patha("../ebin").
   
 usage() ->
   io:format("Usage: leex file.yrl~n").
