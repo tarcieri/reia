@@ -9,7 +9,7 @@
 -export([start/0]).
 
 start() ->
-  run('ReiaEval':new_binding()).
+  run('Eval':new_binding()).
   
 run(Binding) ->
   case read() of
