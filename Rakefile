@@ -21,7 +21,9 @@ REIA_SRC.each do |input|
   end
 end
 
-task :reia => (ERL_SRC + REIA_SRC).map { |input_file| output_file(input_file) }
+PARSER_SRC = FileList.new('src/reia/**/*.{xrl,yrl}')
+
+task :reia => (ERL_SRC + REIA_SRC + PARSER_SRC).map { |input_file| output_file(input_file) }
 
 # Smart exceptions
 SMEX_SRC = FileList['src/smart_exceptions/*.erl']
@@ -48,23 +50,17 @@ file "ebin/leex.beam" => "src/leex/leex.erl" do
 end
 
 # Compile reia_scan using leex
-file "artifacts/erl/reia_scan.erl" => %w[ebin/leex.beam src/reia/compiler/reia_scan.xrl] do
+file "ebin/reia_scan.beam" => %w[ebin/leex.beam src/reia/compiler/reia_scan.xrl] do
   sh "bin/leex src/reia/compiler/reia_scan.xrl"
   mv "src/reia/compiler/reia_scan.erl", "artifacts/erl/reia_scan.erl"
-end
-
-file "ebin/reia_scan.beam" => "artifacts/erl/reia_scan.erl" do
-  sh "erlc +debug_info +nowarn_unused_vars -o artifacts/beam src/reia/compiler/reia_scan.erl"
+  sh "erlc +debug_info +nowarn_unused_vars -o artifacts/beam artifacts/erl/reia_scan.erl"
 end
 
 # Compile reia_parse using yecc
-file "artifacts/erl/reia_parse.erl" => "src/reia/compiler/reia_parse.yrl" do
+file "ebin/reia_parse.erl" => "src/reia/compiler/reia_parse.yrl" do
   sh "bin/yecc src/reia/compiler/reia_parse.yrl"
   mv "src/reia/compiler/reia_parse.erl", "artifacts/erl/reia_parse.erl"
-end
-
-file "ebin/reia_parse.beam" => "src/reia/compiler/reia_parse.erl" do
-  sh "erlc +debug_info -o ebin src/reia/compiler/reia_parse.erl"
+  sh "erlc +debug_info -o ebin artifacts/erl/reia_parse.erl"
 end
 
 # Copy all output BEAM files into the ebin directory
