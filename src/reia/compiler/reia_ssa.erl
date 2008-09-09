@@ -33,7 +33,6 @@ transform({normal, _} = State, {identifier, _Line, _Name} = Node) ->
   
 % On the LHS of match expressions, variables are assigned a new version
 transform({match, Dict}, {identifier, _Line, _Name} = Node) ->
-  io:format("Match expression: ~p~n", [Node]),
   {stop, {match, Dict}, Node};
   
 % Walk unrecognized nodes without transforming them
