@@ -8,10 +8,13 @@
 -module(reia_ssa).
 -export([ast/1, transform/2]).
 
+%-define(msg(Str, Xs), io:format(Str, Xs)).
+-define(msg(Str, Xs), ok).
+
 ast(Ast) ->
-  %io:format("Input: ~p~n", [Ast]),
+  ?msg("Input: ~p~n", [Ast]),
   {ok, _, Ast2} = reia_visitor:transform(Ast, {normal, dict:new()}, fun reia_ssa:transform/2),
-  %io:format("Output: ~p~n", [Ast2]),
+  ?msg("Output: ~p~n", [Ast2]),
   Ast2.
   
 % Function declarations create a new scope
@@ -30,9 +33,10 @@ transform({Mode, _Dict} = State, {funcall, Line, Name, Arguments}) ->
   {stop, {Mode, Dict2}, Node};
 
 transform({Mode, _Dict} = State, {funcall, Line, Receiver, Name, Arguments}) ->
-  {ok, {_, Dict2}, Arguments2} = reia_visitor:transform(Arguments, State, fun transform/2),
-  Node = {funcall, Line, Receiver, Name, Arguments2},
-  {stop, {Mode, Dict2}, Node};
+  {ok, {_, Dict2}, Receiver2}  = reia_visitor:transform(Receiver,  State, fun transform/2), 
+  {ok, {_, Dict3}, Arguments2} = reia_visitor:transform(Arguments, {Mode, Dict2}, fun transform/2),
+  Node = {funcall, Line, Receiver2, Name, Arguments2},
+  {stop, {Mode, Dict3}, Node};
 
 transform({Mode, _Dict} = State, {erl_funcall, Line, Module, Function, Arguments}) ->
   {ok, {_, Dict2}, Arguments2} = reia_visitor:transform(Arguments, State, fun transform/2),
