@@ -40,6 +40,6 @@ forms(Forms) ->
     export_all, 
     verbose, 
     report_errors, 
-    report_warnings, 
-    {parse_transform, smart_exceptions}
+    report_warnings
+    %{parse_transform, smart_exceptions}
   ]).
