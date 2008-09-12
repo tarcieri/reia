@@ -11,7 +11,7 @@ module Eval
         (~value, value, _binding) = exprs(forms, new_binding())
         value
       error:
-        error
+        throw error
     
   def exprs(forms, binding)
     erl_forms = reia_compiler::compile(forms)
