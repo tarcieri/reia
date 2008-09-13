@@ -53,8 +53,7 @@ transform({Mode, Dict}, {match, Line, In1, In2}) ->
 transform({argument, Dict}, {identifier, Line, Name}) ->
   case dict:find(Name, Dict) of
     {ok, _} ->
-      
-      throw({error, {Name, "already bound"}});
+      throw({error, {Line, lists:flatten(io_lib:format("argument already bound: '~s'", [Name]))}});
     error ->
       Dict2 = dict:store(Name, 0, Dict),
       Node = {identifier, Line, ssa_name(Name, 0)},
@@ -68,7 +67,7 @@ transform({normal, Dict} = State, {identifier, Line, Name}) ->
       Node = {identifier, Line, ssa_name(Name, Version)},
       {stop, State, Node};
     error ->
-      throw({error, {Name, "not bound"}})
+      throw({error, {Line, lists:flatten(io_lib:format("unbound variable: '~s'", [Name]))}})
   end;
   
 % On the LHS of match expressions, variables are assigned a new version
