@@ -14,11 +14,20 @@ compile(Expressions) ->
 compile(Expressions, []) ->
   Expressions;
 compile(Expressions, [Pass|Passes]) ->
-  compile(?MODULE:Pass(Expressions), Passes).
+  compile(pass(Pass, Expressions), Passes).
+  
+pass({ssa, Binding}, Expressions) ->
+  ssa(Expressions, Binding);
+pass(Pass, Expressions) ->
+  ?MODULE:Pass(Expressions).
 
 %% Convert Reia forms into SSA form
 ssa(Expressions) ->
   reia_ssa:ast(Expressions).
+  
+ssa(Expressions, Binding) ->
+  Variables = [Name || {Name, _} <- Binding],
+  reia_ssa:ast(Expressions, Variables).
 
 %% Convert Reia forms to Erlang forms
 r2e(Expressions) ->
