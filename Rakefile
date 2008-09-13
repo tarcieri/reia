@@ -1,5 +1,5 @@
 task :default => [:build, :test]
-task :build => [:smerl, :leex, :smart_exceptions, :reia, :ebin]
+task :build => [:smerl, :leex, :smart_exceptions, :reia, :ebin, :clean]
 
 def output_file(input_file)
   'ebin/' + File.basename(input_file).sub(/\.\w+$/, '.beam')
