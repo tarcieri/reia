@@ -26,11 +26,11 @@ Rules.
 -?{Digit}+ : build_integer(TokenChars, TokenLine).
 
 %% Strings
-{DoubleQuoted} : build_token(string, TokenChars, TokenLine, TokenLen).
-{SingleQuoted} : build_token(string, TokenChars, TokenLine, TokenLen).
+{DoubleQuoted} : build_string(string, TokenChars, TokenLine, TokenLen).
+{SingleQuoted} : build_string(string, TokenChars, TokenLine, TokenLen).
 
 %% Regular expressions
-{Regexp} : build_token(regexp, TokenChars, TokenLine, TokenLen).
+{Regexp} : build_string(regexp, TokenChars, TokenLine, TokenLen).
 
 %% Atoms
 \~({UpperCase}|{LowerCase}|_)({UpperCase}|{Digit}|{LowerCase}|_)* : build_atom(TokenChars, TokenLine, TokenLen).
@@ -171,9 +171,33 @@ build_float([$-|Chars], Line) ->
 build_float(Chars, Line) ->
   {token, {float, Line, list_to_float(Chars)}}.
     
-build_token(Type, Chars, Line, Len) ->
-  String = lists:sublist(Chars, 2, Len - 2), 
+build_string(Type, Chars, Line, Len) ->
+  String = unescape_string(lists:sublist(Chars, 2, Len - 2)), 
   {token, {Type, Line, String}}.
+  
+unescape_string(String) -> unescape_string(String, []).
+
+unescape_string([], Output) ->
+  lists:reverse(Output);
+unescape_string([$\\, Escaped | Rest], Output) ->
+  Char = case Escaped of
+    $\\ -> $\\;
+    $\" -> $\";
+    $\' -> $\';
+    $b  -> $\b;
+    $d  -> $\d;
+    $e  -> $\e;
+    $f  -> $\f;
+    $n  -> $\n;
+    $r  -> $\r;
+    $s  -> $\s;
+    $t  -> $\t;
+    $v  -> $\v;
+    _   -> throw({error, {"unrecognized escape sequence: ", [$\\, Escaped]}})
+  end,
+  unescape_string(Rest, [Char|Output]);
+unescape_string([Char|Rest], Output) ->
+  unescape_string(Rest, [Char|Output]).
   
 build_atom(Chars, Line, Len) ->
   String = lists:sublist(Chars, 2, Len - 1),
