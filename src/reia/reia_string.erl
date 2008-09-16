@@ -23,6 +23,11 @@ funcall({string, String}, to_list, []) ->
 funcall({string, String}, to_binary, []) ->
   String;
   
+%% String#to_atom
+%%   Cast a string explicitly to an atom
+funcall({string, String}, to_atom, []) ->
+  list_to_atom(binary_to_list(String));
+  
 %% String#upcase
 %%   Capitalize all letters string
 funcall({string, String}, upcase, []) ->
