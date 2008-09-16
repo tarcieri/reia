@@ -15,8 +15,9 @@ module Eval
     
   def exprs(forms, binding)
     erl_forms = reia_compiler::compile(forms, [(~ssa, binding), ~r2e, ~dynamic])
-    (~value, value, binding) = erl_eval::exprs(erl_forms, binding, (~value, fun(name, arguments) { local(name, arguments) }))
-    (~value, value, binding)
+    (~value, result, binding) = erl_eval::exprs(erl_forms, binding, (~value, fun(name, arguments) { local(name, arguments) }))
+    binding = binding.map { |(var, value)| (var.to_s().sub(/^~/, "").sub(/_[0-9]+$/, "").uncapitalize().to_atom(), value) }
+    (~value, result, binding)
   
   def new_binding
     erl_eval::new_bindings()
