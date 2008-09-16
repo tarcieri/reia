@@ -15,7 +15,13 @@ module Eval
     
   def exprs(forms, binding)
     erl_forms = reia_compiler::compile(forms, [(~ssa, binding), ~r2e, ~dynamic])
+    
+    # Convert Reia variable names to Erlang SSA names
+    binding = binding.map { |(var, value)| (var.to_s().sub(/^~/, "").capitalize().sub(/$/, "_0").to_atom(), value) }
+    
     (~value, result, binding) = erl_eval::exprs(erl_forms, binding, (~value, fun(name, arguments) { local(name, arguments) }))
+    
+    # Convert Erlang SSA variable names back to Reia names
     binding = binding.map { |(var, value)| (var.to_s().sub(/^~/, "").sub(/_[0-9]+$/, "").uncapitalize().to_atom(), value) }
     (~value, result, binding)
   
