@@ -47,4 +47,18 @@ funcall({string, String}, capitalize, []) ->
 funcall({string, String}, uncapitalize, []) ->
   [FirstLetter|Rest] = binary_to_list(String),
   NewString = string:to_lower([FirstLetter]) ++ Rest,
-  reia_list:funcall(reia_erl:e2r(NewString), to_string, []).
+  reia_list:funcall(reia_erl:e2r(NewString), to_string, []);
+  
+%% String#sub
+%%   Replace a portion of a string with a given substitution
+funcall({string, String}, sub, [{regexp, Regex}, {string, Replacement}]) ->
+  List = binary_to_list(String),
+  case re:run(String, Regex) of
+    {match, [{Begin, Length}]} ->
+      Start = lists:sublist(List, 1, Begin),
+      End = lists:sublist(List, Begin + Length + 1, length(List)),
+      List2 = Start ++ binary_to_list(Replacement) ++ End,
+      {string, list_to_binary(List2)};
+    nomatch ->
+      nil
+  end.
