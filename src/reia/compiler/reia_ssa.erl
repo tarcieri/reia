@@ -40,11 +40,11 @@ transform(State, {function, Line, Name, Arguments, Expressions}) ->
   % Return to the original scope
   {stop, State, {function, Line, Name, Arguments2, Expressions2}};
 
-% Lambdas close over the outer scope but still bind arguments
+% Lambdas close over the outer scope, bind arguments, but don't affect the outer scope
 transform({Mode, Dict}, {lambda, Line, Arguments, Expressions}) ->
   {ok, {_, Dict2}, Arguments2} = reia_visitor:transform(Arguments, {argument, Dict}, fun transform/2),
-  {ok, {_, Dict3}, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict2}, fun transform/2),
-  {stop, {Mode, Dict3}, {lambda, Line, Arguments2, Expressions2}};
+  {ok, _, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict2}, fun transform/2),
+  {stop, {Mode, Dict}, {lambda, Line, Arguments2, Expressions2}};
   
 % Function names are identifiers and should remain undisturbed
 transform({Mode, _Dict} = State, {funcall, Line, Name, Arguments}) ->
