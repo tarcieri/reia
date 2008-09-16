@@ -14,7 +14,7 @@ module Eval
         throw error
     
   def exprs(forms, binding)
-    erl_forms = reia_compiler::compile(forms)
+    erl_forms = reia_compiler::compile(forms, [(~ssa, binding), ~r2e, ~dynamic])
     erl_eval::exprs(erl_forms, binding, (~value, fun(name, arguments) { local(name, arguments) }))
   
   def new_binding
