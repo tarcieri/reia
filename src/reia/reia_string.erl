@@ -36,8 +36,15 @@ funcall({string, String}, downcase, []) ->
   reia_list:funcall(reia_erl:e2r(NewString), to_string, []);
   
 %% String#capitalize
-%%   Capitalize the first letter of a string, downcasing all others
+%%   Capitalize the first letter of a string
 funcall({string, String}, capitalize, []) ->
   [FirstLetter|Rest] = binary_to_list(String),
-  NewString = string:to_upper([FirstLetter]) ++ string:to_lower(Rest),
+  NewString = string:to_upper([FirstLetter]) ++ Rest,
+  reia_list:funcall(reia_erl:e2r(NewString), to_string, []);
+  
+%% String#uncapitalize
+%%   Uncapitalize the first letter of a string
+funcall({string, String}, uncapitalize, []) ->
+  [FirstLetter|Rest] = binary_to_list(String),
+  NewString = string:to_lower([FirstLetter]) ++ Rest,
   reia_list:funcall(reia_erl:e2r(NewString), to_string, []).
