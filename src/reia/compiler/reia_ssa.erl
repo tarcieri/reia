@@ -41,10 +41,10 @@ transform(State, {function, Line, Name, Arguments, Expressions}) ->
   {stop, State, {function, Line, Name, Arguments2, Expressions2}};
 
 % Lambdas close over the outer scope, bind arguments, but don't affect the outer scope
-transform({Mode, Dict}, {lambda, Line, Arguments, Expressions}) ->
+transform({_, Dict} = State, {lambda, Line, Arguments, Expressions}) ->
   {ok, {_, Dict2}, Arguments2} = reia_visitor:transform(Arguments, {argument, Dict}, fun transform/2),
   {ok, _, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict2}, fun transform/2),
-  {stop, {Mode, Dict}, {lambda, Line, Arguments2, Expressions2}};
+  {stop, State, {lambda, Line, Arguments2, Expressions2}};
   
 % Function names are identifiers and should remain undisturbed
 transform({Mode, _Dict} = State, {funcall, Line, Name, Arguments}) ->
@@ -98,6 +98,18 @@ transform({'case', Dict}, {clause, Line, Pattern, Expressions}) ->
   {ok, {_, Dict2}, Pattern2} = reia_visitor:transform(Pattern, {match, Dict}, fun transform/2),
   {ok, {_, Dict3}, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict2}, fun transform/2),
   {stop, {'case', Dict3}, {clause, Line, Pattern2, Expressions2}};
+    
+% List comprehensions can access the outer scope but have a scope of their own
+transform({_, Dict} = State, {'lc', Line, Transform, Expressions}) ->
+  {ok, {_, Dict2}, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict}, fun transform/2),
+  {ok, _, Transform2} = reia_visitor:transform(Transform, {normal, Dict2}, fun transform/2),
+  {stop, State, {'lc', Line, Transform2, Expressions2}};
+
+% Generate expressions match a pattern
+transform({Mode, Dict}, {'generate', Line, Pattern, List}) ->
+  {ok, {_, Dict2}, Pattern2} = reia_visitor:transform(Pattern, {match, Dict}, fun transform/2),
+  {ok, {_, Dict3}, List2} = reia_visitor:transform(List, {Mode, Dict2}, fun transform/2),
+  {stop, {Mode, Dict3}, {'generate', Line, Pattern2, List2}};
 
 % Normally identifiers are mapped to their latest version
 transform({normal, Dict} = State, {identifier, Line, Name}) ->
