@@ -26,6 +26,10 @@ funcall(Receiver, to_internal, []) ->
     _ ->
       reia_erl:e2r(Receiver)
   end;
+  
+%% Convert a term from its Reia representation to an internal Erlang one
+funcall(Receiver, internalize, []) ->
+  reia_erl:r2e(Receiver);
 
 funcall({constant, Name}, Method, Arguments) ->
   apply(Name, Method, Arguments);
