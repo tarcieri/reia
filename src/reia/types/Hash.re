@@ -15,6 +15,12 @@ module Hash
         value
       ~error:
         nil
+  
+  # Hash#insert
+  #   Insert an element into a hash, returning a new hash
+  def funcall(term, ~insert, [key, value])
+    (~dict, hash) = term.to_internal()
+    dict::store(key, value, hash)
 
   # Hash#to_list
   #   Convert a hash to a list of its key/value pairs
