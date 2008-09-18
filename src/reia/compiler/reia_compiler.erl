@@ -175,9 +175,9 @@ forms({range, Line, Begin, End}) ->
   ]};
   
 %% Operators
-forms({op, {Op, Line}, In}) ->
+forms({op, Line, Op, In}) ->
   reia_operators:forms(Op, Line, forms(In));
-forms({op, {Op, Line}, In1, In2}) ->
+forms({op, Line, Op, In1, In2}) ->
   reia_operators:forms(Op, Line, forms(In1), forms(In2));
   
 %% Reia function calls

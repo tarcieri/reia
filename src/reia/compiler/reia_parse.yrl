@@ -119,28 +119,28 @@ inline_if_expr -> match_expr : '$1'.
 match_expr -> bool_expr '=' match_expr : {match, line('$2'), '$1', '$3'}.
 match_expr -> bool_expr : '$1'.
 
-bool_expr -> comp_expr bool_op bool_expr : {op, '$2', '$1', '$3'}.
+bool_expr -> comp_expr bool_op bool_expr : {op, line('$1'), op('$2'), '$1', '$3'}.
 bool_expr -> comp_expr : '$1'.
 
-comp_expr -> range_expr comp_op range_expr : {op, '$2', '$1', '$3'}.
+comp_expr -> range_expr comp_op range_expr : {op, line('$1'), op('$2'), '$1', '$3'}.
 comp_expr -> range_expr : '$1'.
 
 range_expr -> add_expr '..' range_expr : {range, line('$2'), '$1', '$3'}.
 range_expr -> add_expr : '$1'.
 
-add_expr -> mult_expr add_op add_expr : {op, '$2', '$1', '$3'}.
+add_expr -> mult_expr add_op add_expr : {op, line('$1'), op('$2'), '$1', '$3'}.
 add_expr -> mult_expr : '$1'.
 
-mult_expr -> pow_expr mult_op mult_expr : {op, '$2', '$1', '$3'}.
+mult_expr -> pow_expr mult_op mult_expr : {op, line('$1'), op('$2'), '$1', '$3'}.
 mult_expr -> pow_expr : '$1'.
 
-pow_expr -> throw_expr pow_op pow_expr : {op, '$2', '$1', '$3'}.
+pow_expr -> throw_expr pow_op pow_expr : {op, line('$1'), op('$2'), '$1', '$3'}.
 pow_expr -> throw_expr : '$1'.
 
 throw_expr -> throw unary_expr : {throw, line('$1'), '$2'}.
 throw_expr -> unary_expr : '$1'.
 
-unary_expr -> unary_op unary_expr : {op, '$1', '$2'}.
+unary_expr -> unary_op unary_expr : {op, line('$1'), op('$1'), '$2'}.
 unary_expr -> funcall_expr : '$1'.
 
 funcall_expr -> funcall : '$1'.
@@ -199,7 +199,7 @@ catch_clause -> 'catch' expr eol indent statements dedent : {'catch', line('$1')
 
 %% Boolean operators
 bool_op -> 'and' : '$1'.
-bool_op -> 'or' : '$1'.
+bool_op -> 'or'  : '$1'.
 
 %% Comparison operators
 comp_op -> '==' : '$1'.
@@ -312,6 +312,10 @@ string(String) ->
 
 %% Keep track of line info in tokens
 line(Tup) -> element(2, Tup).
+
+%% Extract operators from op tokens
+op({Op, _Line}) ->
+  Op.
 
 %% Generate proper forms for if statements
 if_forms({{'if', Line}, Expression, Statements}) ->

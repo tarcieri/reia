@@ -57,7 +57,7 @@ file "ebin/reia_scan.beam" => %w[ebin/leex.beam src/reia/compiler/reia_scan.xrl]
 end
 
 # Compile reia_parse using yecc
-file "ebin/reia_parse.erl" => "src/reia/compiler/reia_parse.yrl" do
+file "ebin/reia_parse.beam" => "src/reia/compiler/reia_parse.yrl" do
   sh "bin/yecc src/reia/compiler/reia_parse.yrl"
   mv "src/reia/compiler/reia_parse.erl", "artifacts/erl/reia_parse.erl"
   sh "erlc +debug_info -o ebin artifacts/erl/reia_parse.erl"
