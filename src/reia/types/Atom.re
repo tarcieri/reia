@@ -16,6 +16,9 @@ module Atom
     "false"
     
   def funcall(term, ~to_s, [])
+    erlang::atom_to_list(term).to_string()
+    
+  def funcall(term, ~inspect, [])
     atom = erlang::atom_to_list(term).to_string()
     case /^[A-Za-z0-9_]+$/.match(atom)
       nil:

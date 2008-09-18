@@ -80,8 +80,13 @@ funcall({list, _} = List, to_string, []) ->
   {string, list_to_binary(to_erl(List))};
 
 %% List#to_s
-%%   Generate a string representing a list
+%%   Generate a string representation of a list
 funcall({list, _} = List, to_s, []) ->
+  funcall(List, inspect, []);
+  
+%% List#inspect
+%%   Inspect the contents of a list
+funcall({list, _} = List, inspect, []) ->
   Elements = [element_to_string2(Element) || Element <- to_erl(List)],
   String = lists:concat(["[", string:join(Elements, ","), "]"]),
   funcall(reia_erl:e2r(String), to_string, []);
@@ -101,7 +106,7 @@ element_to_string(Element) ->
   element_to_string2(Element).
   
 element_to_string2(Element) ->
-  {list, {List, []}} = reia_dispatch:funcall(reia_dispatch:funcall(Element, to_s, []), to_list, []),
+  {list, {List, []}} = reia_dispatch:funcall(reia_dispatch:funcall(Element, inspect, []), to_list, []),
   List.
   
 %%

@@ -19,3 +19,6 @@ module Numeric
     else
       [list] = io_lib::format("~f".to_list(), [number])
       list.to_string()
+      
+  def funcall(number, ~inspect, [])
+    funcall(number, ~to_s, [])

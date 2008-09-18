@@ -19,7 +19,12 @@ module Tuple
   # Tuple#to_s
   #   Generate a string representation of a Tuple  
   def funcall(tuple, ~to_s, [])
-    ["(", tuple.to_list().map { |e| e.to_s() }.join(","), ")"].join()
+    funcall(tuple, ~inspect, [])
+  
+  # Tuple#inspect
+  #   Inspect the contents of a Tuple
+  def funcall(tuple, ~inspect, [])
+    ["(", tuple.to_list().map { |e| e.inspect() }.join(","), ")"].join()
     
   # Tuple#size
   #   Return the number of elements in a Tuple

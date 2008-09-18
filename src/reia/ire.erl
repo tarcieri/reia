@@ -54,7 +54,7 @@ eval_print(String, Binding) ->
   end.
 
 print(Value) ->
-  {string, String} = reia_dispatch:funcall(Value, to_s, []),
+  {string, String} = reia_dispatch:funcall(Value, inspect, []),
   io:format("=> ~s~n", [binary_to_list(String)]).
   
 parse_error({Line, Error}) ->

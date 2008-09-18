@@ -21,9 +21,14 @@ module Hash
   def funcall(term, ~to_list, [])
     (~dict, hash) = term.to_internal()
     dict::to_list(hash)
-    
+  
   # Hash#to_s
   #   Convert a hash to a string representation
   def funcall(hash, ~to_s, [])
-    members = hash.to_list().map { |(k, v)| [k.to_s(), v.to_s()].join(":") }
+    funcall(hash, ~inspect, [])
+        
+  # Hash#inspect
+  #   Inspect the contents of a hash
+  def funcall(hash, ~inspect, [])
+    members = hash.to_list().map { |(k, v)| [k.inspect(), v.inspect()].join(":") }
     ["{", members.join(","), "}"].join()

@@ -9,8 +9,13 @@
 -export([funcall/3]).
 
 %% String#to_s
-%%   Generate a string representation of a string
-funcall({string, String}, to_s, []) ->
+%%   A noop, as strings are already strings
+funcall(String = {string, _}, to_s, []) ->
+  String;
+
+%% String#inspect
+%%   Inspect the contents of a string
+funcall({string, String}, inspect, []) ->
   {string, list_to_binary("\"" ++ binary_to_list(String) ++ "\"")};
   
 %% String#to_list

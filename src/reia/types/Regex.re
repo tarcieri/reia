@@ -15,6 +15,9 @@ module Regex
     
   def funcall(regexp, ~to_s, [])
     ["/", regexp.to_string(), "/"].join()
+    
+  def funcall(regexp, ~inspect, [])
+    funcall(regexp, ~to_s, [])
   
   def funcall(regexp, ~match, [string])
     case re::run(string.to_binary(), regexp.to_list(), [(~capture, ~all, ~binary)])

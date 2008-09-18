@@ -13,6 +13,9 @@ module Binary
     binary.to_list().to_string()
     
   def funcall(binary, ~to_s, [])
+    funcall(binary, ~to_string, [])
+    
+  def funcall(binary, ~inspect, [])
     list = binary.to_list()
     if io_lib::char_list(list)
       ['<<"', list.to_string(), '">>'].join()
