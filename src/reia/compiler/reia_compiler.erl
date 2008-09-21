@@ -183,6 +183,8 @@ forms({op, Line, Op, In1, In2}) ->
 %% Reia function calls
 forms({funcall, Line, {identifier, _, Method}, Arguments}) ->
   {call, Line, {atom, Line, Method}, [forms(Argument) || Argument <- Arguments]};
+forms({funcall, Line, {variable, _, Var}, Arguments}) ->
+  {call, Line, forms({identifier, Line, Var}), [forms(Argument) || Argument <- Arguments]};
 forms({funcall, Line, Receiver, {identifier, _, Method}, Arguments}) ->
   {call, Line,
     {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, funcall}},

@@ -46,10 +46,16 @@ transform({_, Dict} = State, {lambda, Line, Arguments, Expressions}) ->
   {ok, _, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict2}, fun transform/2),
   {stop, State, {lambda, Line, Arguments2, Expressions2}};
   
-% Function names are identifiers and should remain undisturbed
-transform({Mode, _Dict} = State, {funcall, Line, Name, Arguments}) ->
+% Function names are identifiers and should remain undisturbed unless they are bound variables
+transform({Mode, Dict} = State, {funcall, Line, {identifier, _Line, Name} = Identifier, Arguments}) ->
   {ok, {_, Dict2}, Arguments2} = reia_visitor:transform(Arguments, State, fun transform/2),
-  Node = {funcall, Line, Name, Arguments2},
+  Identifier2 = case dict:find(Name, Dict) of
+    {ok, Version} ->
+      {variable, Line, ssa_name(Name, Version)};
+    error ->
+      Identifier
+  end,  
+  Node = {funcall, Line, Identifier2, Arguments2},
   {stop, {Mode, Dict2}, Node};
 
 transform({Mode, _Dict} = State, {funcall, Line, Receiver, Name, Arguments}) ->
