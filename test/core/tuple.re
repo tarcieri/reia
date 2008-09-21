@@ -7,16 +7,11 @@ module TupleTest
     
   # retrieves the nth element correctly
   def nth_test
-    Local.print("- retrieves the nth element correctly: ")
-    
-    tuple = (1,2,3,4,5)
-    if tuple[0] == 1 and tuple[1] == 2 and tuple[4] == 5
-      Local.puts("ok")
-      true
-    else
-      Local.puts("FAILED")
-      false
-  
+    TestHelper.expect("retrieves the nth element correctly", fun do    
+      tuple = (1,2,3,4,5)
+      (true, tuple[0] == 1 and tuple[1] == 2 and tuple[4] == 5)
+    )
+      
   # converts to a list
   def to_list_test
     TestHelper.expect("converts to a list", fun do
