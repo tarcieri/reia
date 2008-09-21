@@ -13,6 +13,7 @@ Nonterminals
   ending_token
   inline_statements
   module_decl
+  class_decl
   functions
   function
   exprs
@@ -64,7 +65,7 @@ Nonterminals
   
 Terminals
   true false nil
-  float integer string regexp atom identifier constant module
+  float integer string regexp atom identifier constant module class
   eol indent dedent def fun do 'case' else 'if' unless 
   'and' 'or' 'not' 'try' 'catch' throw in
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
@@ -84,6 +85,7 @@ statements -> statement statement_ending : ['$1'].
 statements -> statement statement_ending statements : ['$1'|'$3'].
 
 statement -> module_decl : '$1'.
+statement -> class_decl : '$1'.
 statement -> expr : '$1'.
 
 %% Statement endings
@@ -98,6 +100,9 @@ inline_statements -> expr ';' exprs : ['$1'|'$3'].
 
 %% Module declaration
 module_decl -> module constant eol indent functions dedent : {module, line('$1'), '$2', '$5'}.
+
+%% Class declaration
+class_decl -> class constant eol indent functions dedent : {class, line('$1'), '$2', '$5'}.
 
 %% Functions
 functions -> function : ['$1'].
