@@ -19,8 +19,6 @@ r2e({tuple, Elements}) ->
   list_to_tuple([r2e(Element) || Element <- tuple_to_list(Elements)]);
 r2e({list, _} = List) ->
   [r2e(Term) || Term <- reia_list:to_erl(List)];
-r2e({lambda, Fun}) ->
-  Fun;
 r2e(Term) -> Term.
 
 % Convert an Erlang term to a Reia term
@@ -34,8 +32,6 @@ e2r(Term) when is_tuple(Term) ->
       Term;
     {string, String} when is_binary(String) ->
       Term;
-    {lambda, Lambda} when is_function(Lambda) ->
-      Term;
     {dict, _} ->
       Term;
     {constant, _} ->
@@ -47,6 +43,4 @@ e2r(Term) when is_tuple(Term) ->
     _ ->
       {tuple, list_to_tuple([e2r(Element) || Element <- tuple_to_list(Term)])}
   end;
-e2r(Term) when is_function(Term) ->
-  {lambda, Term};
 e2r(Term) -> Term.
