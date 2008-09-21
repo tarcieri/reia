@@ -118,17 +118,17 @@ element_to_string2(Element) ->
 %% Functions which take a block
 %%
 
-funcall({list, _} = List, each, [], {lambda, Block}) ->
+funcall({list, _} = List, each, [], Block) ->
   lists:foreach(Block, to_erl(List)),
   List;
 
-funcall({list, _} = List, map, [], {lambda, Block}) ->
+funcall({list, _} = List, map, [], Block) ->
   {list, {lists:map(Block, to_erl(List)), []}};
   
-funcall({list, _} = List, filter, [], {lambda, Block}) ->
+funcall({list, _} = List, filter, [], Block) ->
   {list, {lists:filter(Block, to_erl(List)), []}};
   
-funcall({list, _} = List, reduce, [Acc0], {lambda, Block}) ->
+funcall({list, _} = List, reduce, [Acc0], Block) ->
   lists:foldl(Block, Acc0, to_erl(List)).
   
 %% Convert a Reia list to its Erlang equivalent

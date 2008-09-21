@@ -152,14 +152,9 @@ forms({binary, Line, String = {string, _, _}}) ->
   
 %% Lambdas
 forms({lambda, Line, Args, Statements}) ->
-  {tuple, Line, [
-    {atom, Line, lambda},
-    {'fun', Line, {clauses,[{clause, Line,
-      [forms(Arg) || Arg <- Args],
-      [],
-      [forms(Statement) || Statement <- Statements]
-    }]}}
-  ]};
+  {'fun', Line, 
+    {clauses,[{clause, Line, [forms(Arg) || Arg <- Args], [], [forms(Statement) || Statement <- Statements]}]}
+  };
   
 %% Ranges
 forms({range, Line, Begin, End}) ->
