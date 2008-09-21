@@ -16,7 +16,9 @@ module TupleTest
     else
       Local.puts("FAILED")
       false
-    
+  
   # converts to a list
-  def to_list_test()
-    TestHelper.assert_equal("converts to a list", [1,2,3].to_s(), (1,2,3).to_list().to_s())
+  def to_list_test
+    TestHelper.expect("converts to a list", fun do
+      ([1,2,3].to_s(), (1,2,3).to_list().to_s())
+    )
