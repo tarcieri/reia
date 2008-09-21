@@ -105,6 +105,12 @@ transform({'case', Dict}, {clause, Line, Pattern, Expressions}) ->
   {ok, {_, Dict3}, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict2}, fun transform/2),
   {stop, {'case', Dict3}, {clause, Line, Pattern2, Expressions2}};
     
+% Catch clauses match against patterns
+transform({Mode, Dict}, {'catch', Line, Pattern, Expressions}) ->
+  {ok, {_, Dict2}, Pattern2} = reia_visitor:transform(Pattern, {match, Dict}, fun transform/2),
+  {ok, {_, Dict3}, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict2}, fun transform/2),
+  {stop, {Mode, Dict3}, {'catch', Line, Pattern2, Expressions2}};
+    
 % List comprehensions can access the outer scope but have a scope of their own
 transform({_, Dict} = State, {'lc', Line, Transform, Expressions}) ->
   {ok, {_, Dict2}, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict}, fun transform/2),
