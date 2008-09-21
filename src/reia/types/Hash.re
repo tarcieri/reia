@@ -9,7 +9,7 @@ module Hash
   # Hash#[]
   #   Retrieve an element from a Hash
   def funcall(term, ~'[]', [key])
-    (~dict, hash) = term.to_internal()
+    (~dict, hash) = term.uninternalize()
     case dict::find(key, hash)
       (~ok, value):
         value
@@ -19,13 +19,13 @@ module Hash
   # Hash#insert
   #   Insert an element into a hash, returning a new hash
   def funcall(term, ~insert, [key, value])
-    (~dict, hash) = term.to_internal()
+    (~dict, hash) = term.uninternalize()
     dict::store(key, value, hash)
 
   # Hash#to_list
   #   Convert a hash to a list of its key/value pairs
   def funcall(term, ~to_list, [])
-    (~dict, hash) = term.to_internal()
+    (~dict, hash) = term.uninternalize()
     dict::to_list(hash)
   
   # Hash#to_s

@@ -16,8 +16,8 @@
 funcall(List, Method, Arguments) when is_list(List) ->
   reia_list:funcall({list, {List, []}}, Method, Arguments);
 
-%% Convert a Reia term to its internal representation
-funcall(Receiver, to_internal, []) ->
+%% Convert a Reia term from its internal representation
+funcall(Receiver, uninternalize, []) ->
   case Receiver of
     {dict, _} ->
       {tuple, Receiver};

@@ -7,7 +7,7 @@
 
 module Regex
   def funcall(regexp, ~to_list, [])
-    (~regexp, bin) = regexp.to_internal()
+    (~regexp, bin) = regexp.uninternalize()
     erlang::binary_to_list(bin)
     
   def funcall(regexp, ~to_string, [])
