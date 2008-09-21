@@ -73,6 +73,11 @@ funcall({list, {[Value|_Forward], _Reverse}}, shift, []) ->
 funcall({list, {Forward, Reverse}}, size, []) ->
   length(Forward) + length(Reverse);
   
+%% List#to_tuple
+%%   Explicitly cast a list to a tuple
+funcall({list, _} = List, to_tuple, []) ->
+  {tuple, list_to_tuple(to_erl(List))};
+ 
 %% List#to_string
 %%   Explicitly cast a list to a string.  Useful for converting Erlang "strings"
 %%   to Reia strings.
