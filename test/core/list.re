@@ -9,39 +9,46 @@ module ListTest
     unshift_test()
     join_test()
     to_tuple_test()
-    
+  
   # retrieves the nth element correctly
   def nth_test
-    Local.print("- retrieves the nth element correctly: ")
-    
-    list = [1,2,3,4,5]
-    if list[0] == 1 and list[1] == 2 and list[4] == 5
-      Local.puts("ok")
-      true
-    else
-      Local.puts("FAILED")
-      false
-    
+    TestHelper.expect("retrieves the nth element correctly", fun do    
+      list = [1,2,3,4,5]
+      (true, list[0] == 1 and list[1] == 2 and list[4] == 5)
+    )
+      
   # reverses the order of a list
   def reverse_test
-    TestHelper.assert_equal("reverses the order of a list", [3,2,1].to_s(), [1,2,3].reverse().to_s())
+    TestHelper.expect("reverses the order of a list", fun do
+      ([3,2,1].to_s(), [1,2,3].reverse().to_s())
+    )
     
   def push_test
-    TestHelper.assert_equal("appends elements with push", [1,2,3,4].to_s(), [1,2,3].push(4).to_s())
+    TestHelper.expect("appends elements with push", fun do
+      ([1,2,3,4].to_s(), [1,2,3].push(4).to_s())
+    )
     
   def pop_test
-    TestHelper.assert_equal("removes last element with pop", 3, [1,2,3].pop())
+    TestHelper.expect("removes last element with pop", fun do 
+      (3, [1,2,3].pop())
+    )
     
   def unshift_test
-    TestHelper.assert_equal("prepends elements with unshift", [1,2,3,4].to_s(), [2,3,4].unshift(1).to_s())
+    TestHelper.expect("prepends elements with unshift", fun do
+      ([1,2,3,4].to_s(), [2,3,4].unshift(1).to_s())
+    )
     
   def shift_test
-    TestHelper.assert_equal("removes first element with shift", 1, [1,2,3].shift())
+    TestHelper.expect("removes first element with shift", fun do
+      (1, [1,2,3].shift())
+    )
     
   def join_test
-    TestHelper.assert_equal("joins into a string", "1,2,3", [1,2,3].join(','))
+    TestHelper.expect("joins into a string", fun do
+      ("1,2,3", [1,2,3].join(','))
+    )
     
   def to_tuple_test()
-    TestHelper.assert_equal("converts to a tuple", (1,2,3).to_s(), [1,2,3].to_tuple().to_s())
-    
-    
+    TestHelper.expect("converts to a tuple", fun do
+      ((1,2,3).to_s(), [1,2,3].to_tuple().to_s())
+    )
