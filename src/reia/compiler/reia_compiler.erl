@@ -47,11 +47,17 @@ dynamic(Expressions) ->
   [dynamic_expression(Expression) || Expression <- Expressions].
   
 %% Pass dynamic module declarations to reia_module:build/1
-dynamic_expression(Module = {module, Line, _Constant, _Functions}) ->
+dynamic_expression({module, Line, _Constant, _Functions} = Module) ->
   %% Convert the module to an Erlang forms representation to pass as a call to reia_module
   Arg = erl_syntax:revert(erl_syntax:abstract(Module)),
   {call, Line, {remote, Line, {atom, Line, reia_module}, {atom, Line, build}}, [Arg]};
   
+%% Pass dynamic class declarations to reia_class:build/1
+dynamic_expression({class, Line, _Constant, _Functions} = Class) ->
+  %% Convert the class to an Erlang forms representation to pass as a call to reia_class
+  Arg = erl_syntax:revert(erl_syntax:abstract(Class)),
+  {call, Line, {remote, Line, {atom, Line, reia_class}, {atom, Line, build}}, [Arg]};
+    
 %% Leave other toplevel expressions alone
 dynamic_expression(Expression) ->
   Expression.
@@ -65,6 +71,10 @@ static(_) ->
 %% Module declarations
 forms({module, Line, {constant, _, Name}, Functions}) ->
   {module, Line, Name, group_clauses([forms(Function) || Function <- Functions])};
+
+%% Class declarations
+forms({class, Line, {constant, _, Name}, Functions}) ->
+  {class, Line, Name, group_clauses([forms(Function) || Function <- Functions])};
   
 %% Functions
 forms({function, Line, {identifier, _, Name}, Arguments, Expressions}) ->
