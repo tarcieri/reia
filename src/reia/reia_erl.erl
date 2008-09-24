@@ -40,6 +40,8 @@ e2r(Term) when is_tuple(Term) ->
       Term;
     {dict, _, _, _, _, _, _, _, _} ->
       {dict, Term};
+    {object, _} ->
+      Term;
     _ ->
       {tuple, list_to_tuple([e2r(Element) || Element <- tuple_to_list(Term)])}
   end;

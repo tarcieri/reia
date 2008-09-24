@@ -11,7 +11,7 @@
 
 build({class, Line, Name, Functions}) ->
   Module = {module, Line, Name, process_functions(Name, Functions)},
-  io:format("~p~n", [Module]),
+  % io:format("~p~n", [Module]),
   reia_module:build(Module);
 build(_) ->
   {error, "invalid class"}.
@@ -24,7 +24,7 @@ process_functions(Module, Functions) ->
     Functions
   ),
   
-  DefaultFunctions = start_functions(Module),
+  DefaultFunctions = init_functions(Module),
   ImmediateFunctions = [Function || {_, Function} <- dict:to_list(FunctionDict)],
   DefaultFunctions ++ ImmediateFunctions ++ process_methods(Methods). 
     
@@ -42,8 +42,15 @@ process_methods([FirstMeth|_] = Methods) ->
   % Extract the line number from the first method
   {function, Line, _, _, _} = FirstMeth,
   
+  % Decompose the function clauses for methods into handle_call clauses
+  Clauses = lists:flatten([process_method(Method) || Method <- Methods ++ default_methods()]),
+  
+  % Add a clause which thunks to method_missing
+  MethodMissingThunk = "handle_call({Method, Args}, _, State) -> method_missing(State, Method, Args).",
+  {function, _, _, _, MethodMissingClause} = parse_function(MethodMissingThunk),
+  
   % New master handle_call function
-  [{function, Line, handle_call, 3, lists:flatten([process_method(Method) || Method <- Methods])}].
+  [{function, Line, handle_call, 3, Clauses ++ MethodMissingClause}].
   
 process_method({function, _Line, Name, _Arity, Clauses}) ->
   [process_method_clause(Clause, Name) || Clause <- Clauses].
@@ -61,7 +68,7 @@ argument_list_cons([], Line) ->
 argument_list_cons([Element|Rest], Line) ->
   {cons, Line, Element, argument_list_cons(Rest, Line)}.
 
-% Default set of functions to incorporate into Reia classes
+% Default functions to incorporate into Reia classes
 default_functions() ->
   [{Name, parse_function(String)} || {Name, String} <- [
     {init,           "init(Args) -> initialize(Args), {ok, dict:new()}."},
@@ -69,12 +76,20 @@ default_functions() ->
     {method_missing, "method_missing(_State, Method, _Args) -> throw({error, {Method, \"undefined\"}})."}
   ]].
   
+% Default methods that Reia objects respond to
+default_methods() ->
+  [parse_function(Function) || Function <- [
+    "to_s() -> {reply, {string, <<\"#<Object>\">>}, void}.",
+    "inspect() -> {reply, {string, <<\"#<Object>\">>}, void}."
+  ]].
+  
 % Functions for starting a new object
-start_functions(Module) ->
-  [start_function(Module, Function) || Function <- ["start", "start_link"]].
+init_functions(Module) ->
+  [init_function(Module, Function) || Function <- ["start", "start_link"]].
 
-start_function(Module, Function) ->
-  parse_function(lists:concat([Function, "() -> gen_server:", Function, "('", Module, "', [], [])."])).
+init_function(Module, Function) ->
+  String = [Function, "() -> {ok, Pid} = gen_server:", Function, "('", Module, "', [], []), {object, {Pid, '", Module, "'}}."],
+  parse_function(lists:concat(String)).
   
 % Parse a function from a string
 parse_function(String) ->

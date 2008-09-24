@@ -31,6 +31,9 @@ funcall(Receiver, uninternalize, []) ->
 funcall(Receiver, internalize, []) ->
   reia_erl:r2e(Receiver);
 
+%% Dispatch a method to an object
+funcall({object, {Pid, _Class}}, Method, Arguments) ->
+  gen_server:call(Pid, {Method, Arguments});
 funcall({constant, Name}, Method, Arguments) ->
   apply(Name, Method, Arguments);
 funcall(Receiver, Method, Arguments) when is_integer(Receiver) or is_float(Receiver) ->
