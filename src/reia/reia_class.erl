@@ -10,21 +10,23 @@
 -compile(export_all).
 
 build({class, Line, Name, Functions}) ->
-  Module = {module, Line, Name, process_functions(Functions)},
+  Module = {module, Line, Name, process_functions(Name, Functions)},
   io:format("~p~n", [Module]),
   reia_module:build(Module);
 build(_) ->
   {error, "invalid class"}.
 
 % Process incoming functions, substituting custom versions for defaults  
-process_functions(Functions) ->
+process_functions(Module, Functions) ->
   {FunctionDict, Methods} = lists:foldr(
     fun process_function/2, 
     {dict:from_list(default_functions()), []}, 
     Functions
   ),
+  
+  DefaultFunctions = start_functions(Module),
   ImmediateFunctions = [Function || {_, Function} <- dict:to_list(FunctionDict)],
-  ImmediateFunctions ++ process_methods(Methods). 
+  DefaultFunctions ++ ImmediateFunctions ++ process_methods(Methods). 
     
 process_function({function, _Line, Name, _Arity, _Clauses} = Function, {Dict, Functions}) ->
   case dict:find(Name, Dict) of
@@ -66,6 +68,13 @@ default_functions() ->
     {initialize,     "initialize(_Args) -> void."}, 
     {method_missing, "method_missing(_State, Method, _Args) -> throw({error, {Method, \"undefined\"}})."}
   ]].
+  
+% Functions for starting a new object
+start_functions(Module) ->
+  [start_function(Module, Function) || Function <- ["start", "start_link"]].
+
+start_function(Module, Function) ->
+  parse_function(lists:concat([Function, "() -> gen_server:", Function, "('", Module, "', [], [])."])).
   
 % Parse a function from a string
 parse_function(String) ->
