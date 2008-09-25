@@ -20,6 +20,8 @@ main(Options) ->
 
 init() ->
   code:add_pathz("./ebin"),
+  code:add_pathz("./artifacts/beam"),
+  code:add_pathz("../artifacts/beam"),
   code:add_pathz("../ebin"),
   code:add_pathz("./src/smart_exceptions"),
   code:add_pathz("../src/smart_exceptions").
