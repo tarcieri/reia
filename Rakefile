@@ -1,5 +1,5 @@
 task :default => [:build, :test]
-task :build => [:smerl, :leex, :smart_exceptions, :reia, :ebin, :clean]
+task :build => [:smerl, :leex, :yecc, :smart_exceptions, :reia, :ebin, :clean]
 
 def output_file(input_file)
   'ebin/' + File.basename(input_file).sub(/\.\w+$/, '.beam')
@@ -43,7 +43,7 @@ file "ebin/smerl.beam" => "src/smerl/smerl.erl" do
 end
 
 # Leex (lexer generator for Erlang)
-task :leex => "ebin/leex.beam"
+task :leex => ["ebin/leex.beam", "ebin/reia_scan.beam"]
 
 file "ebin/leex.beam" => "src/leex/leex.erl" do
   sh "erlc -W0 -o ebin src/leex/leex.erl"
@@ -55,6 +55,8 @@ file "ebin/reia_scan.beam" => %w[ebin/leex.beam src/reia/compiler/reia_scan.xrl]
   mv "src/reia/compiler/reia_scan.erl", "artifacts/erl/reia_scan.erl"
   sh "erlc +debug_info +nowarn_unused_vars -o artifacts/beam artifacts/erl/reia_scan.erl"
 end
+
+task :yecc => "ebin/reia_parse.beam"
 
 # Compile reia_parse using yecc
 file "ebin/reia_parse.beam" => "src/reia/compiler/reia_parse.yrl" do
