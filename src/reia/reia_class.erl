@@ -60,7 +60,19 @@ process_method_clause({clause, Line, Arguments, [], Expressions}, Name) ->
     {tuple, Line, [{atom, Line, Name}, argument_list_cons(Arguments, Line)]}, 
     {var, Line, '_From'}, 
     {var, Line, '_Ivars'}
-  ], [], Expressions}.
+  ], [], process_return_value(Expressions)}.
+
+process_return_value(Expressions) ->
+  process_return_value(lists:reverse(Expressions), []).
+
+process_return_value([], Expressions) ->
+  Expressions;
+process_return_value([Reply|Rest], []) ->
+  Line = element(2, Reply),
+  Result = {tuple, Line, [{atom, Line, reply}, Reply, {atom, Line, void}]},
+  process_return_value(Rest, [Result]);
+process_return_value([Head|Rest], Expressions) ->
+  process_return_value(Rest, [Head|Expressions]).
   
 %% Generate cons for arguments
 argument_list_cons([], Line) ->
@@ -83,8 +95,8 @@ default_functions() ->
 % Default methods that Reia objects respond to
 default_methods() ->
   [parse_function(Function) || Function <- [
-    "to_s() -> {reply, {string, <<\"#<Object>\">>}, void}.",
-    "inspect() -> {reply, {string, <<\"#<Object>\">>}, void}."
+    "to_s() -> {string, <<\"#<Object>\">>}.",
+    "inspect() -> {string, <<\"#<Object>\">>}."
   ]].
   
 % Functions for starting a new object
