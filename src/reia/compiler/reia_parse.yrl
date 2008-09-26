@@ -261,7 +261,6 @@ inline_block -> '{' '|' exprs '|' inline_statements '}' : {lambda, line('$1'), '
 multiline_block -> do eol indent statements dedent : {lambda, line('$1'), [], '$4'}.
 multiline_block -> do '|' exprs '|' eol indent statements dedent : {lambda, line('$1'), '$3', '$7'}.
 
-
 %% Erlang function calls
 erl_funcall -> identifier '::' identifier '(' ')' : {erl_funcall, line('$2'), '$1', '$3', []}.
 erl_funcall -> identifier '::' identifier '(' exprs ')' : {erl_funcall, line('$2'), '$1', '$3', '$5'}.
