@@ -38,8 +38,9 @@ Rules.
 \~{SingleQuoted} : build_quoted_atom(TokenChars, TokenLine, TokenLen).
 
 %% Identifiers and constants
-{UpperCase}({UpperCase}|{Digit}|{LowerCase}|_)* : build_constant(TokenChars, TokenLine).
-({LowerCase}|_)({UpperCase}|{Digit}|{LowerCase}|_)* : build_identifier(TokenChars, TokenLine).
+{UpperCase}({UpperCase}|{LowerCase}|{Digit}|_)* : build_constant(TokenChars, TokenLine).
+({LowerCase}|_)({UpperCase}|{LowerCase}|{Digit}|_)* : build_identifier(TokenChars, TokenLine).
+({LowerCase}|_)({UpperCase}|{LowerCase}|{Digit}|_)*[?!] : build_punctuated_identifier(TokenChars, TokenLine).
 
 %% Ignored
 {Comment} : skip_token.
@@ -217,6 +218,10 @@ build_identifier(Chars, Line) ->
         true -> {token, {Atom, Line}};
         false -> {token, {identifier, Line, Atom}}
     end.
+    
+build_punctuated_identifier(Chars, Line) ->
+  Atom = list_to_atom(Chars),
+  {token, {punctuated_identifier, Line, Atom}}.
 
 reserved_word('nil')    -> true;
 reserved_word('true')   -> true;

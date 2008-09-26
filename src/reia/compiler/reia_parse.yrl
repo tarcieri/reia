@@ -33,6 +33,7 @@ Nonterminals
   pow_op
   funcall_expr
   funcall
+  function_identifier
   block
   inline_block
   multiline_block
@@ -65,8 +66,8 @@ Nonterminals
   .
   
 Terminals
-  true false nil
-  float integer string regexp atom identifier constant module class
+  true false nil float integer string regexp atom
+  identifier punctuated_identifier constant module class
   eol indent dedent def fun do 'case' else 'if' unless 
   'and' 'or' 'not' 'try' 'catch' throw in
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
@@ -112,9 +113,13 @@ class_decl -> class constant eol indent functions dedent : {class, line('$1'), '
 functions -> function : ['$1'].
 functions -> function functions : ['$1'|'$2'].
 
-function -> def identifier eol indent statements dedent : {function, line('$1'), '$2', [], '$5'}.
-function -> def identifier '(' ')' eol indent statements dedent : {function, line('$1'), '$2', [], '$7'}.
-function -> def identifier '(' exprs ')' eol indent statements dedent : {function, line('$1'), '$2', '$4', '$8'}.
+function -> def function_identifier eol indent statements dedent : {function, line('$1'), '$2', [], '$5'}.
+function -> def function_identifier '(' ')' eol indent statements dedent : {function, line('$1'), '$2', [], '$7'}.
+function -> def function_identifier '(' exprs ')' eol indent statements dedent : {function, line('$1'), '$2', '$4', '$8'}.
+
+% Function identifiers
+function_identifier -> identifier : function_identifier('$1').
+function_identifier -> punctuated_identifier : function_identifier('$1').
 
 %% Expressions
 exprs -> expr : ['$1'].
@@ -236,15 +241,15 @@ unary_op -> '-'   : '$1'.
 unary_op -> 'not' : '$1'.
 
 %% Function calls
-funcall -> funcall_expr '.' identifier '(' ')' : {funcall, line('$2'), '$1', '$3', []}.
-funcall -> funcall_expr '.' identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3', '$5'}.
-funcall -> identifier '(' ')' : {funcall, line('$2'), '$1', []}.
-funcall -> identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3'}.
+funcall -> funcall_expr '.' function_identifier '(' ')' : {funcall, line('$2'), '$1', '$3', []}.
+funcall -> funcall_expr '.' function_identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3', '$5'}.
+funcall -> function_identifier '(' ')' : {funcall, line('$2'), '$1', []}.
+funcall -> function_identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3'}.
 
 %% Function calls with blocks
-funcall -> funcall_expr '.' identifier block : {funcall, line('$2'), '$1', '$3', [], '$4'}.
-funcall -> funcall_expr '.' identifier '(' ')' block : {funcall, line('$2'), '$1', '$3', [], '$6'}.
-funcall -> funcall_expr '.' identifier '(' exprs ')' block : {funcall, line('$2'), '$1', '$3', '$5', '$7'}.
+funcall -> funcall_expr '.' function_identifier block : {funcall, line('$2'), '$1', '$3', [], '$4'}.
+funcall -> funcall_expr '.' function_identifier '(' ')' block : {funcall, line('$2'), '$1', '$3', [], '$6'}.
+funcall -> funcall_expr '.' function_identifier '(' exprs ')' block : {funcall, line('$2'), '$1', '$3', '$5', '$7'}.
 
 %% Blocks
 block -> inline_block : '$1'.
@@ -326,6 +331,12 @@ line(Tup) -> element(2, Tup).
 op({Op, _Line}) ->
   Op.
 
+%% Generate proper forms for function identifiers
+function_identifier({identifier, _Line, _Atom} = Identifier) ->
+  Identifier;
+function_identifier({punctuated_identifier, Line, Atom}) ->
+  {identifier, Line, Atom}.
+  
 %% Generate proper forms for if statements
 if_forms({{'if', Line}, Expression, Statements}) ->
   {'if', Line, Expression, Statements};
