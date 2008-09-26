@@ -1,5 +1,5 @@
 task :default => [:build, :test]
-task :build => [:smerl, :leex, :yecc, :smart_exceptions, :reia, :ebin, :clean]
+task :build => [:smerl, :leex, :yecc, :reia, :ebin, :clean]
 
 def output_file(input_file)
   'ebin/' + File.basename(input_file).sub(/\.\w+$/, '.beam')
@@ -25,6 +25,7 @@ PARSER_SRC = FileList.new('src/reia/**/*.{xrl,yrl}')
 
 task :reia => (ERL_SRC + REIA_SRC + PARSER_SRC).map { |input_file| output_file(input_file) }
 
+=begin
 # Smart exceptions
 SMEX_SRC = FileList['src/smart_exceptions/*.erl']
 SMEX_SRC.each do |input|
@@ -34,6 +35,7 @@ SMEX_SRC.each do |input|
 end
 
 task :smart_exceptions => SMEX_SRC.map { |input_file| output_file(input_file) }
+=end
 
 # Smerl (Simple Metaprogramming for Erlang)
 task :smerl => "ebin/smerl.beam"
@@ -77,3 +79,8 @@ end
 task :clean do
   FileList['artifacts/**/*.{erl,beam}'].each { |f| rm_f f }
 end
+
+task :distclean => :clean do
+  FileList['ebin/**/*.beam'].each { |f| rm_f f }
+end
+

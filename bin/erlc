@@ -1,3 +1,3 @@
 #!/bin/sh
 
-erlc +debug_info +'{parse_transform, smart_exceptions}' -pa ebin $*
+erlc +debug_info -pa ebin $* #+'{parse_transform, smart_exceptions}'
