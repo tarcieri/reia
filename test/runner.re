@@ -1,10 +1,10 @@
 load("test/test_helper.re")
 
 # List test
-load("test/core/list.re")
+load("test/types/list.re")
 ListTest.run()
 puts("")
 
 # Tuple test
-load("test/core/tuple.re")
+load("test/types/tuple.re")
 TupleTest.run()
