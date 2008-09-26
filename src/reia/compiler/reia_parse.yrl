@@ -10,6 +10,7 @@ Nonterminals
   statements
   statement
   statement_ending
+  declaration
   ending_token
   inline_statements
   module_decl
@@ -83,10 +84,13 @@ grammar -> statement_ending statements : '$2'.
 statements -> statement : ['$1'].
 statements -> statement statement_ending : ['$1'].
 statements -> statement statement_ending statements : ['$1'|'$3'].
+statements -> declaration : ['$1'].
+statements -> declaration statements : ['$1'|'$2'].
 
-statement -> module_decl : '$1'.
-statement -> class_decl : '$1'.
 statement -> expr : '$1'.
+
+declaration -> module_decl : '$1'.
+declaration -> class_decl : '$1'.
 
 %% Statement endings
 statement_ending -> ending_token : '$1'.
