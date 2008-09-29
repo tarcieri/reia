@@ -1,6 +1,3 @@
-#!/usr/bin/env escript
+#!/bin/sh
 
-main(_) ->
-  code:add_pathz("./ebin"),
-  code:add_pathz("../ebin"),
-  ire:start().
+erl -smp +K true -pa ebin -pa ../ebin -noshell -noinput -s ire init

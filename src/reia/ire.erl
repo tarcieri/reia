@@ -6,12 +6,18 @@
 %
 
 -module(ire).
--export([start/0]).
+-export([init/0, start/0]).
+
+init() ->
+  user_drv:start('tty_sl -c -e', {ire, start, []}).
 
 start() ->
-  run('Eval':new_binding()).
-  
-run(Binding) ->
+  spawn(fun() -> loop() end).
+
+loop() ->
+  loop('Eval':new_binding()).
+    
+loop(Binding) ->
   case read() of
     eof -> io:format("~n"); % print a newline then exit
     String ->
@@ -21,13 +27,17 @@ run(Binding) ->
         Class:Reason -> print_error(Class, Reason), 
         Binding
       end,
-      run(NewBinding)
+      loop(NewBinding)
   end.
   
 read() ->
   read('>> ').
+  
 read(Prompt) ->
-  io:get_line(Prompt).
+  read(standard_io, Prompt).
+  
+read(Io, Prompt) ->
+  io:get_line(Io, Prompt).
   
 read_until_blank(Input, Prompt) ->
   case read(Prompt) of
