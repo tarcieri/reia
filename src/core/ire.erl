@@ -9,6 +9,7 @@
 -export([init/0, start/0]).
 
 init() ->
+  io:format("Reia Interactive Shell (prerelease)~nRunning on "),
   user_drv:start('tty_sl -c -e', {ire, start, []}).
 
 start() ->
