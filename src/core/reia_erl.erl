@@ -23,10 +23,10 @@ r2e(Term) -> Term.
 
 % Convert an Erlang term to a Reia term
 e2r(Term) when is_list(Term) ->
-  {list, {[e2r(Element) || Element <- Term], []}};
+  {list, {[], [e2r(Element) || Element <- Term]}};
 e2r(Term) when is_tuple(Term) ->
   case Term of
-    {list, {Forward, Reverse}} when is_list(Forward) and is_list(Reverse) ->
+    {list, {Reverse, Forward}} when is_list(Forward) and is_list(Reverse) ->
       Term;
     {tuple, Tuple} when is_tuple(Tuple) ->
       Term;

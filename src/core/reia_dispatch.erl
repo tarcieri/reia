@@ -14,7 +14,7 @@
 
 %% Shim to translate Erlang lists into Reia ones
 funcall(List, Method, Arguments) when is_list(List) ->
-  reia_list:funcall({list, {List, []}}, Method, Arguments);
+  reia_list:funcall({list, {[], List}}, Method, Arguments);
 
 %% Convert a Reia term from its internal representation
 funcall(Receiver, uninternalize, []) ->
@@ -63,7 +63,7 @@ funcall(Receiver, _, _) ->
 
 %% Shim to translate Erlang lists into Reia ones
 funcall(List, Method, Arguments, Block) when is_list(List) ->
-  reia_list:funcall({list, {List, []}}, Method, Arguments, Block);
+  reia_list:funcall({list, {[], List}}, Method, Arguments, Block);
   
 funcall(Receiver = {list, _}, Method, Arguments, Block) ->
   reia_list:funcall(Receiver, Method, Arguments, Block).
@@ -71,4 +71,4 @@ funcall(Receiver = {list, _}, Method, Arguments, Block) ->
 %% Reia doesn't have proper pattern matching for lists yet, so use a temporary hack
 %% when talking to modules implemented directly in Reia
 silly_list_hack(List) ->
-  {list, {List, []}}.
+  {list, {[], List}}.

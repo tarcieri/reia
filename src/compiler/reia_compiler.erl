@@ -131,13 +131,14 @@ forms({regexp, Line, Pattern}) ->
 
 %% Lists
 forms({list, Line, Elements}) ->
-  {tuple, Line, [
+  Result = {tuple, Line, [
     {atom, Line, list},
     {tuple, Line, [
-      list_to_forms(Elements, Line),
-      list_to_forms([], Line)
+      list_to_forms([], Line),
+      list_to_forms(Elements, Line)
     ]}
-  ]};
+  ]},
+  Result;
   
 %% Tuples
 forms({tuple, Line, Elements}) ->
@@ -171,11 +172,11 @@ forms({range, Line, Begin, End}) ->
   {tuple, Line, [
     {atom, Line, list},
     {tuple, Line, [
+      list_to_forms([], Line),
       {call, Line,
         {remote, Line, {atom, Line, lists}, {atom, Line, seq}},
         [forms(Begin), forms(End)]
-      },
-      list_to_forms([], Line)
+      }
     ]}
   ]};
   

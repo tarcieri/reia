@@ -14,64 +14,61 @@
 
 %% List#[]
 %%   Retrieve an element in the list
-funcall({list, {Forward, Reverse}}, '[]', [Index]) ->
+funcall({list, {Reverse, Forward}}, '[]', [Index]) ->
   FwLength = length(Forward),
+  RvLength = length(Reverse),
   if
     Index < 0 ->
+      nil;
+    Index >= FwLength + RvLength ->
       nil;
     FwLength > Index ->
       lists:nth(Index + 1, Forward);
     true ->
-      RvLength = length(Reverse),
-      if 
-        Index >= FwLength + RvLength ->
-          nil;
-        true ->
-          lists:nth(RvLength - (Index - FwLength + 1))
-      end
+      lists:nth(RvLength - (Index - FwLength), Reverse)
   end;
       
 %% List#reverse
 %%   Reverse the order of a list
-funcall({list, {Forward, Reverse}}, reverse, []) ->
-  {list, {Reverse, Forward}};
+funcall({list, {Reverse, Forward}}, reverse, []) ->
+  {list, {Forward, Reverse}};
   
 %% List#push
 %%   Add an element to the tail of a list
-funcall({list, {Forward, Reverse}}, push, [Value]) ->
-  {list, {Forward, [Value|Reverse]}};
+funcall({list, {Reverse, Forward}}, push, [Value]) ->
+  {list, {[Value|Reverse], Forward}};
   
 %% List#pop
 %%   Pop an element from the tail of a list
 funcall({list, {[], []}}, pop, []) ->
   nil;
-funcall({list, {Forward, []}}, pop, []) ->
+funcall({list, {[], Forward}}, pop, []) ->
   Reverse = lists:reverse(Forward),
   [Value|_] = Reverse,
   Value;
-funcall({list, {_Forward, [Value|_Reverse]}}, pop, []) ->
+funcall({list, {[Value|_Reverse], _Forward}}, pop, []) ->
   Value;
 
 %% List#unshift
 %%   Unshift an element onto the front of a list
-funcall({list, {Forward, Reverse}}, unshift, [Value]) ->
-  {list, {[Value|Forward], Reverse}};
+funcall({list, {Reverse, Forward}}, unshift, [Value]) ->
+  {list, {Reverse, [Value|Forward]}};
   
 %% List#shift
 %%   Shift an element off the front of a list
 funcall({list, {[], []}}, shift, []) ->
   nil;
-funcall({list, {[], Reverse}}, shift, []) ->
+funcall({list, {Reverse, []}}, shift, []) ->
   Forward = lists:reverse(Reverse),
   [Value|_] = Forward,
   Value;
-funcall({list, {[Value|_Forward], _Reverse}}, shift, []) ->
+funcall({list, {_Reverse, [Value|_Forward]}}, shift, []) ->
   Value;
   
 %% List#size
 %%   Number of items in a list
-funcall({list, {Forward, Reverse}}, size, []) ->
-  length(Forward) + length(Reverse);
+funcall({list, {Reverse, Forward}}, size, []) ->
+  length(Reverse) + length(Forward);
   
 %% List#to_tuple
 %%   Explicitly cast a list to a tuple
@@ -111,7 +108,7 @@ element_to_string(Element) ->
   element_to_string2(Element).
   
 element_to_string2(Element) ->
-  {list, {List, []}} = reia_dispatch:funcall(reia_dispatch:funcall(Element, inspect, []), to_list, []),
+  {list, {[], List}} = reia_dispatch:funcall(reia_dispatch:funcall(Element, inspect, []), to_list, []),
   List.
   
 %%
@@ -123,14 +120,14 @@ funcall({list, _} = List, each, [], Block) ->
   List;
 
 funcall({list, _} = List, map, [], Block) ->
-  {list, {lists:map(Block, to_erl(List)), []}};
+  {list, {[], lists:map(Block, to_erl(List))}};
   
 funcall({list, _} = List, filter, [], Block) ->
-  {list, {lists:filter(Block, to_erl(List)), []}};
+  {list, {[], lists:filter(Block, to_erl(List))}};
   
 funcall({list, _} = List, reduce, [Acc0], Block) ->
   lists:foldl(Block, Acc0, to_erl(List)).
   
 %% Convert a Reia list to its Erlang equivalent
-to_erl({list, {Forward, Reverse}}) ->
+to_erl({list, {Reverse, Forward}}) ->
   Forward ++ lists:reverse(Reverse).
