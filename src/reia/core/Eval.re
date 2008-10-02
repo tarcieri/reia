@@ -4,6 +4,7 @@
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
+
 module Eval
   def string(str)
     case reia_parse::string(str.to_list())
