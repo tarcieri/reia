@@ -82,15 +82,20 @@ argument_list_cons([Element|Rest], Line) ->
 
 % Default functions to incorporate into Reia classes
 default_functions() ->
-  [{Name, parse_function(String)} || {Name, String} <- [
-    {init,           "init(Args) -> initialize(Args), {ok, dict:new()}."},
-    {initialize,     "initialize(_Args) -> void."}, 
-    {method_missing, "method_missing(_State, Method, _Args) -> throw({error, {Method, \"undefined\"}})."},
-    {handle_cast,    "handle_cast(_Msg, State) -> {noreply, State}."},
-    {handle_info,    "handle_info(_Info, State) -> {noreply, State}."},
-    {terminate,      "terminate(_Reason, _State) -> ok."},
-    {code_change,    "code_change(_OldVsn, State, _Extra) -> {ok, State}."}
+  [default_function(Function) || Function <- [
+    "init(Args) -> initialize(Args), {ok, dict:new()}.",
+    "initialize(_Args) -> void.", 
+    "method_missing(_State, Method, _Args) -> throw({error, {Method, \"undefined\"}}).",
+    "handle_cast(_Msg, State) -> {noreply, State}.",
+    "handle_info(_Info, State) -> {noreply, State}.",
+    "terminate(_Reason, _State) -> ok.",
+    "code_change(_OldVsn, State, _Extra) -> {ok, State}."
   ]].
+  
+default_function(String) ->
+  Form = parse_function(String),
+  {function, _, Name, _, _} = Form,
+  {Name, Form}.
   
 % Default methods that Reia objects respond to
 default_methods() ->
