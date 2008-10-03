@@ -51,7 +51,7 @@ transform({Mode, Dict} = State, {funcall, Line, {identifier, _Line, Name} = Iden
   {ok, {_, Dict2}, Arguments2} = reia_visitor:transform(Arguments, State, fun transform/2),
   Identifier2 = case dict:find(Name, Dict) of
     {ok, Version} ->
-      {variable, Line, ssa_name(Name, Version)};
+      {var, Line, ssa_name(Name, Version)};
     error ->
       Identifier
   end,  

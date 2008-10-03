@@ -42,6 +42,7 @@ Nonterminals
   erl_funcall_expr
   erl_funcall
   max_expr
+  ivar
   case_expr
   case_clauses
   case_clause
@@ -72,7 +73,7 @@ Terminals
   'and' 'or' 'not' 'try' 'catch' throw in
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**'
-  '.' '..' ',' ':' '::' ';'
+  '.' '..' ',' ':' '::' ';' '@'
   '=' '==' '!=' '>' '<' '<=' '>='
   .
 
@@ -164,6 +165,7 @@ funcall_expr -> erl_funcall_expr : '$1'.
 erl_funcall_expr -> erl_funcall : '$1'.
 erl_funcall_expr -> max_expr : '$1'.
 
+max_expr -> ivar : '$1'.
 max_expr -> identifier : '$1'.
 max_expr -> nil        : '$1'.
 max_expr -> true       : '$1'.
@@ -183,6 +185,9 @@ max_expr -> if_expr    : '$1'.
 max_expr -> try_expr   : '$1'.
 max_expr -> list_comprehension : '$1'.
 max_expr -> '(' expr ')' : '$2'.
+
+%% Instance variables
+ivar -> '@' identifier : {ivar, line('$1'), identifier_atom('$2')}.
 
 %% Case expressions
 case_expr -> 'case' expr eol indent case_clauses dedent : {'case', line('$1'), '$2', '$5'}.
@@ -329,6 +334,10 @@ line(Tup) -> element(2, Tup).
 %% Extract operators from op tokens
 op({Op, _Line}) ->
   Op.
+
+%% Extract the atom name from an identifier
+identifier_atom({identifier, _Line, Atom}) ->
+  Atom.
 
 %% Generate proper forms for function identifiers
 function_identifier({identifier, _Line, _Atom} = Identifier) ->
