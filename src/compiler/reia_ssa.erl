@@ -31,6 +31,16 @@ transform(State, {module, Line, Name, Expressions}) ->
   ),
   {stop, State, {module, Line, Name, Expressions2}};
   
+% Class declarations create a new scope
+transform(State, {class, Line, Name, Expressions}) ->
+  Expressions2 = lists:map(fun(Expression) ->
+      {ok, _, Expression2} = reia_visitor:transform(Expression, {normal, dict:new()}, fun transform/2),
+      Expression2
+    end,
+    Expressions
+  ),
+  {stop, State, {class, Line, Name, Expressions2}};
+  
 % Function declarations create a new scope
 transform(State, {function, Line, Name, Arguments, Expressions}) ->
   % Create a new scope with dict:new()
