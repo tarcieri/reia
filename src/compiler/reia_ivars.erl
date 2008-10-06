@@ -22,7 +22,7 @@ ast(Ast, Variables) ->
   Ast2.
 
 transform(_State, {ivar, Line, _Name}) ->
-  throw({error, {Line, "instance variables may only be used inside methods"}});
+  throw({error, {Line, "instance variables can only be referenced in classes"}});
       
 % Walk unrecognized nodes without transforming them
 transform(State, Node) ->
