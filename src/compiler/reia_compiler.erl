@@ -9,7 +9,8 @@
 -export([
   default_passes/0, 
   compile/1, 
-  compile/2, 
+  compile/2,
+  ivars/1, 
   ssa/1, 
   r2e/1, 
   dynamic/1, 
@@ -18,7 +19,7 @@
 ]).
 
 default_passes() ->
-  [ssa, r2e, dynamic].
+  [ivars, ssa, r2e, dynamic].
 
 compile(Expressions) ->
   compile(Expressions, default_passes()).
@@ -32,6 +33,10 @@ pass({ssa, Binding}, Expressions) ->
   ssa(Expressions, Binding);
 pass(Pass, Expressions) ->
   ?MODULE:Pass(Expressions).
+
+%% Convert Reia instance variables into internal dict representation
+ivars(Expressions) ->
+  reia_ivars:ast(Expressions).
 
 %% Convert Reia forms into SSA form
 ssa(Expressions) ->
