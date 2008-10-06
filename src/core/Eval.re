@@ -16,7 +16,7 @@ module Eval
     
   def exprs(forms, binding)
     # Compile Reia forms to Erlang forms
-    erl_forms = reia_compiler::compile(forms, [(~ssa, binding), ~r2e, ~dynamic])
+    erl_forms = reia_compiler::compile(forms, passes(binding))
     
     # Convert Reia variable names to Erlang SSA names
     binding = binding.map { |(var, value)| (var.to_s().capitalize().sub(/$/, "_0").to_atom(), value) }
@@ -34,6 +34,13 @@ module Eval
     binding = binding.reduce({}) { |(var, value), hash| hash.insert(var, value) }.to_list()
     
     (~value, result, binding)
+    
+  def passes(binding)
+    reia_compiler::default_passes().map do |pass|
+      if pass == ~ssa
+        (~ssa, binding)
+      else
+        pass
   
   def new_binding
     erl_eval::new_bindings()

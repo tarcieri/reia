@@ -34,7 +34,8 @@ file(Filename, Outfile) ->
   end.
   
 forms(Forms) ->
-  ErlForms = reia_compiler:compile(Forms, [ssa, r2e, static]),
+  Passes = [case Pass of dynamic -> static; _ -> Pass end || Pass <- reia_compiler:default_passes()],
+  ErlForms = reia_compiler:compile(Forms, Passes),
   compile:forms(ErlForms, [
     debug_info, 
     export_all, 

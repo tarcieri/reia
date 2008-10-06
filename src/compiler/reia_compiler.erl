@@ -6,10 +6,22 @@
 %
 
 -module(reia_compiler).
--export([compile/1, compile/2, ssa/1, r2e/1, dynamic/1, static/1, forms/1]).
+-export([
+  default_passes/0, 
+  compile/1, 
+  compile/2, 
+  ssa/1, 
+  r2e/1, 
+  dynamic/1, 
+  static/1, 
+  forms/1
+]).
+
+default_passes() ->
+  [ssa, r2e, dynamic].
 
 compile(Expressions) ->
-  compile(Expressions, [ssa, r2e, dynamic]).
+  compile(Expressions, default_passes()).
 
 compile(Expressions, []) ->
   Expressions;
