@@ -107,8 +107,7 @@ forms({match, Line, In1, In2}) ->
   
 %% Variables
 forms({identifier, Line, Name}) ->
-  [FirstLetter|Rest] = atom_to_list(Name),
-  {var, Line, list_to_atom([string:to_upper(FirstLetter)|Rest])};
+  {var, Line, Name};
 
 %% Primitives
 forms({nil, Line}) ->
