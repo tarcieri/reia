@@ -66,11 +66,35 @@ process_return_value(Line, []) ->
   process_return_value(Line, [{atom, Line, 'nil'}]);
 process_return_value(Line, Expressions) ->
   [Result|Expressions2] = lists:reverse(Expressions),
-  Result2 = {tuple, Line, [{atom, Line, reply}, Result, {var, Line, final_ivars(Expressions)}]},
-  lists:reverse([Result2|Expressions2]).
+  Result2 = {match, Line, {var, Line, '__return_value'}, Result},
+  Result3 = {tuple, Line, [
+    {atom, Line, reply}, 
+    {var, Line, '__return_value'}, 
+    {var, Line, final_ivars(Expressions)}
+  ]},
+  lists:reverse([Result3,Result2|Expressions2]).
 
 final_ivars(Expressions) ->
-  '__instance_variables_0'.
+  {ok, Newest, _} = reia_visitor:transform(Expressions, 0, fun newest_ivars/2),
+  Name = io_lib:format("~s~w", ["__instance_variables_", Newest]),
+  list_to_atom(lists:flatten(Name)).
+
+newest_ivars(Newest, {var, _Line, Name} = Node) ->
+  case atom_to_list(Name) of
+    [$_,$_,$i,$n,$s,$t,$a,$n,$c,$e,$_,$v,$a,$r,$i,$a,$b,$l,$e,$s,$_|VersionStr] ->
+      Version = list_to_integer(VersionStr),
+      Newest2 = if
+        Version > Newest -> 
+          Version;
+        true ->
+          Newest
+      end,
+      {stop, Newest2, Node};
+    _ ->
+      {stop, Newest, Node}
+  end;
+newest_ivars(Newest, Node) ->
+  {walk, Newest, Node}.
 
 %% Generate cons for arguments
 argument_list_cons([], Line) ->
