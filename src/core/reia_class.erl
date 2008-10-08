@@ -1,5 +1,5 @@
 %
-% reia_module: Build modules conforming to the gen_server behavior from Reia classes
+% reia_class: Build modules conforming to the gen_server behavior from Reia classes
 % Copyright (C)2008 Tony Arcieri
 % 
 % Redistribution is permitted under the MIT license.  See LICENSE for details.
@@ -77,7 +77,9 @@ process_return_value(Line, Expressions) ->
 final_ivars(Expressions) ->
   {ok, Newest, _} = reia_visitor:transform(Expressions, 0, fun newest_ivars/2),
   Name = io_lib:format("~s~w", ["__instance_variables_", Newest]),
-  list_to_atom(lists:flatten(Name)).
+  Result = list_to_atom(lists:flatten(Name)),
+  io:format("Final ivars: ~p~n", [Result]),
+  Result.
 
 newest_ivars(Newest, {var, _Line, Name} = Node) ->
   case atom_to_list(Name) of
