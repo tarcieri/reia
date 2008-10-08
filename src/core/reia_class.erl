@@ -60,20 +60,18 @@ process_method_clause({clause, Line, Arguments, [], Expressions}, Name) ->
     {tuple, Line, [{atom, Line, Name}, argument_list_cons(Arguments, Line)]}, 
     {var, Line, '_From'}, 
     {var, Line, '__instance_variables_0'}
-  ], [], process_return_value(Expressions)}.
+  ], [], process_return_value(Line, Expressions)}.
 
-process_return_value(Expressions) ->
-  process_return_value(lists:reverse(Expressions), []).
+process_return_value(Line, []) ->
+  process_return_value(Line, [{atom, Line, 'nil'}]);
+process_return_value(Line, Expressions) ->
+  [Result|Expressions2] = lists:reverse(Expressions),
+  Result2 = {tuple, Line, [{atom, Line, reply}, Result, {var, Line, final_ivars(Expressions)}]},
+  lists:reverse([Result2|Expressions2]).
 
-process_return_value([], Expressions) ->
-  Expressions;
-process_return_value([Reply|Rest], []) ->
-  Line = element(2, Reply),
-  Result = {tuple, Line, [{atom, Line, reply}, Reply, {var, Line, '__instance_variables_0'}]},
-  process_return_value(Rest, [Result]);
-process_return_value([Head|Rest], Expressions) ->
-  process_return_value(Rest, [Head|Expressions]).
-  
+final_ivars(Expressions) ->
+  '__instance_variables_0'.
+
 %% Generate cons for arguments
 argument_list_cons([], Line) ->
   {nil, Line};
