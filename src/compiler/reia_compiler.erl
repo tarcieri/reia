@@ -227,6 +227,10 @@ forms({erl_funcall, Line, {identifier, _, Module}, {identifier, _, Function}, Ar
     [{atom, Line, Module}, {atom, Line, Function}, list_to_forms(Arguments, Line)]
   };
   
+%% Embedded literal Erlang function calls (emitted by earlier compiler passes)
+forms({call, Line, Function, Arguments}) ->
+  {call, Line, Function, [forms(Argument) || Argument <- Arguments]};
+  
 %% Case expressions
 forms({'case', Line, Expression, Clauses}) ->
   forms({'case', Line, Expression, Clauses, {else_clause, Line, [{atom, Line, nil}]}});
