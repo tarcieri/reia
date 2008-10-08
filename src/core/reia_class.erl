@@ -59,7 +59,7 @@ process_method_clause({clause, Line, Arguments, [], Expressions}, Name) ->
   {clause, Line, [
     {tuple, Line, [{atom, Line, Name}, argument_list_cons(Arguments, Line)]}, 
     {var, Line, '_From'}, 
-    {var, Line, 'Instance_variables_0'}
+    {var, Line, '__instance_variables_0'}
   ], [], process_return_value(Expressions)}.
 
 process_return_value(Expressions) ->
@@ -69,7 +69,7 @@ process_return_value([], Expressions) ->
   Expressions;
 process_return_value([Reply|Rest], []) ->
   Line = element(2, Reply),
-  Result = {tuple, Line, [{atom, Line, reply}, Reply, {var, Line, 'Instance_variables_0'}]},
+  Result = {tuple, Line, [{atom, Line, reply}, Reply, {var, Line, '__instance_variables_0'}]},
   process_return_value(Rest, [Result]);
 process_return_value([Head|Rest], Expressions) ->
   process_return_value(Rest, [Head|Expressions]).
