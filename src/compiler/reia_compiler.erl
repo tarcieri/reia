@@ -231,6 +231,10 @@ forms({erl_funcall, Line, {identifier, _, Module}, {identifier, _, Function}, Ar
 forms({call, Line, Function, Arguments}) ->
   {call, Line, Function, [forms(Argument) || Argument <- Arguments]};
   
+%% Begin/end blocks
+forms({block, Line, Expressions}) ->
+  {block, Line, [forms(Expression) || Expression <- Expressions]};
+  
 %% Case expressions
 forms({'case', Line, Expression, Clauses}) ->
   forms({'case', Line, Expression, Clauses, {else_clause, Line, [{atom, Line, nil}]}});
