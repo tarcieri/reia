@@ -57,7 +57,7 @@ transform(method, {ivar, Line, Name}) ->
     },
     [
       {clause, Line, 
-        {tuple, Line, [{atom, Line, 'ok'}, {identifier, Line, placeholder_name(Name)}]},
+        {erl_forms, Line, {tuple, Line, [{atom, Line, 'ok'}, {var, Line, placeholder_name(Name)}]}},
         [{identifier, Line, placeholder_name(Name)}]
       },
       {clause, Line, {atom, Line, 'error'}, [{atom, Line, nil}]}

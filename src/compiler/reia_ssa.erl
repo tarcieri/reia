@@ -158,7 +158,17 @@ transform({match, Dict}, {identifier, Line, Name}) ->
   end,
   Node = {identifier, Line, ssa_name(Name, Version2)},
   {stop, {match, Dict2}, Node};
-    
+  
+% Vars are generated internally by earlier stages of the compiler and work 
+% like identifiers, mapped to their latest version
+transform({normal, _} = State, {var, Line, Name}) ->
+  {stop, State2, {identifier, _, Name2}} = transform(State, {identifier, Line, Name}),
+  {stop, State2, {var, Line, Name2}};
+  
+transform({match, _} = State, {var, Line, Name}) ->
+  {stop, State2, {identifier, _, Name2}} = transform(State, {identifier, Line, Name}),
+  {stop, State2, {var, Line, Name2}};
+   
 % Walk unrecognized nodes without transforming them
 transform(State, Node) ->
   {walk, State, Node}.
