@@ -20,6 +20,7 @@ task :check_erl_version do
   else
     puts "#{version} (too old)"
     puts "Sorry, the version of Erlang you have installed is too old to run Reia"
+    puts "Reia requires a minimum Erlang version of R12B-3 (5.6.3)"
     puts "Please see http://wiki.reia-lang.org/wiki/Building#Prerequisites"
     exit 1
   end
