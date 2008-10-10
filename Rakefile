@@ -1,5 +1,29 @@
-task :default => [:build, :test]
+task :default => [:check_erl_version, :build, :test]
 task :build => [:smerl, :leex, :yecc, :reia, :ebin, :clean]
+
+def erlang_version
+  version = `erl -version 2>&1`.strip.match(/\d\.\d\.\d$/)
+  unless version
+   puts "Error retrieving Erlang version.  Do you have it installed?" 
+   exit 1
+  end
+  
+  version[0]
+end
+
+task :check_erl_version do
+  print "Checking Erlang version... "
+  version = erlang_version
+  
+  if version >= "5.6.3"
+    puts "#{version} (ok)"
+  else
+    puts "#{version} (too old)"
+    puts "Sorry, the version of Erlang you have installed is too old to run Reia"
+    puts "Please see http://wiki.reia-lang.org/wiki/Building#Prerequisites"
+    exit 1
+  end
+end
 
 def output_file(input_file)
   'ebin/' + File.basename(input_file).sub(/\.\w+$/, '.beam')
