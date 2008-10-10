@@ -239,6 +239,7 @@ reserved_word('unless') -> true;
 reserved_word('and')    -> true;
 reserved_word('or')     -> true;
 reserved_word('not')    -> true;
+reserved_word('for')    -> true;
 reserved_word('in')     -> true;
 reserved_word('try')    -> true;
 reserved_word('catch')  -> true;
