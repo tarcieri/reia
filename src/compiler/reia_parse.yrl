@@ -50,6 +50,7 @@ Nonterminals
   if_expr
   inline_if_expr
   if_op
+  for_expr
   try_expr
   catch_clauses
   catch_clause
@@ -70,7 +71,7 @@ Terminals
   true false nil float integer string regexp atom
   identifier punctuated_identifier constant module class
   eol indent dedent def fun do 'case' else 'if' unless 
-  'and' 'or' 'not' 'try' 'catch' throw in
+  'and' 'or' 'not' 'try' 'catch' throw for in
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**'
   '.' '..' ',' ':' '::' ';' '@'
@@ -182,6 +183,7 @@ max_expr -> constant   : '$1'.
 max_expr -> lambda     : '$1'.
 max_expr -> case_expr  : '$1'.
 max_expr -> if_expr    : '$1'.
+max_expr -> for_expr   : '$1'.
 max_expr -> try_expr   : '$1'.
 max_expr -> list_comprehension : '$1'.
 max_expr -> '(' expr ')' : '$2'.
@@ -207,6 +209,9 @@ if_expr -> if_op expr eol indent statements dedent else_clause : if_forms({'$1',
 
 if_op -> 'if'   : '$1'.
 if_op -> unless : '$1'.
+
+%% For loops
+for_expr -> for match_expr in expr eol indent statements dedent : {for, line('$1'), '$2', '$4', '$7'}.
 
 %% Try expressions
 try_expr -> 'try' eol indent statements dedent catch_clauses : {'try', line('$1'), '$4', '$6'}.
