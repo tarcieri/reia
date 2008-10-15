@@ -21,5 +21,20 @@ module Fibonacci
   def optimized(n, next, result)
     optimized(n - 1, next + result, next)
     
+  # Generate a list of Fibonacci numbers
+  def list(n)
+    [optimized(i) | i in 0..(n - 1)]
+    
+  # Optimally generate a list of Fibonacci numbers
+  def optimized_list(n)
+    optimized_list(n - 1, 1, [0])
+  def optimized_list(0, _, result)
+    result.reverse()
+  def optimized_list(n, next, result)
+    optimized_list(n - 1, next + result[0], result.unshift(next))
+    
 n = 42
 puts(["Fibonacci number ", n, ": ", Fibonacci.optimized(n)].join())
+
+n = 10
+puts(["First ", n, " Fibonacci numbers: ", Fibonacci.optimized_list(n)].join())
