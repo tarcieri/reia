@@ -19,7 +19,7 @@ funcall({list, {Reverse, Forward}}, '[]', [Index]) ->
   RvLength = length(Reverse),
   if
     Index < 0 ->
-      nil;
+      funcall({list, {Forward, Reverse}}, '[]', [-Index-1]);
     Index >= FwLength + RvLength ->
       nil;
     FwLength > Index ->

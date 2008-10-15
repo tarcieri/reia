@@ -14,7 +14,7 @@ module ListTest
   def nth_test
     TestHelper.expect("retrieves the nth element correctly", fun do    
       list = [1,2,3,4,5]
-      (true, list[0] == 1 and list[1] == 2 and list[4] == 5)
+      (true, list[0] == 1 and list[1] == 2 and list[4] == 5 and list[-1] == 5 and list[-3] == 3 and list[-10] == nil)
     )
       
   # reverses the order of a list
