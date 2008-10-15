@@ -4,6 +4,7 @@ module TupleTest
     
     nth_test()
     to_list_test()
+    inspect_test()
     
   # retrieves the nth element correctly
   def nth_test
@@ -16,4 +17,9 @@ module TupleTest
   def to_list_test
     TestHelper.expect("converts to a list", fun do
       ([1,2,3].to_s(), (1,2,3).to_list().to_s())
+    )
+
+  def inspect_test
+    TestHelper.expect("inspect returns valid tuple syntax", fun do
+      (true, ().inspect() == "()" and (1,).inspect() == "(1,)" and (1,2).inspect() == "(1,2)")
     )

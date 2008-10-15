@@ -27,7 +27,12 @@ module Tuple
   # Tuple#inspect
   #   Inspect the contents of a Tuple
   def funcall(tuple, ~inspect, [])
-    ["(", tuple.to_list().map { |e| e.inspect() }.join(","), ")"].join()
+    elems = tuple.to_list().map { |e| e.inspect() }.join(",")
+    # special-case trailing comma
+    if tuple.size() == 1
+      ["(", elems, ",)"].join()
+    else
+      ["(", elems, ")"].join()
     
   # Tuple#size
   #   Return the number of elements in a Tuple
