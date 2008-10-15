@@ -14,7 +14,10 @@ module Tuple
   # Tuple#[]
   #   Retrieve an element from a Tuple
   def funcall(tuple, ~'[]', [index])
-    erlang::element(index + 1, tuple)
+    if index < 0
+      erlang::element(tuple.size() + index + 1, tuple)
+    else
+      erlang::element(index + 1, tuple)
   
   # Tuple#to_s
   #   Generate a string representation of a Tuple  
