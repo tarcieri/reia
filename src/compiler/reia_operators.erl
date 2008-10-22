@@ -52,5 +52,16 @@ forms('>' = Op, Line, Ast1, Ast2) ->
 forms('>=' = Op, Line, Ast1, Ast2) ->
   {op, Line, Op, Ast1, Ast2};
 forms('<=', Line, Ast1, Ast2) ->
-  {op, Line, '=<', Ast1, Ast2}.
-
+  {op, Line, '=<', Ast1, Ast2};
+forms('===', Line, Ast1, Ast2) ->
+  {'try', Line,
+    [{match, Line, Ast1, Ast2}, {atom, Line, true}],
+    [],
+    [{clause, Line,
+             [{tuple, Line,
+                     [{atom, Line,error},
+                      {tuple, Line, [{atom, Line, badmatch}, {var, Line, '_'}]},
+                      {var, Line, '_'}]}],
+             [],
+             [{atom, Line, false}]}],
+  []}.
