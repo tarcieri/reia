@@ -14,7 +14,7 @@ Whitespace = [\s]
 DoubleQuoted = "(\\\^.|\\.|[^\"])*"
 SingleQuoted = '(\\\^.|\\.|[^\'])*'
 Regexp = /(\\\^.|\\.|[^/])*/
-Comment = #.*?\n
+Comment = #.*
 
 Rules.
 
