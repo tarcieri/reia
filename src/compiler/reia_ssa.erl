@@ -103,12 +103,6 @@ transform({Mode, Dict}, {match, Line, In1, In2}) ->
   {ok, {_, Dict3}, Out1} = reia_visitor:transform(In1, {match, Dict2}, fun transform/2),
   {stop, {Mode, Dict3}, {match, Line, Out1, Out2}};
   
-% Triple equals performs a match
-transform({Mode, Dict}, {op, Line, '===', In1, In2}) ->
-  {ok, {_, Dict2}, Out2} = reia_visitor:transform(In2, {Mode, Dict}, fun transform/2),
-  {ok, {_, Dict3}, Out1} = reia_visitor:transform(In1, {match, Dict2}, fun transform/2),
-  {stop, {Mode, Dict3}, {op, Line, '===', Out1, Out2}};
-  
 % Case expressions bind variables in clauses
 transform({Mode, Dict}, {'case', Line, Expression, Clauses}) ->
   {ok, {_, Dict2}, Expression2} = reia_visitor:transform(Expression, {Mode, Dict}, fun transform/2),
