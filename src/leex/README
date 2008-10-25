@@ -1,24 +1,17 @@
-From a trapexit forum post by Robert Vierding about the usage of leex and 
-syntax of *.xrl files: 
+Leex is a lexical analyzer generator for Erlang. It allows you to
+tokenize a textual input stream so that it can be grammatically
+analyzed and processed by yecc. It is NOT a part of OTP at this point.
 
-The section headers "Definitions.", "Rules." and "Erlang Code." are literal 
-strings which must occur at the beginning of a line. Only the rules section 
-is necessary. 
+v0.2
+----
+Restored text file version of documentation until I edoc and I are in
+agreement.
 
-You include macros in the pattern by writing {MacroName}. 
-Macros can reference macros. 
-Macros are expanded "as is" without any implicit adding of parentheses. 
+Upgraded erlang_scan.xrl to full erlang tokeniser.
 
-Within the body of a rule you can access the token characters, 
-length and line number thorugh the predefined variables TokenChars, 
-TokenLen and TokenLine. 
+Now use line number of token start.
 
-You return {token,Token}, {end_token,Token}, skip_token or 
-{error,ErrorString}. 
 
-The interface to the generated scanner is the standard io interface: 
-
-string/1-2 
-token/2-3 
-tokens/2-3 
-format_error/1
+Thanks to Sébastien Arnaud who did the first packaging of leex for git.
+Email: arnaudsj@gmail.com
+Github: http://github.com/arnaudsj/
