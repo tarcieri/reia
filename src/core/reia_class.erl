@@ -6,7 +6,7 @@
 %
 
 -module(reia_class).
--export([build/1]).
+-export([build/1, call/2]).
 -compile(export_all).
 
 build({class, Line, Name, Functions}) ->
@@ -15,6 +15,12 @@ build({class, Line, Name, Functions}) ->
   reia_module:build(Module);
 build(_) ->
   {error, "invalid class"}.
+
+call(Pid, {_Method, _Arguments} = Request) ->
+  case gen_server:call(Pid, Request) of
+    {ok, Value} -> Value;
+    {error, Error} -> throw(Error)
+  end.
 
 % Process incoming functions, substituting custom versions for defaults  
 process_functions(Module, Functions) ->
@@ -46,11 +52,11 @@ process_methods([FirstMeth|_] = Methods) ->
   Clauses = lists:flatten([process_method(Method) || Method <- Methods ++ default_methods()]),
   
   % Add a clause which thunks to method_missing
-  MethodMissingThunk = "handle_call({Method, Args}, _, State) -> method_missing(State, Method, Args).",
+  MethodMissingThunk = "dispatch_method({Method, Args}, _, State) -> method_missing(State, Method, Args).",
   {function, _, _, _, MethodMissingClause} = parse_function(MethodMissingThunk),
   
   % New master handle_call function
-  [{function, Line, handle_call, 3, Clauses ++ MethodMissingClause}].
+  [{function, Line, dispatch_method, 3, Clauses ++ MethodMissingClause}].
   
 process_method({function, _Line, Name, _Arity, Clauses}) ->
   [process_method_clause(Clause, Name) || Clause <- Clauses].
@@ -68,8 +74,8 @@ process_return_value(Line, Expressions) ->
   [Result|Expressions2] = lists:reverse(Expressions),
   Result2 = {match, Line, {var, Line, '__return_value'}, Result},
   Result3 = {tuple, Line, [
-    {atom, Line, reply}, 
-    {var, Line, '__return_value'}, 
+    {atom, Line, reply},
+    {tuple, Line, [{atom, Line, ok}, {var, Line, '__return_value'}]}, 
     {var, Line, final_ivars(Expressions)}
   ]},
   lists:reverse([Result3,Result2|Expressions2]).
@@ -108,6 +114,7 @@ default_functions() ->
     "init(Args) -> initialize(Args), {ok, dict:new()}.",
     "initialize(_Args) -> void.", 
     "method_missing(_State, Method, _Args) -> throw({error, {Method, \"undefined\"}}).",
+    "handle_call(Request, From, State) -> try dispatch_method(Request, From, State) catch throw:Error -> {reply, {error, Error}, State} end.",
     "handle_cast(_Msg, State) -> {noreply, State}.",
     "handle_info(_Info, State) -> {noreply, State}.",
     "terminate(_Reason, _State) -> ok.",
