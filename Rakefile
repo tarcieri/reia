@@ -109,6 +109,13 @@ task :install do
   mkdir reia_dir
   
   %w[LICENSE README ebin src lib].each { |f| cp_r f, reia_dir }
+  
+  mkdir "/usr/local/bin" unless File.exist?("/usr/local/bin")
+  
+  File.open("/usr/local/bin/reia", "w") { |f| f << "erl -noshell +K true -s Loader start $* -s init stop" }  
+  File.open("/usr/local/bin/ire", "w")  { |f| f << "erl +K true -noshell -noinput -s ire init" }
+  
+  File.chmod 0755, "/usr/local/bin/ire", "/usr/local/bin/reia"
 end
 
 task :clean do
