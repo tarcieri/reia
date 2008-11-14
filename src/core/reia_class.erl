@@ -87,7 +87,7 @@ final_ivars(Expressions) ->
 
 newest_ivars(Newest, {var, _Line, Name} = Node) ->
   case atom_to_list(Name) of
-    [$_,$_,$i,$n,$s,$t,$a,$n,$c,$e,$_,$v,$a,$r,$i,$a,$b,$l,$e,$s,$_|VersionStr] ->
+    "__instance_variables_" ++ VersionStr ->
       Version = list_to_integer(VersionStr),
       Newest2 = if
         Version > Newest -> 
