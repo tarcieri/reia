@@ -101,6 +101,16 @@ task :test do
   sh "bin/reia test/runner.re"
 end
 
+task :install do
+  lib_dir = `erl -noshell -eval "io:format(code:lib_dir())" -s init stop`
+  reia_dir = File.join(lib_dir, 'reia', '')
+  
+  rm_r reia_dir if File.exist?(reia_dir)
+  mkdir reia_dir
+  
+  %w[LICENSE README ebin src lib].each { |f| cp_r f, reia_dir }
+end
+
 task :clean do
   FileList['artifacts/**/*.{erl,beam}'].each { |f| rm_f f }
 end
