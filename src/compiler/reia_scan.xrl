@@ -22,8 +22,8 @@ Rules.
 \n\s+ : build_indentation(TokenLine, TokenLen).
 
 %% Numbers
--?{Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
--?{Digit}+ : build_integer(TokenChars, TokenLine).
+-?({Digit}+((\'|\`|_)|{Digit}+)*)*\.({Digit}+((\'|\`|_){Digit}+)*)+ : build_float(TokenChars, TokenLine).
+-?{Digit}+((\'|\`|_){Digit}+)* : build_integer(TokenChars, TokenLine).
 
 %% Strings
 {DoubleQuoted} : build_string(string, TokenChars, TokenLine, TokenLen).
@@ -164,16 +164,19 @@ build_dedent(Tokens, Amount, Line, [Current|State]) ->
 build_indentation(Line, Length) ->
   {token, {indentation, Line, Length - 1}}.
 
+remove_cosmetics(Chars, CharsToRemove) ->
+  [S || S <- Chars, [A || A <- CharsToRemove, S =:= A] =:= []].
+
 build_integer([$-|Chars], Line) ->
-  {token, {integer, Line, -list_to_integer(Chars)}};
+  {token, {integer, Line, -list_to_integer(remove_cosmetics(Chars, [$', $_, $`]))}};
 build_integer(Chars, Line) ->
-  {token, {integer, Line, list_to_integer(Chars)}}.
+  {token, {integer, Line, list_to_integer(remove_cosmetics(Chars, [$', $_, $`]))}}.
 
 build_float([$-|Chars], Line) ->
-  {token, {float, Line, -list_to_float(Chars)}};
+  {token, {float, Line, -list_to_float(remove_cosmetics(Chars, [$', $_, $`]))}};
 build_float(Chars, Line) ->
-  {token, {float, Line, list_to_float(Chars)}}.
-    
+  {token, {float, Line, list_to_float(remove_cosmetics(Chars, [$', $_, $`]))}}.
+
 build_string(Type, Chars, Line, Len) ->
   String = unescape_string(lists:sublist(Chars, 2, Len - 2)), 
   {token, {Type, Line, String}}.
