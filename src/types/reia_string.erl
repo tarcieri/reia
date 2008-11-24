@@ -59,6 +59,11 @@ funcall({string, String}, uncapitalize, []) ->
   NewString = string:to_lower([FirstLetter]) ++ Rest,
   reia_list:funcall(reia_erl:e2r(NewString), to_string, []);
   
+%% String#length
+%%   Returns the number of characters in the string
+funcall({string, String}, length, []) ->
+  reia_erl:e2r(string:len(binary_to_list(String)));
+
 %% String#sub
 %%   Replace a portion of a string with a given substitution
 funcall({string, String}, sub, [{regexp, Regex}, {string, Replacement}]) ->
