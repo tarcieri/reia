@@ -9,6 +9,8 @@
 -export([build/1, call/2]).
 -compile(export_all).
 
+%% Convert a Reia class definition into a Reia module which conforms to the
+%% gen_server behavior, then load it into the code server
 build({class, Line, Name, Functions}) ->
   Module = {module, Line, Name, process_functions(Name, Functions)},
   % io:format("~p~n", [Module]),
@@ -16,13 +18,14 @@ build({class, Line, Name, Functions}) ->
 build(_) ->
   {error, "invalid class"}.
 
+%% Call a method on a Reia object at the given Pid
 call(Pid, {_Method, _Arguments} = Request) ->
   case gen_server:call(Pid, Request) of
     {ok, Value} -> Value;
     {error, Error} -> throw(Error)
   end.
 
-% Process incoming functions, substituting custom versions for defaults  
+%% Process incoming functions, substituting custom versions for defaults  
 process_functions(Module, Functions) ->
   {FunctionDict, Methods} = lists:foldr(
     fun process_function/2, 
@@ -30,10 +33,16 @@ process_functions(Module, Functions) ->
     Functions
   ),
   
-  DefaultFunctions = init_functions(Module),
-  ImmediateFunctions = [Function || {_, Function} <- dict:to_list(FunctionDict)],
-  DefaultFunctions ++ ImmediateFunctions ++ process_methods(Methods). 
-    
+  % Pull the initialize function out for special case processing
+  {ok, InitFunction} = dict:find(initialize, FunctionDict),
+  FunctionDict2 = dict:erase(initialize, FunctionDict),
+  
+  DefaultFunctions = start_functions(Module),
+  ImmediateFunctions = [Function || {_, Function} <- dict:to_list(FunctionDict2)],
+  lists:flatten([InitFunction, DefaultFunctions, ImmediateFunctions, process_methods(Methods)]). 
+  
+%% If a method name matches one of the default_functions(), then it has a
+%% special purpose and should be mapped to a function rather than a method.
 process_function({function, _Line, Name, _Arity, _Clauses} = Function, {Dict, Functions}) ->
   case dict:find(Name, Dict) of
     {ok, _} ->
@@ -42,6 +51,7 @@ process_function({function, _Line, Name, _Arity, _Clauses} = Function, {Dict, Fu
       {Dict, [Function|Functions]}
   end.
   
+%% Convert individual method definitions into a single dispatch_method function
 process_methods([]) ->
   [];
 process_methods([FirstMeth|_] = Methods) ->
@@ -58,9 +68,11 @@ process_methods([FirstMeth|_] = Methods) ->
   % New master handle_call function
   [{function, Line, dispatch_method, 3, Clauses ++ MethodMissingClause}].
   
+%% Extract a method into clauses for dispatch_method
 process_method({function, _Line, Name, _Arity, Clauses}) ->
   [process_method_clause(Clause, Name) || Clause <- Clauses].
        
+%% Build a clause for dispatch_method from the original clauses for a method
 process_method_clause({clause, Line, Arguments, [], Expressions}, Name) ->
   {clause, Line, [
     {tuple, Line, [{atom, Line, Name}, argument_list_cons(Arguments, Line)]}, 
@@ -68,6 +80,7 @@ process_method_clause({clause, Line, Arguments, [], Expressions}, Name) ->
     {var, Line, '__instance_variables_0'}
   ], [], process_return_value(Line, Expressions)}.
 
+%% Convert a method's return value into a gen_server reply
 process_return_value(Line, []) ->
   process_return_value(Line, [{atom, Line, 'nil'}]);
 process_return_value(Line, Expressions) ->
@@ -80,11 +93,15 @@ process_return_value(Line, Expressions) ->
   ]},
   lists:reverse([Result3,Result2|Expressions2]).
 
+%% Find the name of the last SSA-transformed __instance_variables variable
+%% present in a given function.
 final_ivars(Expressions) ->
   {ok, Newest, _} = reia_visitor:transform(Expressions, 0, fun newest_ivars/2),
   Name = io_lib:format("~s~w", ["__instance_variables_", Newest]),
   list_to_atom(lists:flatten(Name)).
 
+%% Locate the number of the last SSA transformation of the __instance_variables
+%% variable in a given function.
 newest_ivars(Newest, {var, _Line, Name} = Node) ->
   case atom_to_list(Name) of
     "__instance_variables_" ++ VersionStr ->
@@ -108,7 +125,7 @@ argument_list_cons([], Line) ->
 argument_list_cons([Element|Rest], Line) ->
   {cons, Line, Element, argument_list_cons(Rest, Line)}.
 
-% Default functions to incorporate into Reia classes
+%% Default functions to incorporate into Reia classes
 default_functions() ->
   [default_function(Function) || Function <- [
     "init(Args) -> initialize(Args), {ok, dict:new()}.",
@@ -120,28 +137,29 @@ default_functions() ->
     "terminate(_Reason, _State) -> ok.",
     "code_change(_OldVsn, State, _Extra) -> {ok, State}."
   ]].
-  
+
+%% Parse a default function and return a dict entry for it  
 default_function(String) ->
   Form = parse_function(String),
   {function, _, Name, _, _} = Form,
   {Name, Form}.
   
-% Default methods that Reia objects respond to
+%% Default methods that Reia objects respond to
 default_methods() ->
   [parse_function(Function) || Function <- [
     "to_s() -> {string, <<\"#<Object>\">>}.",
     "inspect() -> {string, <<\"#<Object>\">>}."
   ]].
   
-% Functions for starting a new object
-init_functions(Module) ->
+%% Functions for starting a new object
+start_functions(Module) ->
   [init_function(Module, Function) || Function <- ["start", "start_link"]].
 
 init_function(Module, Function) ->
   String = [Function, "() -> {ok, Pid} = gen_server:", Function, "('", Module, "', [], []), {object, {Pid, '", Module, "'}}."],
   parse_function(lists:concat(String)).
   
-% Parse a function from a string
+%% Parse a function from a string
 parse_function(String) ->
   {ok, Scanned, _} = erl_scan:string(String),
   {ok, Form} = erl_parse:parse_form(Scanned),
