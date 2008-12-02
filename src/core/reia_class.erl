@@ -32,14 +32,19 @@ process_functions(Module, Functions) ->
     {dict:from_list(default_functions()), []}, 
     Functions
   ),
-  
+    
   % Pull the initialize function out for special case processing
-  {ok, InitFunction} = dict:find(initialize, FunctionDict),
+  {ok, InitializeMethod} = dict:find(initialize, FunctionDict),
   FunctionDict2 = dict:erase(initialize, FunctionDict),
   
-  DefaultFunctions = start_functions(Module),
+  DefaultFunctions = start_functions(Module, function_arity(InitializeMethod)),
   ImmediateFunctions = [Function || {_, Function} <- dict:to_list(FunctionDict2)],
-  lists:flatten([InitFunction, DefaultFunctions, ImmediateFunctions, process_methods(Methods)]). 
+  lists:flatten([
+    DefaultFunctions, 
+    ImmediateFunctions, 
+    initialize_method(InitializeMethod), 
+    process_methods(Methods)
+  ]). 
   
 %% If a method name matches one of the default_functions(), then it has a
 %% special purpose and should be mapped to a function rather than a method.
@@ -50,6 +55,21 @@ process_function({function, _Line, Name, _Arity, _Clauses} = Function, {Dict, Fu
     error ->
       {Dict, [Function|Functions]}
   end.
+  
+%% Construct the initialize method (as a function call for now, ugh)
+initialize_method({function, Line, Name, _Arity, Clauses}) ->
+  {function, Line, Name, 1, [initialize_clause(Clause) || Clause <- Clauses]}.
+
+%% Process a clause of initialize
+initialize_clause({clause, Line, Arguments, Guards, Expressions}) ->
+  Arguments2 = [argument_list_cons(Arguments, Line)],
+  InitIvars = {match, Line,
+                {var, Line, '__instance_variables_0'},
+                {call, Line, {remote, Line, {atom, Line, dict}, {atom, Line, new}}, []}
+              },
+  ReturnValue = {var, Line, final_ivars(Expressions)},
+  Expressions2 = lists:flatten([InitIvars, Expressions, ReturnValue]),
+  {clause, Line, Arguments2, Guards, Expressions2}.
   
 %% Convert individual method definitions into a single dispatch_method function
 process_methods([]) ->
@@ -128,14 +148,16 @@ argument_list_cons([Element|Rest], Line) ->
 %% Default functions to incorporate into Reia classes
 default_functions() ->
   [default_function(Function) || Function <- [
-    "init(Args) -> initialize(Args), {ok, dict:new()}.",
-    "initialize(_Args) -> void.", 
+    "init(Args) -> {ok, initialize(Args)}.",
     "method_missing(_State, Method, _Args) -> throw({error, {Method, \"undefined\"}}).",
     "handle_call(Request, From, State) -> try dispatch_method(Request, From, State) catch throw:Error -> {reply, {error, Error}, State} end.",
     "handle_cast(_Msg, State) -> {noreply, State}.",
     "handle_info(_Info, State) -> {noreply, State}.",
     "terminate(_Reason, _State) -> ok.",
-    "code_change(_OldVsn, State, _Extra) -> {ok, State}."
+    "code_change(_OldVsn, State, _Extra) -> {ok, State}.",
+    
+    % A bit sneaky here as this is an untransformed method:
+    "initialize() -> nil."
   ]].
 
 %% Parse a default function and return a dict entry for it  
@@ -152,15 +174,34 @@ default_methods() ->
   ]].
   
 %% Functions for starting a new object
-start_functions(Module) ->
-  [init_function(Module, Function) || Function <- ["start", "start_link"]].
+start_functions(Module, Arity) ->
+  [start_function(Module, Function, Arity) || Function <- ["start", "start_link"]].
 
-init_function(Module, Function) ->
-  String = [Function, "() -> {ok, Pid} = gen_server:", Function, "('", Module, "', [], []), {object, {Pid, '", Module, "'}}."],
+start_function(Module, Function, Arity) ->
+  Vars = variable_list(Arity),
+  String = [Function, "("] ++ Vars ++ 
+    [") -> {ok, Pid} = gen_server:", Function, "('", Module, "', ["] ++ Vars ++ [
+    "], []), {object, {Pid, '", Module, "'}}."],
   parse_function(lists:concat(String)).
+  
+variable_list(0) ->
+  [];
+variable_list(Size) ->
+  add_commas([lists:flatten(io_lib:format("Var~w", [N])) || N <- lists:seq(1, Size)]).
+  
+add_commas(List) -> 
+  add_commas(List, []).
+add_commas([Arg], Result) ->
+  lists:reverse([Arg|Result]);
+add_commas([Head|Rest], Result) ->
+  add_commas(Rest, [",",Head|Result]).
   
 %% Parse a function from a string
 parse_function(String) ->
   {ok, Scanned, _} = erl_scan:string(String),
   {ok, Form} = erl_parse:parse_form(Scanned),
   Form.
+  
+%% Return the arity of a function in Erlang abstract format
+function_arity({function, _Line, _Name, Arity, _Clauses}) ->
+  Arity.
