@@ -1,18 +1,18 @@
-module RegexpTest
+module RegexTest
   def run
-    Local.puts("Regexp")
+    Local.puts("Regex")
     
     match_one()
-    match_all()
-    split()
-    sub()
-    gsub()
+    #match_all()
+    #split()
+    #sub()
+    #gsub()
     to_string()
     inspect()
     
     
   def match_one
-    TestHelper.expect("match a single occurency", fun do
+    TestHelper.expect("match a single occurence", fun do
       string = "(a,b,c,d,e)"
       ("a,", /.,/.match(string))
     )

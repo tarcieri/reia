@@ -10,9 +10,9 @@ load("test/types/tuple.re")
 TupleTest.run()
 puts("")
 
-# Regexp test
-load("test/types/regexp.re")
-RegexpTest.run()
+# Regex test
+load("test/types/regex.re")
+RegexTest.run()
 puts("")
 
 # Object test
