@@ -176,9 +176,47 @@ transform(State, Node) ->
 % Process clauses, giving each branch its own dict and ensuring the highest
 % numbered versions of each variable are bound at the end of each clause
 process_clauses(Type, Vars, Clauses) ->
-  {ok, {_, Vars2}, Clauses2} = reia_visitor:transform(Clauses, {Type, Vars}, fun transform/2),
-  {Vars2, Clauses2}.
+  % Proceed with the normal SSA transformation on each clause
+  Clauses2 = lists:map(fun(Clause) ->
+    {ok, {_, Binding}, Clause2} = reia_visitor:transform(Clause, {Type, Vars}, fun transform/2),
+    {Binding, Clause2}
+  end, Clauses),
   
+  % Extract a nested list of bound variables and SSA versions for each clause
+  ClauseVars = [Binding || {Binding, _} <- Clauses2],
+  
+  % Build a dict of the highest version numbers of any variables referenced 
+  % in any clause
+  NewestVars = lists:foldl(fun update_binding/2, dict:new(), ClauseVars),
+    
+  % Bind any "unsafe" variables in the clauses to the latest SSA version
+  Clauses3 = [bind_unsafe_variables(Vars, Binding, NewestVars, Clause) || {Binding, Clause} <- Clauses2],
+  
+  % Determine the final SSA versions of all variables known for the current binding
+  FinalVars = update_binding(Vars, NewestVars),
+  
+  {FinalVars, Clauses3}.
+
+% Update the OldBinding dictionary with the newest version numbers from 
+% NewBinding, producing a new dictionary
+update_binding(OldBinding, NewBinding) ->
+  lists:foldl(fun({Var, Version}, NewestVars) ->
+    case dict:find(Var, NewestVars) of
+      {ok, NewestVersion} ->
+        if 
+          Version > NewestVersion ->
+            dict:store(Var, Version, NewestVars);
+          true ->
+            NewestVars
+        end;
+      error ->
+        dict:store(Var, Version, NewestVars)
+    end    
+  end, OldBinding, dict:to_list(NewBinding)).
+  
+bind_unsafe_variables(_AllVars, _ClauseVars, _FinalVars, Clause) ->
+  Clause.
+    
 % Generate the SSA name for a given variable, which takes the form name_version
 ssa_name(Name, Version) ->
   Name2 = lists:flatten(io_lib:format("~s_~w", [Name, Version])),
