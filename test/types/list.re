@@ -2,6 +2,7 @@ module ListTest
   def run
     Local.puts("List")
     
+    size_test()
     nth_test()
     reverse_test()  
     push_test()
@@ -10,6 +11,12 @@ module ListTest
     join_test()
     to_tuple_test()
   
+  # knows its size
+  def size_test
+    TestHelper.expect("knows its size", fun do
+      list = [1,2,3,4,5]
+      (5, list.size())
+    )
   # retrieves the nth element correctly
   def nth_test
     TestHelper.expect("retrieves the nth element correctly", fun do    
