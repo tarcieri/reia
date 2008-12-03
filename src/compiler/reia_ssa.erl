@@ -106,7 +106,7 @@ transform({Mode, Dict}, {match, Line, In1, In2}) ->
 % Case expressions bind variables in clauses
 transform({Mode, Dict}, {'case', Line, Expression, Clauses}) ->
   {ok, {_, Dict2}, Expression2} = reia_visitor:transform(Expression, {Mode, Dict}, fun transform/2),
-  {ok, {_, Dict3}, Clauses2} = reia_visitor:transform(Clauses, {'case', Dict2}, fun transform/2),
+  {Dict3, Clauses2} = process_clauses('case', Dict2, Clauses),
   {stop, {Mode, Dict3}, {'case', Line, Expression2, Clauses2}};
 
 % Case clauses match against patterns
@@ -172,6 +172,12 @@ transform({match, _} = State, {var, Line, Name}) ->
 % Walk unrecognized nodes without transforming them
 transform(State, Node) ->
   {walk, State, Node}.
+  
+% Process clauses, giving each branch its own dict and ensuring the highest
+% numbered versions of each variable are bound at the end of each clause
+process_clauses(Type, Vars, Clauses) ->
+  {ok, {_, Vars2}, Clauses2} = reia_visitor:transform(Clauses, {Type, Vars}, fun transform/2),
+  {Vars2, Clauses2}.
   
 % Generate the SSA name for a given variable, which takes the form name_version
 ssa_name(Name, Version) ->
