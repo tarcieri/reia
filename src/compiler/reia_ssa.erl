@@ -219,35 +219,45 @@ update_binding(OldBinding, NewBinding) ->
 % if any are referenced after the statement the clauses belong to.  To avoid
 % this, we need to ensure that all clauses bind the same set of variables upon
 % completion, while still preserving the original return value.
-bind_unsafe_variables(Variables, Clause) ->
-  _UnsafeVariables = enumerate_unsafe_variables(Variables),  
-  Clause.
+bind_unsafe_variables(Variables, {clause, Line, Pattern, Expressions}) ->
+  {DestVersions, SourceVersions} = enumerate_unsafe_variables(Variables),
+  DestTuple   = {tuple, Line, [build_form_for_variable(Var, Line) || Var <- DestVersions]},
+  SourceTuple = {tuple, Line, [build_form_for_variable(Var, Line) || Var <- SourceVersions]},
+  _MatchExpr = {match, Line, DestTuple, SourceTuple},
+  {clause, Line, Pattern, Expressions}.
 
 % Build a list of potentially unsafe variables that need to be bound along with
 % their source and destination versions  
 enumerate_unsafe_variables({OrigVars, ClauseVars, FinalVars}) ->
-  lists:foldl(fun({Var, FinalVersion}, UnsafeVars) ->
+  lists:foldl(fun({Var, FinalVersion}, {DestVersions, SourceVersions}) ->
     case dict:find(Var, ClauseVars) of
       {ok, ClauseVersion} ->
         if ClauseVersion < FinalVersion ->
-          [{Var, ClauseVersion, FinalVersion}|UnsafeVars];
+          {[{Var, FinalVersion}|DestVersions], [{Var, ClauseVersion}|SourceVersions]};
         true ->
-          UnsafeVars
+          {DestVersions, SourceVersions}
         end;
       error ->
         case dict:find(Var, OrigVars) of
           {ok, OrigVersion} ->
-            [{Var, OrigVersion, FinalVersion}|UnsafeVars];
+            {[{Var, FinalVersion}|DestVersions], [{Var, OrigVersion}|SourceVersions]};
           error ->
             case internal_variable(Var) of
               true -> Version = 0;
               false -> Version = nil
             end,
-            [{Var, Version, FinalVersion}|UnsafeVars]
+            {[{Var, FinalVersion}|DestVersions], [{Var, Version}|SourceVersions]}
         end
       end
-  end, [], dict:to_list(FinalVars)).
-    
+  end, {[], []}, dict:to_list(FinalVars)).
+
+% Convert a tuple returned from enumerate_unsafe_variables into the appropriate
+% Erlang abstract form
+build_form_for_variable({_, nil}, Line) ->
+  {atom, Line, nil};
+build_form_for_variable({Name, Version}, Line) ->
+  {identifier, Line, ssa_name(Name, Version)}.
+      
 % Generate the SSA name for a given variable, which takes the form name_version
 ssa_name(Name, Version) ->
   Name2 = lists:flatten(io_lib:format("~s_~w", [Name, Version])),
