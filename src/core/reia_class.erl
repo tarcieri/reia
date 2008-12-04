@@ -105,10 +105,10 @@ process_return_value(Line, []) ->
   process_return_value(Line, [{atom, Line, 'nil'}]);
 process_return_value(Line, Expressions) ->
   [Result|Expressions2] = lists:reverse(Expressions),
-  Result2 = {match, Line, {var, Line, '__return_value'}, Result},
+  Result2 = {match, Line, {var, Line, '__method_return_value'}, Result},
   Result3 = {tuple, Line, [
     {atom, Line, reply},
-    {tuple, Line, [{atom, Line, ok}, {var, Line, '__return_value'}]}, 
+    {tuple, Line, [{atom, Line, ok}, {var, Line, '__method_return_value'}]}, 
     {var, Line, final_ivars(Expressions)}
   ]},
   lists:reverse([Result3,Result2|Expressions2]).

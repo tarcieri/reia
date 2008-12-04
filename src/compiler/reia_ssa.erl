@@ -221,10 +221,13 @@ update_binding(OldBinding, NewBinding) ->
 % completion, while still preserving the original return value.
 bind_unsafe_variables(Variables, {clause, Line, Pattern, Expressions}) ->
   {DestVersions, SourceVersions} = enumerate_unsafe_variables(Variables),
+  
+  % Build the match expression to bind potentially unsafe variables
   DestTuple   = {tuple, Line, [build_form_for_variable(Var, Line) || Var <- DestVersions]},
   SourceTuple = {tuple, Line, [build_form_for_variable(Var, Line) || Var <- SourceVersions]},
-  _MatchExpr = {match, Line, DestTuple, SourceTuple},
-  {clause, Line, Pattern, Expressions}.
+  MatchExpr = {match, Line, DestTuple, SourceTuple},
+  
+  {clause, Line, Pattern, process_return_value(Line, Expressions, MatchExpr)}.
 
 % Build a list of potentially unsafe variables that need to be bound along with
 % their source and destination versions  
@@ -257,7 +260,16 @@ build_form_for_variable({_, nil}, Line) ->
   {atom, Line, nil};
 build_form_for_variable({Name, Version}, Line) ->
   {identifier, Line, ssa_name(Name, Version)}.
-      
+  
+%% Convert a method's return value into a gen_server reply
+process_return_value(Line, [], MatchExpr) ->
+  [MatchExpr, {atom, Line, 'nil'}];
+process_return_value(Line, Expressions, MatchExpr) ->
+  [Result|Expressions2] = lists:reverse(Expressions),
+  ReturnVar = {identifier, Line, '__clause_return_value'},
+  Result2 = {match, Line, ReturnVar, Result},
+  lists:reverse([ReturnVar, MatchExpr, Result2|Expressions2]).
+  
 % Generate the SSA name for a given variable, which takes the form name_version
 ssa_name(Name, Version) ->
   Name2 = lists:flatten(io_lib:format("~s_~w", [Name, Version])),
