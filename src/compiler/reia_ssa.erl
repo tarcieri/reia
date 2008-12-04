@@ -190,7 +190,7 @@ process_clauses(Type, Vars, Clauses) ->
   NewestVars = lists:foldl(fun update_binding/2, dict:new(), ClauseVars),
     
   % Bind any "unsafe" variables in the clauses to the latest SSA version
-  Clauses3 = [bind_unsafe_variables(Vars, Binding, NewestVars, Clause) || {Binding, Clause} <- Clauses2],
+  Clauses3 = [bind_unsafe_variables({Vars, Binding, NewestVars}, Clause) || {Binding, Clause} <- Clauses2],
   
   % Determine the final SSA versions of all variables known for the current binding
   FinalVars = update_binding(Vars, NewestVars),
@@ -219,10 +219,14 @@ update_binding(OldBinding, NewBinding) ->
 % if any are referenced after the statement the clauses belong to.  To avoid
 % this, we need to ensure that all clauses bind the same set of variables upon
 % completion, while still preserving the original return value.
-bind_unsafe_variables(OrigVars, ClauseVars, FinalVars, Clause) ->
-  % Build a list of unsafe variables that need to be bound along with their
-  % source and destination versions
-  _UnsafeVariables = lists:foldl(fun({Var, FinalVersion}, UnsafeVars) ->
+bind_unsafe_variables(Variables, Clause) ->
+  _UnsafeVariables = enumerate_unsafe_variables(Variables),  
+  Clause.
+
+% Build a list of potentially unsafe variables that need to be bound along with
+% their source and destination versions  
+enumerate_unsafe_variables({OrigVars, ClauseVars, FinalVars}) ->
+  lists:foldl(fun({Var, FinalVersion}, UnsafeVars) ->
     case dict:find(Var, ClauseVars) of
       {ok, ClauseVersion} ->
         if ClauseVersion < FinalVersion ->
@@ -235,12 +239,14 @@ bind_unsafe_variables(OrigVars, ClauseVars, FinalVars, Clause) ->
           {ok, OrigVersion} ->
             [{Var, OrigVersion, FinalVersion}|UnsafeVars];
           error ->
-            [{Var, nil, FinalVersion}|UnsafeVars]
+            case internal_variable(Var) of
+              true -> Version = 0;
+              false -> Version = nil
+            end,
+            [{Var, Version, FinalVersion}|UnsafeVars]
         end
       end
-  end, [], dict:to_list(FinalVars)),
-  
-  Clause.
+  end, [], dict:to_list(FinalVars)).
     
 % Generate the SSA name for a given variable, which takes the form name_version
 ssa_name(Name, Version) ->
