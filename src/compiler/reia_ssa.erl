@@ -203,18 +203,43 @@ update_binding(OldBinding, NewBinding) ->
   lists:foldl(fun({Var, Version}, NewestVars) ->
     case dict:find(Var, NewestVars) of
       {ok, NewestVersion} ->
-        if 
-          Version > NewestVersion ->
-            dict:store(Var, Version, NewestVars);
-          true ->
-            NewestVars
+        if Version > NewestVersion ->
+          dict:store(Var, Version, NewestVars);
+        true ->
+          NewestVars
         end;
       error ->
         dict:store(Var, Version, NewestVars)
     end    
   end, OldBinding, dict:to_list(NewBinding)).
   
-bind_unsafe_variables(_AllVars, _ClauseVars, _FinalVars, Clause) ->
+% The versions variables are left in after the SSA transform runs are not 
+% necessarily the latest ones used among the entire set of clauses.  Worse, 
+% some clauses may have bound new variables.  These variables are "unsafe"
+% if any are referenced after the statement the clauses belong to.  To avoid
+% this, we need to ensure that all clauses bind the same set of variables upon
+% completion, while still preserving the original return value.
+bind_unsafe_variables(OrigVars, ClauseVars, FinalVars, Clause) ->
+  % Build a list of unsafe variables that need to be bound along with their
+  % source and destination versions
+  _UnsafeVariables = lists:foldl(fun({Var, FinalVersion}, UnsafeVars) ->
+    case dict:find(Var, ClauseVars) of
+      {ok, ClauseVersion} ->
+        if ClauseVersion < FinalVersion ->
+          [{Var, ClauseVersion, FinalVersion}|UnsafeVars];
+        true ->
+          UnsafeVars
+        end;
+      error ->
+        case dict:find(Var, OrigVars) of
+          {ok, OrigVersion} ->
+            [{Var, OrigVersion, FinalVersion}|UnsafeVars];
+          error ->
+            [{Var, nil, FinalVersion}|UnsafeVars]
+        end
+      end
+  end, [], dict:to_list(FinalVars)),
+  
   Clause.
     
 % Generate the SSA name for a given variable, which takes the form name_version
