@@ -353,7 +353,7 @@ function_identifier({punctuated_identifier, Line, Atom}) ->
   
 %% Generate proper forms for if statements
 if_forms({{'if', Line}, Expression, Statements}) ->
-  {'if', Line, Expression, Statements};
+  {'if', Line, Expression, Statements, {else_clause, Line, [{atom, Line, nil}]}};
 if_forms({{'if', Line}, Expression, Statements, ElseClause}) ->
   {'if', Line, Expression, Statements, ElseClause};
 if_forms({{'unless', Line}, Expression, Statements}) ->

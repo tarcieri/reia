@@ -170,20 +170,6 @@ forms({clause, Line, Expression, Statements}) ->
 forms({else_clause, Line, Statements}) ->
   {clause, Line, [{var, Line, '_'}], [], [forms(Statement) || Statement <- Statements]};
   
-%% If statements
-forms({'if', Line, Expression, Statements}) ->
-  forms({'if', Line, Expression, Statements, {else_clause, Line, [{atom, Line, nil}]}});
-
-forms({'if', Line, Expression, Statements, {else_clause, ElseLine, ElseStatements}}) ->
-  ElseForms = [forms(Statement) || Statement <- ElseStatements],
-  {'case', Line, forms(Expression),
-    [
-      {clause, ElseLine, [{atom, Line, false}], [], ElseForms},
-      {clause, ElseLine, [{atom, Line, nil}],   [], ElseForms},
-      {clause, Line, [{var, Line, '_'}], [], [forms(Statement) || Statement <- Statements]}
-    ]
-  };
-  
 %% Try statements
 forms({'try', Line, Statements, CatchClauses}) ->
   {'try', Line, 

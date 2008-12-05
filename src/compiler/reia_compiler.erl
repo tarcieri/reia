@@ -10,7 +10,8 @@
   default_passes/0, 
   compile/1, 
   compile/2,
-  ivars/1, 
+  ivars/1,
+  branches/1,
   ssa/1, 
   r2e/1, 
   dynamic/1, 
@@ -18,7 +19,7 @@
 ]).
 
 default_passes() ->
-  [ivars, ssa, r2e, dynamic].
+  [branches, ivars, ssa, r2e, dynamic].
 
 compile(Expressions) ->
   compile(Expressions, default_passes()).
@@ -32,6 +33,10 @@ pass({ssa, Binding}, Expressions) ->
   ssa(Expressions, Binding);
 pass(Pass, Expressions) ->
   ?MODULE:Pass(Expressions).
+
+%% Convert if statements to case statements and add default return values
+branches(Expressions) ->
+  reia_branches:ast(Expressions).
 
 %% Convert Reia instance variables into internal dict representation
 ivars(Expressions) ->
