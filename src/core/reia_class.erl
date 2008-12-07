@@ -12,7 +12,9 @@
 %% Convert a Reia class definition into a Reia module which conforms to the
 %% gen_server behavior, then load it into the code server
 build({class, Line, Name, Functions}) ->
-  Module = {module, Line, Name, process_functions(Name, Functions)},
+  Functions2 = process_functions(Name, Functions),
+  [io:format(erl_pp:form(Function)) || Function <- Functions2],
+  Module = {module, Line, Name, Functions2},
   % io:format("~p~n", [Module]),
   reia_module:build(Module);
 build(_) ->
