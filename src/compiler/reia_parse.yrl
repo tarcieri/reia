@@ -46,9 +46,9 @@ Nonterminals
   case_expr
   case_clauses
   case_clause
-  else_clause
   if_expr
   inline_if_expr
+  else_clause
   if_op
   for_expr
   try_expr
@@ -193,15 +193,11 @@ ivar -> '@' identifier : {ivar, line('$1'), identifier_atom('$2')}.
 
 %% Case expressions
 case_expr -> 'case' expr eol indent case_clauses dedent : {'case', line('$1'), '$2', '$5'}.
-case_expr -> 'case' expr eol indent case_clauses else_clause dedent : {'case', line('$1'), '$2', '$5', '$6'}.
 
 case_clauses -> case_clause case_clauses : ['$1'|'$2'].
 case_clauses -> case_clause : ['$1'].
 
 case_clause -> expr ':' eol indent statements dedent : {clause, line('$2'), '$1', '$5'}.
-
-else_clause -> else inline_statements eol : {else_clause, line('$1'), '$2'}.
-else_clause -> else eol indent statements dedent : {else_clause, line('$1'), '$4'}.
 
 %% If expressions
 if_expr -> if_op expr eol indent statements dedent : if_forms({'$1', '$2', '$5'}).
@@ -209,6 +205,9 @@ if_expr -> if_op expr eol indent statements dedent else_clause : if_forms({'$1',
 
 if_op -> 'if'   : '$1'.
 if_op -> unless : '$1'.
+
+else_clause -> else inline_statements eol : {else_clause, line('$1'), '$2'}.
+else_clause -> else eol indent statements dedent : {else_clause, line('$1'), '$4'}.
 
 %% For loops
 for_expr -> for match_expr in expr eol indent statements dedent : {for, line('$1'), '$2', '$4', '$7'}.
