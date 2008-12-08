@@ -70,5 +70,5 @@ funcall({string, String}, sub, [{regexp, Regex}, {string, Replacement}]) ->
       List2 = Start ++ binary_to_list(Replacement) ++ End,
       {string, list_to_binary(List2)};
     nomatch ->
-      nil
+      {string, String}
   end.
