@@ -160,15 +160,10 @@ forms({block, Line, Expressions}) ->
   
 %% Case expressions
 forms({'case', Line, Expression, Clauses}) ->
-  forms({'case', Line, Expression, Clauses, {else_clause, Line, [{atom, Line, nil}]}});
-forms({'case', Line, Expression, Clauses, ElseClause}) ->
-  {'case', Line, forms(Expression), [forms(Clause) || Clause <- Clauses ++ [ElseClause]]};
+  {'case', Line, forms(Expression), [forms(Clause) || Clause <- Clauses]};
     
 forms({clause, Line, Expression, Statements}) ->
   {clause, Line, [forms(Expression)], [], [forms(Statement) || Statement <- Statements]};
-  
-forms({else_clause, Line, Statements}) ->
-  {clause, Line, [{var, Line, '_'}], [], [forms(Statement) || Statement <- Statements]};
   
 %% Try statements
 forms({'try', Line, Statements, CatchClauses}) ->

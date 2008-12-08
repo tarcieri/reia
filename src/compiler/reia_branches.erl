@@ -28,6 +28,10 @@ transform(_, {'if', Line, Expression, Statements, {else_clause, ElseLine, ElseSt
   },
   {walk, void, Node};
   
+%% Case statements
+transform(_, {'case', Line, Expression, Clauses}) ->
+  {'case', Line, Expression, Clauses ++ [{clause, Line, [{var, Line, '_'}], [{atom, Line, nil}]}]};
+  
 % Walk unrecognized nodes without transforming them
 transform(_, Node) ->
   {walk, void, Node}.
