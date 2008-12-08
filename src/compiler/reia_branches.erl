@@ -21,20 +21,40 @@ ast(Ast) ->
 transform(_, {'if', Line, Expression, Statements, {else_clause, ElseLine, ElseStatements}}) ->
   Node = {'case', Line, Expression,
     [
-      {clause, ElseLine, {atom, Line, false}, ElseStatements},
-      {clause, ElseLine, {atom, Line, nil}, ElseStatements},
+      {clause, ElseLine, {false, Line}, ElseStatements},
+      {clause, ElseLine, {nil, Line},   ElseStatements},
       {clause, Line, {identifier, Line, '_'}, Statements}
     ]
   },
   {walk, void, Node};
   
 %% Case statements
-transform(_, {'case', Line, Expression, Clauses}) ->
-  Node = {'case', Line, Expression, 
-    Clauses ++ [{clause, Line, {identifier, Line, '_'}, [{atom, Line, nil}]}]
-  },
+transform(_, {'case', Line, Expression, Clauses} = OrigNode) ->
+  Node = case lists:any(fun is_catchall_clause/1, Clauses) of
+    true ->
+      OrigNode;
+    false ->
+      {'case', Line, Expression, 
+        Clauses ++ [{clause, Line, {identifier, Line, '_'}, [{nil, Line}]
+      }]}
+  end,
   {walk, void, Node};
   
 % Walk unrecognized nodes without transforming them
 transform(_, Node) ->
   {walk, void, Node}.
+    
+% Is the given clause a catch-all clause?
+is_catchall_clause({clause, _Line, Pattern, _Expressions}) ->
+  catchall_pattern(Pattern).
+  
+% Is the given pattern a catch-all?
+catchall_pattern({match, _Line, Pattern1, Pattern2}) ->
+  case catchall_pattern(Pattern1) of
+    true -> true;
+    false -> catchall_pattern(Pattern2)
+  end;
+catchall_pattern({identifier, _, _}) ->
+  true;
+catchall_pattern(_) ->
+  false.
