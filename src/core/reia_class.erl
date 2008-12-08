@@ -66,7 +66,7 @@ initialize_method({function, Line, Name, _Arity, Clauses}) ->
 initialize_clause({clause, Line, Arguments, Guards, Expressions}) ->
   Arguments2 = [argument_list_cons(Arguments, Line)],
   InitIvars = {match, Line,
-                {var, Line, '__instance_variables_0'},
+                {var, Line, '___instance_variables_0'},
                 {call, Line, {remote, Line, {atom, Line, dict}, {atom, Line, new}}, []}
               },
   ReturnValue = {var, Line, final_ivars(Expressions)},
@@ -103,7 +103,7 @@ process_method_clause({clause, Line, Arguments, [], Expressions}, Name) ->
   {clause, Line, [
     {tuple, Line, [{atom, Line, Name}, argument_list_cons(Arguments, Line)]}, 
     {var, Line, '_From'}, 
-    {var, Line, '__instance_variables_0'}
+    {var, Line, '___instance_variables_0'}
   ], [], process_return_value(Line, Expressions)}.
 
 %% Convert a method's return value into a gen_server reply
@@ -119,18 +119,18 @@ process_return_value(Line, Expressions) ->
   ]},
   lists:reverse([Result3,Result2|Expressions2]).
 
-%% Find the name of the last SSA-transformed __instance_variables variable
+%% Find the name of the last SSA-transformed ___instance_variables variable
 %% present in a given function.
 final_ivars(Expressions) ->
   {ok, Newest, _} = reia_visitor:transform(Expressions, 0, fun newest_ivars/2),
-  Name = io_lib:format("~s~w", ["__instance_variables_", Newest]),
+  Name = io_lib:format("~s~w", ["___instance_variables_", Newest]),
   list_to_atom(lists:flatten(Name)).
 
 %% Locate the number of the last SSA transformation of the __instance_variables
 %% variable in a given function.
 newest_ivars(Newest, {var, _Line, Name} = Node) ->
   case atom_to_list(Name) of
-    "__instance_variables_" ++ VersionStr ->
+    "___instance_variables_" ++ VersionStr ->
       Version = list_to_integer(VersionStr),
       Newest2 = if
         Version > Newest -> 
