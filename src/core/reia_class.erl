@@ -75,7 +75,7 @@ initialize_clause({clause, Line, Arguments, Guards, Expressions}) ->
   
 %% Convert individual method definitions into a single dispatch_method function
 process_methods([]) ->
-  [];
+  build_method_dispatch_function(1, lists:flatten([process_method(Method) || Method <- default_methods()]));
 process_methods([FirstMeth|_] = Methods) ->
   % Extract the line number from the first method
   {function, Line, _, _, _} = FirstMeth,
@@ -83,6 +83,10 @@ process_methods([FirstMeth|_] = Methods) ->
   % Decompose the function clauses for methods into handle_call clauses
   Clauses = lists:flatten([process_method(Method) || Method <- Methods ++ default_methods()]),
   
+  build_method_dispatch_function(Line, Clauses).
+
+%% Generate Erlang forms for the class's method dispatch function
+build_method_dispatch_function(Line, Clauses) ->
   % Add a clause which thunks to method_missing
   MethodMissingThunk = "dispatch_method({Method, Args}, _, State) -> method_missing(State, Method, Args).",
   {function, _, _, _, MethodMissingClause} = parse_function(MethodMissingThunk),
