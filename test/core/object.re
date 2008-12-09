@@ -1,3 +1,10 @@
+#
+# ObjectTest: Tests for Reia's object system
+# Copyright (C)2008 Tony Arcieri
+# 
+# Redistribution is permitted under the MIT license.  See LICENSE for details.
+#
+
 class PlusTwo
   def calc(n)
     n + 2

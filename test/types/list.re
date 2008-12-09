@@ -1,3 +1,10 @@
+#
+# ListTest: Tests for Reia's list type
+# Copyright (C)2008 Tony Arcieri
+# 
+# Redistribution is permitted under the MIT license.  See LICENSE for details.
+#
+
 module ListTest
   def run
     Local.puts("List")

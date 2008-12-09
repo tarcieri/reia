@@ -1,3 +1,10 @@
+#
+# RegexTest: Tests for Reia's regular expression type
+# Copyright (C)2008 Tony Arcieri
+# 
+# Redistribution is permitted under the MIT license.  See LICENSE for details.
+#
+
 module RegexTest
   def run
     Local.puts("Regex")

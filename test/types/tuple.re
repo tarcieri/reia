@@ -1,3 +1,10 @@
+#
+# TupleTest: Tests for Reia's tuple type
+# Copyright (C)2008 Tony Arcieri
+# 
+# Redistribution is permitted under the MIT license.  See LICENSE for details.
+#
+
 module TupleTest
   def run
     Local.puts("Tuple")

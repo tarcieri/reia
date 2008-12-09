@@ -1,3 +1,10 @@
+#
+# runner: Runner for Reia's test suite
+# Copyright (C)2008 Tony Arcieri
+# 
+# Redistribution is permitted under the MIT license.  See LICENSE for details.
+#
+
 load("test/test_helper.re")
 
 # List test
