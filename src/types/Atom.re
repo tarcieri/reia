@@ -7,7 +7,7 @@
 
 module Atom    
   def funcall(term, ~to_s, [])
-    erlang::atom_to_list(term).to_string()
+    term.to_list().to_string()
     
   def funcall(nil, ~inspect, [])
     "nil"
@@ -17,9 +17,12 @@ module Atom
 
   def funcall(false, ~inspect, [])
     "false"
+
+  def funcall(term, ~to_list, [])
+    erlang::atom_to_list(term)
     
   def funcall(term, ~inspect, [])
-    atom = erlang::atom_to_list(term).to_string()
+    atom = term.to_s()
     case /^[A-Za-z0-9_]+$/.match(atom)
       nil:
         ["~'", atom, "'"].join()
