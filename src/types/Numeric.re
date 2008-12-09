@@ -14,11 +14,14 @@ module Numeric
       result
         
   def funcall(number, ~to_s, [])
-    if erlang::is_integer(number)
-      erlang::integer_to_list(number).to_string() 
-    else
-      [list] = io_lib::format("~f".to_list(), [number])
-      list.to_string()
-      
+    number.to_list().to_string()
+
   def funcall(number, ~inspect, [])
     funcall(number, ~to_s, [])
+
+  def funcall(number, ~to_list, [])
+    if erlang::is_integer(number)
+      erlang::integer_to_list(number)
+    else
+      [list] = io_lib::format("~f".to_list(), [number])
+
