@@ -22,6 +22,16 @@ load("test/types/regex.re")
 RegexTest.run()
 puts("")
 
+# Numeric test
+load("test/types/numeric.re")
+NumericTest.run()
+puts("")
+
+# Hash test
+load("test/types/hash.re")
+HashTest.run()
+puts("")
+
 # Object test
 load("test/core/object.re")
 ObjectTest.run()

@@ -85,6 +85,11 @@ funcall({list, _} = List, to_string, []) ->
 %%   Generate a string representation of a list
 funcall({list, _} = List, to_s, []) ->
   funcall(List, inspect, []);
+
+%% List#to_hash
+%%    Generate a hash based on key/val pairs
+funcall({list, _} = List, to_hash, []) ->
+  {dict, dict:from_list([reia_erl:r2e(Element) || Element <- to_erl(List)])};
   
 %% List#inspect
 %%   Inspect the contents of a list

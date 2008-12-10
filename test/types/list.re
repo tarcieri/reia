@@ -17,6 +17,7 @@ module ListTest
     unshift_test()
     join_test()
     to_tuple_test()
+    to_hash_test()
   
   # knows its size
   def size_test
@@ -65,4 +66,9 @@ module ListTest
   def to_tuple_test()
     TestHelper.expect("converts to a tuple", fun do
       ((1,2,3).to_s(), [1,2,3].to_tuple().to_s())
+    )
+
+  def to_hash_test()
+    TestHelper.expect("converts to a hash", fun do
+      ([(~foo, "bar"), (~baz, "baz")].to_hash(), {~foo: "bar", ~baz: "baz"})
     )
