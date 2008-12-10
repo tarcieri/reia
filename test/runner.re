@@ -32,6 +32,11 @@ load("test/types/hash.re")
 HashTest.run()
 puts("")
 
+# Atom test
+load("test/types/atom.re")
+AtomTest.run()
+puts("")
+
 # Object test
 load("test/core/object.re")
 ObjectTest.run()

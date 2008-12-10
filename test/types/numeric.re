@@ -1,3 +1,9 @@
+#
+# NumericTest: Tests for Reia's numeric type
+# Copyright (C)2008 Jared Kuolt
+# 
+# Redistribution is permitted under the MIT license.  See LICENSE for details.
+#
 
 module NumericTest
   def run
