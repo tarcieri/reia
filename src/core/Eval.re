@@ -25,7 +25,7 @@ module Eval
     local_callback = fun(name, arguments) { local(name, arguments) }
     
     # Evaluate the expressions using erl_eval
-    (~value, result, binding) = erl_eval::exprs(erl_forms, binding, (~value, local_callback))
+    (~value, result, binding) = eval_shim::exprs(erl_forms, binding, (~value, local_callback))
     
     # Convert Erlang SSA variable names back to Reia names
     binding = binding.map { |(var, value)| (var.to_s().sub(/^_/, "").sub(/_[0-9]+$/, "").to_atom(), value) }
