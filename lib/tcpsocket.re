@@ -17,7 +17,6 @@ class TCPSocket
     case gen_tcp::connect(host.to_list(), port, [~binary, (~active, false)])
       (~ok, socket):
         @socket = socket
-        ~ok
       error:
         throw error
   
