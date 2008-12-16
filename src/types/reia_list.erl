@@ -74,6 +74,11 @@ funcall({list, {Reverse, Forward}}, size, []) ->
 %%   Explicitly cast a list to a tuple
 funcall({list, _} = List, to_tuple, []) ->
   {tuple, list_to_tuple(to_erl(List))};
+  
+%% List#to_list
+%%   Cast a list to a liast, a noop
+funcall({list, _} = List, to_list, []) ->
+  List;
  
 %% List#to_string
 %%   Explicitly cast a list to a string.  Useful for converting Erlang "strings"
