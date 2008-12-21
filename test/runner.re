@@ -40,3 +40,8 @@ puts("")
 # Object test
 load("test/core/object.re")
 ObjectTest.run()
+puts("")
+
+# File test
+load("test/lib/file.re")
+FileTest.run()
