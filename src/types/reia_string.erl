@@ -32,6 +32,16 @@ funcall({string, String}, to_binary, []) ->
 %%   Cast a string explicitly to an atom
 funcall({string, String}, to_atom, []) ->
   list_to_atom(binary_to_list(String));
+
+%% String#to_int
+%%   Cast a string explicitly to an integer
+funcall({string, String}, to_int, []) ->
+  list_to_integer(binary_to_list(String));
+
+%% String#to_float
+%%   Cast a string explicitly to a float
+funcall({string, String}, to_float, []) ->
+  list_to_float(binary_to_list(String));
   
 %% String#upcase
 %%   Capitalize all letters string
