@@ -9,9 +9,15 @@ module Numeric
   def pow(base, exponent)
     result = math::pow(base, exponent)
     if erlang::is_integer(base)
-      erlang::round(result)
+      result.round()
     else
       result
+
+  def funcall(number, ~round, [])
+    erlang::round(number)
+
+  def funcall(number, ~abs, [])
+    erlang::abs(number)
         
   def funcall(number, ~to_s, [])
     number.to_list().to_string()
