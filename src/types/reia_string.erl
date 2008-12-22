@@ -74,6 +74,31 @@ funcall({string, String}, uncapitalize, []) ->
 funcall({string, String}, length, []) ->
   reia_erl:e2r(string:len(binary_to_list(String)));
 
+%% String#slice
+%%   Returns a sub string starting at position of Start,
+%%   ending at option Stop or end of string
+funcall({string, String}, slice, [Start]) ->
+  NewString = reia_erl:e2r(string:sub_string(binary_to_list(String), Start)),
+  reia_list:funcall(NewString, to_string, []);
+funcall({string, String}, slice, [Start, Stop]) ->
+  NewString = reia_erl:e2r(string:sub_string(binary_to_list(String), Start, Stop)),
+  reia_list:funcall(NewString, to_string, []);
+
+%% String#strip
+%%   Returns string stripped of whitespace or optional char,
+%%   in optional atom direction: left, right or both (default)
+funcall({string, String}, strip, []) ->
+  funcall({string, String}, strip, [$ , both]);
+funcall({string, String}, strip, [{string, Bin}]) ->
+  funcall({string, String}, strip, [{string, Bin}, both]);
+funcall({string, String}, strip, [{string, Bin}, Direction]) ->
+  Char = lists:nth(1, binary_to_list(Bin)),
+  funcall({string, String}, strip, [Char, Direction]);
+funcall({string, String}, strip, [Char, Direction]) ->
+  NewString = reia_erl:e2r(string:strip(binary_to_list(String), Direction, Char)),
+  reia_list:funcall(NewString, to_string, []);
+
+
 %% String#sub
 %%   Replace a portion of a string with a given substitution
 funcall({string, String}, sub, [{regexp, Regex}, {string, Replacement}]) ->
