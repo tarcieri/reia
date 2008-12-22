@@ -91,6 +91,8 @@ funcall({string, String}, strip, []) ->
   funcall({string, String}, strip, [$ , both]);
 funcall({string, String}, strip, [{string, Bin}]) ->
   funcall({string, String}, strip, [{string, Bin}, both]);
+funcall({string, String}, strip, [Direction]) ->
+  funcall({string, String}, strip, [$ , Direction]);
 funcall({string, String}, strip, [{string, Bin}, Direction]) ->
   Char = lists:nth(1, binary_to_list(Bin)),
   funcall({string, String}, strip, [Char, Direction]);
