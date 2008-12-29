@@ -1,7 +1,9 @@
 %
-% reia_ivars: Transform Reia instance variables into dict representation 
-% Copyright (C)2008 Tony Arcieri
+% reia_ivars: Some tomfoolery to pass around instance variables (i.e. state)
+%             inside of objects, with a few side effects here and there.
+%             Joe Armstrong would not approve :(
 % 
+% Copyright (C)2008 Tony Arcieri 
 % Redistribution is permitted under the MIT license.  See LICENSE for details.
 %
 
