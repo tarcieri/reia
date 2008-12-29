@@ -8,8 +8,8 @@
 -module(reia_ivars).
 -export([ast/1, transform/2]).
 
--define(msg(Str, Xs), io:format(Str, Xs)).
-%-define(msg(Str, Xs), ok).
+%-define(msg(Str, Xs), io:format(Str, Xs)).
+-define(msg(Str, Xs), ok).
 
 ast(Ast) ->
   ?msg("Input: ~p~n", [Ast]),
