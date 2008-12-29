@@ -12,14 +12,15 @@
   compile/2,
   ivars/1,
   branches/1,
-  ssa/1, 
+  ssa/1,
+  methods/1,
   r2e/1, 
   dynamic/1, 
   static/1
 ]).
 
 default_passes() ->
-  [branches, ivars, ssa, r2e, dynamic].
+  [branches, ivars, ssa, methods, r2e, dynamic].
 
 compile(Expressions) ->
   compile(Expressions, default_passes()).
@@ -49,6 +50,10 @@ ssa(Expressions) ->
 ssa(Expressions, Binding) ->
   Variables = [Name || {Name, _} <- Binding],
   reia_ssa:ast(Expressions, Variables).
+  
+%% Handle state passing to local methods
+methods(Expressions) ->
+  reia_methods:ast(Expressions).
 
 %% Convert Reia forms to Erlang forms
 r2e(Expressions) ->

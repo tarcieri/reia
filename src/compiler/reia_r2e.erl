@@ -153,7 +153,7 @@ forms({erl_funcall, Line, {identifier, _, Module}, {identifier, _, Function}, Ar
 %% Embedded literal Erlang function calls (emitted by earlier compiler passes)
 forms({call, Line, Function, Arguments}) ->
   {call, Line, Function, [forms(Argument) || Argument <- Arguments]};
-  
+    
 %% Begin/end blocks
 forms({block, Line, Expressions}) ->
   {block, Line, [forms(Expression) || Expression <- Expressions]};
