@@ -28,7 +28,7 @@ ast(Ast) ->
 transform(_, {method_call, Line, Method, Arguments, IvarsIn, IvarsOut}) ->
   Node = {block, Line, [
     {match, Line, return_value_pattern(Line, IvarsOut), method_invocation(Line, Method, Arguments, IvarsIn)},
-    {identifier, Line, '__method_return_value'}
+    {identifier, Line, '__meth_return_value'}
   ]},
   {walk, void, Node};
   
@@ -39,22 +39,30 @@ transform(_, Node) ->
 % Pattern for matching a method return value 
 % (same format as gen_server handle_call)
 return_value_pattern(Line, IvarsOut) ->
-  {tuple, Line, [
-    {atom, Line, reply},
-    {identifier, Line, '__method_return_value'}, 
-    IvarsOut
-  ]}.
+  {identifier, _Line, IvarsName} = IvarsOut,
+  {erl_forms, Line,
+    {tuple, Line, [
+      {atom, Line, reply},
+      {tuple, Line, [
+        {atom, Line, ok},
+        {var, Line, '__meth_return_value'}
+      ]}, 
+      {var, Line, IvarsName}
+    ]}
+  }.
   
 % Invoke the given method
 method_invocation(Line, Method, Arguments, IvarsIn) ->
   {identifier, Line, Name} = Method,
   {funcall, Line, 
     {identifier, Line, dispatch_method}, 
-    [
-      {tuple, Line, [
-        {atom, Line, Name}, 
-        {list, Line, Arguments}
-      ]}, 
+    [ 
+      {erl_forms, Line,
+        {tuple, Line, [
+          {atom, Line, Name}, 
+          reia_r2e:list_to_forms(Arguments, Line)
+        ]}
+      }, 
       {atom, Line, local}, 
       IvarsIn
     ]

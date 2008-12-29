@@ -22,12 +22,20 @@ class InitializeTest
 
   def ivars
     (@c, @b, @a)
+    
+class LocalMethodTest
+  def a(n)
+    2 * b(n)
+    
+  def b(n)
+    n + 1
 
 module ObjectTest
   def run
     Local.puts("Object")
     
     method_test()
+    local_method_test()
     state_test()
     initialize_test()
   
@@ -36,6 +44,13 @@ module ObjectTest
     TestHelper.expect("implements method calls", fun do
       obj = PlusTwo.start()
       (44, obj.calc(42))
+    )
+    
+  # implements local method calls
+  def local_method_test
+    TestHelper.expect("implements local method calls", fun do
+      obj = LocalMethodTest.start()
+      (4, obj.a(1))
     )
       
   # stores state in instance_variables

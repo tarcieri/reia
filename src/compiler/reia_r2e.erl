@@ -6,7 +6,7 @@
 %
 
 -module(reia_r2e).
--export([forms/1]).
+-export([forms/1, list_to_forms/2]).
 
 %% Module declarations
 forms({module, Line, {constant, _, Name}, Functions}) ->
@@ -223,8 +223,7 @@ group_clauses([Function|Rest], Dict) ->
     error ->
       group_clauses(Rest, dict:store({Name, Arity}, {Line, [Clause]}, Dict))
   end.
-
-%% Generate AST representing lists
+  
 list_to_forms([], Line) ->
   {nil, Line};
 list_to_forms([Element|Rest], Line) ->
