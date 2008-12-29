@@ -8,8 +8,8 @@
 -module(reia_ivars).
 -export([ast/1, transform/2]).
 
-%-define(msg(Str, Xs), io:format(Str, Xs)).
--define(msg(Str, Xs), ok).
+-define(msg(Str, Xs), io:format(Str, Xs)).
+%-define(msg(Str, Xs), ok).
 
 ast(Ast) ->
   ?msg("Input: ~p~n", [Ast]),
@@ -68,7 +68,14 @@ transform(method, {ivar, Line, Name}) ->
 % Instance variables used outside of classes
 transform(_State, {ivar, Line, _Name}) ->
   throw({error, {Line, "instance variables can only be referenced in classes"}});
-      
+  
+% Local method calls need to pass around ivars, so prepare them for the SSA
+% transform.  This should probably be factored elsewhere, but it's tangentially
+% related to instance variables.
+transform(method, {funcall, Line, Name, Arguments}) ->
+  Node = {method_call, Line, Name, Arguments},
+  {walk, method, Node};
+  
 % Walk unrecognized nodes without transforming them
 transform(State, Node) ->
   {walk, State, Node}.
