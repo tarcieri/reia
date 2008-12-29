@@ -10,7 +10,10 @@ module NumericTest
     Local.puts("Numeric")
 
     compare_test()
-    to_list_test()
+    int_to_list_test()
+    float_to_list_test()
+    int_to_string_test()
+    float_to_string_test()
     str_to_float_test()
     str_to_int_test()
 
@@ -19,11 +22,25 @@ module NumericTest
       (1, 1.0)
     )
 
-  def to_list_test()
-    TestHelper.expect("converts to list", fun do
+  def int_to_list_test()
+    TestHelper.expect("converts ints to list", fun do
       (172.to_list(), [49,55,50])
     )
+    
+  def float_to_list_test()
+    TestHelper.expect("converts floats to list", fun do
+      (3.1415.to_list(), [51,46,49,52,49,53,48,48])
+    )
+    
+  def int_to_string_test()
+    TestHelper.expect("converts ints to string", fun do
+      (42.to_string(), "42")
+    )
 
+  def float_to_string_test()
+    TestHelper.expect("converts floats to string", fun do
+      (1.2.to_string(), "1.200000")
+    )
   def str_to_float_test()
     TestHelper.expect("string converts to float", fun do
       ("100.1234".to_float(), 100.1234)
