@@ -16,7 +16,8 @@
   methods/1,
   r2e/1, 
   dynamic/1, 
-  static/1
+  static/1,
+  nonce/0
 ]).
 
 default_passes() ->
@@ -93,3 +94,7 @@ static([{module, Line, Name, Functions}]) ->
   [{attribute, Line, module, Name}|Functions];
 static(_) ->
   throw({error, "Statically compiled modules must contain one and only one module declaration"}).
+
+%% Generate a single-use variable name
+nonce() ->
+  lists:flatten([io_lib:format("~.16b",[N]) || <<N>> <= erlang:md5(term_to_binary(make_ref()))]).

@@ -279,13 +279,9 @@ process_return_value(Line, [], MatchExpr) ->
   [MatchExpr, {atom, Line, 'nil'}];
 process_return_value(Line, Expressions, MatchExpr) ->
   [Result|Expressions2] = lists:reverse(Expressions),
-  ReturnVar = {identifier, Line, list_to_atom("__clause_return_value_" ++ nonce_name())},
+  ReturnVar = {identifier, Line, list_to_atom("__clause_return_value_" ++ reia_compiler:nonce())},
   Result2 = {match, Line, ReturnVar, Result},
-  lists:reverse([ReturnVar, MatchExpr, Result2|Expressions2]).
-  
-% Generate a single-use variable name
-nonce_name() ->
-  lists:flatten([io_lib:format("~.16b",[N]) || <<N>> <= erlang:md5(term_to_binary(make_ref()))]).  
+  lists:reverse([ReturnVar, MatchExpr, Result2|Expressions2]). 
   
 % Generate the SSA name for a given variable, which takes the form name_version
 ssa_name(Name, Version) ->
