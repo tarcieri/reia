@@ -29,6 +29,16 @@ class LocalMethodTest
     
   def b(n)
     n + 1
+    
+  def c(n)
+    d(n)
+    @foo = @foo + 1
+    
+  def d(n)
+    @foo = n
+    
+  def foo
+    @foo
 
 module ObjectTest
   def run
@@ -36,6 +46,7 @@ module ObjectTest
     
     method_test()
     local_method_test()
+    local_method_ivar_test()
     state_test()
     initialize_test()
   
@@ -51,6 +62,14 @@ module ObjectTest
     TestHelper.expect("implements local method calls", fun do
       obj = LocalMethodTest.start()
       (4, obj.a(1))
+    )
+    
+  # allows instance variable access from local methods
+  def local_method_ivar_test
+    TestHelper.expect("allows instance variable access from local methods", fun do
+      obj = LocalMethodTest.start()
+      obj.c(42)
+      (43, obj.foo())
     )
       
   # stores state in instance_variables
