@@ -26,9 +26,13 @@ ast(Ast) ->
   
 %% Method calls
 transform(_, {method_call, Line, Method, Arguments, IvarsIn, IvarsOut}) ->
+  Nonce = list_to_atom("__return_value_" ++ reia_compiler:nonce()),
   Node = {block, Line, [
-    {match, Line, return_value_pattern(Line, IvarsOut), method_invocation(Line, Method, Arguments, IvarsIn)},
-    {identifier, Line, '__meth_return_value'}
+    {match, Line, 
+      return_value_pattern(Line, IvarsOut, Nonce), 
+      method_invocation(Line, Method, Arguments, IvarsIn)
+    },
+    {identifier, Line, Nonce}
   ]},
   {walk, void, Node};
   
@@ -38,14 +42,14 @@ transform(_, Node) ->
   
 % Pattern for matching a method return value 
 % (same format as gen_server handle_call)
-return_value_pattern(Line, IvarsOut) ->
+return_value_pattern(Line, IvarsOut, Nonce) ->
   {identifier, _Line, IvarsName} = IvarsOut,
   {erl_forms, Line,
     {tuple, Line, [
       {atom, Line, reply},
       {tuple, Line, [
         {atom, Line, ok},
-        {var, Line, '__meth_return_value'}
+        {var, Line, Nonce}
       ]}, 
       {var, Line, IvarsName}
     ]}
