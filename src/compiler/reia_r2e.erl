@@ -142,6 +142,20 @@ forms({funcall, Line, Receiver, {identifier, _, Method}, Arguments, Block}) ->
     {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, funcall}},
     [forms(Receiver), {atom, Line, Method}, list_to_forms(Arguments, Line), forms(Block)]
   };
+  
+%% Class instantiations
+forms({class_inst, Line, {constant, _, Class}, Arguments}) ->
+  {call, Line,
+    {remote, Line, {atom, Line, reia_class}, {atom, Line, inst}},
+    [{atom, Line, Class}, list_to_forms(Arguments, Line)]
+  };
+  
+%% Class instantiations with pseudo-blocks
+forms({class_inst, Line, {constant, _, Class}, Arguments, Block}) ->
+  {call, Line,
+    {remote, Line, {atom, Line, reia_class}, {atom, Line, inst}},
+    [{atom, Line, Class}, list_to_forms(Arguments, Line), forms(Block)]
+  };
     
 %% Erlang function calls
 forms({erl_funcall, Line, {identifier, _, Module}, {identifier, _, Function}, Arguments}) ->
