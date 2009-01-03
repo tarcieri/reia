@@ -37,10 +37,12 @@ Nonterminals
   block
   inline_block
   multiline_block
-  unary_expr
-  unary_op  
+  class_inst_expr
+  class_inst
   erl_funcall_expr
   erl_funcall
+  unary_expr
+  unary_op  
   max_expr
   ivar
   case_expr
@@ -160,8 +162,10 @@ unary_expr -> unary_op unary_expr : {op, line('$1'), op('$1'), '$2'}.
 unary_expr -> funcall_expr : '$1'.
 
 funcall_expr -> funcall : '$1'.
-funcall_expr -> funcall_expr '[' expr ']' : {funcall, line('$2'), '$1', {identifier, line('$2'), '[]'}, ['$3']}.
-funcall_expr -> erl_funcall_expr : '$1'.
+funcall_expr -> class_inst_expr : '$1'.
+
+class_inst_expr -> class_inst : '$1'.
+class_inst_expr -> erl_funcall_expr : '$1'.
 
 erl_funcall_expr -> erl_funcall : '$1'.
 erl_funcall_expr -> max_expr : '$1'.
@@ -253,6 +257,8 @@ unary_op -> 'not' : '$1'.
 %% Function calls
 funcall -> funcall_expr '.' function_identifier '(' ')' : {funcall, line('$2'), '$1', '$3', []}.
 funcall -> funcall_expr '.' function_identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3', '$5'}.
+funcall -> funcall_expr '[' expr ']' : {funcall, line('$2'), '$1', {identifier, line('$2'), '[]'}, ['$3']}.
+
 funcall -> function_identifier '(' ')' : {funcall, line('$2'), '$1', []}.
 funcall -> function_identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3'}.
 
@@ -260,6 +266,19 @@ funcall -> function_identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3'}
 funcall -> funcall_expr '.' function_identifier block : {funcall, line('$2'), '$1', '$3', [], '$4'}.
 funcall -> funcall_expr '.' function_identifier '(' ')' block : {funcall, line('$2'), '$1', '$3', [], '$6'}.
 funcall -> funcall_expr '.' function_identifier '(' exprs ')' block : {funcall, line('$2'), '$1', '$3', '$5', '$7'}.
+
+funcall -> function_identifier block : {funcall, line('$2'), '$1', [], '$2'}.
+funcall -> function_identifier '(' ')' block : {funcall, line('$2'), '$1', [], '$4'}.
+funcall -> function_identifier '(' exprs ')' block : {funcall, line('$2'), '$1', '$3', '$5'}.
+
+%% Class instantiations
+class_inst -> constant '(' ')' : {class_inst, line('$2'), '$1', []}.
+class_inst -> constant '(' exprs ')' : {class_inst, line('$2'), '$1', '$3'}.
+
+%% Class instantiations with blocks
+class_inst -> constant block : {funcall, line('$2'), '$1', [], '$2'}.
+class_inst -> constant '(' ')' block : {funcall, line('$2'), '$1', [], '$4'}.
+class_inst -> constant '(' exprs ')' block : {funcall, line('$2'), '$1', '$3', '$5'}.
 
 %% Blocks
 block -> inline_block : '$1'.
