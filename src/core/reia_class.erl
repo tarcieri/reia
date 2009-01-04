@@ -6,7 +6,7 @@
 %
 
 -module(reia_class).
--export([build/1, call/2]).
+-export([build/1, inst/3, call/2]).
 -compile(export_all).
 
 %% Convert a Reia class definition into a Reia module which conforms to the
@@ -19,6 +19,11 @@ build({class, Line, Name, Functions}) ->
   reia_module:build(Module);
 build(_) ->
   {error, "invalid class"}.
+
+%% Create an instance of a given class, passing the arguments on to its 
+%% initialize function
+inst(Class, Arguments, Block) ->
+  apply(Class, 'start_link', Arguments).
 
 %% Call a method on a Reia object at the given Pid
 call(Pid, {_Method, _Arguments} = Request) ->

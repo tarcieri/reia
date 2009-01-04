@@ -144,11 +144,8 @@ forms({funcall, Line, Receiver, {identifier, _, Method}, Arguments, Block}) ->
   };
   
 %% Class instantiations
-forms({class_inst, Line, {constant, _, Class}, Arguments}) ->
-  {call, Line,
-    {remote, Line, {atom, Line, reia_class}, {atom, Line, inst}},
-    [{atom, Line, Class}, list_to_forms(Arguments, Line)]
-  };
+forms({class_inst, Line, Class, Arguments}) ->
+  forms({class_inst, Line, Class, Arguments, {atom, Line, nil}});
   
 %% Class instantiations with pseudo-blocks
 forms({class_inst, Line, {constant, _, Class}, Arguments, Block}) ->
