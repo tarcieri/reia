@@ -53,21 +53,21 @@ module ObjectTest
   # implements method calls
   def method_test
     TestHelper.expect("implements method calls", fun do
-      obj = PlusTwo.start()
+      obj = PlusTwo()
       (44, obj.calc(42))
     )
     
   # implements local method calls
   def local_method_test
     TestHelper.expect("implements local method calls", fun do
-      obj = LocalMethodTest.start()
+      obj = LocalMethodTest()
       (4, obj.a(1))
     )
     
   # allows instance variable access from local methods
   def local_method_ivar_test
     TestHelper.expect("allows instance variable access from local methods", fun do
-      obj = LocalMethodTest.start()
+      obj = LocalMethodTest()
       obj.c(42)
       (43, obj.foo())
     )
@@ -75,7 +75,7 @@ module ObjectTest
   # stores state in instance_variables
   def state_test
     TestHelper.expect("stores state in instance_variables", fun do
-      obj = StateHolder.start()
+      obj = StateHolder()
       obj.set_val(42)
       (42, obj.get_val())
     )
@@ -83,6 +83,6 @@ module ObjectTest
   # passes arguments from start to initialize
   def initialize_test
     TestHelper.expect("passes arguments from start to initialize", fun do
-      obj = InitializeTest.start(1, 2, 3)
+      obj = InitializeTest(1, 2, 3)
       ((3, 2, 1), obj.ivars())
     )
