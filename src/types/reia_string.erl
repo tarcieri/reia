@@ -6,7 +6,7 @@
 %
 
 -module(reia_string).
--export([funcall/3]).
+-export([funcall/3, from_list/1]).
 
 %% String#to_s
 %%   A noop, as strings are already strings
@@ -100,7 +100,6 @@ funcall({string, String}, strip, [Char, Direction]) ->
   NewString = reia_erl:e2r(string:strip(binary_to_list(String), Direction, Char)),
   reia_list:funcall(NewString, to_string, []);
 
-
 %% String#sub
 %%   Replace a portion of a string with a given substitution
 funcall({string, String}, sub, [{regexp, Regex}, {string, Replacement}]) ->
@@ -114,3 +113,7 @@ funcall({string, String}, sub, [{regexp, Regex}, {string, Replacement}]) ->
     nomatch ->
       {string, String}
   end.
+
+%% Convert a string in Erlang list form to Reia form
+from_list(List) ->
+  {string, list_to_binary(List)}.
