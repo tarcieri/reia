@@ -124,6 +124,7 @@ function -> def function_identifier '(' exprs ')' eol indent statements dedent :
 % Function identifiers
 function_identifier -> identifier : function_identifier('$1').
 function_identifier -> punctuated_identifier : function_identifier('$1').
+function_identifier -> class : function_identifier('$1').
 
 %% Expressions
 exprs -> expr : ['$1'].
@@ -367,7 +368,9 @@ identifier_atom({identifier, _Line, Atom}) ->
 function_identifier({identifier, _Line, _Atom} = Identifier) ->
   Identifier;
 function_identifier({punctuated_identifier, Line, Atom}) ->
-  {identifier, Line, Atom}.
+  {identifier, Line, Atom};
+function_identifier({class, Line}) ->
+  {identifier, Line, class}.
   
 %% Generate proper forms for if statements
 if_forms({{'if', Line}, Expression, Statements}) ->
