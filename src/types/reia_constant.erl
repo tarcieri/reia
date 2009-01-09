@@ -2,10 +2,10 @@
 -export([funcall/3]).
 
 funcall({constant, Name}, inspect, []) ->
-  case code:is_loaded(Name) of
-    {file, _Loaded} ->
+  case code:ensure_loaded(Name) of
+    {module, _Name} ->
       reia_string:from_list(atom_to_list(Name));
-    false ->
+    {error, _Error} ->
       throw({error, {Name, "not loaded"}})
   end;  
 funcall(Constant, to_s, []) ->
