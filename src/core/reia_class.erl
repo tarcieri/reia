@@ -22,7 +22,7 @@ build(_) ->
 
 %% Create an instance of a given class, passing the arguments on to its 
 %% initialize function
-inst(Class, Arguments, Block) ->
+inst(Class, Arguments, _Block) ->
   apply(Class, 'start_link', Arguments).
 
 %% Call a method on a Reia object at the given Pid
@@ -50,7 +50,7 @@ process_functions(Module, Functions) ->
     DefaultFunctions, 
     ImmediateFunctions, 
     initialize_method(InitializeMethod), 
-    process_methods(Methods)
+    process_methods(Module, Methods)
   ]). 
   
 %% If a method name matches one of the default_functions(), then it has a
@@ -79,14 +79,15 @@ initialize_clause({clause, Line, Arguments, Guards, Expressions}) ->
   {clause, Line, Arguments2, Guards, Expressions2}.
   
 %% Convert individual method definitions into a single dispatch_method function
-process_methods([]) ->
-  build_method_dispatch_function(1, lists:flatten([process_method(Method) || Method <- default_methods()]));
-process_methods([FirstMeth|_] = Methods) ->
+process_methods(Module, []) ->
+  Methods = lists:flatten([process_method(Method) || Method <- default_methods(Module)]),
+  build_method_dispatch_function(1, Methods);
+process_methods(Module, [FirstMeth|_] = Methods) ->
   % Extract the line number from the first method
   {function, Line, _, _, _} = FirstMeth,
   
   % Decompose the function clauses for methods into handle_call clauses
-  Clauses = lists:flatten([process_method(Method) || Method <- Methods ++ default_methods()]),
+  Clauses = lists:flatten([process_method(Method) || Method <- Methods ++ default_methods(Module)]),
   
   build_method_dispatch_function(Line, Clauses).
 
@@ -178,10 +179,12 @@ default_function(String) ->
   {Name, Form}.
   
 %% Default methods that Reia objects respond to
-default_methods() ->
+default_methods(Module) ->
+  NameString = lists:concat(["reia_string:from_list(\"#<", Module, ">\")"]),
   [parse_function(Function) || Function <- [
-    "to_s() -> {string, <<\"#<Object>\">>}.",
-    "inspect() -> {string, <<\"#<Object>\">>}."
+    lists:concat(["class() -> {constant, '", Module, "'}."]),
+    "to_s() -> " ++ NameString ++ ".",
+    "inspect() -> " ++ NameString ++ "."
   ]].
   
 %% Functions for starting a new object
