@@ -8,6 +8,9 @@
 -module(reia_ssa).
 -export([ast/1, ast/2, transform/2]).
 
+% Internal state of the SSA transform
+-record(state, {mode=normal, bindings}).
+
 %-define(msg(Str, Xs), io:format(Str, Xs)).
 -define(msg(Str, Xs), ok).
 
@@ -17,14 +20,14 @@ ast(Ast) ->
 ast(Ast, Variables) ->
   Dict = dict:from_list([{Variable, 0} || Variable <- Variables]),
   ?msg("Input: ~p~n", [Ast]),
-  {ok, _, Ast2} = reia_visitor:transform(Ast, {normal, Dict}, fun transform/2),
+  {ok, _, Ast2} = reia_visitor:transform(Ast, #state{bindings=Dict}, fun transform/2),
   ?msg("Output: ~p~n", [Ast2]),
   Ast2.
 
 % Module declarations create a new scope
 transform(State, {module, Line, Name, Expressions}) ->
   Expressions2 = lists:map(fun(Expression) ->
-      {ok, _, Expression2} = reia_visitor:transform(Expression, {normal, dict:new()}, fun transform/2),
+      {ok, _, Expression2} = reia_visitor:transform(Expression, #state{bindings=dict:new()}, fun transform/2),
       Expression2
     end,
     Expressions
@@ -34,7 +37,7 @@ transform(State, {module, Line, Name, Expressions}) ->
 % Class declarations create a new scope
 transform(State, {class, Line, Name, Expressions}) ->
   Expressions2 = lists:map(fun(Expression) ->
-      {ok, _, Expression2} = reia_visitor:transform(Expression, {normal, dict:new()}, fun transform/2),
+      {ok, _, Expression2} = reia_visitor:transform(Expression, #state{bindings=dict:new()}, fun transform/2),
       Expression2
     end,
     Expressions
@@ -44,21 +47,29 @@ transform(State, {class, Line, Name, Expressions}) ->
 % Function declarations create a new scope
 transform(State, {function, Line, Name, Arguments, Expressions}) ->
   % Create a new scope with dict:new()
-  {ok, {_, Dict}, Arguments2} = reia_visitor:transform(Arguments, {argument, dict:new()}, fun transform/2),
-  {ok, _, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict}, fun transform/2),
+  {ok, #state{bindings=Dict}, Arguments2} = reia_visitor:transform(
+    Arguments, 
+    #state{mode=argument, bindings=dict:new()}, 
+    fun transform/2
+  ),
+  {ok, _, Expressions2} = reia_visitor:transform(Expressions, #state{bindings=Dict}, fun transform/2),
     
   % Return to the original scope
   {stop, State, {function, Line, Name, Arguments2, Expressions2}};
 
 % Lambdas close over the outer scope, bind arguments, but don't affect the outer scope
-transform({_, Dict} = State, {lambda, Line, Arguments, Expressions}) ->
-  {ok, {_, Dict2}, Arguments2} = reia_visitor:transform(Arguments, {argument, Dict}, fun transform/2),
-  {ok, _, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict2}, fun transform/2),
+transform(#state{bindings=Dict} = State, {lambda, Line, Arguments, Expressions}) ->
+  {ok, #state{bindings=Dict2}, Arguments2} = reia_visitor:transform(
+    Arguments, 
+    #state{mode=argument, bindings=Dict}, 
+    fun transform/2
+  ),
+  {ok, _, Expressions2} = reia_visitor:transform(Expressions, #state{bindings=Dict2}, fun transform/2),
   {stop, State, {lambda, Line, Arguments2, Expressions2}};
   
 % Function names are identifiers and should remain undisturbed unless they are bound variables
-transform({Mode, Dict} = State, {funcall, Line, {identifier, _Line, Name} = Identifier, Arguments}) ->
-  {ok, {_, Dict2}, Arguments2} = reia_visitor:transform(Arguments, State, fun transform/2),
+transform(#state{mode=Mode, bindings=Dict} = State, {funcall, Line, {identifier, _Line, Name} = Identifier, Arguments}) ->
+  {ok, #state{bindings=Dict2}, Arguments2} = reia_visitor:transform(Arguments, State, fun transform/2),
   Identifier2 = case dict:find(Name, Dict) of
     {ok, Version} ->
       {var, Line, ssa_name(Name, Version)};
@@ -66,25 +77,37 @@ transform({Mode, Dict} = State, {funcall, Line, {identifier, _Line, Name} = Iden
       Identifier
   end,  
   Node = {funcall, Line, Identifier2, Arguments2},
-  {stop, {Mode, Dict2}, Node};
+  {stop, #state{mode=Mode, bindings=Dict2}, Node};
 
-transform({Mode, _Dict} = State, {funcall, Line, Receiver, Name, Arguments}) ->
-  {ok, {_, Dict2}, Receiver2}  = reia_visitor:transform(Receiver,  State, fun transform/2), 
-  {ok, {_, Dict3}, Arguments2} = reia_visitor:transform(Arguments, {Mode, Dict2}, fun transform/2),
+transform(#state{mode=Mode} = State, {funcall, Line, Receiver, Name, Arguments}) ->
+  {ok, #state{bindings=Dict2}, Receiver2}  = reia_visitor:transform(Receiver, State, fun transform/2), 
+  {ok, #state{bindings=Dict3}, Arguments2} = reia_visitor:transform(
+    Arguments, 
+    #state{mode=Mode, bindings=Dict2}, 
+    fun transform/2
+  ),
   Node = {funcall, Line, Receiver2, Name, Arguments2},
-  {stop, {Mode, Dict3}, Node};
+  {stop, #state{mode=Mode, bindings=Dict3}, Node};
 
-transform({Mode, _Dict} = State, {funcall, Line, Receiver, Name, Arguments, Block}) ->
-  {ok, {_, Dict2}, Receiver2}  = reia_visitor:transform(Receiver,  State, fun transform/2), 
-  {ok, {_, Dict3}, Arguments2} = reia_visitor:transform(Arguments, {Mode, Dict2}, fun transform/2),
-  {ok, {_, Dict4}, Block2} = reia_visitor:transform(Block, {Mode, Dict3}, fun transform/2),
+transform(#state{mode=Mode} = State, {funcall, Line, Receiver, Name, Arguments, Block}) ->
+  {ok, #state{bindings=Dict2}, Receiver2}  = reia_visitor:transform(Receiver,  State, fun transform/2), 
+  {ok, #state{bindings=Dict3}, Arguments2} = reia_visitor:transform(
+    Arguments, 
+    #state{mode=Mode, bindings=Dict2}, 
+    fun transform/2
+  ),
+  {ok, #state{bindings=Dict4}, Block2} = reia_visitor:transform(
+    Block, 
+    #state{mode=Mode, bindings=Dict3}, 
+    fun transform/2
+  ),
   Node = {funcall, Line, Receiver2, Name, Arguments2, Block2},
-  {stop, {Mode, Dict4}, Node};
+  {stop, #state{mode=Mode, bindings=Dict4}, Node};
   
 % Input node:  {method_call, Line, Name, Arguments}
 % Output node: {method_call, Line, Name, Arguments, IvarsIn, IvarsOut}
-transform({Mode, Dict} = State, {method_call, Line, {identifier, _Line, Name} = Identifier, Arguments}) ->
-  {ok, {_, Dict2}, Arguments2} = reia_visitor:transform(Arguments, State, fun transform/2),
+transform(#state{mode=Mode, bindings=Dict} = State, {method_call, Line, {identifier, _Line, Name} = Identifier, Arguments}) ->
+  {ok, #state{bindings=Dict2}, Arguments2} = reia_visitor:transform(Arguments, State, fun transform/2),
   {Dict3, Node} = case dict:find(Name, Dict) of
     {ok, Version} ->
       N = {funcall, Line, {var, Line, ssa_name(Name, Version)}, Arguments2},
@@ -92,62 +115,98 @@ transform({Mode, Dict} = State, {method_call, Line, {identifier, _Line, Name} = 
     error ->
       build_method_call(Line, Identifier, Arguments2, Mode, Dict2)
   end,
-  {stop, {Mode, Dict3}, Node};
+  {stop, #state{mode=Mode, bindings=Dict3}, Node};
 
-transform({Mode, _Dict} = State, {erl_funcall, Line, Module, Function, Arguments}) ->
-  {ok, {_, Dict2}, Arguments2} = reia_visitor:transform(Arguments, State, fun transform/2),
+transform(#state{mode=Mode} = State, {erl_funcall, Line, Module, Function, Arguments}) ->
+  {ok, #state{bindings=Dict2}, Arguments2} = reia_visitor:transform(Arguments, State, fun transform/2),
   Node = {erl_funcall, Line, Module, Function, Arguments2},
-  {stop, {Mode, Dict2}, Node};
+  {stop, #state{mode=Mode, bindings=Dict2}, Node};
   
 % Arguments should initialize new entries in the SSA dict
-transform({argument, Dict}, {identifier, Line, Name}) ->
+transform(#state{mode=argument, bindings=Dict}, {identifier, Line, Name}) ->
   case dict:find(Name, Dict) of
     {ok, _} ->
       throw({error, {Line, lists:flatten(io_lib:format("argument already bound: '~s'", [Name]))}});
     error ->
       Dict2 = dict:store(Name, 0, Dict),
       Node = {identifier, Line, ssa_name(Name, 0)},
-      {stop, {argument, Dict2}, Node}
+      {stop, #state{mode=argument, bindings=Dict2}, Node}
   end;
 
 % Match expressions mutate variables on the LHS
-transform({Mode, Dict}, {match, Line, In1, In2}) ->
-  {ok, {_, Dict2}, Out2} = reia_visitor:transform(In2, {Mode, Dict}, fun transform/2),
-  {ok, {_, Dict3}, Out1} = reia_visitor:transform(In1, {match, Dict2}, fun transform/2),
-  {stop, {Mode, Dict3}, {match, Line, Out1, Out2}};
+transform(#state{mode=Mode} = State, {match, Line, In1, In2}) ->
+  {ok, #state{bindings=Dict},  Out2} = reia_visitor:transform(In2, State, fun transform/2),
+  {ok, #state{bindings=Dict2}, Out1} = reia_visitor:transform(
+    In1, 
+    #state{mode=match, bindings=Dict}, 
+    fun transform/2
+  ),
+  {stop, #state{mode=Mode, bindings=Dict2}, {match, Line, Out1, Out2}};
   
 % Case expressions bind variables in clauses
-transform({Mode, Dict}, {'case', Line, Expression, Clauses}) ->
-  {ok, {_, Dict2}, Expression2} = reia_visitor:transform(Expression, {Mode, Dict}, fun transform/2),
-  {Dict3, Clauses2} = process_clauses('case', Dict2, Clauses),
-  {stop, {Mode, Dict3}, {'case', Line, Expression2, Clauses2}};
+transform(#state{mode=Mode} = State, {'case', Line, Expression, Clauses}) ->
+  {ok, #state{bindings=Dict}, Expression2} = reia_visitor:transform(Expression, State, fun transform/2),
+  {Dict2, Clauses2} = process_clauses('case', Dict, Clauses),
+  {stop, #state{mode=Mode, bindings=Dict2}, {'case', Line, Expression2, Clauses2}};
 
 % Case clauses match against patterns
-transform({'case', Dict}, {clause, Line, Pattern, Expressions}) ->
-  {ok, {_, Dict2}, Pattern2} = reia_visitor:transform(Pattern, {match, Dict}, fun transform/2),
-  {ok, {_, Dict3}, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict2}, fun transform/2),
-  {stop, {'case', Dict3}, {clause, Line, Pattern2, Expressions2}};
+transform(#state{mode='case', bindings=Dict}, {clause, Line, Pattern, Expressions}) ->
+  {ok, #state{bindings=Dict2}, Pattern2} = reia_visitor:transform(
+    Pattern, 
+    #state{mode=match, bindings=Dict}, 
+    fun transform/2
+  ),
+  {ok, #state{bindings=Dict3}, Expressions2} = reia_visitor:transform(
+    Expressions, 
+    #state{mode=normal, bindings=Dict2}, 
+    fun transform/2
+  ),
+  {stop, #state{mode='case', bindings=Dict3}, {clause, Line, Pattern2, Expressions2}};
     
 % Catch clauses match against patterns
-transform({Mode, Dict}, {'catch', Line, Pattern, Expressions}) ->
-  {ok, {_, Dict2}, Pattern2} = reia_visitor:transform(Pattern, {match, Dict}, fun transform/2),
-  {ok, {_, Dict3}, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict2}, fun transform/2),
-  {stop, {Mode, Dict3}, {'catch', Line, Pattern2, Expressions2}};
+transform(#state{mode=Mode, bindings=Dict}, {'catch', Line, Pattern, Expressions}) ->
+  {ok, #state{bindings=Dict2}, Pattern2} = reia_visitor:transform(
+    Pattern, 
+    #state{mode=match, bindings=Dict}, 
+    fun transform/2
+  ),
+  {ok, #state{bindings=Dict3}, Expressions2} = reia_visitor:transform(
+    Expressions, 
+    #state{mode=normal, bindings=Dict2}, 
+    fun transform/2
+  ),
+  {stop, #state{mode=Mode, bindings=Dict3}, {'catch', Line, Pattern2, Expressions2}};
     
 % List comprehensions can access the outer scope but have a scope of their own
-transform({_, Dict} = State, {'lc', Line, Transform, Expressions}) ->
-  {ok, {_, Dict2}, Expressions2} = reia_visitor:transform(Expressions, {normal, Dict}, fun transform/2),
-  {ok, _, Transform2} = reia_visitor:transform(Transform, {normal, Dict2}, fun transform/2),
+transform(#state{bindings=Dict} = State, {'lc', Line, Transform, Expressions}) ->
+  {ok, #state{bindings=Dict2}, Expressions2} = reia_visitor:transform(
+    Expressions, 
+    #state{mode=normal, bindings=Dict}, 
+    fun transform/2
+  ),
+  {ok, _, Transform2} = reia_visitor:transform(
+    Transform, 
+    #state{mode=normal, bindings=Dict2}, 
+    fun transform/2
+  ),
   {stop, State, {'lc', Line, Transform2, Expressions2}};
 
 % Generate expressions match a pattern
-transform({Mode, Dict}, {'generate', Line, Pattern, List}) ->
-  {ok, {_, Dict2}, Pattern2} = reia_visitor:transform(Pattern, {match, Dict}, fun transform/2),
-  {ok, {_, Dict3}, List2} = reia_visitor:transform(List, {Mode, Dict2}, fun transform/2),
-  {stop, {Mode, Dict3}, {'generate', Line, Pattern2, List2}};
+transform(#state{mode=Mode, bindings=Dict}, {'generate', Line, Pattern, List}) ->
+  {ok, #state{bindings=Dict2}, Pattern2} = reia_visitor:transform(
+    Pattern, 
+    #state{mode=match, bindings=Dict}, 
+    fun transform/2
+  ),
+  {ok, #state{bindings=Dict3}, List2} = reia_visitor:transform(
+    List, 
+    #state{mode=Mode, bindings=Dict2}, 
+    fun transform/2
+  ),
+  {stop, #state{mode=Mode, bindings=Dict3}, {'generate', Line, Pattern2, List2}};
 
 % Normally identifiers are mapped to their latest version
-transform({normal, Dict} = State, {identifier, Line, Name} = Node) ->
+transform(#state{mode=normal, bindings=Dict} = State, {identifier, Line, Name} = Node) ->
   case dict:find(Name, Dict) of
     {ok, Version} ->
       Node2 = {identifier, Line, ssa_name(Name, Version)},
@@ -155,14 +214,14 @@ transform({normal, Dict} = State, {identifier, Line, Name} = Node) ->
     error ->
       case internal_variable(Name) of
         true ->
-          transform({normal, dict:store(Name, 0, Dict)}, Node);
+          transform(#state{mode=normal, bindings=dict:store(Name, 0, Dict)}, Node);
         false ->
           throw({error, {Line, lists:flatten(io_lib:format("unbound variable: '~s'", [Name]))}})
       end
   end;
   
 % On the LHS of match expressions, variables are assigned a new version
-transform({match, Dict}, {identifier, Line, Name}) ->
+transform(#state{mode=match, bindings=Dict}, {identifier, Line, Name}) ->
   {Dict2, Version2} = case dict:find(Name, Dict) of
     {ok, Version} ->
       {dict:store(Name, Version + 1, Dict), Version + 1};
@@ -170,15 +229,15 @@ transform({match, Dict}, {identifier, Line, Name}) ->
       {dict:store(Name, 0, Dict), 0}
   end,
   Node = {identifier, Line, ssa_name(Name, Version2)},
-  {stop, {match, Dict2}, Node};
+  {stop, #state{mode=match, bindings=Dict2}, Node};
   
 % Vars are generated internally by earlier stages of the compiler and work 
 % like identifiers, mapped to their latest version
-transform({normal, _} = State, {var, Line, Name}) ->
+transform(#state{mode=normal} = State, {var, Line, Name}) ->
   {stop, State2, {identifier, _, Name2}} = transform(State, {identifier, Line, Name}),
   {stop, State2, {var, Line, Name2}};
   
-transform({match, _} = State, {var, Line, Name}) ->
+transform(#state{mode=match} = State, {var, Line, Name}) ->
   {stop, State2, {identifier, _, Name2}} = transform(State, {identifier, Line, Name}),
   {stop, State2, {var, Line, Name2}};
    
@@ -191,7 +250,11 @@ transform(State, Node) ->
 process_clauses(Type, Vars, Clauses) ->
   % Proceed with the normal SSA transformation on each clause
   Clauses2 = lists:map(fun(Clause) ->
-    {ok, {_, Binding}, Clause2} = reia_visitor:transform(Clause, {Type, Vars}, fun transform/2),
+    {ok, #state{bindings=Binding}, Clause2} = reia_visitor:transform(
+      Clause, 
+      #state{mode=Type, bindings=Vars}, 
+      fun transform/2
+    ),
     {Binding, Clause2}
   end, Clauses),
   
@@ -290,14 +353,14 @@ ssa_name(Name, Version) ->
   
 % Generate a method_call node to be processed by reia_class
 build_method_call(Line, Identifier, Arguments, Mode, Dict) ->  
-  {ok, {_, Dict2}, IvarsIn}  = reia_visitor:transform(
+  {ok, #state{bindings=Dict2}, IvarsIn}  = reia_visitor:transform(
     {identifier, Line, '__instance_variables'}, 
-    {Mode, Dict}, 
+    #state{mode=Mode, bindings=Dict}, 
     fun transform/2
   ),
-  {ok, {_, Dict3}, IvarsOut} = reia_visitor:transform(
+  {ok, #state{bindings=Dict3}, IvarsOut} = reia_visitor:transform(
     {identifier, Line, '__instance_variables'}, 
-    {match, Dict2}, 
+    #state{mode=match, bindings=Dict2}, 
     fun transform/2
   ),
   Node = {method_call, Line, Identifier, Arguments, IvarsIn, IvarsOut},
