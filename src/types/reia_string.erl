@@ -18,6 +18,18 @@ funcall(String = {string, _}, to_s, []) ->
 funcall({string, String}, inspect, []) ->
   {string, list_to_binary("\"" ++ binary_to_list(String) ++ "\"")};
   
+%% String#print
+%%   Print out a string to the terminal
+funcall({string, String}, print, []) ->
+  io:format(binary_to_list(String)),
+  nil;
+  
+%% String#puts
+%%   Print out a string with accompanying newline
+funcall({string, String}, puts, []) ->
+  io:format("~s~n", [String]),
+  nil;
+  
 %% String#to_list
 %%   Cast a string explicitly to a list
 funcall({string, String}, to_list, []) ->
