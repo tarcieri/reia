@@ -27,9 +27,10 @@ module FileTest
 
     x = File.open(fn)
     TestHelper.expect("file is written to and read from in the IODevice class", fun do
-      ("bar", x.read(3))
+      result = ("bar", x.read(3))
+      x.close()
+      result
     )
-    x.close()
 
   def fm_read_test
     TestHelper.expect("File.read (module version) reads correctly", fun do
