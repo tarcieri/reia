@@ -8,8 +8,7 @@
 module HashTest
   def run
     Local.puts("Hash")
-    index_test()
-    compare_test()
+    [index_test(), compare_test()]
     
   def index_test
     TestHelper.expect("index recieves proper value", fun do

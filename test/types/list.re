@@ -8,16 +8,7 @@
 module ListTest
   def run
     Local.puts("List")
-    
-    size_test()
-    nth_test()
-    reverse_test()  
-    push_test()
-    pop_test()
-    unshift_test()
-    join_test()
-    to_tuple_test()
-    to_hash_test()
+    [size_test(), nth_test(), reverse_test(), push_test(), pop_test(), unshift_test(), join_test(), to_tuple_test(), to_hash_test()]
   
   # knows its size
   def size_test
