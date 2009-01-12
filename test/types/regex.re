@@ -13,7 +13,9 @@ module RegexTest
     #split()
     #sub()
     #gsub()
-    [match_one(), to_string(), inspect()]
+    [match_one(), 
+    to_string(), 
+    inspect()]
     
   def match_one
     TestHelper.expect("match a single occurence", fun do

@@ -43,7 +43,11 @@ class LocalMethodTest
 module ObjectTest
   def run
     Local.puts("Object")
-    [method_test(), local_method_test(), local_method_ivar_test(), state_test(), initialize_test()]
+    [method_test(), 
+    local_method_test(), 
+    local_method_ivar_test(), 
+    state_test(), 
+    initialize_test()]
       
   # implements method calls
   def method_test

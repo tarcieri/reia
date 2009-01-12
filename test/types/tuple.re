@@ -8,7 +8,10 @@
 module TupleTest
   def run
     Local.puts("Tuple")
-    [size_test(), nth_test(), to_list_test(), inspect_test()]
+    [size_test(), 
+    nth_test(), 
+    to_list_test(), 
+    inspect_test()]
       
   # knows its size
   def size_test

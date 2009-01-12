@@ -9,7 +9,13 @@ module NumericTest
   def run
     Local.puts("Numeric")
 
-    [compare_test(), int_to_list_test(), float_to_list_test(), int_to_string_test(), float_to_string_test(), str_to_float_test(), str_to_int_test()]
+    [compare_test(), 
+    int_to_list_test(), 
+    float_to_list_test(), 
+    int_to_string_test(), 
+    float_to_string_test(), 
+    str_to_float_test(), 
+    str_to_int_test()]
 
   def compare_test
     TestHelper.expect("ints and floats compare", fun do

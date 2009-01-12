@@ -9,7 +9,15 @@ load("lib/file.re")
 module FileTest
   def run
     Local.puts("File")
-    [iodevice_test(), fm_read_test(), fm_write_test(), fm_copy_test(), fm_rename_test(), fm_delete_test(), fm_mkdir_test(),   fm_lsdir_test(), fm_deldir_test()]
+    [iodevice_test(), 
+    fm_read_test(), 
+    fm_write_test(), 
+    fm_copy_test(), 
+    fm_rename_test(), 
+    fm_delete_test(), 
+    fm_mkdir_test(),   
+    fm_lsdir_test(), 
+    fm_deldir_test()]
 
   def iodevice_test
     fn = "foo.txt"
