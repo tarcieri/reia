@@ -50,3 +50,4 @@ puts("")
 results = [r1, r2, r3, r4, r5, r6, r7, r8].flatten()
 failures = [false|false in results]
 puts([results.size(), " assertions, ", failures.size(), " failures"].join())
+erlang::halt(1) if failures.size() > 0
