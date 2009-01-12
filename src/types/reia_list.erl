@@ -92,10 +92,15 @@ funcall({list, _} = List, to_s, []) ->
   funcall(List, inspect, []);
 
 %% List#to_hash
-%%    Generate a hash based on key/val pairs
+%%   Generate a hash based on key/val pairs
 funcall({list, _} = List, to_hash, []) ->
   {dict, dict:from_list([reia_erl:r2e(Element) || Element <- to_erl(List)])};
   
+%% List#flatten
+%%   Returns a flatten version of a given list
+funcall({list, _} = List, flatten, []) ->
+  {list, {[], lists:flatten([preflatten(X) || X <- to_erl(List)])}};
+
 %% List#inspect
 %%   Inspect the contents of a list
 funcall({list, _} = List, inspect, []) ->
@@ -120,8 +125,16 @@ element_to_string(Element) ->
 element_to_string2(Element) ->
   {list, {[], List}} = reia_dispatch:funcall(reia_dispatch:funcall(Element, inspect, []), to_list, []),
   List.
-  
-%%
+ 
+%% Recursively convert a list from a Reia to an Erlang representation in
+%% preparation for flattening
+preflatten({list, _} = List) ->
+  [preflatten(X) || X <- to_erl(List)];
+preflatten(X) when is_list(X) ->
+  [preflatten(Y) || Y <- X];
+preflatten(X) ->
+  X.
+
 %% Functions which take a block
 %%
 
