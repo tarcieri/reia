@@ -19,6 +19,7 @@ Nonterminals
   function
   exprs
   expr
+  eols
   match_expr
   bool_expr
   bool_op
@@ -129,8 +130,12 @@ function_identifier -> class : function_identifier('$1').
 %% Expressions
 exprs -> expr : ['$1'].
 exprs -> expr ',' exprs : ['$1'|'$3'].
+exprs -> expr ',' eols exprs : ['$1'|'$4'].
 
 expr -> inline_if_expr : '$1'.
+
+eols -> eol : '$empty'.
+eols -> eol eols : '$empty'.
 
 inline_if_expr -> match_expr if_op match_expr : if_forms({'$2', '$3', ['$1']}).
 inline_if_expr -> match_expr : '$1'.
