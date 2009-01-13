@@ -7,8 +7,6 @@
 
 module NumericTest
   def run
-    Local.puts("Numeric")
-
     [compare_test(), 
     int_to_list_test(), 
     float_to_list_test(), 

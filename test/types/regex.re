@@ -7,8 +7,6 @@
 
 module RegexTest
   def run
-    Local.puts("Regex")
-    
     #match_all()
     #split()
     #sub()

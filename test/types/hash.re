@@ -7,7 +7,6 @@
 
 module HashTest
   def run
-    Local.puts("Hash")
     [index_test(), compare_test()]
     
   def index_test

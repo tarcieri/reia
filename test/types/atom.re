@@ -7,7 +7,6 @@
 
 module AtomTest
   def run
-    Local.puts("Atom")
     [to_string_test(), inspect_test()]
 
   def to_string_test

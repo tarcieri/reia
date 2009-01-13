@@ -8,7 +8,6 @@ load("lib/file.re")
 
 module FileTest
   def run
-    Local.puts("File")
     [iodevice_test(), 
     fm_read_test(), 
     fm_write_test(), 

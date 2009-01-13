@@ -7,7 +7,6 @@
 
 module ListTest
   def run
-    Local.puts("List")
     [size_test(), 
     nth_test(), 
     reverse_test(), 

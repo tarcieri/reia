@@ -42,7 +42,6 @@ class LocalMethodTest
 
 module ObjectTest
   def run
-    Local.puts("Object")
     [method_test(), 
     local_method_test(), 
     local_method_ivar_test(), 
