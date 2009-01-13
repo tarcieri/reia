@@ -6,7 +6,7 @@
 #
 
 module TestHelper  
-  def expect(description, lambda)
+  def expect(group, description, lambda)
     io::format("- ~s: ".to_list(), [description.to_list()])
     (expected, actual) = lambda()
     if expected == actual
