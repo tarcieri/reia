@@ -7,7 +7,6 @@
 
 -module(reia_class).
 -export([build/1, inst/3, call/2]).
--compile(export_all).
 
 %% Convert a Reia class definition into a Reia module which conforms to the
 %% gen_server behavior, then load it into the code server
@@ -55,22 +54,7 @@ merge_methods(Module, Methods) ->
     Methods
   ),
   [Method || {_, Method} <- dict:to_list(MethodDict)].
-  
-%% Construct the initialize method (as a function call for now, ugh)
-initialize_method({function, Line, Name, _Arity, Clauses}) ->
-  {function, Line, Name, 1, [initialize_clause(Clause) || Clause <- Clauses]}.
-
-%% Process a clause of initialize
-initialize_clause({clause, Line, Arguments, Guards, Expressions}) ->
-  Arguments2 = [argument_list_cons(Arguments, Line)],
-  InitIvars = {match, Line,
-                {var, Line, '___instance_variables_0'},
-                {call, Line, {remote, Line, {atom, Line, dict}, {atom, Line, new}}, []}
-              },
-  ReturnValue = {var, Line, final_ivars(Expressions)},
-  Expressions2 = lists:flatten([InitIvars, Expressions, ReturnValue]),
-  {clause, Line, Arguments2, Guards, Expressions2}.
-  
+    
 %% Build a dispatch_method function and functions for each of the mangled methods
 method_functions(Methods) ->
   % Decompose the function clauses for methods into handle_call clauses
@@ -209,19 +193,7 @@ start_function(Module, {ReiaFunc, OtpFunc}) ->
     "{object, {Pid, '", Module, "'}}."
   ],
   parse_function(lists:concat(String)).
-  
-variable_list(0) ->
-  [];
-variable_list(Size) ->
-  add_commas([lists:flatten(io_lib:format("Var~w", [N])) || N <- lists:seq(1, Size)]).
-  
-add_commas(List) -> 
-  add_commas(List, []).
-add_commas([Arg], Result) ->
-  lists:reverse([Arg|Result]);
-add_commas([Head|Rest], Result) ->
-  add_commas(Rest, [",",Head|Result]).
-  
+    
 %% Parse a function from a string
 parse_function(String) ->
   {ok, Scanned, _} = erl_scan:string(String),
