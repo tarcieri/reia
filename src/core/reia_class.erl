@@ -50,7 +50,7 @@ process_functions(Module, Functions) ->
     DefaultFunctions, 
     ImmediateFunctions, 
     initialize_method(InitializeMethod), 
-    process_methods(Module, Methods)
+    method_functions(Module, Methods)
   ]). 
   
 %% If a method name matches one of the default_functions(), then it has a
@@ -78,37 +78,57 @@ initialize_clause({clause, Line, Arguments, Guards, Expressions}) ->
   Expressions2 = lists:flatten([InitIvars, Expressions, ReturnValue]),
   {clause, Line, Arguments2, Guards, Expressions2}.
   
-%% Convert individual method definitions into a single dispatch_method function
-process_methods(Module, []) ->
-  Methods = lists:flatten([process_method(Method) || Method <- default_methods(Module)]),
-  build_method_dispatch_function(1, Methods);
-process_methods(Module, [FirstMeth|_] = Methods) ->
-  % Extract the line number from the first method
-  {function, Line, _, _, _} = FirstMeth,
-  
+%% Build a dispatch_method function and functions for each of the mangled methods
+method_functions(Module, Methods) ->
   % Decompose the function clauses for methods into handle_call clauses
-  Clauses = lists:flatten([process_method(Method) || Method <- Methods ++ default_methods(Module)]),
-  
-  build_method_dispatch_function(Line, Clauses).
+  {Clauses, Functions} = process_methods(Methods ++ default_methods(Module)),
+  [build_method_dispatch_function(Clauses)|Functions].
 
 %% Generate Erlang forms for the class's method dispatch function
-build_method_dispatch_function(Line, Clauses) ->
+build_method_dispatch_function(Clauses) ->
   % Add a clause which thunks to method_missing
   MethodMissingThunk = "dispatch_method({Method, Args}, _, State) -> method_missing(State, Method, Args).",
   {function, _, _, _, MethodMissingClause} = parse_function(MethodMissingThunk),
+  {function, 1, dispatch_method, 3, Clauses ++ MethodMissingClause}.
+
+%% Process methods into a list of clauses for dispatch_method and functions
+%% with mangled names for each method
+process_methods(Methods) ->
+  {NewClauses, NewFunctions} = lists:foldl(fun(Method, {Clauses, Functions}) ->
+    {Clause, Function} = process_method(Method),
+    {[Clause|Clauses], [Function|Functions]}
+  end, {[],[]}, Methods),
+  {lists:reverse(NewClauses), lists:reverse(NewFunctions)}.
   
-  % New master handle_call function
-  [{function, Line, dispatch_method, 3, Clauses ++ MethodMissingClause}].
-  
-%% Extract a method into clauses for dispatch_method
-process_method({function, _Line, Name, _Arity, Clauses}) ->
-  [process_method_clause(Clause, Name) || Clause <- Clauses].
+%% Extract a method into its dispatch_method clause and mangled form
+process_method({function, Line, Name, _Arity, Clauses}) ->
+  MangledName = reia_mangle:method(Name),
+  DispatcherClause = dispatcher_clause(Name, MangledName, Line),
+  Function = {function, Line, MangledName, 3, 
+    [process_method_clause(Clause) || Clause <- Clauses]
+  },
+  {DispatcherClause, Function}.
+
+%% Generate a clause for dispatch_method which thunks from a real method name
+%% to the given mangled name
+dispatcher_clause(RealName, MangledName, Line) ->
+  {clause, Line, [
+    {tuple, Line, [{atom, Line, RealName}, {var, Line, 'arguments'}]}, 
+    {var, Line, 'caller'}, 
+    {var, Line, 'instance_variables'}
+  ], [], [
+    {call, Line, {atom, Line, MangledName}, [
+      {var, Line, 'arguments'},
+      {var, Line, 'caller'},
+      {var, Line, 'instance_variables'}
+    ]}
+  ]}.
        
 %% Build a clause for dispatch_method from the original clauses for a method
-process_method_clause({clause, Line, Arguments, [], Expressions}, Name) ->
+process_method_clause({clause, Line, Arguments, [], Expressions}) ->
   {clause, Line, [
-    {tuple, Line, [{atom, Line, Name}, argument_list_cons(Arguments, Line)]}, 
-    {var, Line, '_From'}, 
+    argument_list_cons(Arguments, Line), 
+    {var, Line, '_caller'}, 
     {var, Line, '___instance_variables_0'}
   ], [], process_return_value(Line, Expressions)}.
 
