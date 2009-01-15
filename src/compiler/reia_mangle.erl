@@ -1,5 +1,5 @@
 %
-% reia_compiler: Reversable name mangling routines
+% reia_mangle: Reversable name mangling routines
 % Copyright (C)2008 Tony Arcieri
 % 
 % Redistribution is permitted under the MIT license.  See LICENSE for details.
