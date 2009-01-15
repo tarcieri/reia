@@ -64,7 +64,7 @@ method_functions(Methods) ->
 %% Generate Erlang forms for the class's method dispatch function
 build_method_dispatch_function(Clauses) ->
   % Add a clause which thunks to method_missing
-  MethodMissingThunk = "dispatch_method({Method, Args}, _, State) -> method_missing(State, Method, Args).",
+  MethodMissingThunk = "dispatch_method({Method, Args}, Caller, State) -> dispatch_method({method_missing, [Method, Args]}, Caller, State).",
   {function, _, _, _, MethodMissingClause} = parse_function(MethodMissingThunk),
   {function, 1, dispatch_method, 3, Clauses ++ MethodMissingClause}.
 
@@ -163,8 +163,7 @@ default_functions() ->
     "handle_cast(_Msg, State) -> {noreply, State}.",
     "handle_info(_Info, State) -> {noreply, State}.",
     "terminate(_Reason, _State) -> ok.",
-    "code_change(_OldVsn, State, _Extra) -> {ok, State}.",
-    "method_missing(_State, Method, _Args) -> throw({error, {Method, \"undefined\"}})."
+    "code_change(_OldVsn, State, _Extra) -> {ok, State}."
   ]].
   
 %% Default methods that Reia objects respond to
@@ -174,7 +173,8 @@ default_methods(Module) ->
     "class() -> {constant, '" ++ atom_to_list(Module) ++ "'}.",
     "initialize() -> nil.",
     "to_s() -> " ++ NameString ++ ".",
-    "inspect() -> " ++ NameString ++ "."
+    "inspect() -> " ++ NameString ++ ".",
+    "method_missing(Method, _Args) -> throw({error, {Method, \"undefined\"}})."
   ]].
   
 %% Parse a default function and return a dict entry for it  
