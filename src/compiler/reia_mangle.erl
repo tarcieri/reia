@@ -20,15 +20,12 @@ method(Class, Name) ->
   
 unmangle(Module, Name) when is_atom(Name) ->
   unmangle(Module, atom_to_list(Name));
-unmangle(Module, ?prefix ++ Name) ->
-  unmangle_name(Module, Name).
-  
-unmangle_name(Module, "method_" ++ Name) ->
+unmangle(Module, ?prefix ++ "method_" ++ Name) ->
   {method, Module, list_to_atom(Name)};
-unmangle_name(_Module, "extmethod_" ++ Name) ->
+unmangle(_Module, ?prefix ++ "extmethod_" ++ Name) ->
   {Class, Method} = extract_class_and_method(Name),
   {method, list_to_atom(Class), list_to_atom(Method)};
-unmangle_name(_, _) ->
+unmangle(_, _) ->
   nil.
   
 extract_class_and_method(Name) ->
