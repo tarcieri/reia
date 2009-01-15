@@ -11,8 +11,8 @@
 
 %% Convert a Reia class definition into a Reia module which conforms to the
 %% gen_server behavior, then load it into the code server
-build({class, Line, Name, Functions}) ->
-  Functions2 = process_functions(Name, Functions),
+build({class, Line, Name, Methods}) ->
+  Functions2 = build_functions(Name, Methods),
   % [io:format(erl_pp:form(Function)) || Function <- Functions2],
   Module = {module, Line, Name, Functions2},
   % io:format("~p~n", [Module]),
@@ -23,45 +23,38 @@ build(_) ->
 %% Create an instance of a given class, passing the arguments on to its 
 %% initialize function
 inst(Class, Arguments, _Block) ->
-  apply(Class, 'start_link', Arguments).
+  Obj = Class:spawn_link(),
+  call(Obj, {'initialize', Arguments}),
+  Obj.
 
 %% Call a method on a Reia object at the given Pid
-call(Pid, {_Method, _Arguments} = Request) ->
+call({object, {Pid, _Class}}, Request) ->
+  call(Pid, Request);
+call(Pid, {_Method, _Arguments} = Request) when is_pid(Pid) ->
   case gen_server:call(Pid, Request) of
     {ok, Value} -> Value;
     {error, Error} -> throw(Error)
   end.
 
-%% Process incoming functions, substituting custom versions for defaults  
-process_functions(Module, Functions) ->
-  {FunctionDict, Methods} = lists:foldr(
-    fun process_function/2, 
-    {dict:from_list(default_functions()), []}, 
-    Functions
-  ),
-    
-  % Pull the initialize function out for special case processing
-  {ok, InitializeMethod} = dict:find(initialize, FunctionDict),
-  FunctionDict2 = dict:erase(initialize, FunctionDict),
-  
-  DefaultFunctions = start_functions(Module, function_arity(InitializeMethod)),
-  ImmediateFunctions = [Function || {_, Function} <- dict:to_list(FunctionDict2)],
+%% Process incoming methods and build the functions for the resulting module
+build_functions(Module, Methods) ->  
   lists:flatten([
-    DefaultFunctions, 
-    ImmediateFunctions, 
-    initialize_method(InitializeMethod), 
-    method_functions(Module, Methods)
-  ]). 
+    start_functions(Module), 
+    default_functions(), 
+    method_functions(merge_methods(Module, Methods))
+  ]).
   
-%% If a method name matches one of the default_functions(), then it has a
-%% special purpose and should be mapped to a function rather than a method.
-process_function({function, _Line, Name, _Arity, _Clauses} = Function, {Dict, Functions}) ->
-  case dict:find(Name, Dict) of
-    {ok, _} ->
-      {dict:store(Name, Function, Dict), Functions};
-    error ->
-      {Dict, [Function|Functions]}
-  end.
+%% Merge default methods with the user-defined ones
+merge_methods(Module, Methods) -> 
+  MethodDict = lists:foldr(
+    fun(Function, Dict) -> 
+      {function, _Line, Name, _Arity, _Clauses} = Function,
+      dict:store(Name, Function, Dict)
+    end,
+    dict:from_list(default_methods(Module)), 
+    Methods
+  ),
+  [Method || {_, Method} <- dict:to_list(MethodDict)].
   
 %% Construct the initialize method (as a function call for now, ugh)
 initialize_method({function, Line, Name, _Arity, Clauses}) ->
@@ -79,9 +72,9 @@ initialize_clause({clause, Line, Arguments, Guards, Expressions}) ->
   {clause, Line, Arguments2, Guards, Expressions2}.
   
 %% Build a dispatch_method function and functions for each of the mangled methods
-method_functions(Module, Methods) ->
+method_functions(Methods) ->
   % Decompose the function clauses for methods into handle_call clauses
-  {Clauses, Functions} = process_methods(Methods ++ default_methods(Module)),
+  {Clauses, Functions} = process_methods(Methods),
   [build_method_dispatch_function(Clauses)|Functions].
 
 %% Generate Erlang forms for the class's method dispatch function
@@ -177,45 +170,44 @@ argument_list_cons([], Line) ->
 argument_list_cons([Element|Rest], Line) ->
   {cons, Line, Element, argument_list_cons(Rest, Line)}.
 
-%% Default functions to incorporate into Reia classes
+%% These functions are required for the generated modules to implement the
+%% gen_server behavior
 default_functions() ->
-  [default_function(Function) || Function <- [
-    "init(Args) -> {ok, initialize(Args)}.",
-    "method_missing(_State, Method, _Args) -> throw({error, {Method, \"undefined\"}}).",
+  [parse_function(Function) || Function <- [
+    "init([]) -> {ok, dict:new()}.",
     "handle_call(Request, From, State) -> try dispatch_method(Request, From, State) catch throw:Error -> {reply, {error, Error}, State} end.",
     "handle_cast(_Msg, State) -> {noreply, State}.",
     "handle_info(_Info, State) -> {noreply, State}.",
     "terminate(_Reason, _State) -> ok.",
     "code_change(_OldVsn, State, _Extra) -> {ok, State}.",
-    
-    % A bit sneaky here as this is an untransformed method:
-    "initialize() -> nil."
+    "method_missing(_State, Method, _Args) -> throw({error, {Method, \"undefined\"}})."
   ]].
-
-%% Parse a default function and return a dict entry for it  
-default_function(String) ->
-  Form = parse_function(String),
-  {function, _, Name, _, _} = Form,
-  {Name, Form}.
   
 %% Default methods that Reia objects respond to
 default_methods(Module) ->
   NameString = lists:concat(["reia_string:from_list(\"#<", Module, ">\")"]),
-  [parse_function(Function) || Function <- [
-    lists:concat(["class() -> {constant, '", Module, "'}."]),
+  [default_method(Function) || Function <- [
+    "class() -> {constant, '" ++ atom_to_list(Module) ++ "'}.",
+    "initialize() -> nil.",
     "to_s() -> " ++ NameString ++ ".",
     "inspect() -> " ++ NameString ++ "."
   ]].
   
+%% Parse a default function and return a dict entry for it  
+default_method(String) ->
+  Form = parse_function(String),
+  {function, _, Name, _, _} = Form,
+  {Name, Form}.
+  
 %% Functions for starting a new object
-start_functions(Module, Arity) ->
-  [start_function(Module, Function, Arity) || Function <- ["start", "start_link"]].
+start_functions(Module) ->
+  [start_function(Module, Function) || Function <- [{"spawn", "start"}, {"spawn_link", "start_link"}]].
 
-start_function(Module, Function, Arity) ->
-  Vars = variable_list(Arity),
-  String = [Function, "("] ++ Vars ++ 
-    [") -> {ok, Pid} = gen_server:", Function, "('", Module, "', ["] ++ Vars ++ [
-    "], []), {object, {Pid, '", Module, "'}}."],
+start_function(Module, {ReiaFunc, OtpFunc}) ->
+  String = [
+    ReiaFunc, "() -> {ok, Pid} = gen_server:", OtpFunc, "('", Module, "', [], [])," ++ 
+    "{object, {Pid, '", Module, "'}}."
+  ],
   parse_function(lists:concat(String)).
   
 variable_list(0) ->
@@ -235,7 +227,3 @@ parse_function(String) ->
   {ok, Scanned, _} = erl_scan:string(String),
   {ok, Form} = erl_parse:parse_form(Scanned),
   Form.
-  
-%% Return the arity of a function in Erlang abstract format
-function_arity({function, _Line, _Name, Arity, _Clauses}) ->
-  Arity.
