@@ -11,7 +11,7 @@ class TCPSocket
   # Open a TCP connection the given host and port
   #
   # Example:
-  #  sock = TCPSocket.start("www.google.com", 80)
+  #  sock = TCPSocket("www.google.com", 80)
   #
   def initialize(host, port)
     case gen_tcp::connect(host.to_list(), port, [~binary, (~active, false)])

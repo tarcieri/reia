@@ -8,10 +8,10 @@
 # This interface is subject to change!
 module File
   def open(fn)
-    IODevice.start(fn, [~read])
+    IODevice(fn, [~read])
 
   def open(fn, modes)
-    IODevice.start(fn, modes)
+    IODevice(fn, modes)
 
   def read(fn)
     case file::read_file(fn.to_list())

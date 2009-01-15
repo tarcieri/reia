@@ -10,7 +10,7 @@ class ODBC
   # Open a ODBC connection with DSN string
   #
   # Example:
-  #   db = ODBC.start("DSN=mysqldb;UID=root") 
+  #   db = ODBC("DSN=mysqldb;UID=root") 
   #   db.select_count("SELECT * FROM fruit") # Returns number of rows
   #
   # You can access results from the cursor by using select_count
@@ -50,7 +50,7 @@ class ODBC
   def query(q)
     case odbc::sql_query(@ref, q.to_list())
       (~selected, colnames, rows):
-        ODBCResult.start(colnames, rows) 
+        ODBCResult(colnames, rows) 
       (~updated, nrows):
         nrows
       (~error, reason):
@@ -59,28 +59,28 @@ class ODBC
   def next
     case odbc::next(@ref)
       (~selected, colnames, rows):
-        ODBCResult.start(colnames, rows)
+        ODBCResult(colnames, rows)
       (~error, reason):
         throw reason
 
   def prev
     case odbc::prev(@ref)
       (~selected, colnames, rows):
-        ODBCResult.start(colnames, rows)
+        ODBCResult(colnames, rows)
       (~error, reason):
         throw reason
 
   def first
     case odbc::first(@ref)
       (~selected, colnames, rows):
-        ODBCResult.start(colnames, rows)
+        ODBCResult(colnames, rows)
       (~error, reason):
         throw reason
 
   def last
     case odbc::last(@ref)
       (~selected, colnames, rows):
-        ODBCResult.start(colnames, rows)
+        ODBCResult(colnames, rows)
       (~error, reason):
         throw reason
 
