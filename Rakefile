@@ -97,7 +97,7 @@ task :ebin do
   FileList["artifacts/beam/*.beam"].each { |file| cp file, "ebin" }
 end
 
-task :test do
+task :test => :build do
   sh "bin/reia test/runner.re"
 end
 
@@ -126,3 +126,7 @@ task :distclean => :clean do
   FileList['ebin/**/*.beam'].each { |f| rm_f f }
 end
 
+task :cruise do
+  CruiseControl.invoke_rake_task :distclean
+  CruiseControl.invoke_rake_task :test
+end
