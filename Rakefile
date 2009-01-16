@@ -70,14 +70,14 @@ file "ebin/smerl.beam" => "src/smerl/smerl.erl" do
 end
 
 # Leex (lexer generator for Erlang)
-task :leex => ["ebin/leex.beam", "ebin/reia_scan.beam"]
+task :leex => ["src/leex/leex.beam", "ebin/reia_scan.beam"]
 
-file "ebin/leex.beam" => "src/leex/leex.erl" do
+file "src/leex/leex.beam" => "src/leex/leex.erl" do
   sh "erlc -W0 -o ebin src/leex/leex.erl"
 end
 
 # Compile reia_scan using leex
-file "ebin/reia_scan.beam" => %w[ebin/leex.beam src/compiler/reia_scan.xrl] do
+file "ebin/reia_scan.beam" => %w[src/leex/leex.beam src/compiler/reia_scan.xrl] do
   sh "bin/leex src/compiler/reia_scan.xrl"
   mv "src/compiler/reia_scan.erl", "artifacts/erl/reia_scan.erl"
   sh "erlc +debug_info +nowarn_unused_vars -o artifacts/beam artifacts/erl/reia_scan.erl"
@@ -94,7 +94,7 @@ end
 
 # Copy all output BEAM files into the ebin directory
 task :ebin do
-  FileList["artifacts/beam/*.beam"].each { |file| cp file, "ebin" }
+  FileList["artifacts/beam/*.beam"].each { |file| p file; cp file, "ebin" }
 end
 
 task :test => :build do
