@@ -40,8 +40,24 @@ build_functions(Module, Methods) ->
   lists:flatten([
     start_functions(Module), 
     default_functions(), 
-    method_functions(merge_methods(Module, Methods))
+    method_functions(Module, Methods)
   ]).
+  
+%% Build a dispatch_method function and functions for each of the mangled methods
+method_functions(Module, Methods) ->
+  % Decompose the function clauses for methods into handle_call clauses
+  {Clauses, Functions} = process_methods(Module, Methods),
+  [build_method_dispatch_function(Clauses)|Functions].
+
+%% Process methods into a list of clauses for dispatch_method and functions
+%% with mangled names for each method
+process_methods(Module, Methods) ->
+  FinalMethods = merge_methods(Module, Methods),
+  {NewClauses, NewFunctions} = lists:foldl(fun(Method, {Clauses, Functions}) ->
+    {Clause, Function} = process_method(Method),
+    {[Clause|Clauses], [Function|Functions]}
+  end, {[],[]}, FinalMethods),
+  {lists:reverse(NewClauses), lists:reverse(NewFunctions)}.
   
 %% Merge default methods with the user-defined ones
 merge_methods(Module, Methods) -> 
@@ -54,28 +70,6 @@ merge_methods(Module, Methods) ->
     Methods
   ),
   [Method || {_, Method} <- dict:to_list(MethodDict)].
-    
-%% Build a dispatch_method function and functions for each of the mangled methods
-method_functions(Methods) ->
-  % Decompose the function clauses for methods into handle_call clauses
-  {Clauses, Functions} = process_methods(Methods),
-  [build_method_dispatch_function(Clauses)|Functions].
-
-%% Generate Erlang forms for the class's method dispatch function
-build_method_dispatch_function(Clauses) ->
-  % Add a clause which thunks to method_missing
-  MethodMissingThunk = "dispatch_method({Method, Args}, Caller, State) -> dispatch_method({method_missing, [Method, Args]}, Caller, State).",
-  {function, _, _, _, MethodMissingClause} = parse_function(MethodMissingThunk),
-  {function, 1, dispatch_method, 3, Clauses ++ MethodMissingClause}.
-
-%% Process methods into a list of clauses for dispatch_method and functions
-%% with mangled names for each method
-process_methods(Methods) ->
-  {NewClauses, NewFunctions} = lists:foldl(fun(Method, {Clauses, Functions}) ->
-    {Clause, Function} = process_method(Method),
-    {[Clause|Clauses], [Function|Functions]}
-  end, {[],[]}, Methods),
-  {lists:reverse(NewClauses), lists:reverse(NewFunctions)}.
   
 %% Extract a method into its dispatch_method clause and mangled form
 process_method({function, Line, Name, _Arity, Clauses}) ->
@@ -153,6 +147,13 @@ argument_list_cons([], Line) ->
   {nil, Line};
 argument_list_cons([Element|Rest], Line) ->
   {cons, Line, Element, argument_list_cons(Rest, Line)}.
+  
+%% Generate Erlang forms for the class's method dispatch function
+build_method_dispatch_function(Clauses) ->
+  % Add a clause which thunks to method_missing
+  MethodMissingThunk = "dispatch_method({Method, Args}, Caller, State) -> dispatch_method({method_missing, [Method, Args]}, Caller, State).",
+  {function, _, _, _, MethodMissingClause} = parse_function(MethodMissingThunk),
+  {function, 1, dispatch_method, 3, Clauses ++ MethodMissingClause}.
 
 %% These functions are required for the generated modules to implement the
 %% gen_server behavior
