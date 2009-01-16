@@ -18,7 +18,10 @@ build({module, _Line, Name, Functions}) ->
     new_module(Name), 
     Functions
   ),
-  smerl:compile(Module, compile_options());
+  case smerl:compile(Module, compile_options()) of
+    ok -> {constant, Name};
+    Error -> throw(Error)
+  end;
 build(_) ->
   {error, "invalid module"}.
 
