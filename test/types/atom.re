@@ -18,3 +18,8 @@ module AtomTest
     TestHelper.expect(Atom, "inspect shows proper value", fun do
       (~'foo bar'.inspect(), "~'foo bar'")
     )
+
+  def failure_test
+    TestHelper.expect(Atom, "failure", fun do
+      (true, false)
+    )
