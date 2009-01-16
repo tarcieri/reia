@@ -73,7 +73,7 @@ end
 task :leex => ["src/leex/leex.beam", "ebin/reia_scan.beam"]
 
 file "src/leex/leex.beam" => "src/leex/leex.erl" do
-  sh "erlc -W0 -o ebin src/leex/leex.erl"
+  sh "erlc -W0 -o src/leex src/leex/leex.erl"
 end
 
 # Compile reia_scan using leex
