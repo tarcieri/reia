@@ -92,8 +92,11 @@ dynamic_expression(Expression) ->
 %% Static module declarations
 static([{module, Line, Name, Functions}]) ->
   [{attribute, Line, module, Name}|Functions];
+static([{class, _Line, _Name, _Functions} = Class]) ->
+  Module = reia_class:ast(Class),
+  static([Module]);
 static(_) ->
-  throw({error, "Statically compiled modules must contain one and only one module declaration"}).
+  throw({error, "Statically compiled modules must contain one and only one module or class declaration"}).
 
 %% Generate a single-use variable name
 nonce() ->

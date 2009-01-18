@@ -6,18 +6,22 @@
 %
 
 -module(reia_class).
--export([build/1, inst/3, call/2]).
+-export([build/1, ast/1, inst/3, call/2]).
 
 %% Convert a Reia class definition into a Reia module which conforms to the
 %% gen_server behavior, then load it into the code server
-build({class, Line, Name, Methods}) ->
+build(Class) ->
+  Module = ast(Class),
+  reia_module:build(Module).
+    
+%% Compile a Reia class to an Erlang module
+ast({class, Line, Name, Methods}) ->
   Functions2 = build_functions(Name, Methods),
   % [io:format(erl_pp:form(Function)) || Function <- Functions2],
-  Module = {module, Line, Name, Functions2},
-  % io:format("~p~n", [Module]),
-  reia_module:build(Module);
-build(_) ->
+  {module, Line, Name, Functions2};
+ast(_) ->
   {error, "invalid class"}.
+
 
 %% Create an instance of a given class, passing the arguments on to its 
 %% initialize function

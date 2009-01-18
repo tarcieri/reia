@@ -20,18 +20,23 @@ file(Filename, Outfile) ->
   case file:read_file(Filename) of
     {ok, Data} ->
       case reia_parse:string(binary_to_list(Data)) of
-        {ok, Forms = [{module, _, _, _}]} ->
-          {ok, _Module, Bin} = forms(Forms),
-          file:write_file(Outfile, Bin),
-          {ok, Outfile};
-        {ok, _} ->
-          {error, "compiled Reia must define exactly one module"};
+        {ok, [{module, _, _, _}] = Forms} ->
+          module(Forms, Outfile);
+        {ok, [{class, _, _, _}] = Forms} ->
+          module(Forms, Outfile);
+        {ok, _Forms} ->
+          {error, "compiled Reia must define exactly one module or class"};
         {error, {Line, Message}} ->
           {error, io_lib:format("Line ~w: ~s", [Line, Message])}
       end;
     {error, Err} ->
       {error, io_lib:format("~p", [Err])}
   end.
+  
+module(Forms, Outfile) ->
+  {ok, _Module, Bin} = forms(Forms),
+  file:write_file(Outfile, Bin),
+  {ok, Outfile}.
   
 forms(Forms) ->
   Passes = [case Pass of dynamic -> static; _ -> Pass end || Pass <- reia_compiler:default_passes()],
