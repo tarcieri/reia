@@ -7,3 +7,6 @@ class Object
     
   def inspect
     to_s()
+    
+  def method_missing(method, args)
+    throw (~error, (method, "undefined"))
