@@ -22,7 +22,11 @@ file(Filename, Outfile) ->
       case reia_parse:string(binary_to_list(Data)) of
         {ok, [{module, _, _, _}] = Forms} ->
           module(Forms, Outfile);
-        {ok, [{class, _, _, _}] = Forms} ->
+        {ok, [{class, _, Name, _}] = Forms} ->
+          case internal_class(Name) of
+            true -> void;
+            false -> io:format("Warning: reiac is intended for core Reia classes only~n")
+          end,
           module(Forms, Outfile);
         {ok, _Forms} ->
           {error, "compiled Reia must define exactly one module or class"};
@@ -49,3 +53,8 @@ forms(Forms) ->
     report_warnings
     %{parse_transform, smart_exceptions}
   ]).
+  
+internal_class('Object') ->
+  true;
+internal_class(_) ->
+  false.
