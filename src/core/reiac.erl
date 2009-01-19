@@ -26,7 +26,7 @@ file(Filename, Outfile) ->
           {constant, _, Name} = Constant,
           case internal_class(Name) of
             true -> void;
-            false -> io:format("Warning: reiac is intended for core Reia classes only", [Name])
+            false -> io:format("Warning: reiac is intended for core Reia classes only~n")
           end,
           module(Filename, Outfile, Forms);
         {ok, _Forms} ->
@@ -45,12 +45,13 @@ module(Infile, Outfile, Forms) ->
   
 forms(FileName, Forms) ->
   Passes = [case Pass of dynamic -> static; _ -> Pass end || Pass <- reia_compiler:default_passes()],
-  ErlForms = reia_compiler:compile(Forms, Passes),
+  [ModuleDecl|Functions] = reia_compiler:compile(Forms, Passes),
   Attributes = [
-    {attribute, 1, file, {FileName, 1}}%, %% FIXME this is probably incorrect
-    %{attribute, 1, reia_source, Forms}
+    ModuleDecl,
+    {attribute, 1, file, {FileName, 1}}, %% FIXME this is probably incorrect
+    {attribute, 1, code, Forms}
   ],
-  compile:forms(ErlForms ++ Attributes, [
+  compile:forms(Attributes ++ Functions, [
     debug_info, 
     export_all, 
     verbose, 
