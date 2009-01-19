@@ -21,13 +21,14 @@ file(Filename, Outfile) ->
     {ok, Data} ->
       case reia_parse:string(binary_to_list(Data)) of
         {ok, [{module, _, _, _}] = Forms} ->
-          module(Forms, Outfile);
-        {ok, [{class, _, Name, _}] = Forms} ->
+          module(Filename, Outfile, Forms);
+        {ok, [{class, _, Constant, _}] = Forms} ->
+          {constant, _, Name} = Constant,
           case internal_class(Name) of
             true -> void;
-            false -> io:format("Warning: reiac is intended for core Reia classes only~n")
+            false -> io:format("Warning: reiac is intended for core Reia classes only", [Name])
           end,
-          module(Forms, Outfile);
+          module(Filename, Outfile, Forms);
         {ok, _Forms} ->
           {error, "compiled Reia must define exactly one module or class"};
         {error, {Line, Message}} ->
@@ -37,15 +38,19 @@ file(Filename, Outfile) ->
       {error, io_lib:format("~p", [Err])}
   end.
   
-module(Forms, Outfile) ->
-  {ok, _Module, Bin} = forms(Forms),
+module(Infile, Outfile, Forms) ->
+  {ok, _Module, Bin} = forms(Infile, Forms),
   file:write_file(Outfile, Bin),
   {ok, Outfile}.
   
-forms(Forms) ->
+forms(FileName, Forms) ->
   Passes = [case Pass of dynamic -> static; _ -> Pass end || Pass <- reia_compiler:default_passes()],
   ErlForms = reia_compiler:compile(Forms, Passes),
-  compile:forms(ErlForms, [
+  Attributes = [
+    {attribute, 1, file, {FileName, 1}}%, %% FIXME this is probably incorrect
+    %{attribute, 1, reia_source, Forms}
+  ],
+  compile:forms(ErlForms ++ Attributes, [
     debug_info, 
     export_all, 
     verbose, 
