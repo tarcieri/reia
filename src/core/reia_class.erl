@@ -154,10 +154,10 @@ argument_list_cons([Element|Rest], Line) ->
   
 %% Generate Erlang forms for the class's method dispatch function
 build_method_dispatch_function(Clauses) ->
-  % Add a clause which thunks to method_missing
-  MethodMissingThunk = "dispatch_method({Method, Args}, Caller, State) -> dispatch_method({method_missing, [Method, Args]}, Caller, State).",
-  {function, _, _, _, MethodMissingClause} = parse_function(MethodMissingThunk),
-  {function, 1, dispatch_method, 3, Clauses ++ MethodMissingClause}.
+  % Add a clause which thunks to _ if no method responds
+  CatchallFunc = "dispatch_method({Method, Args}, Caller, State) -> dispatch_method({'_', [Method, Args]}, Caller, State).",
+  {function, _, _, _, CatchallClause} = parse_function(CatchallFunc),
+  {function, 1, dispatch_method, 3, Clauses ++ CatchallClause}.
 
 %% These functions are required for the generated modules to implement the
 %% gen_server behavior
@@ -179,7 +179,7 @@ default_methods(Module) ->
     "initialize() -> nil.",
     "to_s() -> " ++ NameString ++ ".",
     "inspect() -> " ++ NameString ++ ".",
-    "method_missing(Method, _Args) -> throw({error, {Method, \"undefined\"}})."
+    "'_'(Method, _Args) -> throw({error, {Method, \"undefined\"}})."
   ]].
   
 %% Parse a default function and return a dict entry for it  
