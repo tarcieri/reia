@@ -126,7 +126,4 @@ task :distclean => :clean do
   FileList['ebin/**/*.beam'].each { |f| rm_f f }
 end
 
-task :cruise do
-  CruiseControl.invoke_rake_task :distclean
-  CruiseControl.invoke_rake_task :test
-end
+task :ci => %w[distclean test]
