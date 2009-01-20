@@ -50,12 +50,12 @@ module Eval
   def local(name, args)
     case name
       ~puts:
-        args.each { |arg| Local.puts(arg) }
+        args.each { |arg| Main.puts(arg) }
         nil
       ~print:
-        Local.print(args[0])
+        Main.print(args[0])
       ~eval:
-        Local.eval(args[0])
+        Main.eval(args[0])
       ~load:
-        Local.load(args[0])
+        Main.load(args[0])
       
