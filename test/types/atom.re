@@ -7,7 +7,7 @@
 
 module AtomTest
   def run
-    [to_string_test(), inspect_test(), failure_test()]
+    [to_string_test(), inspect_test()]
 
   def to_string_test
     TestHelper.expect(Atom, "to_string test", fun do
