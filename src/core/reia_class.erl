@@ -6,7 +6,38 @@
 %
 
 -module(reia_class).
--export([build/1, ast/1, inst/3, call/2]).
+-export([new/1, add_ancestor/2, build/1, ast/1, inst/3, call/2]).
+
+-record(class, {line, name, ancestor, methods, inherited_methods}).
+
+%% Create a new class with the given ancestor
+new(Name) ->
+  #class{name=Name, methods=dict:new()}.
+  
+%% Add an ancestor to the given class
+add_ancestor(DescendantClass, AncestorName) when is_atom(AncestorName) ->
+  case code:ensure_loaded(AncestorName) of
+    {module, _} -> void;
+    Error -> throw(Error)
+  end,
+  
+  AncestorClass = case [Code || {code, Code} <- AncestorName:module_info(attributes)] of
+    [[Class]] -> Class;
+    _ -> throw({error, {AncestorName, "lacks a code attribute (not a Reia module?)"}})
+  end,
+  
+  add_ancestor(DescendantClass, AncestorClass);
+add_ancestor(DescendantClass, {class, _Line, AncestorName, AncestorMethods}) ->
+  InheritedMethods = lists:foldr(
+    fun(Function, Dict) -> 
+      {function, Line, {identifier, _, Name}, Arity, Clauses} = Function,
+      Method = {method, Line, {AncestorName, Name}, Arity, Clauses},
+      dict:store(Name, Method, Dict)
+    end,
+    DescendantClass#class.inherited_methods,
+    AncestorMethods
+  ),
+  DescendantClass#class{inherited_methods=InheritedMethods}.
 
 %% Convert a Reia class definition into a Reia module which conforms to the
 %% gen_server behavior, then load it into the code server
