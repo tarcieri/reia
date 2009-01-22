@@ -12,7 +12,7 @@
 
 %% Create a new class with the given ancestor
 new(Name) ->
-  #class{name=Name, methods=dict:new()}.
+  #class{name=Name, inherited_methods=dict:new()}.
   
 %% Add an ancestor to the given class
 add_ancestor(DescendantClass, AncestorName) when is_atom(AncestorName) ->
