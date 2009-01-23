@@ -27,15 +27,9 @@ build(Class) ->
   reia_module:build(ast(Class)).
   
 compile_inherited_methods(MethodsDict) ->
-  Methods = [
-    {function, Line, {identifier, Line, Name}, Arguments, Exprs} || 
-    {_, {method, Line, {_, Name}, Arguments, Exprs}} <- dict:to_list(MethodsDict)
-  ],
+  Methods = [Method || {_, {_, Method}} <- dict:to_list(MethodsDict)],
   Class = {class, 1, {constant, 1, 'base_class'}, Methods},
-  Passes = lists:filter(
-    fun(X) -> if X == dynamic -> false; true -> true end end, 
-    reia_compiler:default_passes()
-  ),
+  Passes = [Pass || Pass <- reia_compiler:default_passes(), Pass /= dynamic],
   [{class, _, _, Functions}] = reia_compiler:compile([Class], Passes),
   Functions.
      
@@ -55,9 +49,8 @@ add_ancestor(Methods, AncestorName) when is_atom(AncestorName) ->
 add_ancestor(Methods, {class, _Line, {constant, _, AncestorName}, AncestorMethods}) ->
   lists:foldr(
     fun(Function, Dict) ->
-      {function, Line, {identifier, _, Name}, Arguments, Clauses} = Function,
-      Method = {method, Line, {AncestorName, Name}, Arguments, Clauses},
-      dict:store(Name, Method, Dict)
+      {function, _, {identifier, _, Name}, _, _} = Function,
+      dict:store(Name, {AncestorName, Function}, Dict) 
     end,
     Methods,
     AncestorMethods
