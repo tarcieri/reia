@@ -2,6 +2,9 @@ class Object
   def initialize
     nil
     
+  def class
+    Object
+    
   def to_s
     ["#<", class(), ">"].join()
     

@@ -6,16 +6,41 @@
 %
  
 -module(reia_class).
--export([new/1, add_ancestor/2, build/1, ast/1, inst/3, call/2]).
- 
--record(class, {line, name, ancestor, methods, inherited_methods}).
- 
-%% Create a new class with the given ancestor
-new(Name) ->
-  #class{name=Name, inherited_methods=dict:new()}.
+-export([build/1, ast/1, inst/3, call/2]).
+
+%% Convert a Reia class definition into a Reia module which conforms to the
+%% gen_server behavior, then load it into the code server
+build({class, _Line, 'Object', _Methods} = Class) ->
+  reia_module:build(ast(Class));
+build(Class) ->
+  %{module, Line, Name, Functions} = ast(Class),
   
+  % Generate the methods which are derived from this class's ancestors
+  BaseMethods = add_ancestor(dict:new(), 'Object'),
+  
+  % Generate and compile the base class
+  _BaseClass = compile_inherited_methods(BaseMethods),
+  
+  % Generate the method for returning the class of an object
+  %ClassMethod = parse_function("class() -> {constant, '" ++ atom_to_list(Name) ++ "'}."),
+
+  reia_module:build(ast(Class)).
+  
+compile_inherited_methods(MethodsDict) ->
+  Methods = [
+    {function, Line, {identifier, Line, Name}, Arguments, Exprs} || 
+    {_, {method, Line, {_, Name}, Arguments, Exprs}} <- dict:to_list(MethodsDict)
+  ],
+  Class = {class, 1, {constant, 1, 'base_class'}, Methods},
+  Passes = lists:filter(
+    fun(X) -> if X == dynamic -> false; true -> true end end, 
+    reia_compiler:default_passes()
+  ),
+  [{class, _, _, Functions}] = reia_compiler:compile([Class], Passes),
+  Functions.
+     
 %% Add an ancestor to the given class
-add_ancestor(DescendantClass, AncestorName) when is_atom(AncestorName) ->
+add_ancestor(Methods, AncestorName) when is_atom(AncestorName) ->
   case code:ensure_loaded(AncestorName) of
     {module, _} -> void;
     Error -> throw(Error)
@@ -26,33 +51,24 @@ add_ancestor(DescendantClass, AncestorName) when is_atom(AncestorName) ->
     _ -> throw({error, {AncestorName, "lacks a code attribute (not a Reia module?)"}})
   end,
   
-  add_ancestor(DescendantClass, AncestorClass);
-add_ancestor(DescendantClass, {class, _Line, AncestorName, AncestorMethods}) ->
-  InheritedMethods = lists:foldr(
+  add_ancestor(Methods, AncestorClass);
+add_ancestor(Methods, {class, _Line, {constant, _, AncestorName}, AncestorMethods}) ->
+  lists:foldr(
     fun(Function, Dict) ->
-      {function, Line, {identifier, _, Name}, Arity, Clauses} = Function,
-      Method = {method, Line, {AncestorName, Name}, Arity, Clauses},
+      {function, Line, {identifier, _, Name}, Arguments, Clauses} = Function,
+      Method = {method, Line, {AncestorName, Name}, Arguments, Clauses},
       dict:store(Name, Method, Dict)
     end,
-    DescendantClass#class.inherited_methods,
+    Methods,
     AncestorMethods
-  ),
-  DescendantClass#class{inherited_methods=InheritedMethods}.
- 
-%% Convert a Reia class definition into a Reia module which conforms to the
-%% gen_server behavior, then load it into the code server
-build(Class) ->
-  Module = ast(Class),
-  reia_module:build(Module).
+  ).
     
 %% Compile a Reia class to an Erlang module
 ast({class, Line, Name, Methods}) ->
   Functions2 = build_functions(Name, Methods),
-  % [io:format(erl_pp:form(Function)) || Function <- Functions2],
   {module, Line, Name, Functions2};
 ast(_) ->
   {error, "invalid class"}.
- 
  
 %% Create an instance of a given class, passing the arguments on to its
 %% initialize function
