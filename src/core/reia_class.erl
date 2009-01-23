@@ -11,20 +11,40 @@
 %% Convert a Reia class definition into a Reia module which conforms to the
 %% gen_server behavior, then load it into the code server
 build({class, _Line, 'Object', _Methods} = Class) ->
+  % Object gets special case behavior as it has no ancestor
   reia_module:build(ast(Class));
-build(Class) ->
-  %{module, Line, Name, Functions} = ast(Class),
-  
+build({class, Line, Name, Methods}) ->
   % Generate the methods which are derived from this class's ancestors
-  BaseMethods = add_ancestor(dict:new(), 'Object'),
-  
-  % Generate and compile the base class
-  _BaseClass = compile_inherited_methods(BaseMethods),
+  BaseMethods = build_inherited_methods(add_ancestor(dict:new(), 'Object')),
   
   % Generate the method for returning the class of an object
-  %ClassMethod = parse_function("class() -> {constant, '" ++ atom_to_list(Name) ++ "'}."),
+  ClassMethod = parse_function("class() -> {constant, '" ++ atom_to_list(Name) ++ "'}."),
+  
+  % Merge this class's methods in with its ancestry
+  FinalMethods = merge_ancestry([ClassMethod|Methods], BaseMethods),
 
-  reia_module:build(ast(Class)).
+  reia_module:build(ast({class, Line, Name, FinalMethods})).
+  
+merge_ancestry(Methods, AncestorMethods) ->
+  FinalMethods = lists:foldl(
+    fun({function, _, Name, _, _} = Function, Dict) ->
+      dict:store(Name, Function, Dict)
+    end,
+    AncestorMethods,
+    Methods
+  ),
+  [Method || {_, Method} <- dict:to_list(FinalMethods)].
+  
+build_inherited_methods(MethodsDict) ->
+  Methods = compile_inherited_methods(MethodsDict),
+  lists:foldl(
+    fun({function, _, Name, _, _} = Function, Dict) ->
+      {method, Ancestor, _} = dict:fetch(Name, MethodsDict),
+      dict:store(Name, {method, Ancestor, Function}, Dict)
+    end,
+    dict:new(),
+    Methods
+  ).
   
 compile_inherited_methods(MethodsDict) ->
   Methods = [Method || {_, {_, _, Method}} <- dict:to_list(MethodsDict)],
@@ -47,9 +67,8 @@ add_ancestor(Methods, AncestorName) when is_atom(AncestorName) ->
   
   add_ancestor(Methods, AncestorClass);
 add_ancestor(Methods, {class, _Line, {constant, _, AncestorName}, AncestorMethods}) ->
-  lists:foldr(
-    fun(Function, Dict) ->
-      {function, _, {identifier, _, Name}, _, _} = Function,
+  lists:foldl(
+    fun({function, _, {identifier, _, Name}, _, _} = Function, Dict) ->
       dict:store(Name, {method, AncestorName, Function}, Dict) 
     end,
     Methods,
@@ -84,40 +103,33 @@ build_functions(Module, Methods) ->
   lists:flatten([
     start_functions(Module),
     default_functions(),
-    method_functions(Module, Methods)
+    method_functions(Methods)
   ]).
   
 %% Build a dispatch_method function and functions for each of the mangled methods
-method_functions(Module, Methods) ->
+method_functions(Methods) ->
   % Decompose the function clauses for methods into handle_call clauses
-  {Clauses, Functions} = process_methods(Module, Methods),
+  {Clauses, Functions} = process_methods(Methods),
   [build_method_dispatch_function(Clauses)|Functions].
  
 %% Process methods into a list of clauses for dispatch_method and functions
 %% with mangled names for each method
-process_methods(Module, Methods) ->
-  FinalMethods = merge_methods(Module, Methods),
+process_methods(Methods) ->
   {NewClauses, NewFunctions} = lists:foldl(fun(Method, {Clauses, Functions}) ->
-    {Clause, Function} = process_method(Method),
-    {[Clause|Clauses], [Function|Functions]}
-  end, {[],[]}, FinalMethods),
+    {Name, Function} = extract_mangled_name_and_function(Method),
+    {Clause, Function2} = build_dispatcher_clause_and_function(Function, Name),
+    {[Clause|Clauses], [Function2|Functions]}
+  end, {[],[]}, Methods),
   {lists:reverse(NewClauses), lists:reverse(NewFunctions)}.
   
-%% Merge default methods with the user-defined ones
-merge_methods(Module, Methods) ->
-  MethodDict = lists:foldr(
-    fun(Function, Dict) ->
-      {function, _Line, Name, _Arity, _Clauses} = Function,
-      dict:store(Name, Function, Dict)
-    end,
-    dict:from_list(default_methods(Module)),
-    Methods
-  ),
-  [Method || {_, Method} <- dict:to_list(MethodDict)].
-  
 %% Extract a method into its dispatch_method clause and mangled form
-process_method({function, Line, Name, _Arity, Clauses}) ->
-  MangledName = reia_mangle:method(Name),
+extract_mangled_name_and_function({method, Ancestor, {function, _, Name, _, _} = Function}) ->
+  {reia_mangle:method(Ancestor, Name), Function};
+extract_mangled_name_and_function({function, _, Name, _, _} = Function) ->
+  {reia_mangle:method(Name), Function}.
+  
+%% Construct the new function and dispatcher clause
+build_dispatcher_clause_and_function({function, Line, Name, _Arity, Clauses}, MangledName) ->
   DispatcherClause = dispatcher_clause(Name, MangledName, Line),
   Function = {function, Line, MangledName, 3,
     [process_method_clause(Clause) || Clause <- Clauses]
@@ -210,23 +222,6 @@ default_functions() ->
     "terminate(_Reason, _State) -> ok.",
     "code_change(_OldVsn, State, _Extra) -> {ok, State}."
   ]].
-  
-%% Default methods that Reia objects respond to
-default_methods(Module) ->
-  NameString = lists:concat(["reia_string:from_list(\"#<", Module, ">\")"]),
-  [default_method(Function) || Function <- [
-    "class() -> {constant, '" ++ atom_to_list(Module) ++ "'}.",
-    "initialize() -> nil.",
-    "to_s() -> " ++ NameString ++ ".",
-    "inspect() -> " ++ NameString ++ ".",
-    "'_'(Method, _Args) -> throw({error, {Method, \"undefined\"}})."
-  ]].
-  
-%% Parse a default function and return a dict entry for it
-default_method(String) ->
-  Form = parse_function(String),
-  {function, _, Name, _, _} = Form,
-  {Name, Form}.
   
 %% Functions for starting a new object
 start_functions(Module) ->
