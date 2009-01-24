@@ -1,3 +1,6 @@
 #!/bin/sh
 
-erl -pa ebin -pa ../ebin -noshell +K true -s Loader start $* -s init stop 
+PROGRAM=$1
+shift
+
+erl -pa ebin -pa ../ebin -noshell +K true -s Loader start $PROGRAM -s init stop -extra $*

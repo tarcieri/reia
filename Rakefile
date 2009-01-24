@@ -112,8 +112,15 @@ task :install do
   
   mkdir "/usr/local/bin" unless File.exist?("/usr/local/bin")
   
-  File.open("/usr/local/bin/reia", "w") { |f| f << "erl -noshell +K true -s Loader start $* -s init stop" }  
-  File.open("/usr/local/bin/ire", "w")  { |f| f << "erl +K true -noshell -noinput -s ire init" }
+  File.open("/usr/local/bin/reia", "w", 0755) do |f| f << """#!/bin/sh
+PROGRAM=$1
+shift
+erl -noshell +K true -s Loader start $PROGRAM -s init stop -extra $*"""
+  end
+
+  File.open("/usr/local/bin/ire", "w", 0755) do |f| f << """#!/bin/sh
+erl +K true -noshell -noinput -s ire init -extra $*"
+end
     
   File.chmod 0755, "/usr/local/bin/ire", "/usr/local/bin/reia"
 end
