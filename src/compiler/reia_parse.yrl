@@ -264,6 +264,7 @@ unary_op -> 'not' : '$1'.
 funcall -> funcall_expr '.' function_identifier '(' ')' : {funcall, line('$2'), '$1', '$3', []}.
 funcall -> funcall_expr '.' function_identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3', '$5'}.
 funcall -> funcall_expr '[' expr ']' : {funcall, line('$2'), '$1', {identifier, line('$2'), '[]'}, ['$3']}.
+funcall -> funcall_expr '.' function_identifier '[' expr ']' : {funcall, line('$2'), {funcall, line('$2'), '$1', '$3', []}, {identifier, line('$2'), '[]'}, ['$5']}.
 
 funcall -> function_identifier '(' ')' : {funcall, line('$2'), '$1', []}.
 funcall -> function_identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3'}.
