@@ -35,61 +35,61 @@ class ODBC
   def initialize(dsn)
     odbc::start()
     case odbc::connect(dsn.to_list(), [])
-      (~ok, ref):
-        @ref = ref
-      (~error, reason):
-        throw reason
+    when (~ok, ref)
+      @ref = ref
+    when (~error, reason)
+      throw reason
 
   def select_count(q)
     case odbc::select_count(@ref, q.to_list())
-      (~ok, nrows):
-        nrows
-      (~error, reason):
-        throw reason
+    when (~ok, nrows)
+      nrows
+    when (~error, reason)
+      throw reason
 
   def query(q)
     case odbc::sql_query(@ref, q.to_list())
-      (~selected, colnames, rows):
-        ODBCResult(colnames, rows) 
-      (~updated, nrows):
-        nrows
-      (~error, reason):
-        throw reason
+    when (~selected, colnames, rows)
+      ODBCResult(colnames, rows) 
+    when (~updated, nrows)
+      nrows
+    when (~error, reason)
+      throw reason
 
   def next
     case odbc::next(@ref)
-      (~selected, colnames, rows):
-        ODBCResult(colnames, rows)
-      (~error, reason):
-        throw reason
+    when (~selected, colnames, rows)
+      ODBCResult(colnames, rows)
+    when (~error, reason)
+      throw reason
 
   def prev
     case odbc::prev(@ref)
-      (~selected, colnames, rows):
-        ODBCResult(colnames, rows)
-      (~error, reason):
-        throw reason
+    when (~selected, colnames, rows)
+      ODBCResult(colnames, rows)
+    when (~error, reason)
+      throw reason
 
   def first
     case odbc::first(@ref)
-      (~selected, colnames, rows):
-        ODBCResult(colnames, rows)
-      (~error, reason):
-        throw reason
+    when (~selected, colnames, rows)
+      ODBCResult(colnames, rows)
+    when (~error, reason)
+      throw reason
 
   def last
     case odbc::last(@ref)
-      (~selected, colnames, rows):
-        ODBCResult(colnames, rows)
-      (~error, reason):
-        throw reason
+    when (~selected, colnames, rows)
+      ODBCResult(colnames, rows)
+    when (~error, reason)
+      throw reason
 
   def describe_table(table)
     case odbc::describe_table(@ref, table.to_list())
-      (~ok, description):
-        description
-      (~error, reason):
-        throw reason
+    when (~ok, description)
+      description
+    when (~error, reason)
+      throw reason
 
   def close
     odbc::disconnect(@ref)
@@ -120,4 +120,3 @@ class ODBCResult
 
   def size
     @rowdata.size()
-

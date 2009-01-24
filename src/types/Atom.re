@@ -24,7 +24,7 @@ module Atom
   def funcall(term, ~inspect, [])
     atom = term.to_s()
     case /^[A-Za-z0-9_]+$/.match(atom)
-      nil:
+    when nil
         ["~'", atom, "'"].join()
-      _:
+    when _
         ["~", atom].join()

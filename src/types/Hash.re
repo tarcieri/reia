@@ -11,10 +11,10 @@ module Hash
   def funcall(term, ~'[]', [key])
     (~dict, hash) = term.uninternalize()
     case dict::find(key, hash)
-      (~ok, value):
-        value
-      ~error:
-        nil
+    when (~ok, value)
+      value
+    when ~error
+      nil
   
   # Hash#insert
   #   Insert an element into a hash, returning a new hash

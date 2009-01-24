@@ -8,11 +8,11 @@
 module Eval
   def string(str)
     case reia_parse::string(str.to_list())
-      (~ok, forms):
-        (~value, value, _binding) = exprs(forms, new_binding())
-        value
-      error:
-        throw error
+    when (~ok, forms)
+      (~value, value, _binding) = exprs(forms, new_binding())
+      value
+    when error
+      throw error
     
   def exprs(forms, binding)
     # Compile Reia forms to Erlang forms
@@ -49,13 +49,13 @@ module Eval
   # FIXME: this is a rather inelegant solution and should be DRYed out
   def local(name, args)
     case name
-      ~puts:
-        args.each { |arg| Main.puts(arg) }
-        nil
-      ~print:
-        Main.print(args[0])
-      ~eval:
-        Main.eval(args[0])
-      ~load:
-        Main.load(args[0])
+    when ~puts
+      args.each { |arg| Main.puts(arg) }
+      nil
+    when ~print
+      Main.print(args[0])
+    when ~eval
+      Main.eval(args[0])
+    when ~load
+      Main.load(args[0])
       

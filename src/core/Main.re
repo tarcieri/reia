@@ -23,7 +23,7 @@ module Main
     
   def load(path)
     case file::read_file(path.to_list())
-      (~ok, data):
-        Eval.string(data.to_string())
-      error:
-        error
+    when (~ok, data)
+      Eval.string(data.to_string())
+    when error
+      error

@@ -15,11 +15,11 @@ module Loader
 
   def read_input(data)
     case io::get_line(~'')
-      ~eof:
-        input = data.map { |s| s.to_string() }.join()
-        eval_input(input)
-      string:
-        read_input(data.push(string))
+    when ~eof
+      input = data.map { |s| s.to_string() }.join()
+      eval_input(input)
+    when string
+      read_input(data.push(string))
   
   def eval_input(input)
     try

@@ -73,7 +73,7 @@ Nonterminals
 Terminals
   true false nil float integer string regexp atom
   identifier punctuated_identifier constant module class
-  eol indent dedent def fun do 'case' else 'if' unless 
+  eol indent dedent def fun do 'case' when else 'if' unless 
   'and' 'or' 'not' 'try' 'catch' throw for in
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**'
@@ -202,12 +202,12 @@ max_expr -> '(' expr ')' : '$2'.
 ivar -> '@' identifier : {ivar, line('$1'), identifier_atom('$2')}.
 
 %% Case expressions
-case_expr -> 'case' expr eol indent case_clauses dedent : {'case', line('$1'), '$2', '$5'}.
+case_expr -> 'case' expr eol case_clauses : {'case', line('$1'), '$2', '$4'}.
 
 case_clauses -> case_clause case_clauses : ['$1'|'$2'].
 case_clauses -> case_clause : ['$1'].
 
-case_clause -> expr ':' eol indent statements dedent : {clause, line('$2'), '$1', '$5'}.
+case_clause -> when expr eol indent statements dedent : {clause, line('$1'), '$2', '$5'}.
 
 %% If expressions
 if_expr -> if_op expr eol indent statements dedent : if_forms({'$1', '$2', '$5'}).

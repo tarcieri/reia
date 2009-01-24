@@ -15,73 +15,73 @@ module File
 
   def read(fn)
     case file::read_file(fn.to_list())
-      (~ok, data):
-        data.to_string()
-      (~error, reason):
-        throw reason
+    when (~ok, data)
+      data.to_string()
+    when (~error, reason)
+      throw reason
 
   def write(fn, data)
     case file::write_file(fn.to_list(), data.to_list())
-      ~ok:
-        ~ok
-      (~error, reason):
-        throw reason
+    when ~ok
+      ~ok
+    when (~error, reason)
+      throw reason
 
   def delete(fn)
     case file::delete(fn.to_list())
-      ~ok:
-        ~ok
-      (~error, reason):
-        throw reason
+    when ~ok
+      ~ok
+    when (~error, reason)
+      throw reason
 
   def copy(src, dest)
     case file::copy(src.to_list(), dest.to_list())
-      (~ok, _):
-        ~ok
-      (~error, reason):
-        throw reason
+    when (~ok, _)
+      ~ok
+    when (~error, reason)
+      throw reason
 
   def rename(src, dest)
     case file::rename(src.to_list(), dest.to_list())
-      ~ok:
-        ~ok
-      (~error, reason):
-        throw reason
+    when ~ok
+      ~ok
+    when (~error, reason)
+      throw reason
   
   def list_dir(dir)
     case file::list_dir(dir.to_list())
-      (~ok, filenames):
-        filenames.map{|m| reia_erl::e2r(m).to_string()}
-      (~error, reason):
-        throw reason
+    when (~ok, filenames)
+      filenames.map{|m| reia_erl::e2r(m).to_string()}
+    when (~error, reason)
+      throw reason
 
   def make_dir(dir)
     case file::make_dir(dir.to_list())
-      ~ok:
-        ~ok
-      (~error, reason):
-        throw reason
+    when ~ok
+      ~ok
+    when (~error, reason)
+      throw reason
 
   def del_dir(dir)
     case file::del_dir(dir.to_list())
-      ~ok:
-        ~ok
-      (~error, reason):
-        throw reason
+    when ~ok
+      ~ok
+    when (~error, reason)
+      throw reason
 
   def set_cwd(dir)
     case file::set_cwd(dir.to_list())
-      ~ok:
-        ~ok
-      (~error, reason):
-        throw reason
+    when ~ok
+      ~ok
+    when (~error, reason)
+      throw reason
 
   def get_cwd
     case file::get_cwd()
-      (~ok, dir):
-        dir
-      (~error, reason):
-        throw reason
+    when (~ok, dir)
+      dir
+    when (~error, reason)
+      throw reason
 
 class IODevice
   # Mimicking Erlang's io_device returned from file:open
@@ -89,30 +89,30 @@ class IODevice
     @modes = reia_erl::r2e(modes.map{|m| reia_erl::r2e(m)})
     @fn = fn.to_list()
     case file::open(@fn, @modes)
-      (~ok, file):
-        @file = file 
-      (~error, reason):
-        throw reason
+    when (~ok, file)
+      @file = file 
+    when (~error, reason)
+      throw reason
 
   def read(num)
     case file::read(@file, reia_erl::r2e(num))
-      (~ok, data):
-        data.to_string()
-      ~eof:
-        ~eof
-      (~error, reason):
-        throw reason
+    when (~ok, data)
+      data.to_string()
+    when ~eof
+      ~eof
+    when (~error, reason)
+      throw reason
 
   def close
     case file::close(@file)
-      ~ok:
-        ~ok
-      (~error, reason):
-        throw reason
+    when ~ok
+      ~ok
+    when (~error, reason)
+      throw reason
 
   def write(data)
     case file::write(@file, data.to_list())
-      ~ok:
-        ~ok
-      (~error, reason):
-        throw reason
+    when ~ok
+      ~ok
+    when (~error, reason)
+      throw reason

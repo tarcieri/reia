@@ -21,10 +21,10 @@ module Regex
   
   def funcall(regexp, ~match, [string])
     case re::run(string.to_binary(), regexp.to_list(), [(~capture, ~all, ~binary)])
-      (~match, results):
-        if results.size() > 1
-          results.map { |result| result.to_string() }
-        else
-          results[0].to_string()
-      ~nomatch:
-        nil
+    when (~match, results)
+      if results.size() > 1
+        results.map { |result| result.to_string() }
+      else
+        results[0].to_string()
+    when ~nomatch
+      nil
