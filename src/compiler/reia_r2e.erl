@@ -13,8 +13,10 @@ forms({module, Line, {constant, _, Name}, Functions}) ->
   {module, Line, Name, group_clauses([forms(Function) || Function <- Functions])};
 
 %% Class declarations
-forms({class, Line, {constant, _, Name}, Functions}) ->
-  {class, Line, Name, group_clauses([forms(Function) || Function <- Functions])};
+forms({class, Line, {constant, _, _} = Name, Functions}) ->
+  forms({class, Line, Name, {constant, Line, 'Object'}, Functions});
+forms({class, Line, {constant, _, Name}, {constant, _, Ancestor}, Functions}) ->
+  {class, Line, Name, Ancestor, group_clauses([forms(Function) || Function <- Functions])};
   
 %% Functions
 forms({function, Line, {identifier, _, Name}, Arguments, Expressions}) ->

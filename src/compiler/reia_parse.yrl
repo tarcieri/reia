@@ -113,6 +113,7 @@ module_decl -> module constant eol indent functions dedent : {module, line('$1')
 
 %% Class declaration
 class_decl -> class constant eol indent functions dedent : {class, line('$1'), '$2', '$5'}.
+class_decl -> class constant '<' constant eol indent functions dedent : {class, line('$1'), '$2', '$4', '$7'}.
 
 %% Functions
 functions -> function : ['$1'].

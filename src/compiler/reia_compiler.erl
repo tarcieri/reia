@@ -80,7 +80,7 @@ dynamic_expression({module, Line, _Constant, _Functions} = Module) ->
   {call, Line, {remote, Line, {atom, Line, reia_module}, {atom, Line, build}}, [Arg]};
   
 %% Pass dynamic class declarations to reia_class:build/1
-dynamic_expression({class, Line, _Constant, _Functions} = Class) ->
+dynamic_expression({class, Line, _Name, _Ancestor, _Functions} = Class) ->
   %% Convert the class to an Erlang forms representation to pass as a call to reia_class
   Arg = erl_syntax:revert(erl_syntax:abstract(Class)),
   {call, Line, {remote, Line, {atom, Line, reia_class}, {atom, Line, build}}, [Arg]};
@@ -92,7 +92,7 @@ dynamic_expression(Expression) ->
 %% Static module declarations
 static([{module, Line, Name, Functions}]) ->
   [{attribute, Line, module, Name}|Functions];
-static([{class, _Line, _Name, _Functions} = Class]) ->
+static([{class, _Line, _Name, _Ancestor, _Functions} = Class]) ->
   Module = reia_class:ast(Class),
   static([Module]);
 static(_) ->

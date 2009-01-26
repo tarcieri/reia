@@ -10,10 +10,10 @@
 
 %% Convert a Reia class definition into a Reia module which conforms to the
 %% gen_server behavior, then load it into the code server
-build({class, _Line, 'Object', _Methods} = Class) ->
+build({class, _Line, 'Object', _, _Methods} = Class) ->
   % Object gets special case behavior as it has no ancestor
   reia_module:build(ast(Class));
-build({class, Line, Name, Methods}) ->
+build({class, Line, Name, Ancestor, Methods}) ->
   % Generate the methods which are derived from this class's ancestors
   BaseMethods = build_inherited_methods(add_ancestor(dict:new(), 'Object')),
   
@@ -23,7 +23,7 @@ build({class, Line, Name, Methods}) ->
   % Merge this class's methods in with its ancestry
   FinalMethods = merge_ancestry([ClassMethod|Methods], BaseMethods),
 
-  reia_module:build(ast({class, Line, Name, FinalMethods})).
+  reia_module:build(ast({class, Line, Name, Ancestor, FinalMethods})).
   
 merge_ancestry(Methods, AncestorMethods) ->
   FinalMethods = lists:foldl(
@@ -50,7 +50,7 @@ compile_inherited_methods(MethodsDict) ->
   Methods = [Method || {_, {_, _, Method}} <- dict:to_list(MethodsDict)],
   Class = {class, 1, {constant, 1, 'base_class'}, Methods},
   Passes = [Pass || Pass <- reia_compiler:default_passes(), Pass /= dynamic],
-  [{class, _, _, Functions}] = reia_compiler:compile([Class], Passes),
+  [{class, _, _, _, Functions}] = reia_compiler:compile([Class], Passes),
   Functions.
      
 %% Add an ancestor to the given class
@@ -76,7 +76,7 @@ add_ancestor(Methods, {class, _Line, {constant, _, AncestorName}, AncestorMethod
   ).
     
 %% Compile a Reia class to an Erlang module
-ast({class, Line, Name, Methods}) ->
+ast({class, Line, Name, _Ancestor, Methods}) ->
   Functions2 = build_functions(Name, Methods),
   {module, Line, Name, Functions2};
 ast(_) ->

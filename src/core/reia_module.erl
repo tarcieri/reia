@@ -23,7 +23,7 @@ build({module, _Line, Name, Functions}) ->
     Error -> throw(Error)
   end;
 build(_) ->
-  {error, "invalid module"}.
+  throw({error, "invalid module"}).
 
 new_module(Name) ->
   smerl:set_export_all(smerl:new(Name), true).
