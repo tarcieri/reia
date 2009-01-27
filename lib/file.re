@@ -41,45 +41,10 @@ module File
     when (~error, reason)
       throw reason
 
-  def rename(src, dest)
+  def move(src, dest)
     case file::rename(src.to_list(), dest.to_list())
     when ~ok
       ~ok
-    when (~error, reason)
-      throw reason
-  
-  def list_dir(dir)
-    case file::list_dir(dir.to_list())
-    when (~ok, filenames)
-      filenames.map{|m| reia_erl::e2r(m).to_string()}
-    when (~error, reason)
-      throw reason
-
-  def make_dir(dir)
-    case file::make_dir(dir.to_list())
-    when ~ok
-      ~ok
-    when (~error, reason)
-      throw reason
-
-  def del_dir(dir)
-    case file::del_dir(dir.to_list())
-    when ~ok
-      ~ok
-    when (~error, reason)
-      throw reason
-
-  def set_cwd(dir)
-    case file::set_cwd(dir.to_list())
-    when ~ok
-      ~ok
-    when (~error, reason)
-      throw reason
-
-  def get_cwd
-    case file::get_cwd()
-    when (~ok, dir)
-      dir
     when (~error, reason)
       throw reason
 
