@@ -10,12 +10,12 @@ module Dir
   def list(dir)
     case file::list_dir(dir.to_list())
     when (~ok, filenames)
-      filenames.map{|m| reia_erl::e2r(m).to_string()}
+      [filename.to_string() | filename in filenames]
     when (~error, reason)
       throw reason
       
   def glob(path)
-    [p.to_string() | p in filelib::wildcard(path.to_list())]
+    [filename.to_string() | filename in filelib::wildcard(path.to_list())]
 
   def mkdir(dir)
     create(dir)
