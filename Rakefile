@@ -134,3 +134,4 @@ task :distclean => :clean do
 end
 
 task :ci => %w[distclean test]
+task :cruise => :ci
