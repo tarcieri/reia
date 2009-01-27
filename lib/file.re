@@ -16,7 +16,7 @@ module File
   def read(fn)
     case file::read_file(fn.to_list())
     when (~ok, data)
-      data.to_string()
+      data
     when (~error, reason)
       throw reason
 

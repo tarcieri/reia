@@ -12,11 +12,8 @@ module FileTest
     fm_read_test(), 
     fm_write_test(), 
     fm_copy_test(), 
-    fm_rename_test(), 
-    fm_delete_test(), 
-    fm_mkdir_test(),   
-    fm_lsdir_test(), 
-    fm_deldir_test()]
+    fm_move_test(), 
+    fm_delete_test()]
 
   def iodevice_test
     fn = "foo.txt"
@@ -26,14 +23,14 @@ module FileTest
 
     x = File.open(fn)
     TestHelper.expect(File, "file is written to and read from in the IODevice class", fun do
-      result = ("bar", x.read(3))
+      result = (<<"bar">>, x.read(3))
       x.close()
       result
     )
 
   def fm_read_test
     TestHelper.expect(File, "File.read (module version) reads correctly", fun do
-      ("bar", File.read("foo.txt"))
+      (<<"bar">>, File.read("foo.txt"))
     )
 
   def fm_write_test
@@ -46,29 +43,12 @@ module FileTest
       (~ok, File.copy("foo.txt", "bar.txt"))
     )
 
-  def fm_rename_test
-    TestHelper.expect(File, "File.rename moves file", fun do
-      (~ok, File.rename("foo.txt", "bar.txt"))
+  def fm_move_test
+    TestHelper.expect(File, "File.move moves file", fun do
+      (~ok, File.move("foo.txt", "bar.txt"))
     )
 
   def fm_delete_test
     TestHelper.expect(File, "File.delete removes file", fun do
       (~ok, File.delete("bar.txt"))
     )
-
-  def fm_mkdir_test
-    TestHelper.expect(File, "File.make_dir creates directory", fun do
-      (~ok, File.make_dir("testdir"))
-    )
-
-  def fm_lsdir_test
-    TestHelper.expect(File, "File.list_dir lists directory contents", fun do
-      ([], File.list_dir("testdir"))
-    )
-
-  def fm_deldir_test
-    TestHelper.expect(File, "File.del_dir removes directory", fun do
-      (~ok, File.del_dir("testdir"))
-    )
-
-
