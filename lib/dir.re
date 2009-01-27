@@ -13,6 +13,9 @@ module Dir
       filenames.map{|m| reia_erl::e2r(m).to_string()}
     when (~error, reason)
       throw reason
+      
+  def glob(path)
+    [p.to_string() | p in filelib::wildcard(path.to_list())]
 
   def mkdir(dir)
     create(dir)
