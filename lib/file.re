@@ -8,7 +8,7 @@
 # This interface is subject to change!
 module File
   def open(fn)
-    IODevice(fn, [~read])
+    IODevice(fn, [~read,~binary])
 
   def open(fn, modes)
     IODevice(fn, modes)
@@ -27,6 +27,9 @@ module File
     when (~error, reason)
       throw reason
 
+  def rm(fn)
+    delete(fn)
+    
   def delete(fn)
     case file::delete(fn.to_list())
     when ~ok
@@ -34,6 +37,9 @@ module File
     when (~error, reason)
       throw reason
 
+  def cp(src, dest)
+    copy(src, dest)
+    
   def copy(src, dest)
     case file::copy(src.to_list(), dest.to_list())
     when (~ok, _)
@@ -41,6 +47,9 @@ module File
     when (~error, reason)
       throw reason
 
+  def mv(src, dest)
+    move(src, dest)
+    
   def move(src, dest)
     case file::rename(src.to_list(), dest.to_list())
     when ~ok
@@ -62,7 +71,7 @@ class IODevice
   def read(num)
     case file::read(@file, reia_erl::r2e(num))
     when (~ok, data)
-      data.to_string()
+      data
     when ~eof
       ~eof
     when (~error, reason)
