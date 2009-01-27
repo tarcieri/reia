@@ -1,4 +1,4 @@
--module(reia_constant).
+-module('Constant').
 -export([funcall/3]).
 
 funcall({constant, Name}, inspect, []) ->

@@ -35,7 +35,7 @@ funcall(Receiver, internalize, []) ->
 funcall({object, {Pid, _Class}}, Method, Arguments) ->
   reia_class:call(Pid, {Method, Arguments});
 funcall({constant, _Name} = Receiver, Method, Arguments) ->
-  reia_constant:funcall(Receiver, Method, Arguments);
+  'Constant':funcall(Receiver, Method, Arguments);
 funcall(Receiver, Method, Arguments) when is_integer(Receiver) or is_float(Receiver) ->
   'Numeric':funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver, Method, Arguments) when is_atom(Receiver) ->
