@@ -39,11 +39,15 @@ r7 = ObjectTest.run()
 load("test/lib/file.re")
 r8 = FileTest.run()
 
+# File test
+load("test/lib/dir.re")
+r9 = DirTest.run()
+
 puts("\n")
 
-results = [r1, r2, r3, r4, r5, r6, r7, r8].flatten()
+results = [r1, r2, r3, r4, r5, r6, r7, r8, r9].flatten()
 failures = [error|error = (~error, _, _, _, _) in results]
 failures.each { |(~error, group, description, expected, actual)| puts(["'", group, " ", description, "' FAILED"].join()); puts(["expected ", expected, ", actual ", actual, "\n"].join()) }
 
 puts([results.size(), " assertions, ", failures.size(), " failures"].join())
-erlang::halt(1) if failures.size() > 0
+System.halt(1) if failures.size() > 0
