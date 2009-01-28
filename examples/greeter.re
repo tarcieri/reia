@@ -1,5 +1,5 @@
 # Greeter example
-# (Inspired by a similar example on ruby-lang.org
+# (Inspired by a similar example on ruby-lang.org)
 #
 # From the toplevel Reia directory, run: bin/reia examples/greeter.re
 
