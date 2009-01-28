@@ -1,5 +1,5 @@
 # 
-# File: Reia file interface
+# Dir: Reia directory interface
 # Copyright (C)2009 Tony Arcieri
 #
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
