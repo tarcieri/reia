@@ -28,6 +28,10 @@ transform(State, {class, Line, Name, Expressions}) ->
   ),
   {stop, State, {class, Line, Name, Expressions2}};
   
+transform(State, {class, Line, Name, Ancestor, Expressions}) ->
+  {stop, _, {class, _, _, Expressions2}} = transform(State, {class, Line, Name, Expressions}),
+  {stop, State, {class, Line, Name, Ancestor, Expressions2}};
+  
 transform(class, {function, Line, Name, Arguments, Expressions}) ->
   Expressions2 = lists:map(fun(Expression) ->
       {ok, _, Expression2} = reia_visitor:transform(Expression, method, fun transform/2),
