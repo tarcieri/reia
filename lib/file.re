@@ -56,6 +56,28 @@ module File
       ~ok
     when (~error, reason)
       throw reason
+  
+  def size(path)
+    filelib::file_size(path.to_list())
+    
+  def file?(path)
+    filelib::is_regular(path.to_list())
+    
+  def dir?(path)
+    directory?(path)
+    
+  def directory?(path)
+    filelib::is_dir(path.to_list())
+  
+  def link?(path)
+    symlink?(path)
+    
+  def symlink?(path)
+    case file::read_link(path.to_list())
+    when (~ok, _)
+      true
+    when _
+      false
 
 class IODevice
   # Mimicking Erlang's io_device returned from file:open
