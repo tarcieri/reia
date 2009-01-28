@@ -52,7 +52,7 @@ class InheritanceTest < TestAncestor
     simple1(n) * 2
     
   def ivars2
-    ivars1
+    ivars1()
     @foo * 2
 
 module ObjectTest
