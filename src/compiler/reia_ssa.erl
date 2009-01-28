@@ -43,6 +43,9 @@ transform(State, {class, Line, Name, Expressions}) ->
     Expressions
   ),
   {stop, State, {class, Line, Name, Expressions2}};
+transform(State, {class, Line, Name, Ancestor, Expressions}) ->
+  {stop, _, {class, _, _, Expressions2}} = transform(State, {class, Line, Name, Expressions}),
+  {stop, State, {class, Line, Name, Ancestor, Expressions2}};
   
 % Function declarations create a new scope
 transform(State, {function, Line, Name, Arguments, Expressions}) ->
