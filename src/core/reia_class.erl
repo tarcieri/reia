@@ -15,17 +15,45 @@ build({class, _Line, 'Object', _, _Methods} = Class) ->
   reia_module:build(ast(Class));
 build({class, Line, Name, Ancestor, Methods}) ->
   % Generate the methods which are derived from this class's ancestors
-  BaseMethods = build_inherited_methods(add_ancestor(dict:new(), 'Object')),
+  ParentMethods = build_inherited_methods(build_parent_from_ancestry(Ancestor)),
   
-  % Generate the method for returning the class of an object
+  % Generate the obj.class() method
   ClassMethod = parse_function("class() -> {constant, '" ++ atom_to_list(Name) ++ "'}."),
   
-  % Merge this class's methods in with its ancestry
-  FinalMethods = merge_ancestry([ClassMethod|Methods], BaseMethods),
+  % Merge this class's methods with its parent
+  FinalMethods = merge_with_parent([ClassMethod|Methods], ParentMethods),
 
   reia_module:build(ast({class, Line, Name, Ancestor, FinalMethods})).
   
-merge_ancestry(Methods, AncestorMethods) ->
+% Walk the ancestors living in the code server, combining them into a single
+% unified parent class
+build_parent_from_ancestry(AncestorName) when is_atom(AncestorName) ->
+  case code:ensure_loaded(AncestorName) of
+    {module, _} -> void;
+    Error -> throw(Error)
+  end,
+  
+  AncestorClass = case [Code || {code, Code} <- AncestorName:module_info(attributes)] of
+    [[Class]] -> Class;
+    _ -> throw({error, {AncestorName, "lacks a code attribute (not a Reia module?)"}})
+  end,
+  
+  build_parent_from_ancestry(AncestorClass);  
+build_parent_from_ancestry({class, _Line, {constant, _, 'Object'}, Methods}) ->
+  merge_ancestor_methods(dict:new(), 'Object', Methods);
+build_parent_from_ancestry({class, _Line, {constant, _, Name}, {constant, _, AncestorName}, Methods}) ->
+  merge_ancestor_methods(build_parent_from_ancestry(AncestorName), Name, Methods).
+  
+merge_ancestor_methods(AncestorMethods, ClassName, Methods) ->
+  lists:foldl(
+    fun({function, _, {identifier, _, Name}, _, _} = Function, Dict) ->
+      dict:store(Name, {method, ClassName, Function}, Dict) 
+    end,
+    AncestorMethods,
+    Methods
+  ).
+  
+merge_with_parent(Methods, AncestorMethods) ->
   FinalMethods = lists:foldl(
     fun({function, _, Name, _, _} = Function, Dict) ->
       dict:store(Name, Function, Dict)
@@ -52,28 +80,6 @@ compile_inherited_methods(MethodsDict) ->
   Passes = [Pass || Pass <- reia_compiler:default_passes(), Pass /= dynamic],
   [{class, _, _, _, Functions}] = reia_compiler:compile([Class], Passes),
   Functions.
-     
-%% Add an ancestor to the given class
-add_ancestor(Methods, AncestorName) when is_atom(AncestorName) ->
-  case code:ensure_loaded(AncestorName) of
-    {module, _} -> void;
-    Error -> throw(Error)
-  end,
-  
-  AncestorClass = case [Code || {code, Code} <- AncestorName:module_info(attributes)] of
-    [[Class]] -> Class;
-    _ -> throw({error, {AncestorName, "lacks a code attribute (not a Reia module?)"}})
-  end,
-  
-  add_ancestor(Methods, AncestorClass);
-add_ancestor(Methods, {class, _Line, {constant, _, AncestorName}, AncestorMethods}) ->
-  lists:foldl(
-    fun({function, _, {identifier, _, Name}, _, _} = Function, Dict) ->
-      dict:store(Name, {method, AncestorName, Function}, Dict) 
-    end,
-    Methods,
-    AncestorMethods
-  ).
     
 %% Compile a Reia class to an Erlang module
 ast({class, Line, Name, _Ancestor, Methods}) ->
