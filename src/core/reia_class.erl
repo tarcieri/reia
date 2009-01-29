@@ -6,14 +6,15 @@
 %
  
 -module(reia_class).
--export([build/1, ast/1, inst/3, call/2]).
+-export([build/1, build/2, ast/1, inst/3, call/2]).
 
 %% Convert a Reia class definition into a Reia module which conforms to the
 %% gen_server behavior, then load it into the code server
 build({class, _Line, 'Object', _, _Methods} = Class) ->
   % Object gets special case behavior as it has no ancestor
-  reia_module:build(ast(Class));
-build({class, Line, Name, Ancestor, Methods}) ->
+  reia_module:build(ast(Class)).
+  
+build({class, Line, Name, Ancestor, Methods}, _OrigExprs) ->
   % Generate the methods which are derived from this class's ancestors
   ParentMethods = build_inherited_methods(build_parent_from_ancestry(Ancestor)),
   
