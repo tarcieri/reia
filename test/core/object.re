@@ -113,5 +113,5 @@ module ObjectTest
   def inheritance_ivar_test
     TestHelper.expect(Object, "allows instance variable access from inherited methods", fun do
       obj = InheritanceTest()
-      (42, obj.ivar2())
+      (42, obj.ivars2())
     )

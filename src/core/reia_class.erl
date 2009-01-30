@@ -14,7 +14,7 @@ build({class, _Line, 'Object', _, _Methods} = Class) ->
   % Object gets special case behavior as it has no ancestor
   reia_module:build(ast(Class)).
   
-build({class, Line, Name, Ancestor, Methods}, _OrigExprs) ->
+build({class, Line, Name, Ancestor, Methods}, OrigExprs) ->
   % Generate the methods which are derived from this class's ancestors
   ParentMethods = build_inherited_methods(build_parent_from_ancestry(Ancestor)),
   
@@ -24,7 +24,7 @@ build({class, Line, Name, Ancestor, Methods}, _OrigExprs) ->
   % Merge this class's methods with its parent
   FinalMethods = merge_with_parent([ClassMethod|Methods], ParentMethods),
 
-  reia_module:build(ast({class, Line, Name, Ancestor, FinalMethods})).
+  reia_module:build(ast({class, Line, Name, Ancestor, FinalMethods}), [{code, [OrigExprs]}]).
   
 % Walk the ancestors living in the code server, combining them into a single
 % unified parent class
@@ -42,6 +42,8 @@ build_parent_from_ancestry(AncestorName) when is_atom(AncestorName) ->
   build_parent_from_ancestry(AncestorClass);  
 build_parent_from_ancestry({class, _Line, {constant, _, 'Object'}, Methods}) ->
   merge_ancestor_methods(dict:new(), 'Object', Methods);
+build_parent_from_ancestry({class, Line, Name, Methods}) ->
+  build_parent_from_ancestry({class, Line, Name, {constant, Line, 'Object'}, Methods});
 build_parent_from_ancestry({class, _Line, {constant, _, Name}, {constant, _, AncestorName}, Methods}) ->
   merge_ancestor_methods(build_parent_from_ancestry(AncestorName), Name, Methods).
   

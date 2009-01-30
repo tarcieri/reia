@@ -1,32 +1,37 @@
 %
-% reia_module: Magical Smerl-powered runtime module builder
+% reia_module: Runtime module generation and loading
 % Copyright (C)2008 Tony Arcieri
 % 
 % Redistribution is permitted under the MIT license.  See LICENSE for details.
 %
 
 -module(reia_module).
--export([build/1]).
+-export([build/1, build/2]).
 -define(COMPILE_OPTIONS, [report_errors, report_warnings, return_errors]).
 
-build({module, _Line, Name, Functions}) ->
-  Module = lists:foldl(
-    fun(Func, Mod) -> 
-      {ok, Mod2} = smerl:add_func(Mod, Func),
-      Mod2
-    end, 
-    new_module(Name), 
-    Functions
-  ),
-  case smerl:compile(Module, compile_options()) of
-    ok -> {constant, Name};
-    Error -> throw(Error)
+build(Module) ->
+  build(Module, []).
+  
+build({module, Line, Name, Functions}, Attributes) ->
+  Module = [
+    {attribute, Line, module, Name},
+    {attribute, Line, compile, export_all}
+  ] ++ [{attribute, Line, AttrName, Value} || {AttrName, Value} <- Attributes] ++ Functions,
+  
+  case compile:forms(Module, compile_options()) of
+    {ok, Name, Bin} ->
+      code:purge(Name),
+      case code:load_binary(Name, atom_to_list(Name) ++ ".re", Bin) of
+        {module, Name} ->
+          {constant, Name};
+        Error ->
+          throw(Error)
+      end;
+    Error ->
+      throw(Error)
   end;
-build(_) ->
+build(_, _) ->
   throw({error, "invalid module"}).
-
-new_module(Name) ->
-  smerl:set_export_all(smerl:new(Name), true).
   
 compile_options() ->
   compile_options(?COMPILE_OPTIONS).

@@ -1,5 +1,5 @@
 task :default => [:check_erl_version, :build, :test]
-task :build => [:smerl, :leex, :yecc, :reia, :ebin, :clean]
+task :build => [:scanner, :parser, :reia, :ebin, :clean]
 
 def erlang_version
   version = `erl -version 2>&1`.strip.match(/\d\.\d\.\d$/)
@@ -62,15 +62,8 @@ end
 task :smart_exceptions => SMEX_SRC.map { |input_file| output_file(input_file) }
 =end
 
-# Smerl (Simple Metaprogramming for Erlang)
-task :smerl => "ebin/smerl.beam"
-
-file "ebin/smerl.beam" => "src/smerl/smerl.erl" do
-  sh "erlc -W0 -o ebin src/smerl/smerl.erl"
-end
-
 # Leex (lexer generator for Erlang)
-task :leex => ["src/leex/leex.beam", "ebin/reia_scan.beam"]
+task :scanner => ["src/leex/leex.beam", "ebin/reia_scan.beam"]
 
 file "src/leex/leex.beam" => "src/leex/leex.erl" do
   sh "erlc -W0 -o src/leex src/leex/leex.erl"
@@ -83,7 +76,7 @@ file "ebin/reia_scan.beam" => %w[src/leex/leex.beam src/compiler/reia_scan.xrl] 
   sh "erlc +debug_info +nowarn_unused_vars -o artifacts/beam artifacts/erl/reia_scan.erl"
 end
 
-task :yecc => "ebin/reia_parse.beam"
+task :parser => "ebin/reia_parse.beam"
 
 # Compile reia_parse using yecc
 file "ebin/reia_parse.beam" => "src/compiler/reia_parse.yrl" do
