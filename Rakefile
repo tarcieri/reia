@@ -1,5 +1,7 @@
-task :default => [:check_erl_version, :build, :test]
+task :default => [:check_erl_version, :check_previous_install, :build, :test]
 task :build => [:scanner, :parser, :reia, :ebin, :clean]
+
+PREFIX="/usr/local"
 
 def erlang_version
   version = `erl -version 2>&1`.strip.match(/\d\.\d\.\d$/)
@@ -9,6 +11,14 @@ def erlang_version
   end
   
   version[0]
+end
+
+def erl_lib_dir
+  `erl -noshell -eval "io:format(code:lib_dir())" -s init stop`
+end
+
+def reia_install_dir
+  File.join(erl_lib_dir, 'reia', '')
 end
 
 task :check_erl_version do
@@ -23,6 +33,14 @@ task :check_erl_version do
     puts "Reia requires a minimum Erlang version of R12B-3 (5.6.3)"
     puts "Please see http://wiki.reia-lang.org/wiki/Building#Prerequisites"
     exit 1
+  end
+end
+
+task :check_previous_install do
+  if File.exists?(reia_install_dir)
+    puts "*** WARNING: Previous installation of Reia detected"
+    puts "*** If you experience problems during the build process please try"
+    puts "*** running 'rake uninstall' before proceeding"
   end
 end
 
@@ -95,27 +113,32 @@ task :test => :build do
 end
 
 task :install do
-  lib_dir = `erl -noshell -eval "io:format(code:lib_dir())" -s init stop`
-  reia_dir = File.join(lib_dir, 'reia', '')
+  reia_dir = reia_install_dir
   
   rm_r reia_dir if File.exist?(reia_dir)
   mkdir reia_dir
   
   %w[LICENSE README ebin src lib].each { |f| cp_r f, reia_dir }
   
-  mkdir "/usr/local/bin" unless File.exist?("/usr/local/bin")
+  mkdir PREFIX + "/bin" unless File.exist?(PREFIX + "/bin")
   
-  File.open("/usr/local/bin/reia", "w", 0755) do |f| f << """#!/bin/sh
+  File.open(PREFIX + "/bin/reia", "w", 0755) do |f| f << "
+#!/bin/sh
 PROGRAM=$1
 shift
-erl -noshell +K true -s Loader start $PROGRAM -s init stop -extra $*"""
+erl -noshell +K true -s Loader start $PROGRAM -s init stop -extra $*"
   end
 
-  File.open("/usr/local/bin/ire", "w", 0755) do |f| f << """#!/bin/sh
+  File.open(PREFIX + "/bin/ire", "w", 0755) do |f| f << "#!/bin/sh
 erl +K true -noshell -noinput -s ire init -extra $*"
+  end
 end
-    
-  File.chmod 0755, "/usr/local/bin/ire", "/usr/local/bin/reia"
+
+task :uninstall do
+  if File.directory?(reia_install_dir)
+    rm_r reia_install_dir
+    %w[reia ire].each { |p| rm PREFIX + "/bin/#{p}" }
+  end
 end
 
 task :clean do
