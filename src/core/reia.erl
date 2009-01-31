@@ -8,6 +8,7 @@
 -module(reia).
 -export([
   apply/3, apply/4,
+  invoke/3, invoke/4,
   parse/1,
   spawn/2, spawn/3,
   spawn_link/2, spawn_link/3
@@ -23,9 +24,15 @@ apply(Constant, Method, Arguments) ->
 % converting methods from Erlang to Reia from.
 % FIXME should disintermediate the block from other formal arguments.
 apply(Constant, Method, Arguments, nil) ->
-  erlang:apply(Constant, Method, [reia_erl:e2r(Arg) || Arg <- Arguments]);
+  reia_erl:r2e(erlang:apply(Constant, Method, [reia_erl:e2r(Arg) || Arg <- Arguments]));
 apply(Constant, Method, Arguments, Block) ->
-  erlang:apply(Constant, Method, [reia_erl:e2r(Arg) || Arg <- Arguments ++ [Block]]).
+  reia_erl:r2e(erlang:apply(Constant, Method, [reia_erl:e2r(Arg) || Arg <- Arguments ++ [Block]])).
+  
+% Invoke a method on the given Reia object
+invoke(Object, Method, Arguments) ->
+  invoke(Object, Method, Arguments, nil).
+invoke(Object, Method, Arguments, _Block) ->
+  reia_erl:r2e(reia_class:call(Object, {Method, [reia_erl:e2r(Arg) || Arg <- Arguments]})).
   
 % Parse a given string (in standard Erlang list form) into its Reia parse tree
 %  parse(String) -> {ok, ParseTree} | {error, Reason}
