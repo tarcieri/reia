@@ -124,6 +124,15 @@ funcall({string, String}, sub, [{regexp, Regex}, {string, Replacement}]) ->
       {string, list_to_binary(List2)};
     nomatch ->
       {string, String}
+  end;
+  
+%% String#parse
+%%   Parse a string into its Reia parse tree
+funcall({string, String}, parse, []) ->
+  List = binary_to_list(String),
+  case reia:parse(List) of
+    {ok, Expressions}  -> reia_erl:e2r(Expressions);
+    {error, _} = Error -> throw(Error)
   end.
 
 %% Convert a string in Erlang list form to Reia form
