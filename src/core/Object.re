@@ -13,3 +13,6 @@ class Object
     
   def _(method, args)
     throw (~error, (method, "undefined"))
+    
+  def handle_message(message)
+    nil
