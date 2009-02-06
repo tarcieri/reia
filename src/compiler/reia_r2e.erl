@@ -163,6 +163,21 @@ forms({erl_funcall, Line, {identifier, _, Module}, {identifier, _, Function}, Ar
     [{atom, Line, Module}, {atom, Line, Function}, list_to_forms(Arguments, Line)]
   };
   
+%% Actor messages
+forms({send, Line, Receiver, Message}) ->
+  Message2 = forms(Message),
+  {'case', Line, forms(Receiver), [
+    {clause, Line, [{tuple, Line, [{atom, Line, object}, {tuple, Line, [{var, Line,'__pid'}, {var, Line, '_'}]}]}], [],
+      [{op, Line, '!', {var, Line, '__pid'}, Message2}]
+    },
+    {clause, Line, [{tuple, Line, [{atom, Line, constant}, {var, Line, '__constant_name'}]}], [],
+      [{op, Line, '!', {var, Line, '__constant_name'}, Message2}]
+    },
+    {clause, Line, [{var, Line, '__pid'}], [[{call, Line, {atom, Line, is_pid}, [{var, Line, '__pid'}]}]],
+      [{op, Line, '!', {var, Line, '__pid'}, Message2}]
+    }
+ ]};
+  
 %% Embedded literal Erlang function calls (emitted by earlier compiler passes)
 forms({call, Line, Function, Arguments}) ->
   {call, Line, Function, [forms(Argument) || Argument <- Arguments]};
