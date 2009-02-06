@@ -1,3 +1,10 @@
+#
+# Object: Common ancestor of all classes
+# Copyright (C)2008-09 Tony Arcieri
+# 
+# Redistribution is permitted under the MIT license.  See LICENSE for details.
+#
+
 class Object
   def initialize
     nil
