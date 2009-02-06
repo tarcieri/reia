@@ -81,7 +81,7 @@ Rules.
 \|    : {token,{'|',TokenLine}}.
 \|\|  : {token,{'or',TokenLine}}.
 &&    : {token,{'and',TokenLine}}.
-!     : {token,{'not',TokenLine}}.
+!     : {token,{'!',TokenLine}}.
 
 Erlang code.  
 

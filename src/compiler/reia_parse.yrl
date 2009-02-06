@@ -21,6 +21,7 @@ Nonterminals
   expr
   eols
   match_expr
+  send_expr
   bool_expr
   bool_op
   comp_expr
@@ -76,7 +77,7 @@ Terminals
   eol indent dedent def fun do 'case' when else 'if' unless 
   'and' 'or' 'not' 'try' 'catch' throw for in
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
-  '+' '-' '*' '/' '%' '**'
+  '+' '-' '*' '/' '%' '**' '!'
   '.' '..' ',' ':' '::' ';' '@'
   '=' '==' '===' '!=' '>' '<' '<=' '>='
   .
@@ -141,8 +142,11 @@ eols -> eol eols : '$empty'.
 inline_if_expr -> match_expr if_op match_expr : if_forms({'$2', '$3', ['$1']}).
 inline_if_expr -> match_expr : '$1'.
 
-match_expr -> bool_expr '=' match_expr : {match, line('$2'), '$1', '$3'}.
-match_expr -> bool_expr : '$1'.
+match_expr -> send_expr '=' match_expr : {match, line('$2'), '$1', '$3'}.
+match_expr -> send_expr : '$1'.
+
+send_expr -> bool_expr '!' send_expr : {send, line('$2'), '$1', '$3'}.
+send_expr -> bool_expr : '$1'.
 
 bool_expr -> comp_expr bool_op bool_expr : {op, line('$1'), op('$2'), '$1', '$3'}.
 bool_expr -> comp_expr : '$1'.
@@ -166,6 +170,7 @@ throw_expr -> throw unary_expr : {throw, line('$1'), '$2'}.
 throw_expr -> unary_expr : '$1'.
 
 unary_expr -> unary_op unary_expr : {op, line('$1'), op('$1'), '$2'}.
+unary_expr -> '!' unary_expr : {op, line('$1'), 'not', '$2'}.
 unary_expr -> funcall_expr : '$1'.
 
 funcall_expr -> funcall : '$1'.
