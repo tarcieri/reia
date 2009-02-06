@@ -40,6 +40,16 @@ class LocalMethodTest
   def foo
     @foo
     
+class MessageTest
+  def initialize
+    @received_message = nil
+    
+  def handle_message(message)
+    @received_message = message
+    
+  def received_message
+    @received_message
+    
 class TestAncestor
   def simple1(n)
     n + 1
@@ -60,7 +70,8 @@ module ObjectTest
     [method_test(), 
     local_method_test(), 
     local_method_ivar_test(), 
-    state_test(), 
+    state_test(),
+    message_test(),
     initialize_test(),
     inheritance_test(),
     inheritance_ivar_test()]
@@ -95,6 +106,14 @@ module ObjectTest
       (42, obj.get_val())
     )
 
+  # receives messages over the actor protocol
+  def message_test
+    TestHelper.expect(Object, "receives messages over the actor protocol", fun do
+      obj = MessageTest()
+      obj ! 42
+      (42, obj.received_message())
+    )
+    
   # passes arguments from start to initialize
   def initialize_test
     TestHelper.expect(Object, "passes arguments from start to initialize", fun do
