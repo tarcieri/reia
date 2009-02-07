@@ -186,12 +186,24 @@ forms({call, Line, Function, Arguments}) ->
 forms({block, Line, Expressions}) ->
   {block, Line, [forms(Expression) || Expression <- Expressions]};
   
+%% Clauses
+forms({clause, Line, Expression, Statements}) ->
+  {clause, Line, [forms(Expression)], [], [forms(Statement) || Statement <- Statements]};
+  
 %% Case expressions
 forms({'case', Line, Expression, Clauses}) ->
   {'case', Line, forms(Expression), [forms(Clause) || Clause <- Clauses]};
+      
+%% Receive expressions
+forms({'receive', Line, Clauses}) ->
+  {'receive', Line, [forms(Clause) || Clause <- Clauses]};
     
-forms({clause, Line, Expression, Statements}) ->
-  {clause, Line, [forms(Expression)], [], [forms(Statement) || Statement <- Statements]};
+forms({'receive', Line, Clauses, {'after', _, Timeout, Expressions}}) ->
+  {'receive', Line, 
+    [forms(Clause) || Clause <- Clauses], 
+    forms(Timeout), 
+    [forms(Expression) || Expression <- Expressions]
+  };
   
 %% Try statements
 forms({'try', Line, Statements, CatchClauses}) ->
