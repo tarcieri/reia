@@ -6,6 +6,10 @@
 #
 
 module Lambda
+  def funcall(lambda, ~arity, [])
+    (~arity, arity) = erlang::fun_info(lambda, ~arity)
+    arity;
+    
   def funcall(lambda, ~to_s, [])
     funcall(lambda, ~inspect, [])
     
