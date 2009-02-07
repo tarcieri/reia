@@ -51,6 +51,7 @@ Nonterminals
   clause
   case_expr
   receive_expr
+  after_clause
   if_expr
   inline_if_expr
   else_clause
@@ -76,7 +77,7 @@ Terminals
   true false nil float integer string regexp atom
   identifier punctuated_identifier constant module class
   eol indent dedent def fun do 'case' when else 'if' unless 
-  'and' 'or' 'not' 'try' 'catch' throw for in 'receive'
+  'and' 'or' 'not' 'try' 'catch' throw for in 'receive' 'after'
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**' '!'
   '.' '..' ',' ':' '::' ';' '@'
@@ -220,6 +221,10 @@ case_expr -> 'case' expr eol clauses : {'case', line('$1'), '$2', '$4'}.
   
 %% Receive expressions
 receive_expr -> 'receive' eol clauses : {'receive', line('$1'), '$3'}.
+receive_expr -> 'receive' eol clauses after_clause : {'receive', line('$1'), '$3', '$4'}.
+receive_expr -> 'receive' eol after_clause : {'receive', line('$1'), [], '$3'}.
+  
+after_clause -> 'after' expr eol indent statements dedent : {'after', line('$1'), '$2', '$5'}.
 
 %% If expressions
 if_expr -> if_op expr eol indent statements dedent : if_forms({'$1', '$2', '$5'}).

@@ -235,6 +235,7 @@ reserved_word('fun')     -> true;
 reserved_word('do')      -> true;
 reserved_word('case')    -> true;
 reserved_word('receive') -> true;
+reserved_word('after')   -> true;
 reserved_word('when')    -> true;
 reserved_word('else')    -> true;
 reserved_word('if')      -> true;
