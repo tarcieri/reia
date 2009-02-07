@@ -12,8 +12,12 @@ class Object
   def class
     Object
     
+  def pid
+    erlang::self()
+    
   def to_s
-    ["#<", class(), ">"].join()
+    pid_str = pid().to_s().sub(/^</, '')
+    ["#<", class(), ":", pid_str].join()
     
   def inspect
     to_s()
