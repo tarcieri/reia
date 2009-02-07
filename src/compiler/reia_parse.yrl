@@ -47,9 +47,10 @@ Nonterminals
   unary_op  
   max_expr
   ivar
+  clauses
+  clause
   case_expr
-  case_clauses
-  case_clause
+  receive_expr
   if_expr
   inline_if_expr
   else_clause
@@ -75,7 +76,7 @@ Terminals
   true false nil float integer string regexp atom
   identifier punctuated_identifier constant module class
   eol indent dedent def fun do 'case' when else 'if' unless 
-  'and' 'or' 'not' 'try' 'catch' throw for in
+  'and' 'or' 'not' 'try' 'catch' throw for in 'receive'
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**' '!'
   '.' '..' ',' ':' '::' ';' '@'
@@ -201,19 +202,24 @@ max_expr -> case_expr  : '$1'.
 max_expr -> if_expr    : '$1'.
 max_expr -> for_expr   : '$1'.
 max_expr -> try_expr   : '$1'.
+max_expr -> receive_expr : '$1'.
 max_expr -> list_comprehension : '$1'.
 max_expr -> '(' expr ')' : '$2'.
 
 %% Instance variables
 ivar -> '@' identifier : {ivar, line('$1'), identifier_atom('$2')}.
 
+%% Clauses
+clauses -> clause clauses : ['$1'|'$2'].
+clauses -> clause : ['$1'].
+
+clause -> when expr eol indent statements dedent : {clause, line('$1'), '$2', '$5'}.
+
 %% Case expressions
-case_expr -> 'case' expr eol case_clauses : {'case', line('$1'), '$2', '$4'}.
-
-case_clauses -> case_clause case_clauses : ['$1'|'$2'].
-case_clauses -> case_clause : ['$1'].
-
-case_clause -> when expr eol indent statements dedent : {clause, line('$1'), '$2', '$5'}.
+case_expr -> 'case' expr eol clauses : {'case', line('$1'), '$2', '$4'}.
+  
+%% Receive expressions
+receive_expr -> 'receive' eol clauses : {'receive', line('$1'), '$3'}.
 
 %% If expressions
 if_expr -> if_op expr eol indent statements dedent : if_forms({'$1', '$2', '$5'}).
