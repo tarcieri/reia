@@ -152,6 +152,15 @@ transform(#state{mode=Mode} = State, {'case', Line, Expression, Clauses}) ->
   {Dict2, Clauses2} = process_clauses('case', Dict, Clauses),
   {stop, #state{mode=Mode, bindings=Dict2}, {'case', Line, Expression2, Clauses2}};
 
+% Receive expressions work just like case statements
+transform(#state{mode=Mode, bindings=Dict}, {'receive', Line, Clauses}) ->
+  {Dict2, Clauses2} = process_clauses('case', Dict, Clauses),
+  {stop, #state{mode=Mode, bindings=Dict2}, {'receive', Line, Clauses2}};
+    
+transform(#state{mode=Mode, bindings=Dict}, {'receive', Line, Clauses, AfterClause}) ->
+  {Dict2, Clauses2} = process_clauses('case', Dict, Clauses),
+  {stop, #state{mode=Mode, bindings=Dict2}, {'receive', Line, Clauses2, AfterClause}};
+
 % Case clauses match against patterns
 transform(#state{mode='case', bindings=Dict}, {clause, Line, Pattern, Expressions}) ->
   {ok, #state{bindings=Dict2}, Pattern2} = reia_visitor:transform(

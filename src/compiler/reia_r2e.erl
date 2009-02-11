@@ -163,6 +163,21 @@ forms({erl_funcall, Line, {identifier, _, Module}, {identifier, _, Function}, Ar
     [{atom, Line, Module}, {atom, Line, Function}, list_to_forms(Arguments, Line)]
   };
   
+%% Actor messages
+forms({send, Line, Receiver, Message}) ->
+  Message2 = forms(Message),
+  {'case', Line, forms(Receiver), [
+    {clause, Line, [{tuple, Line, [{atom, Line, object}, {tuple, Line, [{var, Line,'__pid'}, {var, Line, '_'}]}]}], [],
+      [{op, Line, '!', {var, Line, '__pid'}, Message2}]
+    },
+    {clause, Line, [{tuple, Line, [{atom, Line, constant}, {var, Line, '__constant_name'}]}], [],
+      [{op, Line, '!', {var, Line, '__constant_name'}, Message2}]
+    },
+    {clause, Line, [{var, Line, '__pid'}], [[{call, Line, {atom, Line, is_pid}, [{var, Line, '__pid'}]}]],
+      [{op, Line, '!', {var, Line, '__pid'}, Message2}]
+    }
+ ]};
+  
 %% Embedded literal Erlang function calls (emitted by earlier compiler passes)
 forms({call, Line, Function, Arguments}) ->
   {call, Line, Function, [forms(Argument) || Argument <- Arguments]};
@@ -171,12 +186,24 @@ forms({call, Line, Function, Arguments}) ->
 forms({block, Line, Expressions}) ->
   {block, Line, [forms(Expression) || Expression <- Expressions]};
   
+%% Clauses
+forms({clause, Line, Expression, Statements}) ->
+  {clause, Line, [forms(Expression)], [], [forms(Statement) || Statement <- Statements]};
+  
 %% Case expressions
 forms({'case', Line, Expression, Clauses}) ->
   {'case', Line, forms(Expression), [forms(Clause) || Clause <- Clauses]};
+      
+%% Receive expressions
+forms({'receive', Line, Clauses}) ->
+  {'receive', Line, [forms(Clause) || Clause <- Clauses]};
     
-forms({clause, Line, Expression, Statements}) ->
-  {clause, Line, [forms(Expression)], [], [forms(Statement) || Statement <- Statements]};
+forms({'receive', Line, Clauses, {'after', _, Timeout, Expressions}}) ->
+  {'receive', Line, 
+    [forms(Clause) || Clause <- Clauses], 
+    forms(Timeout), 
+    [forms(Expression) || Expression <- Expressions]
+  };
   
 %% Try statements
 forms({'try', Line, Statements, CatchClauses}) ->

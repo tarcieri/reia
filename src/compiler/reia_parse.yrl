@@ -21,6 +21,7 @@ Nonterminals
   expr
   eols
   match_expr
+  send_expr
   bool_expr
   bool_op
   comp_expr
@@ -46,9 +47,11 @@ Nonterminals
   unary_op  
   max_expr
   ivar
+  clauses
+  clause
   case_expr
-  case_clauses
-  case_clause
+  receive_expr
+  after_clause
   if_expr
   inline_if_expr
   else_clause
@@ -74,9 +77,9 @@ Terminals
   true false nil float integer string regexp atom
   identifier punctuated_identifier constant module class
   eol indent dedent def fun do 'case' when else 'if' unless 
-  'and' 'or' 'not' 'try' 'catch' throw for in
+  'and' 'or' 'not' 'try' 'catch' throw for in 'receive' 'after'
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
-  '+' '-' '*' '/' '%' '**'
+  '+' '-' '*' '/' '%' '**' '!'
   '.' '..' ',' ':' '::' ';' '@'
   '=' '==' '===' '!=' '>' '<' '<=' '>='
   .
@@ -141,8 +144,11 @@ eols -> eol eols : '$empty'.
 inline_if_expr -> match_expr if_op match_expr : if_forms({'$2', '$3', ['$1']}).
 inline_if_expr -> match_expr : '$1'.
 
-match_expr -> bool_expr '=' match_expr : {match, line('$2'), '$1', '$3'}.
-match_expr -> bool_expr : '$1'.
+match_expr -> send_expr '=' match_expr : {match, line('$2'), '$1', '$3'}.
+match_expr -> send_expr : '$1'.
+
+send_expr -> bool_expr '!' send_expr : {send, line('$2'), '$1', '$3'}.
+send_expr -> bool_expr : '$1'.
 
 bool_expr -> comp_expr bool_op bool_expr : {op, line('$1'), op('$2'), '$1', '$3'}.
 bool_expr -> comp_expr : '$1'.
@@ -166,6 +172,7 @@ throw_expr -> throw unary_expr : {throw, line('$1'), '$2'}.
 throw_expr -> unary_expr : '$1'.
 
 unary_expr -> unary_op unary_expr : {op, line('$1'), op('$1'), '$2'}.
+unary_expr -> '!' unary_expr : {op, line('$1'), 'not', '$2'}.
 unary_expr -> funcall_expr : '$1'.
 
 funcall_expr -> funcall : '$1'.
@@ -196,19 +203,28 @@ max_expr -> case_expr  : '$1'.
 max_expr -> if_expr    : '$1'.
 max_expr -> for_expr   : '$1'.
 max_expr -> try_expr   : '$1'.
+max_expr -> receive_expr : '$1'.
 max_expr -> list_comprehension : '$1'.
 max_expr -> '(' expr ')' : '$2'.
 
 %% Instance variables
 ivar -> '@' identifier : {ivar, line('$1'), identifier_atom('$2')}.
 
+%% Clauses
+clauses -> clause clauses : ['$1'|'$2'].
+clauses -> clause : ['$1'].
+
+clause -> when expr eol indent statements dedent : {clause, line('$1'), '$2', '$5'}.
+
 %% Case expressions
-case_expr -> 'case' expr eol case_clauses : {'case', line('$1'), '$2', '$4'}.
-
-case_clauses -> case_clause case_clauses : ['$1'|'$2'].
-case_clauses -> case_clause : ['$1'].
-
-case_clause -> when expr eol indent statements dedent : {clause, line('$1'), '$2', '$5'}.
+case_expr -> 'case' expr eol clauses : {'case', line('$1'), '$2', '$4'}.
+  
+%% Receive expressions
+receive_expr -> 'receive' eol clauses : {'receive', line('$1'), '$3'}.
+receive_expr -> 'receive' eol clauses after_clause : {'receive', line('$1'), '$3', '$4'}.
+receive_expr -> 'receive' eol after_clause : {'receive', line('$1'), [], '$3'}.
+  
+after_clause -> 'after' expr eol indent statements dedent : {'after', line('$1'), '$2', '$5'}.
 
 %% If expressions
 if_expr -> if_op expr eol indent statements dedent : if_forms({'$1', '$2', '$5'}).
