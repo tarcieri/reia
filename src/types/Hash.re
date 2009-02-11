@@ -22,6 +22,30 @@ module Hash
     (~dict, hash) = term.uninternalize()
     dict::store(key, value, hash)
 
+  # Hash#remove
+  #   Remove an element from a hash, returning a new hash
+  def funcall(term, ~remove, [key])
+    (~dict, hash) = term.uninternalize()
+    dict::erase(key, hash)
+
+  # Hash#keys
+  #   Returns a list of all keys from a hash
+  def funcall(term, ~keys, [])
+    (~dict, hash) = term.uninternalize()
+    dict::fetch_keys(hash)
+
+  # Hash#has
+  #   Checks if a key is present in a hash
+  def funcall(term, ~has, [key])
+    (~dict, hash) = term.uninternalize()
+    dict::is_key(key, hash)
+
+  # Hash#size
+  #   Returns the number of pairs in a hash
+  def funcall(term, ~size, [])
+    (~dict, hash) = term.uninternalize()
+    dict::size(hash)
+
   # Hash#to_list
   #   Convert a hash to a list of its key/value pairs
   def funcall(term, ~to_list, [])
