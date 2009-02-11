@@ -118,7 +118,7 @@ task :install do
   rm_r reia_dir if File.exist?(reia_dir)
   mkdir reia_dir
   
-  %w[LICENSE README ebin src lib].each { |f| cp_r f, reia_dir }
+  %w[LICENSE README.textile ebin src lib].each { |f| cp_r f, reia_dir }
   
   mkdir PREFIX + "/bin" unless File.exist?(PREFIX + "/bin")
   
