@@ -7,7 +7,7 @@
 
 module StringTest
   def run
-    [length_test(), inspect_test()]
+    [length_test(), inspect_test(), sub_test()]
 
   def length_test
     TestHelper.expect("String", "knows its length", fun do
@@ -17,4 +17,9 @@ module StringTest
   def inspect_test
     TestHelper.expect("String", "inspects properly", fun do
       ("\"foobar\"", "foobar".inspect())
+    )
+    
+  def sub_test
+    TestHelper.expect("String", "substitutes properly", fun do
+      ("bazbar", "foobar".sub(/foo/, "baz"))
     )
