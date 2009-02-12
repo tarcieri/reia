@@ -126,6 +126,12 @@ funcall({string, String}, sub, [{regexp, Regex}, {string, Replacement}]) ->
       {string, String}
   end;
   
+%% String#split
+%%   Split apart a string using the given regex
+funcall({string, String}, split, [{regexp, Regex}]) ->
+  List = binary_to_list(String),
+  reia_erl:e2r([{string, Bin} || Bin <- re:split(List, Regex)]);
+  
 %% String#parse
 %%   Parse a string into its Reia parse tree
 funcall({string, String}, parse, []) ->
