@@ -15,37 +15,41 @@ r1 = ListTest.run()
 load("test/types/tuple.re")
 r2 = TupleTest.run()
 
+# String test
+load("test/types/string.re")
+r3 = StringTest.run()
+
 # Regex test
 load("test/types/regex.re")
-r3 = RegexTest.run()
+r4 = RegexTest.run()
 
 # Numeric test
 load("test/types/numeric.re")
-r4 = NumericTest.run()
+r5 = NumericTest.run()
 
 # Hash test
 load("test/types/hash.re")
-r5 = HashTest.run()
+r6 = HashTest.run()
 
 # Atom test
 load("test/types/atom.re")
-r6 = AtomTest.run()
+r7 = AtomTest.run()
 
 # Object test
 load("test/core/object.re")
-r7 = ObjectTest.run()
+r8 = ObjectTest.run()
 
 # File test
 load("test/lib/file.re")
-r8 = FileTest.run()
+r9 = FileTest.run()
 
 # File test
 load("test/lib/dir.re")
-r9 = DirTest.run()
+r10 = DirTest.run()
 
 puts("\n")
 
-results = [r1, r2, r3, r4, r5, r6, r7, r8, r9].flatten()
+results = [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10].flatten()
 failures = [error|error = (~error, _, _, _, _) in results]
 failures.each { |(~error, group, description, expected, actual)| puts(["'", group, " ", description, "' FAILED"].join()); puts(["expected ", expected, ", actual ", actual, "\n"].join()) }
 
