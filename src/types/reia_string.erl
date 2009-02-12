@@ -132,9 +132,9 @@ funcall({string, String}, split, [{regexp, Regex}]) ->
   List = binary_to_list(String),
   reia_erl:e2r([{string, Bin} || Bin <- re:split(List, Regex)]);
   
-%% String#parse
+%% String#to_parsetree
 %%   Parse a string into its Reia parse tree
-funcall({string, String}, parse, []) ->
+funcall({string, String}, to_parsetree, []) ->
   List = binary_to_list(String),
   case reia:parse(List) of
     {ok, Expressions}  -> reia_erl:e2r(Expressions);
