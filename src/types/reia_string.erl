@@ -139,6 +139,32 @@ funcall({string, String}, to_parsetree, []) ->
   case reia:parse(List) of
     {ok, Expressions}  -> reia_erl:e2r(Expressions);
     {error, _} = Error -> throw(Error)
+  end;
+
+%% String#to_i
+%%   Sloppily convert a string into an integer
+funcall({string, String}, to_i, []) ->
+  List = binary_to_list(String),
+  case erl_scan:string(List) of
+    {ok, [{integer, _, Integer}], _} -> 
+      Integer;
+    {ok, [{'-', _}, {integer, _, Integer}], _} ->
+      -Integer;
+    _ -> 
+      0
+  end;
+  
+%% String#to_f
+%%   Sloppily convert a string into a float
+funcall({string, String}, to_f, []) ->
+  List = binary_to_list(String),
+  case erl_scan:string(List) of
+    {ok, [{float, _, Float}], _} -> 
+      Float;
+    {ok, [{'-', _}, {float, _, Float}], _} ->
+      -Float;
+    _ -> 
+      0.0
   end.
 
 %% Convert a string in Erlang list form to Reia form
