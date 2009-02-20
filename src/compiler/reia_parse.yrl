@@ -190,7 +190,6 @@ max_expr -> nil        : '$1'.
 max_expr -> true       : '$1'.
 max_expr -> false      : '$1'.
 max_expr -> number     : '$1'.
-max_expr -> string     : '$1'.
 max_expr -> regexp     : '$1'.
 max_expr -> list       : '$1'.
 max_expr -> tuple      : '$1'.
@@ -206,6 +205,7 @@ max_expr -> try_expr   : '$1'.
 max_expr -> receive_expr : '$1'.
 max_expr -> list_comprehension : '$1'.
 max_expr -> '(' expr ')' : '$2'.
+max_expr -> string     : interpolate_string('$1').
 
 %% Instance variables
 ivar -> '@' identifier : {ivar, line('$1'), identifier_atom('$2')}.
@@ -404,3 +404,19 @@ if_forms({{'unless', Line}, Expression, Statements}) ->
   {'if', Line, Expression, [{nil, Line}], {else_clause, Line, Statements}};
 if_forms({{'unless', Line}, Expression, Statements, {else_clause, _, ElseStatements}}) ->
   {'if', Line, Expression, ElseStatements, {else_clause, Line, Statements}}.
+    
+%% Interpolate strings, parsing the contents of #{...} tags
+interpolate_string({string, Line, String}) ->
+  interpolate_string(String, Line, [], []).
+  
+interpolate_string([], Line, CharAcc, FragmentAcc) ->
+  Result = lists:reverse([lists:reverse(CharAcc)|FragmentAcc]),
+  case length(Result) of
+    1 -> {string,  Line, lists:nth(1, Result)};
+    _ -> {dstring, Line, Result}
+  end;
+interpolate_string("#{" ++ String, Line, CharAcc, FragmentAcc) ->
+  io:format("Detected an interpolationmajig: ~p~n", [String]),
+  interpolate_string(String, Line, CharAcc, FragmentAcc);
+interpolate_string([Char|Rest], Line, CharAcc, FragmentAcc) ->
+  interpolate_string(Rest, Line, [Char|CharAcc], FragmentAcc).

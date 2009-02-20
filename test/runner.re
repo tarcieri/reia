@@ -5,53 +5,57 @@
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-load("test/test_helper.re")
+try
+  load("test/test_helper.re")
 
-# List test
-load("test/types/list.re")
-r1 = ListTest.run()
+  # List test
+  load("test/types/list.re")
+  r1 = ListTest.run()
 
-# Tuple test
-load("test/types/tuple.re")
-r2 = TupleTest.run()
+  # Tuple test
+  load("test/types/tuple.re")
+  r2 = TupleTest.run()
 
-# String test
-load("test/types/string.re")
-r3 = StringTest.run()
+  # String test
+  load("test/types/string.re")
+  r3 = StringTest.run()
 
-# Regex test
-load("test/types/regex.re")
-r4 = RegexTest.run()
+  # Regex test
+  load("test/types/regex.re")
+  r4 = RegexTest.run()
 
-# Numeric test
-load("test/types/numeric.re")
-r5 = NumericTest.run()
+  # Numeric test
+  load("test/types/numeric.re")
+  r5 = NumericTest.run()
 
-# Hash test
-load("test/types/hash.re")
-r6 = HashTest.run()
+  # Hash test
+  load("test/types/hash.re")
+  r6 = HashTest.run()
 
-# Atom test
-load("test/types/atom.re")
-r7 = AtomTest.run()
+  # Atom test
+  load("test/types/atom.re")
+  r7 = AtomTest.run()
 
-# Object test
-load("test/core/object.re")
-r8 = ObjectTest.run()
+  # Object test
+  load("test/core/object.re")
+  r8 = ObjectTest.run()
 
-# File test
-load("test/lib/file.re")
-r9 = FileTest.run()
+  # File test
+  load("test/lib/file.re")
+  r9 = FileTest.run()
 
-# File test
-load("test/lib/dir.re")
-r10 = DirTest.run()
+  # File test
+  load("test/lib/dir.re")
+  r10 = DirTest.run()
 
-puts("\n")
+  puts("\n")
 
-results = [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10].flatten()
-failures = [error|error = (~error, _, _, _, _) in results]
-failures.each { |(~error, group, description, expected, actual)| puts(["'", group, " ", description, "' FAILED"].join()); puts(["expected ", expected, ", actual ", actual, "\n"].join()) }
+  results = [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10].flatten()
+  failures = [error|error = (~error, _, _, _, _) in results]
+  failures.each { |(~error, group, description, expected, actual)| puts(["'", group, " ", description, "' FAILED"].join()); puts(["expected ", expected, ", actual ", actual, "\n"].join()) }
 
-puts([results.size(), " assertions, ", failures.size(), " failures"].join())
-System.halt(1) if failures.size() > 0
+  puts([results.size(), " assertions, ", failures.size(), " failures"].join())
+  System.halt(1) if failures.size() > 0
+catch ex
+  io::format("Exception: ~p~n".to_list(), [ex])
+  System.halt(1)
