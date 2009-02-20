@@ -6,6 +6,7 @@
 #
 
 try
+  throw "death!"
   load("test/test_helper.re")
 
   # List test
@@ -57,5 +58,5 @@ try
   puts([results.size(), " assertions, ", failures.size(), " failures"].join())
   System.halt(1) if failures.size() > 0
 catch ex
-  io::format("Exception: ~p~n".to_list(), [ex])
+  ["Exception: ", ex].join().puts()
   System.halt(1)
