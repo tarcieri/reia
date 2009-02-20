@@ -6,7 +6,6 @@
 #
 
 try
-  throw "death!"
   load("test/test_helper.re")
 
   # List test
