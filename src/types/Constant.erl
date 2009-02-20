@@ -1,3 +1,10 @@
+%
+% Constant: Methods for the String pseudo-class
+% Copyright (C)2008-09 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module('Constant').
 -export([funcall/3]).
 
