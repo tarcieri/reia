@@ -8,7 +8,15 @@
 -module('Exception').
 -export([funcall/3]).
 
-funcall({exception, {_Class, Reason}}, inspect, []) ->
-  reia_string:from_list(io_lib:format("~p", [Reason]));
+funcall({exception, {Class, Reason}}, inspect, []) ->
+  reia_string:from_list(format_error(Class, Reason));
 funcall(Constant, to_s, []) ->
   funcall(Constant, inspect, []).
+  
+format_error(Class, Reason) ->
+  PF = fun(Term, I) ->
+    io_lib:format("~." ++ integer_to_list(I) ++ "P", [Term, 50]) 
+  end,
+  StackTrace = erlang:get_stacktrace(),
+  StackFun = fun(M, _F, _A) -> (M =:= erl_eval) or (M =:= ?MODULE) end,
+  lib:format_exception(1, Class, Reason, StackTrace, StackFun, PF).
