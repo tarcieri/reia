@@ -56,6 +56,8 @@ funcall(Receiver = {string, _}, Method, Arguments) ->
   reia_string:funcall(Receiver, Method, Arguments);
 funcall(Receiver = {regexp, _}, Method, Arguments) ->
   'Regex':funcall(Receiver, Method, silly_list_hack(Arguments));
+funcall(Receiver = {exception, _}, Method, Arguments) ->
+  'Exception':funcall(Receiver, Method, Arguments);
 funcall(Receiver, _, _) ->
   throw({error, unknown_receiver, Receiver}).
   
