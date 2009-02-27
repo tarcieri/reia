@@ -123,7 +123,7 @@ element_to_string(Element) ->
   element_to_string2(Element).
   
 element_to_string2(Element) ->
-  {list, {[], List}} = reia_dispatch:funcall(reia_dispatch:funcall(Element, inspect, []), to_list, []),
+  {list, {[], List}} = reia_dispatch:funcall(reia_dispatch:funcall(Element, to_s, []), to_list, []),
   List.
  
 %% Recursively convert a list from a Reia to an Erlang representation in
