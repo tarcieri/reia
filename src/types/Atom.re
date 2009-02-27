@@ -7,7 +7,7 @@
 
 module Atom    
   def funcall(term, ~to_s, [])
-    term.to_list().to_string()
+    term.to_list().to_string().sub(/^~/, '')
     
   def funcall(nil, ~inspect, [])
     "nil"
