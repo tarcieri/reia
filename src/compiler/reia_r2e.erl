@@ -63,6 +63,10 @@ forms({string, Line, String}) ->
     {bin, Line, [{bin_element, Line, {string, Line, String}, default, default}]}
   ]};
   
+%% Interpolated strings
+forms({dstring, Line, Exprs}) ->
+  forms({funcall, Line, {list, Line, Exprs}, {identifier, Line, join}, []});
+  
 %% Regexes
 forms({regexp, Line, Pattern}) ->
   {tuple, Line, [
