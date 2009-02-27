@@ -411,7 +411,7 @@ interpolate_string({string, Line, String}) ->
   
 interpolate_string([], Line, CharAcc, ExprAcc) ->
   Result = case CharAcc of
-    [] -> ExprAcc;
+    [] -> lists:reverse(ExprAcc);
     _  -> lists:reverse([{string, Line, lists:reverse(CharAcc)}|ExprAcc])
   end,
   case Result of
