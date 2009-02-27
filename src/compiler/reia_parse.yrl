@@ -410,9 +410,12 @@ interpolate_string({string, Line, String}) ->
   interpolate_string(String, Line, [], []).
   
 interpolate_string([], Line, CharAcc, ExprAcc) ->
-  Result = lists:reverse([lists:reverse(CharAcc)|ExprAcc]),
-  case length(Result) of
-    1 -> {string,  Line, lists:nth(1, Result)};
+  Result = case CharAcc of
+    [] -> ExprAcc;
+    _  -> lists:reverse([{string, Line, lists:reverse(CharAcc)}|ExprAcc])
+  end,
+  case Result of
+    [{string, Line, _} = Res] -> Res;
     _ -> {dstring, Line, Result}
   end;
 interpolate_string("#{" ++ String, Line, CharAcc, ExprAcc) ->
