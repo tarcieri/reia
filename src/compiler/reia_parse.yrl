@@ -420,7 +420,11 @@ interpolate_string([], Line, CharAcc, ExprAcc) ->
   end;
 interpolate_string("#{" ++ String, Line, CharAcc, ExprAcc) ->
   {String2, Expr} = extract_fragment([], String, Line),
-  interpolate_string(String2, Line, CharAcc, [Expr|ExprAcc]);
+  ExprAcc2 = case CharAcc of
+    [] -> ExprAcc;
+    _  -> [{string, Line, lists:reverse(CharAcc)}|ExprAcc]
+  end,
+  interpolate_string(String2, Line, [], [Expr|ExprAcc2]);
 interpolate_string([Char|Rest], Line, CharAcc, ExprAcc) ->
   interpolate_string(Rest, Line, [Char|CharAcc], ExprAcc).
   
