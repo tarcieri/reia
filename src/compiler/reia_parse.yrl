@@ -409,17 +409,17 @@ if_forms({{'unless', Line}, Expression, Statements, {else_clause, _, ElseStateme
 interpolate_string({string, Line, String}) ->
   interpolate_string(String, Line, [], []).
   
-interpolate_string([], Line, CharAcc, FragmentAcc) ->
-  Result = lists:reverse([lists:reverse(CharAcc)|FragmentAcc]),
+interpolate_string([], Line, CharAcc, ExprAcc) ->
+  Result = lists:reverse([lists:reverse(CharAcc)|ExprAcc]),
   case length(Result) of
     1 -> {string,  Line, lists:nth(1, Result)};
     _ -> {dstring, Line, Result}
   end;
-interpolate_string("#{" ++ String, Line, CharAcc, FragmentAcc) ->
-  extract_fragment([], String, Line),
-  interpolate_string(String, Line, CharAcc, FragmentAcc);
-interpolate_string([Char|Rest], Line, CharAcc, FragmentAcc) ->
-  interpolate_string(Rest, Line, [Char|CharAcc], FragmentAcc).
+interpolate_string("#{" ++ String, Line, CharAcc, ExprAcc) ->
+  {String2, Expr} = extract_fragment([], String, Line),
+  interpolate_string(String2, Line, CharAcc, [Expr|ExprAcc]);
+interpolate_string([Char|Rest], Line, CharAcc, ExprAcc) ->
+  interpolate_string(Rest, Line, [Char|CharAcc], ExprAcc).
   
 extract_fragment(_Continuation, [], Line) ->
   throw({error, {Line, "unexpected end of interpolated string"}});
@@ -431,9 +431,15 @@ extract_fragment(Continuation, [$}|String], Line) ->
   {more, Continuation2} = reia_scan:tokens(Continuation, [$}], Line),
   case Continuation2 of
     {tokens, _, _, _, _, [{'}', _}|Tokens], _, _} ->
-      io:format("A proper ending! ~p~n", [Tokens]),
-      % extract_fragment(Continuation2, String, Line)
-      String;
+      case reia_parse:parse(lists:reverse(Tokens)) of
+        {ok, [Expr]} ->
+          {String, Expr};
+        %% Need more tokens
+        {error, {999999, _}} ->
+          extract_fragment(Continuation2, String, Line);
+        Error ->
+          throw(Error)
+      end;
     {skip_tokens, _, _, _, _, {_, _, Error}, _, _} ->
       throw({error, {Line, Error}})
   end;
