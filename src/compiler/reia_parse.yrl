@@ -8,18 +8,12 @@
 Nonterminals
   grammar
   statements
-  statement
-  statement_ending
-  declaration
-  ending_token
+  separators
+  separator
   inline_statements
-  module_decl
-  class_decl
-  functions
-  function
   exprs
-  expr
   eols
+  expr
   match_expr
   send_expr
   bool_expr
@@ -33,6 +27,11 @@ Nonterminals
   mult_op
   pow_expr
   pow_op
+  declaration
+  module_decl
+  class_decl
+  functions
+  function
   funcall_expr
   funcall
   function_identifier
@@ -76,7 +75,7 @@ Nonterminals
 Terminals
   true false nil float integer string regexp atom
   identifier punctuated_identifier constant module class
-  eol indent dedent def fun do 'case' when else 'if' unless 
+  eol indent dedent def fun do 'end' 'case' when else 'if' unless 
   'and' 'or' 'not' 'try' 'catch' throw for in 'receive' 'after'
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**' '!'
@@ -87,59 +86,32 @@ Terminals
 Rootsymbol grammar.
 
 grammar -> statements : '$1'.
-grammar -> statement_ending statements : '$2'.
 
 %% Program statements
-statements -> statement : ['$1'].
-statements -> statement statement_ending : ['$1'].
-statements -> statement statement_ending statements : ['$1'|'$3'].
-statements -> declaration : ['$1'].
-statements -> declaration statements : ['$1'|'$2'].
+statements -> expr : ['$1'].
+statements -> expr separators : ['$1'].
+statements -> separators statements : '$2'.
+statements -> expr separators statements : ['$1'|'$3'].
 
-statement -> expr : '$1'.
+separators -> separator : '$empty'.
+separators -> separator separators : '$empty'.
 
-declaration -> module_decl : '$1'.
-declaration -> class_decl : '$1'.
-
-%% Statement endings
-statement_ending -> ending_token : '$1'.
-statement_ending -> statement_ending ending_token : '$1'.
-ending_token -> ';' : '$1'.
-ending_token -> eol : '$1'.
+separator -> eol : '$empty'.
+separator -> ';' : '$empty'.
 
 %% Inline statements
 inline_statements -> expr : ['$1'].
 inline_statements -> expr ';' exprs : ['$1'|'$3'].
-
-%% Module declaration
-module_decl -> module constant eol indent functions dedent : {module, line('$1'), '$2', '$5'}.
-
-%% Class declaration
-class_decl -> class constant eol indent functions dedent : {class, line('$1'), '$2', '$5'}.
-class_decl -> class constant '<' constant eol indent functions dedent : {class, line('$1'), '$2', '$4', '$7'}.
-
-%% Functions
-functions -> function : ['$1'].
-functions -> function functions : ['$1'|'$2'].
-
-function -> def function_identifier eol indent statements dedent : {function, line('$1'), '$2', [], '$5'}.
-function -> def function_identifier '(' ')' eol indent statements dedent : {function, line('$1'), '$2', [], '$7'}.
-function -> def function_identifier '(' exprs ')' eol indent statements dedent : {function, line('$1'), '$2', '$4', '$8'}.
-
-% Function identifiers
-function_identifier -> identifier : function_identifier('$1').
-function_identifier -> punctuated_identifier : function_identifier('$1').
-function_identifier -> class : function_identifier('$1').
 
 %% Expressions
 exprs -> expr : ['$1'].
 exprs -> expr ',' exprs : ['$1'|'$3'].
 exprs -> expr ',' eols exprs : ['$1'|'$4'].
 
-expr -> inline_if_expr : '$1'.
-
 eols -> eol : '$empty'.
 eols -> eol eols : '$empty'.
+
+expr -> inline_if_expr : '$1'.
 
 inline_if_expr -> match_expr if_op match_expr : if_forms({'$2', '$3', ['$1']}).
 inline_if_expr -> match_expr : '$1'.
@@ -203,6 +175,7 @@ max_expr -> if_expr    : '$1'.
 max_expr -> for_expr   : '$1'.
 max_expr -> try_expr   : '$1'.
 max_expr -> receive_expr : '$1'.
+max_expr -> declaration  : '$1'.
 max_expr -> list_comprehension : '$1'.
 max_expr -> '(' expr ')' : '$2'.
 max_expr -> string     : interpolate_string('$1').
@@ -240,12 +213,12 @@ else_clause -> else eol indent statements dedent : {else_clause, line('$1'), '$4
 for_expr -> for match_expr in expr eol indent statements dedent : {for, line('$1'), '$2', '$4', '$7'}.
 
 %% Try expressions
-try_expr -> 'try' eol indent statements dedent catch_clauses : {'try', line('$1'), '$4', '$6'}.
+try_expr -> 'try' statements catch_clauses 'end' : {'try', line('$1'), '$2', '$3'}.
 
 catch_clauses -> catch_clause catch_clauses : ['$1'|'$2'].
 catch_clauses -> catch_clause : ['$1'].
 
-catch_clause -> 'catch' expr eol indent statements dedent : {'catch', line('$1'), '$2', '$5'}.
+catch_clause -> 'catch' expr 'eol' statements : {'catch', line('$1'), '$2', '$4'}.
 
 %% Boolean operators
 bool_op -> 'and' : '$1'.
@@ -276,6 +249,30 @@ pow_op -> '**' : '$1'.
 unary_op -> '+'   : '$1'.
 unary_op -> '-'   : '$1'.
 unary_op -> 'not' : '$1'.
+
+%% Declarations
+declaration -> module_decl : '$1'.
+declaration -> class_decl : '$1'.
+
+%% Module declaration
+module_decl -> module constant eol indent functions dedent : {module, line('$1'), '$2', '$5'}.
+
+%% Class declaration
+class_decl -> class constant eol indent functions dedent : {class, line('$1'), '$2', '$5'}.
+class_decl -> class constant '<' constant eol indent functions dedent : {class, line('$1'), '$2', '$4', '$7'}.
+
+%% Functions
+functions -> function : ['$1'].
+functions -> function functions : ['$1'|'$2'].
+
+function -> def function_identifier eol indent statements dedent : {function, line('$1'), '$2', [], '$5'}.
+function -> def function_identifier '(' ')' eol indent statements dedent : {function, line('$1'), '$2', [], '$7'}.
+function -> def function_identifier '(' exprs ')' eol indent statements dedent : {function, line('$1'), '$2', '$4', '$8'}.
+
+% Function identifiers
+function_identifier -> identifier : function_identifier('$1').
+function_identifier -> punctuated_identifier : function_identifier('$1').
+function_identifier -> class : function_identifier('$1').
 
 %% Function calls
 funcall -> funcall_expr '.' function_identifier '(' ')' : {funcall, line('$2'), '$1', '$3', []}.
@@ -311,8 +308,8 @@ block -> multiline_block : '$1'.
 inline_block -> '{' inline_statements '}' : {lambda, line('$1'), [], $2}.
 inline_block -> '{' '|' exprs '|' inline_statements '}' : {lambda, line('$1'), '$3', '$5'}.
 
-multiline_block -> do eol indent statements dedent : {lambda, line('$1'), [], '$4'}.
-multiline_block -> do '|' exprs '|' eol indent statements dedent : {lambda, line('$1'), '$3', '$7'}.
+multiline_block -> do statements 'end' : {lambda, line('$1'), [], '$2'}.
+multiline_block -> do '|' exprs '|' statements 'end' : {lambda, line('$1'), '$3', '$5'}.
 
 %% Erlang function calls
 erl_funcall -> identifier '::' identifier '(' ')' : {erl_funcall, line('$2'), '$1', '$3', []}.
@@ -364,7 +361,7 @@ Erlang code.
 
 %% Easy interface for parsing a given string with nicely formatted errors
 string(String) ->
-  case reia_scan:scan(String) of
+  case reia_scan:string(String) of
     {ok, Tokens, _} -> 
       case reia_parse:parse(Tokens) of
         {ok, Exprs} ->
