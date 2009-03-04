@@ -14,7 +14,8 @@ module FileTest
     fm_copy_test(), 
     fm_move_test(), 
     fm_delete_test()]
-
+  end
+  
   def iodevice_test
     fn = "foo.txt"
     f = File.open(fn, [~write])
@@ -26,29 +27,36 @@ module FileTest
       result = (<<"bar">>, x.read(3))
       x.close()
       result
-    )
-
+    end)
+  end
+  
   def fm_read_test
     TestHelper.expect(File, "File.read (module version) reads correctly", fun do
       (<<"bar">>, File.read("foo.txt"))
-    )
-
+    end)
+  end
+  
   def fm_write_test
     TestHelper.expect(File, "File.write (module version) writes correctly", fun do
       (~ok, File.write("foo.txt", "baz"))
-    )
-
+    end)
+  end
+  
   def fm_copy_test
     TestHelper.expect(File, "File.copy copies file", fun do
       (~ok, File.copy("foo.txt", "bar.txt"))
-    )
-
+    end)
+  end
+  
   def fm_move_test
     TestHelper.expect(File, "File.move moves file", fun do
       (~ok, File.move("foo.txt", "bar.txt"))
-    )
-
+    end)
+  end
+  
   def fm_delete_test
     TestHelper.expect(File, "File.delete removes file", fun do
       (~ok, File.delete("bar.txt"))
-    )
+    end)
+  end
+end
