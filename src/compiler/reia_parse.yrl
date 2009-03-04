@@ -200,14 +200,13 @@ receive_expr -> 'receive' eol after_clause : {'receive', line('$1'), [], '$3'}.
 after_clause -> 'after' expr eol indent statements dedent : {'after', line('$1'), '$2', '$5'}.
 
 %% If expressions
-if_expr -> if_op expr eol indent statements dedent : if_forms({'$1', '$2', '$5'}).
-if_expr -> if_op expr eol indent statements dedent else_clause : if_forms({'$1', '$2', '$5', '$7'}).
+if_expr -> if_op expr separator statements 'end' : if_forms({'$1', '$2', '$4'}).
+if_expr -> if_op expr separator statements else_clause 'end' : if_forms({'$1', '$2', '$4', '$5'}).
 
 if_op -> 'if'   : '$1'.
 if_op -> unless : '$1'.
 
-else_clause -> else inline_statements eol : {else_clause, line('$1'), '$2'}.
-else_clause -> else eol indent statements dedent : {else_clause, line('$1'), '$4'}.
+else_clause -> else statements : {else_clause, line('$1'), '$2'}.
 
 %% For loops
 for_expr -> for match_expr in expr eol indent statements dedent : {for, line('$1'), '$2', '$4', '$7'}.
@@ -255,19 +254,21 @@ declaration -> module_decl : '$1'.
 declaration -> class_decl : '$1'.
 
 %% Module declaration
-module_decl -> module constant eol indent functions dedent : {module, line('$1'), '$2', '$5'}.
+module_decl -> module constant separator functions 'end' : {module, line('$1'), '$2', '$4'}.
 
 %% Class declaration
-class_decl -> class constant eol indent functions dedent : {class, line('$1'), '$2', '$5'}.
-class_decl -> class constant '<' constant eol indent functions dedent : {class, line('$1'), '$2', '$4', '$7'}.
+class_decl -> class constant separator functions 'end' : {class, line('$1'), '$2', '$4'}.
+class_decl -> class constant '<' constant separator functions 'end' : {class, line('$1'), '$2', '$4', '$6'}.
 
 %% Functions
 functions -> function : ['$1'].
-functions -> function functions : ['$1'|'$2'].
+functions -> function separators : ['$1'].
+functions -> separators functions : '$2'.
+functions -> function separators functions : ['$1'|'$3'].
 
-function -> def function_identifier eol indent statements dedent : {function, line('$1'), '$2', [], '$5'}.
-function -> def function_identifier '(' ')' eol indent statements dedent : {function, line('$1'), '$2', [], '$7'}.
-function -> def function_identifier '(' exprs ')' eol indent statements dedent : {function, line('$1'), '$2', '$4', '$8'}.
+function -> def function_identifier separator statements 'end' : {function, line('$1'), '$2', [], '$4'}.
+function -> def function_identifier '(' ')' separator statements 'end' : {function, line('$1'), '$2', [], '$6'}.
+function -> def function_identifier '(' exprs ')' separator statements 'end' : {function, line('$1'), '$2', '$4', '$7'}.
 
 % Function identifiers
 function_identifier -> identifier : function_identifier('$1').

@@ -14,3 +14,6 @@ module TestHelper
     else
       "F".print()
       (~error, group, description, expected, actual)
+    end
+  end
+end
