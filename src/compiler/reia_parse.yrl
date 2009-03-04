@@ -187,17 +187,17 @@ ivar -> '@' identifier : {ivar, line('$1'), identifier_atom('$2')}.
 clauses -> clause clauses : ['$1'|'$2'].
 clauses -> clause : ['$1'].
 
-clause -> when expr eol indent statements dedent : {clause, line('$1'), '$2', '$5'}.
+clause -> when expr separator statements : {clause, line('$1'), '$2', '$4'}.
 
 %% Case expressions
-case_expr -> 'case' expr eol clauses : {'case', line('$1'), '$2', '$4'}.
+case_expr -> 'case' expr separator clauses 'end': {'case', line('$1'), '$2', '$4'}.
   
 %% Receive expressions
-receive_expr -> 'receive' eol clauses : {'receive', line('$1'), '$3'}.
-receive_expr -> 'receive' eol clauses after_clause : {'receive', line('$1'), '$3', '$4'}.
-receive_expr -> 'receive' eol after_clause : {'receive', line('$1'), [], '$3'}.
+receive_expr -> 'receive' separator clauses 'end': {'receive', line('$1'), '$3'}.
+receive_expr -> 'receive' separator clauses after_clause 'end': {'receive', line('$1'), '$3', '$4'}.
+receive_expr -> 'receive' separator after_clause 'end' : {'receive', line('$1'), [], '$3'}.
   
-after_clause -> 'after' expr eol indent statements dedent : {'after', line('$1'), '$2', '$5'}.
+after_clause -> 'after' expr separator statements : {'after', line('$1'), '$2', '$4'}.
 
 %% If expressions
 if_expr -> if_op expr separator statements 'end' : if_forms({'$1', '$2', '$4'}).
