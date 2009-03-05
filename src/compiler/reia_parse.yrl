@@ -10,7 +10,7 @@ Nonterminals
   expr_list
   separators
   separator
-  inline_statements
+  inline_expr_list
   exprs
   eols
   expr
@@ -100,8 +100,8 @@ separator -> eol : '$empty'.
 separator -> ';' : '$empty'.
 
 %% Inline statements
-inline_statements -> expr : ['$1'].
-inline_statements -> expr ';' exprs : ['$1'|'$3'].
+inline_expr_list -> expr : ['$1'].
+inline_expr_list -> expr ';' exprs : ['$1'|'$3'].
 
 %% Expressions
 exprs -> expr : ['$1'].
@@ -306,8 +306,8 @@ class_inst -> constant '(' exprs ')' block : {funcall, line('$2'), '$1', '$3', '
 block -> inline_block : '$1'.
 block -> multiline_block : '$1'.
   
-inline_block -> '{' inline_statements '}' : {lambda, line('$1'), [], $2}.
-inline_block -> '{' '|' exprs '|' inline_statements '}' : {lambda, line('$1'), '$3', '$5'}.
+inline_block -> '{' inline_expr_list '}' : {lambda, line('$1'), [], $2}.
+inline_block -> '{' '|' exprs '|' inline_expr_list '}' : {lambda, line('$1'), '$3', '$5'}.
 
 multiline_block -> do expr_list 'end' : {lambda, line('$1'), [], '$2'}.
 multiline_block -> do '|' exprs '|' expr_list 'end' : {lambda, line('$1'), '$3', '$5'}.
@@ -340,9 +340,9 @@ dict_entries -> bool_expr ':' expr ',' dict_entries : [{'$1','$3'}|'$5'].
 binary -> '<<' string '>>' : {binary, line('$1'), '$2'}.
 
 %% Lambdas
-lambda -> fun '{' inline_statements '}' : {lambda, line('$1'), [], '$3'}.
-lambda -> fun '(' ')' '{' inline_statements '}' : {lambda, line('$1'), [], '$5'}.
-lambda -> fun '(' exprs ')' '{' inline_statements '}' : {lambda, line('$1'), '$3', '$6'}.
+lambda -> fun '{' inline_expr_list '}' : {lambda, line('$1'), [], '$3'}.
+lambda -> fun '(' ')' '{' inline_expr_list '}' : {lambda, line('$1'), [], '$5'}.
+lambda -> fun '(' exprs ')' '{' inline_expr_list '}' : {lambda, line('$1'), '$3', '$6'}.
 lambda -> fun do expr_list 'end' : {lambda, line('$1'), [], '$3'}.
 lambda -> fun '(' ')' do expr_list 'end' : {lambda, line('$1'), [], '$5'}.
 lambda -> fun '(' exprs ')' do expr_list 'end' : {lambda, line('$1'), '$3', '$6'}.
