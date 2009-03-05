@@ -53,13 +53,13 @@ try
   results = [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10].flatten()
   failures = [error|error = (~error, _, _, _, _) in results]
   failures.each do |(~error, group, description, expected, actual)| 
-    puts(["'", group, " ", description, "' FAILED"].join())
-    puts(["expected ", expected, ", actual ", actual, "\n"].join())
+    puts("'#{group} #{description}' FAILED")
+    puts("expected #{expected}, actual #{actual}\n")
   end
   
-  puts([results.size(), " assertions, ", failures.size(), " failures"].join())
+  puts("#{results.size()} assertions, #{failures.size()} failures")
   System.halt(1) if failures.size() > 0
 catch ex
-  ["Exception: ", ex].join().puts()
+  puts("Exception: #{ex}")
   System.halt(1)
 end
