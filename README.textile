@@ -54,7 +54,7 @@ h2. Implementation
 
 Here's some thoroughly interesting implementation trivia about Reia:
 
-* Leex-based scanner (with second pass for indentation sensitivity)
+* Leex-based scanner
 * Yecc-based grammar
 * Compiler transforms Reia abstract forms to Erlang abstract forms or BEAM 
   bytecode
