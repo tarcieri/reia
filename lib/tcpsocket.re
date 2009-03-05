@@ -15,32 +15,41 @@ class TCPSocket
   #
   def initialize(host, port)
     case gen_tcp::connect(host.to_list(), port, [~binary, (~active, false)])
-      (~ok, socket):
-        @socket = socket
-      error:
-        throw error
+    when (~ok, socket)
+      @socket = socket
+    when error
+      throw error
+    end
+  end
   
   # Read the specified amount of data from the socket.  A read of length zero
   # will read all data available.
   def read(length)
     case gen_tcp::recv(@socket, length)
-      (~ok, packet):
-        packet
-      (~error, reason):
-        throw reason
+    when (~ok, packet)
+      packet
+    when (~error, reason)
+      throw reason
+    end
+  end
   
   # Write the given data to the socket
   def write(data)
     case gen_tcp::send(@socket, data)
-      ~ok:
-        true
-      (~error, reason):
-        throw reason
+    when ~ok
+      true
+    when (~error, reason)
+      throw reason
+    end
+  end
   
   # Close the socket
   def close
     case gen_tcp::close(@socket)
-      ~ok:
-        true
-      (~error, reason):
-        throw reason
+    when ~ok
+      true
+    when (~error, reason)
+      throw reason
+    end
+  end
+end
