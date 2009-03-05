@@ -75,7 +75,7 @@ Nonterminals
 Terminals
   true false nil float integer string regexp atom
   identifier punctuated_identifier constant module class
-  eol indent dedent def fun do 'end' 'case' when else 'if' unless 
+  eol def fun do 'end' 'case' when else 'if' unless 
   'and' 'or' 'not' 'try' 'catch' throw for in 'receive' 'after'
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**' '!'
