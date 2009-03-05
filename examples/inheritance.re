@@ -8,17 +8,27 @@
 class Animal
   def initialize(name)
     @name = name
+  end
+  
   def name
     @name
+  end
+end
 
 class Cat < Animal
   def talk
     'Meow!'
+  end
+end
 
 class Dog < Animal
   def talk
     'Woof! Woof!'
+  end
+end
 
 animals = [Cat('Missy'), Dog('Mr. Bojangles'), Dog('Lassie')]
+
 animals.each do |animal|
-  [animal.name(), ' the ', animal.class(), ': ', animal.talk()].join().puts()
+  "#{animal.name()} the #{animal.class()} says: #{animal.talk()}".puts()
+end
