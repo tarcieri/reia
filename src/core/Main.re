@@ -12,14 +12,17 @@ module Main
   def puts(string)
     io::format("~s~n".to_list(), [string.to_list()])
     nil
+  end
     
   # Print a string (without newline) to standard output
   def print(string)
     io::format(string.to_list())
     nil
+  end
   
   def eval(string)
     Eval.string(string)
+  end
     
   def load(path)
     case file::read_file(path.to_list())
@@ -27,3 +30,6 @@ module Main
       Eval.string(data.to_string())
     when error
       error
+    end
+  end
+end

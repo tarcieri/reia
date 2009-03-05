@@ -13,6 +13,8 @@ module Eval
       value
     when error
       throw error
+    end
+  end
     
   def exprs(forms, binding)
     # Compile Reia forms to Erlang forms
@@ -34,6 +36,7 @@ module Eval
     binding = binding.reduce({}) { |(var, value), hash| hash.insert(var, value) }.to_list()
     
     (~value, result, binding)
+  end
     
   def passes(binding)
     reia_compiler::default_passes().map do |pass|
@@ -41,9 +44,13 @@ module Eval
         (~ssa, binding)
       else
         pass
+      end
+    end
+  end
   
   def new_binding
     erl_eval::new_bindings()
+  end
   
   # Thunk local functions to Kernel
   # FIXME: this is a rather inelegant solution and should be DRYed out
@@ -58,4 +65,6 @@ module Eval
       Main.eval(args[0])
     when ~load
       Main.load(args[0])
-      
+    end
+  end
+end

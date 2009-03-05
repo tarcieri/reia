@@ -8,22 +8,30 @@
 class Object
   def initialize
     nil
+  end
     
   def class
     Object
+  end
     
   def pid
     erlang::self()
+  end
     
   def to_s
     pid_str = pid().to_s().sub(/^</, '')
-    ["#<", class(), ":", pid_str].join()
+    "#<#{class()}:#{pid_str}"
+  end
     
   def inspect
     to_s()
+  end
     
   def _(method, args)
     throw (~error, (method, "undefined"))
+  end
     
   def handle_message(message)
     nil
+  end
+end
