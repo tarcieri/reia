@@ -39,6 +39,8 @@ class ODBC
       @ref = ref
     when (~error, reason)
       throw reason
+    end
+  end
 
   def select_count(q)
     case odbc::select_count(@ref, q.to_list())
@@ -46,6 +48,8 @@ class ODBC
       nrows
     when (~error, reason)
       throw reason
+    end
+  end
 
   def query(q)
     case odbc::sql_query(@ref, q.to_list())
@@ -55,6 +59,8 @@ class ODBC
       nrows
     when (~error, reason)
       throw reason
+    end
+  end
 
   def next
     case odbc::next(@ref)
@@ -62,6 +68,8 @@ class ODBC
       ODBCResult(colnames, rows)
     when (~error, reason)
       throw reason
+    end
+  end
 
   def prev
     case odbc::prev(@ref)
@@ -69,6 +77,8 @@ class ODBC
       ODBCResult(colnames, rows)
     when (~error, reason)
       throw reason
+    end
+  end
 
   def first
     case odbc::first(@ref)
@@ -76,13 +86,17 @@ class ODBC
       ODBCResult(colnames, rows)
     when (~error, reason)
       throw reason
-
+    end
+  end
+  
   def last
     case odbc::last(@ref)
     when (~selected, colnames, rows)
       ODBCResult(colnames, rows)
     when (~error, reason)
       throw reason
+    end
+  end
 
   def describe_table(table)
     case odbc::describe_table(@ref, table.to_list())
@@ -90,10 +104,14 @@ class ODBC
       description
     when (~error, reason)
       throw reason
-
+    end
+  end
+  
   def close
     odbc::disconnect(@ref)
     odbc::stop()
+  end
+end
 
 class ODBCResult
   def initialize(colnames, rows)
@@ -104,6 +122,10 @@ class ODBCResult
           c.to_string()
         else
           c
+        end
+      end
+    end
+  end
 
   def hashes
     if @hashes
@@ -111,12 +133,18 @@ class ODBCResult
     else
       range = (0..(@columns.size() - 1))
       @hashes = @rowdata.map {|row| range.map{|i| (@columns[i], row[i])}.to_hash() }
+    end
+  end
 
   def rowdata
     @rowdata
+  end
 
   def columns
     @columns
+  end
 
   def size
     @rowdata.size()
+  end
+end
