@@ -49,7 +49,7 @@ def output_file(input_file)
 end
 
 # Reia
-ERL_SRC = FileList.new('src/{compiler,core,types}/**/*.erl')
+ERL_SRC = FileList.new('src/{compiler,builtins,core}/**/*.erl')
 ERL_SRC.each do |input|
   file output_file(input) => input do
     sh "bin/erlc +debug_info -o artifacts/beam #{input}"
