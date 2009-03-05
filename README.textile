@@ -58,7 +58,7 @@ Here's some thoroughly interesting implementation trivia about Reia:
 * Yecc-based grammar
 * Compiler transforms Reia abstract forms to Erlang abstract forms or BEAM 
   bytecode
-* Partly self-hosted: most core Reia types are written in Reia
+* Partly self-hosted: Reia's builtin types are mostly written in Reia
 
 h2. Links
 
