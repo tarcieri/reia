@@ -7,9 +7,12 @@
 class Greeter
   def initialize(name)
     @name = name.capitalize()
-
+  end
+  
   def salute
-    ["Hello ", @name, "!"].join().puts()
+    "Hello #{@name}!".puts()
+  end
+end
 
 # Create a new object
 g = Greeter("world")
