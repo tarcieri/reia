@@ -187,21 +187,21 @@ ivar -> '@' identifier : {ivar, line('$1'), identifier_atom('$2')}.
 clauses -> clause clauses : ['$1'|'$2'].
 clauses -> clause : ['$1'].
 
-clause -> when expr separator expr_list : {clause, line('$1'), '$2', '$4'}.
+clause -> when expr separators expr_list : {clause, line('$1'), '$2', '$4'}.
 
 %% Case expressions
-case_expr -> 'case' expr separator clauses 'end': {'case', line('$1'), '$2', '$4'}.
+case_expr -> 'case' expr separators clauses 'end': {'case', line('$1'), '$2', '$4'}.
   
 %% Receive expressions
-receive_expr -> 'receive' separator clauses 'end': {'receive', line('$1'), '$3'}.
-receive_expr -> 'receive' separator clauses after_clause 'end': {'receive', line('$1'), '$3', '$4'}.
-receive_expr -> 'receive' separator after_clause 'end' : {'receive', line('$1'), [], '$3'}.
+receive_expr -> 'receive' separators clauses 'end': {'receive', line('$1'), '$3'}.
+receive_expr -> 'receive' separators clauses after_clause 'end': {'receive', line('$1'), '$3', '$4'}.
+receive_expr -> 'receive' separators after_clause 'end' : {'receive', line('$1'), [], '$3'}.
   
-after_clause -> 'after' expr separator expr_list : {'after', line('$1'), '$2', '$4'}.
+after_clause -> 'after' expr separators expr_list : {'after', line('$1'), '$2', '$4'}.
 
 %% If expressions
-if_expr -> if_op expr separator expr_list 'end' : if_forms({'$1', '$2', '$4'}).
-if_expr -> if_op expr separator expr_list else_clause 'end' : if_forms({'$1', '$2', '$4', '$5'}).
+if_expr -> if_op expr separators expr_list 'end' : if_forms({'$1', '$2', '$4'}).
+if_expr -> if_op expr separators expr_list else_clause 'end' : if_forms({'$1', '$2', '$4', '$5'}).
 
 if_op -> 'if'   : '$1'.
 if_op -> unless : '$1'.
@@ -209,7 +209,7 @@ if_op -> unless : '$1'.
 else_clause -> else expr_list : {else_clause, line('$1'), '$2'}.
 
 %% For loops
-for_expr -> for match_expr in expr separator expr_list end : {for, line('$1'), '$2', '$4', '$6'}.
+for_expr -> for match_expr in expr separators expr_list end : {for, line('$1'), '$2', '$4', '$6'}.
 
 %% Try expressions
 try_expr -> 'try' expr_list catch_clauses 'end' : {'try', line('$1'), '$2', '$3'}.
@@ -217,7 +217,7 @@ try_expr -> 'try' expr_list catch_clauses 'end' : {'try', line('$1'), '$2', '$3'
 catch_clauses -> catch_clause catch_clauses : ['$1'|'$2'].
 catch_clauses -> catch_clause : ['$1'].
 
-catch_clause -> 'catch' expr separator expr_list : {'catch', line('$1'), '$2', '$4'}.
+catch_clause -> 'catch' expr separators expr_list : {'catch', line('$1'), '$2', '$4'}.
 
 %% Boolean operators
 bool_op -> 'and' : '$1'.
@@ -254,11 +254,11 @@ declaration -> module_decl : '$1'.
 declaration -> class_decl : '$1'.
 
 %% Module declaration
-module_decl -> module constant separator functions 'end' : {module, line('$1'), '$2', '$4'}.
+module_decl -> module constant separators functions 'end' : {module, line('$1'), '$2', '$4'}.
 
 %% Class declaration
-class_decl -> class constant separator functions 'end' : {class, line('$1'), '$2', '$4'}.
-class_decl -> class constant '<' constant separator functions 'end' : {class, line('$1'), '$2', '$4', '$6'}.
+class_decl -> class constant separators functions 'end' : {class, line('$1'), '$2', '$4'}.
+class_decl -> class constant '<' constant separators functions 'end' : {class, line('$1'), '$2', '$4', '$6'}.
 
 %% Functions
 functions -> function : ['$1'].
@@ -266,9 +266,9 @@ functions -> function separators : ['$1'].
 functions -> separators functions : '$2'.
 functions -> function separators functions : ['$1'|'$3'].
 
-function -> def function_identifier separator expr_list 'end' : {function, line('$1'), '$2', [], '$4'}.
-function -> def function_identifier '(' ')' separator expr_list 'end' : {function, line('$1'), '$2', [], '$6'}.
-function -> def function_identifier '(' exprs ')' separator expr_list 'end' : {function, line('$1'), '$2', '$4', '$7'}.
+function -> def function_identifier separators expr_list 'end' : {function, line('$1'), '$2', [], '$4'}.
+function -> def function_identifier '(' ')' separators expr_list 'end' : {function, line('$1'), '$2', [], '$6'}.
+function -> def function_identifier '(' exprs ')' separators expr_list 'end' : {function, line('$1'), '$2', '$4', '$7'}.
 
 % Function identifiers
 function_identifier -> identifier : function_identifier('$1').
