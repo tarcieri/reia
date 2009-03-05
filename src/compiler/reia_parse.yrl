@@ -209,7 +209,7 @@ if_op -> unless : '$1'.
 else_clause -> else statements : {else_clause, line('$1'), '$2'}.
 
 %% For loops
-for_expr -> for match_expr in expr eol indent statements dedent : {for, line('$1'), '$2', '$4', '$7'}.
+for_expr -> for match_expr in expr separator statements end : {for, line('$1'), '$2', '$4', '$6'}.
 
 %% Try expressions
 try_expr -> 'try' statements catch_clauses 'end' : {'try', line('$1'), '$2', '$3'}.
@@ -217,7 +217,7 @@ try_expr -> 'try' statements catch_clauses 'end' : {'try', line('$1'), '$2', '$3
 catch_clauses -> catch_clause catch_clauses : ['$1'|'$2'].
 catch_clauses -> catch_clause : ['$1'].
 
-catch_clause -> 'catch' expr 'eol' statements : {'catch', line('$1'), '$2', '$4'}.
+catch_clause -> 'catch' expr separator statements : {'catch', line('$1'), '$2', '$4'}.
 
 %% Boolean operators
 bool_op -> 'and' : '$1'.
