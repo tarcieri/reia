@@ -8,17 +8,23 @@
 module Binary
   def funcall(binary, ~to_list, [])
     erlang::binary_to_list(binary)
+  end
     
   def funcall(binary, ~to_string, [])
     binary.to_list().to_string()
+  end
     
   def funcall(binary, ~to_s, [])
     funcall(binary, ~to_string, [])
+  end
     
   def funcall(binary, ~inspect, [])
     list = binary.to_list()
     if io_lib::char_list(list)
-      ['<<"', list.to_string(), '">>'].join()
+      "<<\"#{list.to_string()}\">>"
     else
-      ["<<", list.join(","), ">>"].join()
-      
+      l = list.join(",")
+      "<<\"#{l}\">>"
+    end
+  end
+end
