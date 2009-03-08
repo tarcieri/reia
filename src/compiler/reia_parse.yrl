@@ -8,11 +8,8 @@
 Nonterminals
   grammar
   expr_list
-  separators
-  separator
-  inline_expr_list
-  exprs
   eols
+  exprs
   expr
   match_expr
   send_expr
@@ -36,8 +33,6 @@ Nonterminals
   funcall
   function_identifier
   block
-  inline_block
-  multiline_block
   class_inst_expr
   class_inst
   erl_funcall_expr
@@ -79,7 +74,7 @@ Terminals
   'and' 'or' 'not' 'try' 'catch' throw for in 'receive' 'after'
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**' '!'
-  '.' '..' ',' ':' '::' ';' '@'
+  '.' '..' ',' ':' '::' '@'
   '=' '==' '===' '!=' '>' '<' '<=' '>='
   .
 
@@ -89,27 +84,17 @@ grammar -> expr_list : '$1'.
 
 %% Expression lists 
 expr_list -> expr : ['$1'].
-expr_list -> expr separators : ['$1'].
-expr_list -> separators expr_list : '$2'.
-expr_list -> expr separators expr_list : ['$1'|'$3'].
+expr_list -> expr eols : ['$1'].
+expr_list -> eols expr_list : '$2'.
+expr_list -> expr eols expr_list : ['$1'|'$3'].
 
-separators -> separator : '$empty'.
-separators -> separator separators : '$empty'.
-
-separator -> eol : '$empty'.
-separator -> ';' : '$empty'.
-
-%% Inline statements
-inline_expr_list -> expr : ['$1'].
-inline_expr_list -> expr ';' exprs : ['$1'|'$3'].
+eols -> eol : '$empty'.
+eols -> eol eols : '$empty'.
 
 %% Expressions
 exprs -> expr : ['$1'].
 exprs -> expr ',' exprs : ['$1'|'$3'].
 exprs -> expr ',' eols exprs : ['$1'|'$4'].
-
-eols -> eol : '$empty'.
-eols -> eol eols : '$empty'.
 
 expr -> inline_if_expr : '$1'.
 
@@ -187,21 +172,21 @@ ivar -> '@' identifier : {ivar, line('$1'), identifier_atom('$2')}.
 clauses -> clause clauses : ['$1'|'$2'].
 clauses -> clause : ['$1'].
 
-clause -> when expr separators expr_list : {clause, line('$1'), '$2', '$4'}.
+clause -> when expr eols expr_list : {clause, line('$1'), '$2', '$4'}.
 
 %% Case expressions
-case_expr -> 'case' expr separators clauses 'end': {'case', line('$1'), '$2', '$4'}.
+case_expr -> 'case' expr eols clauses 'end': {'case', line('$1'), '$2', '$4'}.
   
 %% Receive expressions
-receive_expr -> 'receive' separators clauses 'end': {'receive', line('$1'), '$3'}.
-receive_expr -> 'receive' separators clauses after_clause 'end': {'receive', line('$1'), '$3', '$4'}.
-receive_expr -> 'receive' separators after_clause 'end' : {'receive', line('$1'), [], '$3'}.
+receive_expr -> 'receive' eols clauses 'end': {'receive', line('$1'), '$3'}.
+receive_expr -> 'receive' eols clauses after_clause 'end': {'receive', line('$1'), '$3', '$4'}.
+receive_expr -> 'receive' eols after_clause 'end' : {'receive', line('$1'), [], '$3'}.
   
-after_clause -> 'after' expr separators expr_list : {'after', line('$1'), '$2', '$4'}.
+after_clause -> 'after' expr eols expr_list : {'after', line('$1'), '$2', '$4'}.
 
 %% If expressions
-if_expr -> if_op expr separators expr_list 'end' : if_forms({'$1', '$2', '$4'}).
-if_expr -> if_op expr separators expr_list else_clause 'end' : if_forms({'$1', '$2', '$4', '$5'}).
+if_expr -> if_op expr eols expr_list 'end' : if_forms({'$1', '$2', '$4'}).
+if_expr -> if_op expr eols expr_list else_clause 'end' : if_forms({'$1', '$2', '$4', '$5'}).
 
 if_op -> 'if'   : '$1'.
 if_op -> unless : '$1'.
@@ -209,7 +194,7 @@ if_op -> unless : '$1'.
 else_clause -> else expr_list : {else_clause, line('$1'), '$2'}.
 
 %% For loops
-for_expr -> for match_expr in expr separators expr_list end : {for, line('$1'), '$2', '$4', '$6'}.
+for_expr -> for match_expr in expr eols expr_list end : {for, line('$1'), '$2', '$4', '$6'}.
 
 %% Try expressions
 try_expr -> 'try' expr_list catch_clauses 'end' : {'try', line('$1'), '$2', '$3'}.
@@ -217,7 +202,7 @@ try_expr -> 'try' expr_list catch_clauses 'end' : {'try', line('$1'), '$2', '$3'
 catch_clauses -> catch_clause catch_clauses : ['$1'|'$2'].
 catch_clauses -> catch_clause : ['$1'].
 
-catch_clause -> 'catch' expr separators expr_list : {'catch', line('$1'), '$2', '$4'}.
+catch_clause -> 'catch' expr eols expr_list : {'catch', line('$1'), '$2', '$4'}.
 
 %% Boolean operators
 bool_op -> 'and' : '$1'.
@@ -254,21 +239,21 @@ declaration -> module_decl : '$1'.
 declaration -> class_decl : '$1'.
 
 %% Module declaration
-module_decl -> module constant separators functions 'end' : {module, line('$1'), '$2', '$4'}.
+module_decl -> module constant eols functions 'end' : {module, line('$1'), '$2', '$4'}.
 
 %% Class declaration
-class_decl -> class constant separators functions 'end' : {class, line('$1'), '$2', '$4'}.
-class_decl -> class constant '<' constant separators functions 'end' : {class, line('$1'), '$2', '$4', '$6'}.
+class_decl -> class constant eols functions 'end' : {class, line('$1'), '$2', '$4'}.
+class_decl -> class constant '<' constant eols functions 'end' : {class, line('$1'), '$2', '$4', '$6'}.
 
 %% Functions
 functions -> function : ['$1'].
-functions -> function separators : ['$1'].
-functions -> separators functions : '$2'.
-functions -> function separators functions : ['$1'|'$3'].
+functions -> function eols : ['$1'].
+functions -> eols functions : '$2'.
+functions -> function eols functions : ['$1'|'$3'].
 
-function -> def function_identifier separators expr_list 'end' : {function, line('$1'), '$2', [], '$4'}.
-function -> def function_identifier '(' ')' separators expr_list 'end' : {function, line('$1'), '$2', [], '$6'}.
-function -> def function_identifier '(' exprs ')' separators expr_list 'end' : {function, line('$1'), '$2', '$4', '$7'}.
+function -> def function_identifier eols expr_list 'end' : {function, line('$1'), '$2', [], '$4'}.
+function -> def function_identifier '(' ')' eols expr_list 'end' : {function, line('$1'), '$2', [], '$6'}.
+function -> def function_identifier '(' exprs ')' eols expr_list 'end' : {function, line('$1'), '$2', '$4', '$7'}.
 
 % Function identifiers
 function_identifier -> identifier : function_identifier('$1').
@@ -303,14 +288,12 @@ class_inst -> constant '(' ')' block : {funcall, line('$2'), '$1', [], '$4'}.
 class_inst -> constant '(' exprs ')' block : {funcall, line('$2'), '$1', '$3', '$5'}.
 
 %% Blocks
-block -> inline_block : '$1'.
-block -> multiline_block : '$1'.
-  
-inline_block -> '{' inline_expr_list '}' : {lambda, line('$1'), [], $2}.
-inline_block -> '{' '|' exprs '|' inline_expr_list '}' : {lambda, line('$1'), '$3', '$5'}.
 
-multiline_block -> do expr_list 'end' : {lambda, line('$1'), [], '$2'}.
-multiline_block -> do '|' exprs '|' expr_list 'end' : {lambda, line('$1'), '$3', '$5'}.
+block -> '{' expr_list '}' : {lambda, line('$1'), [], $2}.
+block -> '{' '|' exprs '|' expr_list '}' : {lambda, line('$1'), '$3', '$5'}.
+
+block -> do expr_list 'end' : {lambda, line('$1'), [], '$2'}.
+block -> do '|' exprs '|' expr_list 'end' : {lambda, line('$1'), '$3', '$5'}.
 
 %% Erlang function calls
 erl_funcall -> identifier '::' identifier '(' ')' : {erl_funcall, line('$2'), '$1', '$3', []}.
@@ -340,9 +323,9 @@ dict_entries -> bool_expr ':' expr ',' dict_entries : [{'$1','$3'}|'$5'].
 binary -> '<<' string '>>' : {binary, line('$1'), '$2'}.
 
 %% Lambdas
-lambda -> fun '{' inline_expr_list '}' : {lambda, line('$1'), [], '$3'}.
-lambda -> fun '(' ')' '{' inline_expr_list '}' : {lambda, line('$1'), [], '$5'}.
-lambda -> fun '(' exprs ')' '{' inline_expr_list '}' : {lambda, line('$1'), '$3', '$6'}.
+lambda -> fun '{' expr_list '}' : {lambda, line('$1'), [], '$3'}.
+lambda -> fun '(' ')' '{' expr_list '}' : {lambda, line('$1'), [], '$5'}.
+lambda -> fun '(' exprs ')' '{' expr_list '}' : {lambda, line('$1'), '$3', '$6'}.
 lambda -> fun do expr_list 'end' : {lambda, line('$1'), [], '$3'}.
 lambda -> fun '(' ')' do expr_list 'end' : {lambda, line('$1'), [], '$5'}.
 lambda -> fun '(' exprs ')' do expr_list 'end' : {lambda, line('$1'), '$3', '$6'}.
