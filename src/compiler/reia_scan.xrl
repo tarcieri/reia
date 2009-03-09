@@ -43,7 +43,9 @@ Rules.
 {Comment} : skip_token.
 {Whitespace}+ : skip_token.
 
-\n    : {token,{eol,TokenLine}}.
+%% Newline-spanning whitespace
+({Comment}|{Whitespace})*(\n({Comment}|{Whitespace})*)+ : {token,{eol,TokenLine}}.
+
 \(    : {token,{'(',TokenLine}}.
 \)    : {token,{')',TokenLine}}.
 \[    : {token,{'[',TokenLine}}.

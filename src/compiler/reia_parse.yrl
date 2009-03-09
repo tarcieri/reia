@@ -8,7 +8,6 @@
 Nonterminals
   grammar
   expr_list
-  eols
   exprs
   expr
   match_expr
@@ -84,17 +83,14 @@ grammar -> expr_list : '$1'.
 
 %% Expression lists 
 expr_list -> expr : ['$1'].
-expr_list -> expr eols : ['$1'].
-expr_list -> eols expr_list : '$2'.
-expr_list -> expr eols expr_list : ['$1'|'$3'].
-
-eols -> eol : '$empty'.
-eols -> eol eols : '$empty'.
+expr_list -> expr eol : ['$1'].
+expr_list -> eol expr_list : '$2'.
+expr_list -> expr eol expr_list : ['$1'|'$3'].
 
 %% Expressions
 exprs -> expr : ['$1'].
 exprs -> expr ',' exprs : ['$1'|'$3'].
-exprs -> expr ',' eols exprs : ['$1'|'$4'].
+exprs -> expr ',' eol exprs : ['$1'|'$4'].
 
 expr -> inline_if_expr : '$1'.
 
@@ -172,21 +168,21 @@ ivar -> '@' identifier : {ivar, line('$1'), identifier_atom('$2')}.
 clauses -> clause clauses : ['$1'|'$2'].
 clauses -> clause : ['$1'].
 
-clause -> when expr eols expr_list : {clause, line('$1'), '$2', '$4'}.
+clause -> when expr eol expr_list : {clause, line('$1'), '$2', '$4'}.
 
 %% Case expressions
-case_expr -> 'case' expr eols clauses 'end': {'case', line('$1'), '$2', '$4'}.
+case_expr -> 'case' expr eol clauses 'end': {'case', line('$1'), '$2', '$4'}.
   
 %% Receive expressions
-receive_expr -> 'receive' eols clauses 'end': {'receive', line('$1'), '$3'}.
-receive_expr -> 'receive' eols clauses after_clause 'end': {'receive', line('$1'), '$3', '$4'}.
-receive_expr -> 'receive' eols after_clause 'end' : {'receive', line('$1'), [], '$3'}.
+receive_expr -> 'receive' eol clauses 'end': {'receive', line('$1'), '$3'}.
+receive_expr -> 'receive' eol clauses after_clause 'end': {'receive', line('$1'), '$3', '$4'}.
+receive_expr -> 'receive' eol after_clause 'end' : {'receive', line('$1'), [], '$3'}.
   
-after_clause -> 'after' expr eols expr_list : {'after', line('$1'), '$2', '$4'}.
+after_clause -> 'after' expr eol expr_list : {'after', line('$1'), '$2', '$4'}.
 
 %% If expressions
-if_expr -> if_op expr eols expr_list 'end' : if_forms({'$1', '$2', '$4'}).
-if_expr -> if_op expr eols expr_list else_clause 'end' : if_forms({'$1', '$2', '$4', '$5'}).
+if_expr -> if_op expr eol expr_list 'end' : if_forms({'$1', '$2', '$4'}).
+if_expr -> if_op expr eol expr_list else_clause 'end' : if_forms({'$1', '$2', '$4', '$5'}).
 
 if_op -> 'if'   : '$1'.
 if_op -> unless : '$1'.
@@ -194,7 +190,7 @@ if_op -> unless : '$1'.
 else_clause -> else expr_list : {else_clause, line('$1'), '$2'}.
 
 %% For loops
-for_expr -> for match_expr in expr eols expr_list end : {for, line('$1'), '$2', '$4', '$6'}.
+for_expr -> for match_expr in expr eol expr_list end : {for, line('$1'), '$2', '$4', '$6'}.
 
 %% Try expressions
 try_expr -> 'try' expr_list catch_clauses 'end' : {'try', line('$1'), '$2', '$3'}.
@@ -202,7 +198,7 @@ try_expr -> 'try' expr_list catch_clauses 'end' : {'try', line('$1'), '$2', '$3'
 catch_clauses -> catch_clause catch_clauses : ['$1'|'$2'].
 catch_clauses -> catch_clause : ['$1'].
 
-catch_clause -> 'catch' expr eols expr_list : {'catch', line('$1'), '$2', '$4'}.
+catch_clause -> 'catch' expr eol expr_list : {'catch', line('$1'), '$2', '$4'}.
 
 %% Boolean operators
 bool_op -> 'and' : '$1'.
@@ -239,21 +235,21 @@ declaration -> module_decl : '$1'.
 declaration -> class_decl : '$1'.
 
 %% Module declaration
-module_decl -> module constant eols functions 'end' : {module, line('$1'), '$2', '$4'}.
+module_decl -> module constant eol functions 'end' : {module, line('$1'), '$2', '$4'}.
 
 %% Class declaration
-class_decl -> class constant eols functions 'end' : {class, line('$1'), '$2', '$4'}.
-class_decl -> class constant '<' constant eols functions 'end' : {class, line('$1'), '$2', '$4', '$6'}.
+class_decl -> class constant eol functions 'end' : {class, line('$1'), '$2', '$4'}.
+class_decl -> class constant '<' constant eol functions 'end' : {class, line('$1'), '$2', '$4', '$6'}.
 
 %% Functions
 functions -> function : ['$1'].
-functions -> function eols : ['$1'].
-functions -> eols functions : '$2'.
-functions -> function eols functions : ['$1'|'$3'].
+functions -> function eol : ['$1'].
+functions -> eol functions : '$2'.
+functions -> function eol functions : ['$1'|'$3'].
 
-function -> def function_identifier eols expr_list 'end' : {function, line('$1'), '$2', [], '$4'}.
-function -> def function_identifier '(' ')' eols expr_list 'end' : {function, line('$1'), '$2', [], '$6'}.
-function -> def function_identifier '(' exprs ')' eols expr_list 'end' : {function, line('$1'), '$2', '$4', '$7'}.
+function -> def function_identifier eol expr_list 'end' : {function, line('$1'), '$2', [], '$4'}.
+function -> def function_identifier '(' ')' eol expr_list 'end' : {function, line('$1'), '$2', [], '$6'}.
+function -> def function_identifier '(' exprs ')' eol expr_list 'end' : {function, line('$1'), '$2', '$4', '$7'}.
 
 % Function identifiers
 function_identifier -> identifier : function_identifier('$1').
