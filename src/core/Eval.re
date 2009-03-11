@@ -8,8 +8,8 @@
 module Eval
   def string(str)
     case reia_parse::string(str.to_list())
-    when (~ok, forms)
-      (~value, value, _binding) = exprs(forms, new_binding())
+    when (:ok, forms)
+      (:value, value, _binding) = exprs(forms, new_binding())
       value
     when error
       throw error
@@ -27,7 +27,7 @@ module Eval
     local_callback = fun(name, arguments) { local(name, arguments) }
     
     # Evaluate the expressions using erl_eval
-    (~value, result, binding) = eval_shim::exprs(erl_forms, binding, (~value, local_callback))
+    (:value, result, binding) = eval_shim::exprs(erl_forms, binding, (:value, local_callback))
     
     # Convert Erlang SSA variable names back to Reia names
     binding = binding.map { |(var, value)| (var.to_s().sub(/^_/, "").sub(/_[0-9]+$/, "").to_atom(), value) }
@@ -35,13 +35,13 @@ module Eval
     # Keep only the latest variable name
     binding = binding.reduce({}) { |(var, value), hash| hash.insert(var, value) }.to_list()
     
-    (~value, result, binding)
+    (:value, result, binding)
   end
     
   def passes(binding)
     reia_compiler::default_passes().map do |pass|
-      if pass == ~ssa
-        (~ssa, binding)
+      if pass == :ssa
+        (:ssa, binding)
       else
         pass
       end
@@ -56,14 +56,14 @@ module Eval
   # FIXME: this is a rather inelegant solution and should be DRYed out
   def local(name, args)
     case name
-    when ~puts
+    when :puts
       args.each { |arg| Main.puts(arg) }
       nil
-    when ~print
+    when :print
       Main.print(args[0])
-    when ~eval
+    when :eval
       Main.eval(args[0])
-    when ~load
+    when :load
       Main.load(args[0])
     end
   end

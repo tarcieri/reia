@@ -6,7 +6,7 @@ module System
     
   # Return the number of CPUs in the current system
   def cpus
-    erlang::system_info(~logical_processors)
+    erlang::system_info(:logical_processors)
   end
     
   # Halt the system, possibly returning the given status code

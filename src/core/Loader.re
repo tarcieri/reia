@@ -11,13 +11,13 @@ module Loader
   end
     
   def start(args)
-    (~ok, input) = file::read_file(args[0])
+    (:ok, input) = file::read_file(args[0])
     eval_input(input.to_string())
   end
 
   def read_input(data)
-    case io::get_line(~'')
-    when ~eof
+    case io::get_line(:'')
+    when :eof
       input = data.map { |s| s.to_string() }.join()
       eval_input(input)
     when string

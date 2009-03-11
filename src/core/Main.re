@@ -26,7 +26,7 @@ module Main
     
   def load(path)
     case file::read_file(path.to_list())
-    when (~ok, data)
+    when (:ok, data)
       Eval.string(data.to_string())
     when error
       error

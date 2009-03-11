@@ -28,7 +28,7 @@ class Object
   end
     
   def _(method, args)
-    throw (~error, (method, "undefined"))
+    throw (:error, (method, "undefined"))
   end
     
   def handle_message(message)
