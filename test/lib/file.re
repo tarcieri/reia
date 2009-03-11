@@ -10,11 +10,11 @@ module FileTest
   def run
     [
       iodevice_test(), 
-      fm_read_test(), 
-      fm_write_test(), 
-      fm_copy_test(), 
-      fm_move_test(), 
-      fm_delete_test()
+      read_test(), 
+      write_test(), 
+      copy_test(), 
+      move_test(), 
+      delete_test()
     ]
   end
   
@@ -32,31 +32,31 @@ module FileTest
     end)
   end
   
-  def fm_read_test
+  def read_test
     TestHelper.expect(File, "File.read (module version) reads correctly", fun do
       (<<"bar">>, File.read("foo.txt"))
     end)
   end
   
-  def fm_write_test
+  def write_test
     TestHelper.expect(File, "File.write (module version) writes correctly", fun do
       (:ok, File.write("foo.txt", "baz"))
     end)
   end
   
-  def fm_copy_test
+  def copy_test
     TestHelper.expect(File, "File.copy copies file", fun do
       (:ok, File.copy("foo.txt", "bar.txt"))
     end)
   end
   
-  def fm_move_test
+  def move_test
     TestHelper.expect(File, "File.move moves file", fun do
       (:ok, File.move("foo.txt", "bar.txt"))
     end)
   end
   
-  def fm_delete_test
+  def delete_test
     TestHelper.expect(File, "File.delete removes file", fun do
       (:ok, File.delete("bar.txt"))
     end)
