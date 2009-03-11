@@ -35,74 +35,74 @@ class ODBC
   def initialize(dsn)
     odbc::start()
     case odbc::connect(dsn.to_list(), [])
-    when (~ok, ref)
+    when (:ok, ref)
       @ref = ref
-    when (~error, reason)
+    when (:error, reason)
       throw reason
     end
   end
 
   def select_count(q)
     case odbc::select_count(@ref, q.to_list())
-    when (~ok, nrows)
+    when (:ok, nrows)
       nrows
-    when (~error, reason)
+    when (:error, reason)
       throw reason
     end
   end
 
   def query(q)
     case odbc::sql_query(@ref, q.to_list())
-    when (~selected, colnames, rows)
+    when (:selected, colnames, rows)
       ODBCResult(colnames, rows) 
-    when (~updated, nrows)
+    when (:updated, nrows)
       nrows
-    when (~error, reason)
+    when (:error, reason)
       throw reason
     end
   end
 
   def next
     case odbc::next(@ref)
-    when (~selected, colnames, rows)
+    when (:selected, colnames, rows)
       ODBCResult(colnames, rows)
-    when (~error, reason)
+    when (:error, reason)
       throw reason
     end
   end
 
   def prev
     case odbc::prev(@ref)
-    when (~selected, colnames, rows)
+    when (:selected, colnames, rows)
       ODBCResult(colnames, rows)
-    when (~error, reason)
+    when (:error, reason)
       throw reason
     end
   end
 
   def first
     case odbc::first(@ref)
-    when (~selected, colnames, rows)
+    when (:selected, colnames, rows)
       ODBCResult(colnames, rows)
-    when (~error, reason)
+    when (:error, reason)
       throw reason
     end
   end
   
   def last
     case odbc::last(@ref)
-    when (~selected, colnames, rows)
+    when (:selected, colnames, rows)
       ODBCResult(colnames, rows)
-    when (~error, reason)
+    when (:error, reason)
       throw reason
     end
   end
 
   def describe_table(table)
     case odbc::describe_table(@ref, table.to_list())
-    when (~ok, description)
+    when (:ok, description)
       description
-    when (~error, reason)
+    when (:error, reason)
       throw reason
     end
   end
