@@ -81,16 +81,17 @@ Rootsymbol grammar.
 
 grammar -> expr_list : '$1'.
 
-%% Expression lists 
+%% Expression lists (eol delimited)
 expr_list -> expr : ['$1'].
 expr_list -> expr eol : ['$1'].
 expr_list -> eol expr_list : '$2'.
 expr_list -> expr eol expr_list : ['$1'|'$3'].
 
-%% Expressions
+%% Expressions (comma delimited)
 exprs -> expr : ['$1'].
+exprs -> expr eol : ['$1'].
+exprs -> eol exprs : '$2'.
 exprs -> expr ',' exprs : ['$1'|'$3'].
-exprs -> expr ',' eol exprs : ['$1'|'$4'].
 
 expr -> inline_if_expr : '$1'.
 

@@ -7,13 +7,15 @@
 
 module HashTest
   def run
-    [index_test(), 
-    compare_test(), 
-    remove_test(), 
-    size_test(), 
-    keys_test(), 
-    has_test(), 
-    has_test2()]
+    [
+      index_test(), 
+      compare_test(), 
+      remove_test(), 
+      size_test(), 
+      keys_test(), 
+      has_test(), 
+      has_test2()
+    ]
   end
     
   def index_test
