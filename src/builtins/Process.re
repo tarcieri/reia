@@ -20,13 +20,13 @@ module Process
     
   # Process#to_s
   #   Generate a string representation of a process
-  def funcall(pid, ~to_s, [])
-    funcall(pid, ~inspect, [])
+  def funcall(pid, :to_s, [])
+    funcall(pid, :inspect, [])
   end
 
   # Process#inspect
   #   Inspect a process
-  def funcall(pid, ~inspect, [])
+  def funcall(pid, :inspect, [])
     erlang::pid_to_list(pid).to_string()
   end
 end

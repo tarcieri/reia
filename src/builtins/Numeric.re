@@ -15,27 +15,27 @@ module Numeric
     end
   end
 
-  def funcall(number, ~round, [])
+  def funcall(number, :round, [])
     erlang::round(number)
   end
 
-  def funcall(number, ~abs, [])
+  def funcall(number, :abs, [])
     erlang::abs(number)
   end
   
-  def funcall(number, ~to_string, [])
+  def funcall(number, :to_string, [])
     number.to_list().to_string()
   end
         
-  def funcall(number, ~to_s, [])
-    funcall(number, ~to_string, [])
+  def funcall(number, :to_s, [])
+    funcall(number, :to_string, [])
   end
     
-  def funcall(number, ~inspect, [])
-    funcall(number, ~to_string, [])
+  def funcall(number, :inspect, [])
+    funcall(number, :to_string, [])
   end
 
-  def funcall(number, ~to_list, [])
+  def funcall(number, :to_list, [])
     if erlang::is_integer(number)
       erlang::integer_to_list(number)
     else
