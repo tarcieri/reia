@@ -9,31 +9,31 @@ try
   load("test/test_helper.re")
 
   # List test
-  load("test/types/list.re")
+  load("test/builtins/list.re")
   r1 = ListTest.run()
 
   # Tuple test
-  load("test/types/tuple.re")
+  load("test/builtins/tuple.re")
   r2 = TupleTest.run()
 
   # String test
-  load("test/types/string.re")
+  load("test/builtins/string.re")
   r3 = StringTest.run()
 
   # Regex test
-  load("test/types/regex.re")
+  load("test/builtins/regex.re")
   r4 = RegexTest.run()
 
   # Numeric test
-  load("test/types/numeric.re")
+  load("test/builtins/numeric.re")
   r5 = NumericTest.run()
 
   # Hash test
-  load("test/types/hash.re")
+  load("test/builtins/hash.re")
   r6 = HashTest.run()
 
   # Atom test
-  load("test/types/atom.re")
+  load("test/builtins/atom.re")
   r7 = AtomTest.run()
 
   # Object test
