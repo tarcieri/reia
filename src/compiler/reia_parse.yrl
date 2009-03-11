@@ -410,8 +410,6 @@ extract_fragment(_Continuation, [], Line) ->
   throw({error, {Line, "unexpected end of interpolated string"}});
 extract_fragment(_Continuation, [$"|_], Line) ->
   throw({error, {Line, "invalid quote within interpolated string"}});
-extract_fragment(_Continuation, [$'|_], Line) ->
-  throw({error, {Line, "invalid quote within interpolated string"}});
 extract_fragment(Continuation, [$}|String], Line) ->
   {more, Continuation2} = reia_scan:tokens(Continuation, [$}], Line),
   case Continuation2 of
