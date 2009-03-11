@@ -80,6 +80,7 @@ Rules.
 \|    : {token,{'|',TokenLine}}.
 \|\|  : {token,{'or',TokenLine}}.
 &&    : {token,{'and',TokenLine}}.
+&     : {token,{'&',TokenLine}}.
 !     : {token,{'!',TokenLine}}.
 
 Erlang code.  
