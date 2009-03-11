@@ -23,8 +23,7 @@ module Binary
     if io_lib::char_list(list)
       "<<\"#{list.to_string()}\">>"
     else
-      l = list.join(",")
-      "<<\"#{l}\">>"
+      "<<\"#{list.join(',')}\">>"
     end
   end
 end
