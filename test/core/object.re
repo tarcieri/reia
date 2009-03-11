@@ -91,14 +91,16 @@ end
 
 module ObjectTest
   def run
-    [method_test(), 
-    local_method_test(), 
-    local_method_ivar_test(), 
-    state_test(),
-    message_test(),
-    initialize_test(),
-    inheritance_test(),
-    inheritance_ivar_test()]
+    [
+      method_test(), 
+      local_method_test(), 
+      local_method_ivar_test(), 
+      state_test(),
+      message_test(),
+      initialize_test(),
+      inheritance_test(),
+      inheritance_ivar_test()
+    ]
   end
         
   # implements method calls

@@ -7,13 +7,15 @@
 
 module RegexTest
   def run
-    #match_all()
-    #split()
-    #sub()
-    #gsub()
-    [match_one(), 
-    to_string(), 
-    inspect()]
+    [
+      #match_all(),
+      #split(),
+      #sub(),
+      #gsub(),
+      match_one(), 
+      to_string(), 
+      inspect()
+    ]
   end
   
   def match_one

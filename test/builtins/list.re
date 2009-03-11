@@ -7,15 +7,17 @@
 
 module ListTest
   def run
-    [size_test(), 
-    nth_test(), 
-    reverse_test(), 
-    push_test(), 
-    pop_test(), 
-    unshift_test(), 
-    join_test(), 
-    to_tuple_test(), 
-    to_hash_test()]
+    [
+      size_test(), 
+      nth_test(), 
+      reverse_test(), 
+      push_test(), 
+      pop_test(), 
+      unshift_test(), 
+      join_test(), 
+      to_tuple_test(), 
+      to_hash_test()
+    ]
   end
   
   # knows its size

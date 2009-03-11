@@ -7,10 +7,12 @@
 
 module TupleTest
   def run
-    [size_test(), 
-    nth_test(), 
-    to_list_test(), 
-    inspect_test()]
+    [
+      size_test(), 
+      nth_test(), 
+      to_list_test(), 
+      inspect_test()
+    ]
   end
 
   # knows its size

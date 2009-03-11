@@ -7,11 +7,13 @@
 
 module StringTest
   def run
-    [length_test(), 
-    inspect_test(), 
-    sub_test(),
-    interpolation_test()]
-    #split_test() -- requires Erlang R12B-5, which isn't generally available :/
+    [
+      length_test(), 
+      inspect_test(), 
+      sub_test(),
+      interpolation_test()
+      #split_test() -- requires Erlang R12B-5, which isn't generally available :/
+    ]
   end
   
   def length_test

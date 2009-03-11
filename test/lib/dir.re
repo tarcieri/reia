@@ -9,9 +9,11 @@ load("lib/dir.re")
 
 module DirTest
   def run
-    [create_test(),   
-    list_test(), 
-    delete_test()]
+    [
+      create_test(),   
+      list_test(), 
+      delete_test()
+    ]
   end
   
   def create_test

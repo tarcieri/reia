@@ -7,13 +7,15 @@
 
 module NumericTest
   def run
-    [compare_test(), 
-    int_to_list_test(), 
-    float_to_list_test(), 
-    int_to_string_test(), 
-    float_to_string_test(), 
-    str_to_float_test(), 
-    str_to_int_test()]
+    [
+      compare_test(), 
+      int_to_list_test(), 
+      float_to_list_test(), 
+      int_to_string_test(), 
+      float_to_string_test(), 
+      str_to_float_test(), 
+      str_to_int_test()
+    ]
   end
   
   def compare_test

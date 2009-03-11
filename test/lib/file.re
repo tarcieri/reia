@@ -8,12 +8,14 @@ load("lib/file.re")
 
 module FileTest
   def run
-    [iodevice_test(), 
-    fm_read_test(), 
-    fm_write_test(), 
-    fm_copy_test(), 
-    fm_move_test(), 
-    fm_delete_test()]
+    [
+      iodevice_test(), 
+      fm_read_test(), 
+      fm_write_test(), 
+      fm_copy_test(), 
+      fm_move_test(), 
+      fm_delete_test()
+    ]
   end
   
   def iodevice_test
