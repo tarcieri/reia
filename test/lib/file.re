@@ -18,7 +18,7 @@ module FileTest
   
   def iodevice_test
     fn = "foo.txt"
-    f = File.open(fn, [~write])
+    f = File.open(fn, [:write])
     f.write("bar")
     f.close()
 
@@ -38,25 +38,25 @@ module FileTest
   
   def fm_write_test
     TestHelper.expect(File, "File.write (module version) writes correctly", fun do
-      (~ok, File.write("foo.txt", "baz"))
+      (:ok, File.write("foo.txt", "baz"))
     end)
   end
   
   def fm_copy_test
     TestHelper.expect(File, "File.copy copies file", fun do
-      (~ok, File.copy("foo.txt", "bar.txt"))
+      (:ok, File.copy("foo.txt", "bar.txt"))
     end)
   end
   
   def fm_move_test
     TestHelper.expect(File, "File.move moves file", fun do
-      (~ok, File.move("foo.txt", "bar.txt"))
+      (:ok, File.move("foo.txt", "bar.txt"))
     end)
   end
   
   def fm_delete_test
     TestHelper.expect(File, "File.delete removes file", fun do
-      (~ok, File.delete("bar.txt"))
+      (:ok, File.delete("bar.txt"))
     end)
   end
 end

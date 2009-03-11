@@ -79,7 +79,7 @@ module ListTest
   
   def to_hash_test()
     TestHelper.expect("List", "converts to a hash", fun do
-      ([(~foo, "bar"), (~baz, "baz")].to_hash(), {~foo: "bar", ~baz: "baz"})
+      ([(:foo, "bar"), (:baz, "baz")].to_hash(), {:foo => "bar", :baz => "baz"})
     end)
   end
 end

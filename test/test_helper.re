@@ -10,10 +10,10 @@ module TestHelper
     (expected, actual) = lambda()
     if expected == actual
       ".".print()
-      ~ok
+      :ok
     else
       "F".print()
-      (~error, group, description, expected, actual)
+      (:error, group, description, expected, actual)
     end
   end
 end

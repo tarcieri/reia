@@ -16,7 +16,7 @@ module DirTest
   
   def create_test
     TestHelper.expect(Dir, "creates directories", fun do
-      (~ok, Dir.create("testdir"))
+      (:ok, Dir.create("testdir"))
     end)
   end
   
@@ -28,7 +28,7 @@ module DirTest
   
   def delete_test
     TestHelper.expect(Dir, "removes directories", fun do
-      (~ok, Dir.delete("testdir"))
+      (:ok, Dir.delete("testdir"))
     end)
   end
 end

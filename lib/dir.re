@@ -1,6 +1,6 @@
 # 
 # Dir: Reia directory interface
-# Copyright (C)2009 Tony Arcieri
+# Copyright (C)2009 Tony Arcieri, Jared Kuolt
 #
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
@@ -9,9 +9,9 @@
 module Dir
   def list(dir)
     case file::list_dir(dir.to_list())
-    when (~ok, filenames)
+    when (:ok, filenames)
       [filename.to_string() | filename in filenames]
-    when (~error, reason)
+    when (:error, reason)
       throw reason
     end
   end
@@ -26,9 +26,9 @@ module Dir
     
   def create(dir)
     case file::make_dir(dir.to_list())
-    when ~ok
-      ~ok
-    when (~error, reason)
+    when :ok
+      :ok
+    when (:error, reason)
       throw reason
     end
   end
@@ -39,9 +39,9 @@ module Dir
     
   def delete(dir)
     case file::del_dir(dir.to_list())
-    when ~ok
-      ~ok
-    when (~error, reason)
+    when :ok
+      :ok
+    when (:error, reason)
       throw reason
     end
   end
@@ -52,9 +52,9 @@ module Dir
     
   def cd(dir)
     case file::set_cwd(dir.to_list())
-    when ~ok
-      ~ok
-    when (~error, reason)
+    when :ok
+      :ok
+    when (:error, reason)
       throw reason
     end
   end
@@ -65,9 +65,9 @@ module Dir
     
   def getcwd
     case file::get_cwd()
-    when (~ok, dir)
+    when (:ok, dir)
       dir.to_string()
-    when (~error, reason)
+    when (:error, reason)
       throw reason
     end
   end

@@ -73,8 +73,8 @@ Terminals
   'and' 'or' 'not' 'try' 'catch' throw for in 'receive' 'after'
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**' '!'
-  '.' '..' ',' ':' '::' '@'
-  '=' '==' '===' '!=' '>' '<' '<=' '>='
+  '.' '..' ',' '::' '@'
+  '=' '==' '===' '!=' '>' '<' '=>' '<=' '>='
   .
 
 Rootsymbol grammar.
@@ -312,8 +312,8 @@ tuple -> '(' expr ',' exprs ')': {tuple, line('$1'), ['$2'|'$4']}.
 dict -> '{' '}' : {dict, line('$1'), []}.
 dict -> '{' dict_entries '}' : {dict, line('$1'), '$2'}.
 
-dict_entries -> bool_expr ':' expr : [{'$1','$3'}].
-dict_entries -> bool_expr ':' expr ',' dict_entries : [{'$1','$3'}|'$5'].
+dict_entries -> bool_expr '=>' expr : [{'$1','$3'}].
+dict_entries -> bool_expr '=>' expr ',' dict_entries : [{'$1','$3'}|'$5'].
 
 %% Binaries
 binary -> '<<' string '>>' : {binary, line('$1'), '$2'}.

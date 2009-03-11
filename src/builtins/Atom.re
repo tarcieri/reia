@@ -6,33 +6,33 @@
 #
 
 module Atom    
-  def funcall(term, ~to_s, [])
-    term.to_list().to_string().sub(/^~/, '')
+  def funcall(term, :to_s, [])
+    term.to_list().to_string().sub(/^:/, '')
   end
     
-  def funcall(nil, ~inspect, [])
+  def funcall(nil, :inspect, [])
     "nil"
   end
 
-  def funcall(true, ~inspect, [])
+  def funcall(true, :inspect, [])
     "true"
   end
 
-  def funcall(false, ~inspect, [])
+  def funcall(false, :inspect, [])
     "false"
   end
 
-  def funcall(term, ~to_list, [])
+  def funcall(term, :to_list, [])
     erlang::atom_to_list(term)
   end
     
-  def funcall(term, ~inspect, [])
+  def funcall(term, :inspect, [])
     atom = term.to_s()
     case /^[A-Za-z0-9_]+$/.match(atom)
     when nil
-      "~'#{atom}'"
+      ":'#{atom}'"
     when _
-      "~#{atom}"
+      ":#{atom}"
     end
   end
 end

@@ -51,8 +51,8 @@ try
   puts("\n")
 
   results = [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10].flatten()
-  failures = [error|error = (~error, _, _, _, _) in results]
-  failures.each do |(~error, group, description, expected, actual)| 
+  failures = [error|error = (:error, _, _, _, _) in results]
+  failures.each do |(:error, group, description, expected, actual)| 
     puts("'#{group} #{description}' FAILED")
     puts("expected #{expected}, actual #{actual}\n")
   end

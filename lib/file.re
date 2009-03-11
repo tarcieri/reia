@@ -1,6 +1,6 @@
 # 
 # File: Reia file interface
-# Copyright (C)2008 Jared Kuolt
+# Copyright (C)2008 Jared Kuolt, Tony Arcieri
 #
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
@@ -8,7 +8,7 @@
 # This interface is subject to change!
 module File
   def open(fn)
-    IODevice(fn, [~read,~binary])
+    IODevice(fn, [:read, :binary])
   end
   
   def open(fn, modes)
@@ -17,18 +17,18 @@ module File
   
   def read(fn)
     case file::read_file(fn.to_list())
-    when (~ok, data)
+    when (:ok, data)
       data
-    when (~error, reason)
+    when (:error, reason)
       throw reason
     end
   end
   
   def write(fn, data)
     case file::write_file(fn.to_list(), data.to_list())
-    when ~ok
-      ~ok
-    when (~error, reason)
+    when :ok
+      :ok
+    when (:error, reason)
       throw reason
     end
   end
@@ -39,9 +39,9 @@ module File
     
   def delete(fn)
     case file::delete(fn.to_list())
-    when ~ok
-      ~ok
-    when (~error, reason)
+    when :ok
+      :ok
+    when (:error, reason)
       throw reason
     end
   end
@@ -52,9 +52,9 @@ module File
     
   def copy(src, dest)
     case file::copy(src.to_list(), dest.to_list())
-    when (~ok, _)
-      ~ok
-    when (~error, reason)
+    when (:ok, _)
+      :ok
+    when (:error, reason)
       throw reason
     end
   end
@@ -65,9 +65,9 @@ module File
     
   def move(src, dest)
     case file::rename(src.to_list(), dest.to_list())
-    when ~ok
-      ~ok
-    when (~error, reason)
+    when :ok
+      :ok
+    when (:error, reason)
       throw reason
     end
   end
@@ -94,7 +94,7 @@ module File
     
   def symlink?(path)
     case file::read_link(path.to_list())
-    when (~ok, _)
+    when (:ok, _)
       true
     when _
       false
@@ -108,38 +108,38 @@ class IODevice
     @modes = reia_erl::r2e(modes.map{|m| reia_erl::r2e(m)})
     @fn = fn.to_list()
     case file::open(@fn, @modes)
-    when (~ok, file)
+    when (:ok, file)
       @file = file 
-    when (~error, reason)
+    when (:error, reason)
       throw reason
     end
   end
 
   def read(num)
     case file::read(@file, reia_erl::r2e(num))
-    when (~ok, data)
+    when (:ok, data)
       data
-    when ~eof
-      ~eof
-    when (~error, reason)
+    when :eof
+      :eof
+    when (:error, reason)
       throw reason
     end
   end
   
   def close
     case file::close(@file)
-    when ~ok
-      ~ok
-    when (~error, reason)
+    when :ok
+      :ok
+    when (:error, reason)
       throw reason
     end
   end
   
   def write(data)
     case file::write(@file, data.to_list())
-    when ~ok
-      ~ok
-    when (~error, reason)
+    when :ok
+      :ok
+    when (:error, reason)
       throw reason
     end
   end
