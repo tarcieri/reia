@@ -31,6 +31,7 @@ Nonterminals
   funcall_expr
   funcall
   function_identifier
+  function_params
   block
   class_inst_expr
   class_inst
@@ -73,7 +74,7 @@ Terminals
   'and' 'or' 'not' 'try' 'catch' throw for in 'receive' 'after'
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**' '!'
-  '.' '..' ',' '::' '@'
+  '.' '..' ',' '::' '@' '&'
   '=' '==' '===' '!=' '>' '<' '=>' '<=' '>='
   .
 
@@ -248,11 +249,21 @@ functions -> function eol : ['$1'].
 functions -> eol functions : '$2'.
 functions -> function eol functions : ['$1'|'$3'].
 
+%% Function definitions
 function -> def function_identifier eol expr_list 'end' : {function, line('$1'), '$2', [], '$4'}.
 function -> def function_identifier '(' ')' eol expr_list 'end' : {function, line('$1'), '$2', [], '$6'}.
 function -> def function_identifier '(' exprs ')' eol expr_list 'end' : {function, line('$1'), '$2', '$4', '$7'}.
 
-% Function identifiers
+%% Function definitions with block arguments
+function -> def function_identifier '(' '&' identifier ')' eol expr_list 'end' : {function, line('$1'), '$2', [], '$5', '$8'}.
+function -> def function_identifier '(' function_params '&' identifier ')' eol expr_list 'end' : {function, line('$1'), '$2', '$4', '$6', '$9'}.
+
+%% FIXME: workaround for shift/reduce conflicts involving ',' and block args
+%% Doesn't handle newlines properly
+function_params -> expr ',' : ['$1'].
+function_params -> expr ',' function_params : ['$1'|'$3'].
+
+%% Function identifiers
 function_identifier -> identifier : function_identifier('$1').
 function_identifier -> punctuated_identifier : function_identifier('$1').
 function_identifier -> class : function_identifier('$1').
