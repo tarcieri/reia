@@ -54,7 +54,7 @@ try
   failures = [error|error = (:error, _, _, _, _) in results]
   failures.each do |(:error, group, description, expected, actual)| 
     puts("'#{group} #{description}' FAILED")
-    puts("expected #{expected}, actual #{actual}\n")
+    puts("expected #{expected.inspect()}, actual #{actual.inspect()}\n")
   end
   
   puts("#{results.size()} assertions, #{failures.size()} failures")
