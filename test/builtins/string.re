@@ -11,8 +11,9 @@ module StringTest
       length_test(), 
       inspect_test(), 
       sub_test(),
-      interpolation_test()
-      #split_test() -- requires Erlang R12B-5, which isn't generally available :/
+      interpolation_test(),
+      #split_test(), -- requires Erlang R12B-5, which isn't generally available :/
+      to_constant_test()
     ]
   end
   
@@ -44,6 +45,12 @@ module StringTest
   def split_test
     TestHelper.expect("String", "splits properly", fun do
       (["foo", "bar", "baz"], "foo    bar baz".split(/\s+/))
+    end)
+  end
+  
+  def to_constant_test
+    TestHelper.expect("String", "converts to constant", fun do
+      (Object, "Object".to_constant())
     end)
   end
 end

@@ -140,7 +140,18 @@ funcall({string, String}, to_parsetree, []) ->
     {ok, Expressions}  -> reia_erl:e2r(Expressions);
     {error, _} = Error -> throw(Error)
   end;
-
+  
+%% String#to_constant
+%%   Convert a string to a constant
+funcall({string, String}, to_constant, []) ->
+  Name = list_to_atom(binary_to_list(String)),
+  case code:ensure_loaded(Name) of
+    {module, _Name} ->
+      {constant, Name};
+    {error, _Error} ->
+      throw({error, {Name, "not loaded"}})
+  end;
+  
 %% String#to_i
 %%   Sloppily convert a string into an integer
 funcall({string, String}, to_i, []) ->
