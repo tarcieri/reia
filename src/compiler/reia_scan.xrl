@@ -106,6 +106,7 @@ unescape_string([], Output) ->
 unescape_string([$\\, Escaped | Rest], Output) ->
   Char = case Escaped of
     $\\ -> $\\;
+    $/  -> $/; 
     $\" -> $\";
     $\' -> $\';
     $b  -> $\b;
