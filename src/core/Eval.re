@@ -65,6 +65,8 @@ module Eval
       Main.eval(args[0])
     when :load
       Main.load(args[0])
+    when _
+      throw "undefined shell command: #{name}"
     end
   end
 end
