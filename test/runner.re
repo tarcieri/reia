@@ -16,6 +16,7 @@ tests = [
   "builtins/hash",
   "builtins/atom",
   "core/object",
+  "core/blocks",
   "lib/file",
   "lib/dir"
 ]
