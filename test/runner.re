@@ -21,11 +21,16 @@ tests = [
 ]
 
 results = tests.map do |test|
-  load("test/#{test}.re")
+  try
+    load("test/#{test}.re")
   
-  name = test.split(/\//)[1]
-  mod = "#{name.capitalize()}Test".to_constant()
-  mod.run()
+    name = test.split(/\//)[1]
+    mod = "#{name.capitalize()}Test".to_constant()
+    mod.run()
+  catch ex
+    print("E")
+    (:error, "#{test}.re", ex)
+  end
 end.flatten()
 
 puts("\n")
@@ -36,5 +41,10 @@ failures.each do |(:error, group, description, expected, actual)|
   puts("expected #{expected.inspect()}, actual #{actual.inspect(    )}\n")
 end
 
-puts("#{results.size()} assertions, #{failures.size()} failures")
-System.halt(1) if failures.size() > 0
+errors = [error|error = (:error, _, _) in results]
+errors.each do |(:error, test, ex)|
+  puts("#{test} ERROR: #{ex}\n")
+end
+
+puts("#{results.size()} assertions, #{failures.size()} failures, #{errors.size()} errors")
+System.halt(1) if failures.size() > 0 or errors.size() > 0
