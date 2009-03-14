@@ -8,29 +8,22 @@
 load("test/test_helper.re")
 
 tests = [
-  "builtins/list",
-  "builtins/tuple",
-  "builtins/string",
-  "builtins/regex",
-  "builtins/numeric",
-  "builtins/hash",
-  "builtins/atom",
-  "core/object",
-  "core/blocks",
-  "lib/file",
-  "lib/dir"
+  ("builtins", ["list", "tuple", "string", "regex", "numeric", "hash", "atom"]),
+  ("core",     ["object", "blocks"]),
+  ("lib",      ["file", "dir"])
 ]
 
-results = tests.map do |test|
-  try
-    load("test/#{test}.re")
-  
-    name = test.split(/\//)[1]
-    mod = "#{name.capitalize()}Test".to_constant()
-    mod.run()
-  catch ex
-    print("E")
-    (:error, "#{test}.re", ex)
+results = tests.map do |(group, modules)|
+  modules.map do |name|
+    try
+      load("test/#{group}/#{name}.re")
+    
+      mod = "#{name.capitalize()}Test".to_constant()
+      mod.run()
+    catch ex
+      print("E")
+      (:error, "#{group}/#{name}.re", ex)
+    end
   end
 end.flatten()
 
