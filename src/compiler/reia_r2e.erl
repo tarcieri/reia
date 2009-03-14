@@ -65,7 +65,7 @@ forms({string, Line, String}) ->
   
 %% Interpolated strings
 forms({dstring, Line, Exprs}) ->
-  forms({funcall, Line, {list, Line, Exprs}, {identifier, Line, join}, []});
+  forms({funcall, Line, {list, Line, Exprs}, {identifier, Line, join}, [], {atom, Line, nil}});
   
 %% Regexes
 forms({regexp, Line, Pattern}) ->
@@ -131,18 +131,14 @@ forms({op, Line, Op, In}) ->
 forms({op, Line, Op, In1, In2}) ->
   reia_operators:forms(Op, Line, forms(In1), forms(In2));
   
-%% Reia function calls
-forms({funcall, Line, {identifier, _, Method}, Arguments}) ->
-  {call, Line, {atom, Line, Method}, [forms(Argument) || Argument <- Arguments]};
-forms({funcall, Line, {var, _, Var}, Arguments}) ->
+%% Lambda invocations
+forms({funcall, Line, {var, _, Var}, Arguments, _Block}) ->
   {call, Line, forms({identifier, Line, Var}), [forms(Argument) || Argument <- Arguments]};
-forms({funcall, Line, Receiver, {identifier, _, Method}, Arguments}) ->
-  {call, Line,
-    {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, funcall}},
-    [forms(Receiver), {atom, Line, Method}, list_to_forms(Arguments, Line)]
-  };
   
-%% Reia function calls with pseudo-blocks
+%% Function calls
+forms({funcall, Line, {identifier, _, Method}, Arguments, _Block}) ->
+  {call, Line, {atom, Line, Method}, [forms(Argument) || Argument <- Arguments]};
+  
 forms({funcall, Line, Receiver, {identifier, _, Method}, Arguments, Block}) ->
   {call, Line,
     {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, funcall}},

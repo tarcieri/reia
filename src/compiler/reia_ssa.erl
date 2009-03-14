@@ -70,26 +70,16 @@ transform(#state{bindings=Dict} = State, {lambda, Line, Arguments, Expressions})
   {ok, _, Expressions2} = reia_visitor:transform(Expressions, #state{bindings=Dict2}, fun transform/2),
   {stop, State, {lambda, Line, Arguments2, Expressions2}};
   
-% Function names are identifiers and should remain undisturbed unless they are bound variables
-transform(#state{mode=Mode, bindings=Dict} = State, {funcall, Line, {identifier, _Line, Name} = Identifier, Arguments}) ->
+transform(#state{mode=Mode, bindings=Dict} = State, {funcall, Line, {identifier, _Line, Name} = Identifier, Arguments, Block}) ->
   {ok, #state{bindings=Dict2}, Arguments2} = reia_visitor:transform(Arguments, State, fun transform/2),
+  {ok, #state{bindings=Dict3}, Block2} = reia_visitor:transform(Block, #state{mode=Mode, bindings=Dict2}, fun transform/2),
   Identifier2 = case dict:find(Name, Dict) of
     {ok, Version} ->
       {var, Line, ssa_name(Name, Version)};
     error ->
       Identifier
   end,  
-  Node = {funcall, Line, Identifier2, Arguments2},
-  {stop, #state{mode=Mode, bindings=Dict2}, Node};
-
-transform(#state{mode=Mode} = State, {funcall, Line, Receiver, Name, Arguments}) ->
-  {ok, #state{bindings=Dict2}, Receiver2}  = reia_visitor:transform(Receiver, State, fun transform/2), 
-  {ok, #state{bindings=Dict3}, Arguments2} = reia_visitor:transform(
-    Arguments, 
-    #state{mode=Mode, bindings=Dict2}, 
-    fun transform/2
-  ),
-  Node = {funcall, Line, Receiver2, Name, Arguments2},
+  Node = {funcall, Line, Identifier2, Arguments2, Block2},
   {stop, #state{mode=Mode, bindings=Dict3}, Node};
 
 transform(#state{mode=Mode} = State, {funcall, Line, Receiver, Name, Arguments, Block}) ->
