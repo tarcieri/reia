@@ -59,27 +59,27 @@ funcall({string, String}, to_float, []) ->
 %%   Capitalize all letters string
 funcall({string, String}, upcase, []) ->
   NewString = string:to_upper(binary_to_list(String)),
-  reia_list:funcall(reia_erl:e2r(NewString), to_string, []);
+  reia_list:funcall(reia_erl:e2r(NewString), to_string, [], nil);
   
 %% String#downcase
 %%   Remove capitalization from a string
 funcall({string, String}, downcase, []) ->
   NewString = string:to_lower(binary_to_list(String)),
-  reia_list:funcall(reia_erl:e2r(NewString), to_string, []);
+  reia_list:funcall(reia_erl:e2r(NewString), to_string, [], nil);
   
 %% String#capitalize
 %%   Capitalize the first letter of a string
 funcall({string, String}, capitalize, []) ->
   [FirstLetter|Rest] = binary_to_list(String),
   NewString = string:to_upper([FirstLetter]) ++ Rest,
-  reia_list:funcall(reia_erl:e2r(NewString), to_string, []);
+  reia_list:funcall(reia_erl:e2r(NewString), to_string, [], nil);
   
 %% String#uncapitalize
 %%   Uncapitalize the first letter of a string
 funcall({string, String}, uncapitalize, []) ->
   [FirstLetter|Rest] = binary_to_list(String),
   NewString = string:to_lower([FirstLetter]) ++ Rest,
-  reia_list:funcall(reia_erl:e2r(NewString), to_string, []);
+  reia_list:funcall(reia_erl:e2r(NewString), to_string, [], nil);
   
 %% String#length
 %%   Returns the number of characters in the string
@@ -91,10 +91,10 @@ funcall({string, String}, length, []) ->
 %%   ending at option Stop or end of string
 funcall({string, String}, slice, [Start]) ->
   NewString = reia_erl:e2r(string:sub_string(binary_to_list(String), Start)),
-  reia_list:funcall(NewString, to_string, []);
+  reia_list:funcall(NewString, to_string, [], nil);
 funcall({string, String}, slice, [Start, Stop]) ->
   NewString = reia_erl:e2r(string:sub_string(binary_to_list(String), Start, Stop)),
-  reia_list:funcall(NewString, to_string, []);
+  reia_list:funcall(NewString, to_string, [], nil);
 
 %% String#strip
 %%   Returns string stripped of whitespace or optional char,
@@ -110,7 +110,7 @@ funcall({string, String}, strip, [{string, Bin}, Direction]) ->
   funcall({string, String}, strip, [Char, Direction]);
 funcall({string, String}, strip, [Char, Direction]) ->
   NewString = reia_erl:e2r(string:strip(binary_to_list(String), Direction, Char)),
-  reia_list:funcall(NewString, to_string, []);
+  reia_list:funcall(NewString, to_string, [], nil);
 
 %% String#sub
 %%   Replace a portion of a string with a given substitution
