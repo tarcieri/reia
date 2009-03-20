@@ -57,7 +57,7 @@ funcall(Receiver = {string, _}, Method, Arguments, _Block) ->
 funcall(Receiver = {regexp, _}, Method, Arguments, _Block) ->
   'Regex':funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver = {exception, _}, Method, Arguments, _Block) ->
-  'Exception':funcall(Receiver, Method, Arguments, _Block);
+  'Exception':funcall(Receiver, Method, Arguments);
 funcall(Receiver, _, _, _) ->
   throw({error, unknown_receiver, Receiver}).
   
