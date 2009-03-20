@@ -60,6 +60,19 @@ transform(State, {function, Line, Name, Arguments, Expressions}) ->
   % Return to the original scope
   {stop, State, {function, Line, Name, Arguments2, Expressions2}};
 
+transform(State, {function, Line, Name, Arguments, Block, Expressions}) ->
+  % Create a new scope with dict:new()
+  {ok, #state{bindings=Dict}, Arguments2} = reia_visitor:transform(
+    Arguments, 
+    #state{mode=argument, bindings=dict:new()}, 
+    fun transform/2
+  ),
+  {ok, #state{bindings=Dict2}, Block2} = reia_visitor:transform(Block, #state{mode=argument, bindings=Dict}, fun transform/2),
+  {ok, _, Expressions2} = reia_visitor:transform(Expressions, #state{bindings=Dict2}, fun transform/2),
+
+  % Return to the original scope
+  {stop, State, {function, Line, Name, Arguments2, Block2, Expressions2}};
+
 % Lambdas close over the outer scope, bind arguments, but don't affect the outer scope
 transform(#state{bindings=Dict} = State, {lambda, Line, Arguments, Expressions}) ->
   {ok, #state{bindings=Dict2}, Arguments2} = reia_visitor:transform(
