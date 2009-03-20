@@ -78,8 +78,8 @@ transform(_State, {ivar, Line, _Name}) ->
 % Local method calls need to pass around ivars, so prepare them for the SSA
 % transform.  This should probably be factored elsewhere, but it's tangentially
 % related to instance variables.
-transform(method, {funcall, Line, Name, Arguments}) ->
-  Node = {method_call, Line, Name, Arguments},
+transform(method, {funcall, Line, Name, Arguments, Block}) ->
+  Node = {method_call, Line, Name, Arguments, Block},
   {walk, method, Node};
   
 % Walk unrecognized nodes without transforming them

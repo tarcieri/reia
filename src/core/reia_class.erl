@@ -49,7 +49,7 @@ build_parent_from_ancestry({class, _Line, {constant, _, Name}, {constant, _, Anc
   
 merge_ancestor_methods(AncestorMethods, ClassName, Methods) ->
   lists:foldl(
-    fun({function, _, {identifier, _, Name}, _, _} = Function, Dict) ->
+    fun({function, _, {identifier, _, Name}, _, _, _} = Function, Dict) ->
       dict:store(Name, {method, ClassName, Function}, Dict) 
     end,
     AncestorMethods,
@@ -58,7 +58,7 @@ merge_ancestor_methods(AncestorMethods, ClassName, Methods) ->
   
 merge_with_parent(Methods, AncestorMethods) ->
   FinalMethods = lists:foldl(
-    fun({function, _, Name, _, _} = Function, Dict) ->
+    fun({function, _, Name, _, _, _} = Function, Dict) ->
       dict:store(Name, Function, Dict)
     end,
     AncestorMethods,
@@ -69,7 +69,7 @@ merge_with_parent(Methods, AncestorMethods) ->
 build_inherited_methods(MethodsDict) ->
   Methods = compile_inherited_methods(MethodsDict),
   lists:foldl(
-    fun({function, _, Name, _, _} = Function, Dict) ->
+    fun({function, _, Name, _, _, _} = Function, Dict) ->
       {method, Ancestor, _} = dict:fetch(Name, MethodsDict),
       dict:store(Name, {method, Ancestor, Function}, Dict)
     end,
@@ -132,7 +132,7 @@ process_methods(Methods) ->
   {lists:reverse(NewClauses), lists:reverse(NewFunctions)}.
   
 %% Extract a method into its dispatch_method clause and mangled form
-extract_mangled_name_and_function({method, Ancestor, {function, _, Name, _, _} = Function}) ->
+extract_mangled_name_and_function({method, Ancestor, {function, _, Name, _, _, _} = Function}) ->
   {reia_mangle:method(Ancestor, Name), Function};
 extract_mangled_name_and_function({function, _, Name, _, _} = Function) ->
   {reia_mangle:method(Name), Function}.

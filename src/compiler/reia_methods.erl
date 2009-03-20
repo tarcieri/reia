@@ -25,12 +25,12 @@ ast(Ast) ->
   Ast2.
   
 %% Method calls
-transform(_, {method_call, Line, Method, Arguments, IvarsIn, IvarsOut}) ->
+transform(_, {method_call, Line, Method, Arguments, Block, IvarsIn, IvarsOut}) ->
   Nonce = list_to_atom("__return_value_" ++ reia_compiler:nonce()),
   Node = {block, Line, [
     {match, Line, 
       return_value_pattern(Line, IvarsOut, Nonce), 
-      method_invocation(Line, Method, Arguments, IvarsIn)
+      method_invocation(Line, Method, Arguments, Block, IvarsIn)
     },
     {identifier, Line, Nonce}
   ]},
@@ -56,7 +56,7 @@ return_value_pattern(Line, IvarsOut, Nonce) ->
   }.
   
 % Invoke the given method
-method_invocation(Line, Method, Arguments, IvarsIn) ->
+method_invocation(Line, Method, Arguments, Block, IvarsIn) ->
   {identifier, Line, Name} = Method,
   {funcall, Line, 
     {identifier, Line, dispatch_method}, 
@@ -69,5 +69,6 @@ method_invocation(Line, Method, Arguments, IvarsIn) ->
       }, 
       {atom, Line, local}, 
       IvarsIn
-    ]
+    ],
+    Block
   }.
