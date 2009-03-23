@@ -32,14 +32,14 @@ transform(State, {class, Line, Name, Ancestor, Expressions}) ->
   {stop, _, {class, _, _, Expressions2}} = transform(State, {class, Line, Name, Expressions}),
   {stop, State, {class, Line, Name, Ancestor, Expressions2}};
   
-transform(class, {function, Line, Name, Arguments, Expressions}) ->
+transform(class, {function, Line, Name, Arguments, Block, Expressions}) ->
   Expressions2 = lists:map(fun(Expression) ->
       {ok, _, Expression2} = reia_visitor:transform(Expression, method, fun transform/2),
       Expression2
     end,
     Expressions
   ),
-  {stop, class, {function, Line, Name, Arguments, Expressions2}};
+  {stop, class, {function, Line, Name, Arguments, Block, Expressions2}};
 
 % Match statements
 transform(method, {match, Line, In1, In2}) ->

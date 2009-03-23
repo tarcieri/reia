@@ -48,18 +48,6 @@ transform(State, {class, Line, Name, Ancestor, Expressions}) ->
   {stop, State, {class, Line, Name, Ancestor, Expressions2}};
   
 % Function declarations create a new scope
-transform(State, {function, Line, Name, Arguments, Expressions}) ->
-  % Create a new scope with dict:new()
-  {ok, #state{bindings=Dict}, Arguments2} = reia_visitor:transform(
-    Arguments, 
-    #state{mode=argument, bindings=dict:new()}, 
-    fun transform/2
-  ),
-  {ok, _, Expressions2} = reia_visitor:transform(Expressions, #state{bindings=Dict}, fun transform/2),
-    
-  % Return to the original scope
-  {stop, State, {function, Line, Name, Arguments2, Expressions2}};
-
 transform(State, {function, Line, Name, Arguments, Block, Expressions}) ->
   % Create a new scope with dict:new()
   {ok, #state{bindings=Dict}, Arguments2} = reia_visitor:transform(

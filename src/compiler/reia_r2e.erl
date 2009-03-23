@@ -19,13 +19,13 @@ forms({class, Line, {constant, _, Name}, {constant, _, Ancestor}, Functions}) ->
   {class, Line, Name, Ancestor, group_clauses([forms(Function) || Function <- Functions])};
   
 %% Functions
-forms({function, Line, {identifier, _, Name}, Arguments, Expressions}) ->
+forms({function, Line, {identifier, _, Name}, Arguments, _Block, Expressions}) ->
   {function, Line, Name, erlang:length(Arguments), [{clause, Line, 
     [forms(Argument) || Argument <- Arguments],
     [],
     [forms(Expression) || Expression <- Expressions]
   }]};
-  
+    
 %% Pattern matching
 forms({match, Line, In1, In2}) ->
   {match, Line, forms(In1), forms(In2)};

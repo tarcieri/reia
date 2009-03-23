@@ -250,9 +250,9 @@ functions -> eol functions : '$2'.
 functions -> function eol functions : ['$1'|'$3'].
 
 %% Function definitions
-function -> def function_identifier eol expr_list 'end' : {function, line('$1'), '$2', [], '$4'}.
-function -> def function_identifier '(' ')' eol expr_list 'end' : {function, line('$1'), '$2', [], '$6'}.
-function -> def function_identifier '(' exprs ')' eol expr_list 'end' : {function, line('$1'), '$2', '$4', '$7'}.
+function -> def function_identifier eol expr_list 'end' : {function, line('$1'), '$2', [], nil, '$4'}.
+function -> def function_identifier '(' ')' eol expr_list 'end' : {function, line('$1'), '$2', [], nil, '$6'}.
+function -> def function_identifier '(' exprs ')' eol expr_list 'end' : {function, line('$1'), '$2', '$4', nil, '$7'}.
 
 %% Function definitions with block arguments
 function -> def function_identifier '(' '&' identifier ')' eol expr_list 'end' : {function, line('$1'), '$2', [], '$5', '$8'}.

@@ -49,7 +49,7 @@ build_parent_from_ancestry({class, _Line, {constant, _, Name}, {constant, _, Anc
   
 merge_ancestor_methods(AncestorMethods, ClassName, Methods) ->
   lists:foldl(
-    fun({function, _, {identifier, _, Name}, _, _} = Function, Dict) ->
+    fun({function, _, {identifier, _, Name}, _, _, _} = Function, Dict) ->
       dict:store(Name, {method, ClassName, Function}, Dict) 
     end,
     AncestorMethods,
