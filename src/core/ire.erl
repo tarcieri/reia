@@ -16,7 +16,7 @@ start() ->
   spawn(fun() -> loop() end).
 
 loop() ->
-  loop('Eval':new_binding()).
+  loop('Eval':new_binding({}, nil)).
     
 loop(Binding) ->
   case read() of
@@ -51,7 +51,7 @@ read_until_blank(Input, Prompt) ->
 eval_print(String, Binding) ->
   case reia_parse:string(String) of
     {ok, Exprs} ->
-      {tuple, {value, Value, NewBinding}} = 'Eval':exprs(Exprs, Binding),
+      {tuple, {value, Value, NewBinding}} = 'Eval':exprs({Exprs, Binding}, nil),
       print(Value),
       NewBinding;
       
