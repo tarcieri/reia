@@ -126,7 +126,7 @@ task :install do
 #!/bin/sh
 PROGRAM=$1
 shift
-erl -noshell +K true -s Loader start $PROGRAM -s init stop -extra $*"
+erl -noshell +K true -s reia erl_load $PROGRAM -s init stop -extra $*"
   end
 
   File.open(PREFIX + "/bin/ire", "w", 0755) do |f| f << "#!/bin/sh

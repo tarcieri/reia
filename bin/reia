@@ -3,4 +3,4 @@
 PROGRAM=$1
 shift
 
-erl -pa ebin -pa ../ebin -noshell +K true -s Loader start $PROGRAM -s init stop -extra $*
+erl -pa ebin -pa ../ebin -noshell +K true -s reia erl_load $PROGRAM -s init stop -extra $*
