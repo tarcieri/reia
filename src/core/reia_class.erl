@@ -161,7 +161,9 @@ dispatcher_clause(RealName, MangledName, Line) ->
   ]}.
        
 %% Build a clause for dispatch_method from the original clauses for a method
-process_method_clause({clause, Line, Arguments, [], Expressions}) ->
+process_method_clause({clause, Line, [], [], Expressions}) ->
+  process_method_clause({clause, Line, [{tuple, Line, []}, nil], [], Expressions});
+process_method_clause({clause, Line, [{tuple, _, Arguments}, _Block], [], Expressions}) ->
   {clause, Line, [
     argument_list_cons(Arguments, Line),
     {var, Line, '_caller'},
