@@ -19,9 +19,9 @@ forms({class, Line, {constant, _, Name}, {constant, _, Ancestor}, Functions}) ->
   {class, Line, Name, Ancestor, group_clauses([forms(Function) || Function <- Functions])};
   
 %% Functions
-forms({function, Line, {identifier, _, Name}, Arguments, _Block, Expressions}) ->
-  {function, Line, Name, erlang:length(Arguments), [{clause, Line, 
-    [forms(Argument) || Argument <- Arguments],
+forms({function, Line, {identifier, _, Name}, Arguments, Block, Expressions}) ->
+  {function, Line, Name, 2, [{clause, Line, 
+    [{tuple, Line, [forms(Argument) || Argument <- Arguments]}, forms(Block)],
     [],
     [forms(Expression) || Expression <- Expressions]
   }]};
@@ -136,8 +136,8 @@ forms({funcall, Line, {var, _, Var}, Arguments, _Block}) ->
   {call, Line, forms({identifier, Line, Var}), [forms(Argument) || Argument <- Arguments]};
   
 %% Function calls
-forms({funcall, Line, {identifier, _, Method}, Arguments, _Block}) ->
-  {call, Line, {atom, Line, Method}, [forms(Argument) || Argument <- Arguments]};
+forms({funcall, Line, {identifier, _, Method}, Arguments, Block}) ->
+  {call, Line, {atom, Line, Method}, [{tuple, Line, [forms(Argument) || Argument <- Arguments]}, forms(Block)]};
   
 forms({funcall, Line, Receiver, {identifier, _, Method}, Arguments, Block}) ->
   {call, Line,

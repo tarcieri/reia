@@ -56,19 +56,22 @@ return_value_pattern(Line, IvarsOut, Nonce) ->
   }.
   
 % Invoke the given method
-method_invocation(Line, Method, Arguments, Block, IvarsIn) ->
+% Dispatches to dispatch_method({Method, Args}, Caller, State)
+method_invocation(Line, Method, Arguments, _Block, IvarsIn) ->
   {identifier, Line, Name} = Method,
-  {funcall, Line, 
-    {identifier, Line, dispatch_method}, 
-    [ 
-      {erl_forms, Line,
-        {tuple, Line, [
-          {atom, Line, Name}, 
-          reia_r2e:list_to_forms(Arguments, Line)
-        ]}
-      }, 
-      {atom, Line, local}, 
-      IvarsIn
-    ],
-    Block
-  }.
+  Arguments2 = [
+    {tuple, Line, [
+      {atom, Line, Name},
+      form_list(Arguments, Line)
+    ]}, 
+    {atom, Line, local}, 
+    forms(IvarsIn)
+  ],
+  {erl_forms, Line, {call, Line, {atom, Line, dispatch_method}, Arguments2}}.
+  
+% Ugh, hacka perform the final passes of the compiler.
+% FIXME: This sucks
+forms(Node) ->
+  reia_r2e:forms(Node).
+form_list(Node, Line) ->
+  reia_r2e:list_to_forms(Node, Line).
