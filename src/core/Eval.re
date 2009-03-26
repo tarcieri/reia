@@ -23,11 +23,8 @@ module Eval
     # Convert Reia variable names to Erlang SSA names
     binding = binding.map { |(var, value)| (var.to_s().sub(/^/, "_").sub(/$/, "_0").to_atom(), value) }
         
-    # Set up a fun which is called for local functions
-    local_callback = fun(name, arguments) { local(name, arguments) }
-    
     # Evaluate the expressions using erl_eval
-    (:value, result, binding) = eval_shim::exprs(erl_forms, binding, (:value, local_callback))
+    (:value, result, binding) = eval_shim::exprs(erl_forms, binding)
     
     # Convert Erlang SSA variable names back to Reia names
     binding = binding.map { |(var, value)| (var.to_s().sub(/^_/, "").sub(/_[0-9]+$/, "").to_atom(), value) }
@@ -50,23 +47,5 @@ module Eval
   
   def new_binding
     erl_eval::new_bindings()
-  end
-  
-  # Thunk local functions to Kernel
-  # FIXME: this is a rather inelegant solution and should be DRYed out
-  def local(name, args)
-    case name
-    when :puts
-      args.each { |arg| Main.puts(arg) }
-      nil
-    when :print
-      Main.print(args[0])
-    when :eval
-      Main.eval(args[0])
-    when :load
-      Main.load(args[0])
-    when _
-      throw "undefined shell command: #{name}"
-    end
   end
 end

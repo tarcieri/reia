@@ -24,11 +24,9 @@ apply(Constant, Method, Arguments) ->
 % Call the given Reia function from the Erlang environment, automatically
 % converting methods from Erlang to Reia from.
 % FIXME should disintermediate the block from other formal arguments.
-apply(Constant, Method, Arguments, nil) ->
-  reia_erl:r2e(erlang:apply(Constant, Method, [reia_erl:e2r(Arg) || Arg <- Arguments]));
 apply(Constant, Method, Arguments, Block) ->
-  reia_erl:r2e(erlang:apply(Constant, Method, [reia_erl:e2r(Arg) || Arg <- Arguments ++ [Block]])).
-  
+  reia_erl:r2e(erlang:apply(Constant, Method, [list_to_tuple([reia_erl:e2r(Arg) || Arg <- Arguments]), Block])).
+    
 % Invoke a method on the given Reia object
 invoke(Object, Method, Arguments) ->
   invoke(Object, Method, Arguments, nil).

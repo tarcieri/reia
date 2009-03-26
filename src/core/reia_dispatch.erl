@@ -8,10 +8,6 @@
 -module(reia_dispatch).
 -export([funcall/4]).
 
-%%
-%% Funcalls that don't take blocks
-%%
-
 %% Shim to translate Erlang lists into Reia ones
 funcall(List, Method, Arguments, Block) when is_list(List) ->
   reia_list:funcall({list, {[], List}}, Method, Arguments, Block);
@@ -34,14 +30,14 @@ funcall(Receiver, internalize, [], _Block) ->
 %% Dispatch a method to an object
 funcall({object, {Pid, _Class}}, Method, Arguments, _Block) ->
   reia_class:call(Pid, {Method, Arguments});
-funcall({constant, _Name} = Receiver, Method, Arguments, _Block) ->
-  'Constant':funcall(Receiver, Method, Arguments);
+funcall({constant, _Name} = Receiver, Method, Arguments, Block) ->
+  'Constant':funcall(Receiver, Method, Arguments, Block);
 funcall(Receiver, Method, Arguments, _Block) when is_integer(Receiver) or is_float(Receiver) ->
   'Numeric':funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver, Method, Arguments, _Block) when is_atom(Receiver) ->
   'Atom':funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver, Method, Arguments, _Block) when is_binary(Receiver) ->
-  'Binary':funcall(Receiver, Method, silly_list_hack(Arguments));
+  'Binary':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver, Method, Arguments, _Block) when is_function(Receiver) ->
   'Lambda':funcall(Receiver, Method, silly_list_hack(Arguments));
 funcall(Receiver, Method, Arguments, _Block) when is_pid(Receiver) ->
