@@ -15,7 +15,7 @@ exprs(Expressions, Bindings) ->
 local_function(Name, [Args, Block]) ->
   case Name of
     'puts' ->
-      ['Main':puts({Arg}, Block) || Arg <- list_to_tuple(Args)];
+      ['Main':puts({Arg}, Block) || Arg <- tuple_to_list(Args)];
     _ ->
       'Main':Name(Args, Block)
   end.
