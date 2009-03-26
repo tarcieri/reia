@@ -33,25 +33,25 @@ funcall({object, {Pid, _Class}}, Method, Arguments, _Block) ->
 funcall({constant, _Name} = Receiver, Method, Arguments, Block) ->
   'Constant':funcall(Receiver, Method, Arguments, Block);
 funcall(Receiver, Method, Arguments, _Block) when is_integer(Receiver) or is_float(Receiver) ->
-  'Numeric':funcall(Receiver, Method, silly_list_hack(Arguments));
+  'Numeric':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver, Method, Arguments, _Block) when is_atom(Receiver) ->
-  'Atom':funcall(Receiver, Method, silly_list_hack(Arguments));
+  'Atom':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver, Method, Arguments, _Block) when is_binary(Receiver) ->
   'Binary':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
+funcall(Receiver = {dict, _}, Method, Arguments, _Block) ->
+  'Hash':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver, Method, Arguments, _Block) when is_function(Receiver) ->
-  'Lambda':funcall(Receiver, Method, silly_list_hack(Arguments));
+  'Lambda':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver, Method, Arguments, _Block) when is_pid(Receiver) ->
-  'Process':funcall(Receiver, Method, silly_list_hack(Arguments));
+  'Process':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver = {list, _}, Method, Arguments, Block) ->
   reia_list:funcall(Receiver, Method, Arguments, Block);
 funcall(Receiver = {tuple, _}, Method, Arguments, _Block) ->
-  'Tuple':funcall(Receiver, Method, silly_list_hack(Arguments));
-funcall(Receiver = {dict, _}, Method, Arguments, _Block) ->
-  'Hash':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
+  'Tuple':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver = {string, _}, Method, Arguments, _Block) ->
   reia_string:funcall(Receiver, Method, Arguments);
 funcall(Receiver = {regexp, _}, Method, Arguments, _Block) ->
-  'Regex':funcall(Receiver, Method, silly_list_hack(Arguments));
+  'Regex':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver = {exception, _}, Method, Arguments, _Block) ->
   'Exception':funcall(Receiver, Method, Arguments);
 funcall(Receiver, _, _, _) ->
