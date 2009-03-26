@@ -10,8 +10,8 @@ module Loader
     read_input([])
   end
     
-  def start(args)
-    (:ok, input) = file::read_file(args[0])
+  def start(file)
+    (:ok, input) = file::read_file(file)
     eval_input(input.to_string())
   end
 

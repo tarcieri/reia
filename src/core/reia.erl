@@ -11,7 +11,8 @@
   invoke/3, invoke/4,
   parse/1,
   spawn/2, spawn/3,
-  spawn_link/2, spawn_link/3
+  spawn_link/2, spawn_link/3,
+  load_file/1, erl_load/1
 ]).
 
 % Call the given Reia function from the Erlang environment, automatically 
@@ -50,3 +51,12 @@ spawn(Class, Arguments, Block) ->
 spawn_link(Class, Arguments) -> reia:spawn(Class, Arguments, nil).
 spawn_link(Class, Arguments, Block) ->
   reia_class:inst(Class, Arguments, Block).
+  
+% Load the given file through the Reia loader
+load_file(File) ->
+  reia:apply('Loader', 'start', [File]).
+
+% Load a file when invoked from the Erlang command line
+% Handles funky argument thunking coming off the shell
+erl_load([File]) ->
+  load_file(File).
