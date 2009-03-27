@@ -297,7 +297,7 @@ class_inst -> constant '(' exprs ')' block : {funcall, line('$2'), '$1', '$3', '
 
 %% Blocks
 
-block -> '{' expr_list '}' : {lambda, line('$1'), [], $2}.
+block -> '{' expr_list '}' : {lambda, line('$1'), [], '$2'}.
 block -> '{' '|' exprs '|' expr_list '}' : {lambda, line('$1'), '$3', '$5'}.
 
 block -> do expr_list 'end' : {lambda, line('$1'), [], '$2'}.
