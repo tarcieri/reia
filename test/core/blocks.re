@@ -1,4 +1,4 @@
-module BlockTest
+module BlocksTest
   def run
     [standalone_test(), argument_test()]
   end
@@ -13,7 +13,7 @@ module BlockTest
   # accepts blocks with other arguments
   def argument_test
     TestHelper.expect("Blocks", "can be passed alongside other arguments", fun do
-      (42, blocks_with_args(20, 2) { |n| n * 2 })
+      (42, block_with_args(20, 2) { |n| n * 2 })
     end)
   end
   
