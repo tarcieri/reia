@@ -8,14 +8,14 @@
 module Process
   # Process#spawn
   #   Create a new process
-  def spawn(lambda)
-    proc_lib::spawn(lambda)
+  def spawn(&block)
+    proc_lib::spawn(block)
   end
     
   # Process#spawn_link
-  #   Create a new process
-  def spawn_link(lambda)
-    proc_lib::spawn(lambda)
+  #   Create a new process and links it to the current one
+  def spawn_link(&block)
+    proc_lib::spawn_link(block)
   end
     
   # Process#to_s
