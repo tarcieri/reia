@@ -18,39 +18,39 @@ module StringTest
   end
   
   def length_test
-    TestHelper.expect("String", "knows its length", fun do
+    TestHelper.expect("String", "knows its length") do
       (6, "foobar".length())
-    end)
+    end
   end
   
   def inspect_test
-    TestHelper.expect("String", "inspects properly", fun do
+    TestHelper.expect("String", "inspects properly") do
       ("\"foobar\"", "foobar".inspect())
-    end)
+    end
   end
     
   def sub_test
-    TestHelper.expect("String", "substitutes properly", fun do
+    TestHelper.expect("String", "substitutes properly") do
       ("bazbar", "foobar".sub(/foo/, "baz"))
-    end)
+    end
   end
     
   def interpolation_test
     (foo, bar) = (1, 2)
-    TestHelper.expect("String", "interpolates nested Reia syntax", fun do
+    TestHelper.expect("String", "interpolates nested Reia syntax") do
       ("foo: 1, bar: 2", "foo: #{foo}, bar: #{bar}")
-    end)
+    end
   end
     
   def split_test
-    TestHelper.expect("String", "splits properly", fun do
+    TestHelper.expect("String", "splits properly") do
       (["foo", "bar", "baz"], "foo    bar baz".split(/\s+/))
-    end)
+    end
   end
   
   def to_constant_test
-    TestHelper.expect("String", "converts to constant", fun do
+    TestHelper.expect("String", "converts to constant") do
       (Object, "Object".to_constant())
-    end)
+    end
   end
 end

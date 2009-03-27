@@ -6,8 +6,8 @@
 #
 
 module TestHelper  
-  def expect(group, description, lambda)
-    (expected, actual) = lambda()
+  def expect(group, description, &block)
+    (expected, actual) = block()
     if expected == actual
       ".".print()
       :ok

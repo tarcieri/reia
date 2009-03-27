@@ -105,68 +105,68 @@ module ObjectTest
         
   # implements method calls
   def method_test
-    TestHelper.expect(Object, "implements method calls", fun do
+    TestHelper.expect(Object, "implements method calls") do
       obj = PlusTwo()
       (44, obj.calc(42))
-    end)
+    end
   end
   
   # implements local method calls
   def local_method_test
-    TestHelper.expect(Object, "implements local method calls", fun do
+    TestHelper.expect(Object, "implements local method calls") do
       obj = LocalMethodTest()
       (4, obj.a(1))
-    end)
+    end
   end
     
   # allows instance variable access from local methods
   def local_method_ivar_test
-    TestHelper.expect(Object, "allows instance variable access from local methods", fun do
+    TestHelper.expect(Object, "allows instance variable access from local methods") do
       obj = LocalMethodTest()
       obj.c(42)
       (43, obj.foo())
-    end)
+    end
   end
       
   # stores state in instance_variables
   def state_test
-    TestHelper.expect(Object, "stores state in instance_variables", fun do
+    TestHelper.expect(Object, "stores state in instance_variables") do
       obj = StateHolder()
       obj.set_val(42)
       (42, obj.get_val())
-    end)
+    end
   end
   
   # receives messages over the actor protocol
   def message_test
-    TestHelper.expect(Object, "receives messages over the actor protocol", fun do
+    TestHelper.expect(Object, "receives messages over the actor protocol") do
       obj = MessageTest()
       obj ! 42
       (42, obj.received_message())
-    end)
+    end
   end
     
   # passes arguments from start to initialize
   def initialize_test
-    TestHelper.expect(Object, "passes arguments from start to initialize", fun do
+    TestHelper.expect(Object, "passes arguments from start to initialize") do
       obj = InitializeTest(1, 2, 3)
       ((3, 2, 1), obj.ivars())
-    end)
+    end
   end
   
   # supports simple inheritance
   def inheritance_test
-    TestHelper.expect(Object, "supports simple inheritance", fun do
+    TestHelper.expect(Object, "supports simple inheritance") do
       obj = InheritanceTest()
       (42, obj.simple2(20))
-    end)
+    end
   end
     
   # allows instance variable access from inherited methods
   def inheritance_ivar_test
-    TestHelper.expect(Object, "allows instance variable access from inherited methods", fun do
+    TestHelper.expect(Object, "allows instance variable access from inherited methods") do
       obj = InheritanceTest()
       (42, obj.ivars2())
-    end)
+    end
   end
 end

@@ -11,14 +11,14 @@ module AtomTest
   end
 
   def to_string_test
-    TestHelper.expect(Atom, "to_string test", fun do
+    TestHelper.expect(Atom, "to_string test") do
       (:'foo bar'.to_s(), "foo bar")
-    end)
+    end
   end
   
   def inspect_test
-    TestHelper.expect(Atom, "inspect shows proper value", fun do
+    TestHelper.expect(Atom, "inspect shows proper value") do
       (:'foo bar'.inspect(), ":'foo bar'")
-    end)
+    end
   end
 end

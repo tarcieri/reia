@@ -25,40 +25,40 @@ module FileTest
     f.close()
 
     x = File.open(fn)
-    TestHelper.expect(File, "file is written to and read from in the IODevice class", fun do
+    TestHelper.expect(File, "file is written to and read from in the IODevice class") do
       result = (<<"bar">>, x.read(3))
       x.close()
       result
-    end)
+    end
   end
   
   def read_test
-    TestHelper.expect(File, "File.read (module version) reads correctly", fun do
+    TestHelper.expect(File, "File.read (module version) reads correctly") do
       (<<"bar">>, File.read("foo.txt"))
-    end)
+    end
   end
   
   def write_test
-    TestHelper.expect(File, "File.write (module version) writes correctly", fun do
+    TestHelper.expect(File, "File.write (module version) writes correctly") do
       (:ok, File.write("foo.txt", "baz"))
-    end)
+    end
   end
   
   def copy_test
-    TestHelper.expect(File, "File.copy copies file", fun do
+    TestHelper.expect(File, "File.copy copies file") do
       (:ok, File.copy("foo.txt", "bar.txt"))
-    end)
+    end
   end
   
   def move_test
-    TestHelper.expect(File, "File.move moves file", fun do
+    TestHelper.expect(File, "File.move moves file") do
       (:ok, File.move("foo.txt", "bar.txt"))
-    end)
+    end
   end
   
   def delete_test
-    TestHelper.expect(File, "File.delete removes file", fun do
+    TestHelper.expect(File, "File.delete removes file") do
       (:ok, File.delete("bar.txt"))
-    end)
+    end
   end
 end

@@ -17,30 +17,30 @@ module TupleTest
 
   # knows its size
   def size_test
-    TestHelper.expect(Tuple, "knows its size", fun do
+    TestHelper.expect(Tuple, "knows its size") do
       list = (1,2,3,4,5)
       (5, list.size())
-    end)
+    end
   end
             
   # retrieves the nth element correctly
   def nth_test
-    TestHelper.expect(Tuple, "retrieves the nth element correctly", fun do    
+    TestHelper.expect(Tuple, "retrieves the nth element correctly") do    
       tuple = (1,2,3,4,5)
       (true, tuple[0] == 1 and tuple[1] == 2 and tuple[4] == 5 and tuple[-2] == 4)
-    end)
+    end
   end
       
   # converts to a list
   def to_list_test
-    TestHelper.expect(Tuple, "converts to a list", fun do
+    TestHelper.expect(Tuple, "converts to a list") do
       ([1,2,3].to_s(), (1,2,3).to_list().to_s())
-    end)
+    end
   end
   
   def inspect_test
-    TestHelper.expect(Tuple, "inspect returns valid tuple syntax", fun do
+    TestHelper.expect(Tuple, "inspect returns valid tuple syntax") do
       (true, ().inspect() == "()" and (1,).inspect() == "(1,)" and (1,2).inspect() == "(1,2)")
-    end)
+    end
   end
 end

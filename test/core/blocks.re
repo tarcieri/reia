@@ -5,16 +5,16 @@ module BlocksTest
   
   # accepts blocks when the only argument
   def standalone_test
-    TestHelper.expect("Blocks", "are accepted as the only function argument", fun do
+    TestHelper.expect("Blocks", "are accepted as the only function argument") do
       (42, just_a_block_alone { |n| n * 2 })
-    end)
+    end
   end
   
   # accepts blocks with other arguments
   def argument_test
-    TestHelper.expect("Blocks", "can be passed alongside other arguments", fun do
+    TestHelper.expect("Blocks", "can be passed alongside other arguments") do
       (42, block_with_args(20, 2) { |n| n * 2 })
-    end)
+    end
   end
   
   def just_a_block_alone(&block)

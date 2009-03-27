@@ -19,44 +19,44 @@ module HashTest
   end
     
   def index_test
-    TestHelper.expect(Hash, "index recieves proper value", fun do
+    TestHelper.expect(Hash, "index recieves proper value") do
       ({:foo => "bar"}[:foo], "bar")
-    end)
+    end
   end
   
   def compare_test
-    TestHelper.expect(Hash, "comparison is equal", fun do
+    TestHelper.expect(Hash, "comparison is equal") do
       ({:foo => "bar"}, {:foo => "bar"})
-    end)
+    end
   end
   
   def remove_test
-    TestHelper.expect(Hash, "removes a value", fun do
+    TestHelper.expect(Hash, "removes a value") do
       ({:foo => "bar", :zoo => "horse"}.remove(:zoo), {:foo => "bar"})
-    end)
+    end
   end
   
   def size_test
-    TestHelper.expect(Hash, "calculates size", fun do
+    TestHelper.expect(Hash, "calculates size") do
       ({:foo => "bar", :zoo => "horse"}.size(), 2)
-    end)
+    end
   end
   
   def keys_test
-    TestHelper.expect(Hash, "collects keys into a list", fun do
+    TestHelper.expect(Hash, "collects keys into a list") do
       ({:foo => "bar", :zoo => "horse", :bar => "foo"}.keys(), [:bar, :zoo, :foo])
-    end)
+    end
   end
   
   def has_test
-    TestHelper.expect(Hash, "checks if a key is presented", fun do
+    TestHelper.expect(Hash, "checks if a key is presented") do
       ({:foo => "bar", :zoo => "horse"}.has(:foo), true)
-    end)
+    end
   end
   
   def has_test2
-    TestHelper.expect(Hash, "checks if a key is missing", fun do
+    TestHelper.expect(Hash, "checks if a key is missing") do
       ({:foo => "bar", :zoo => "horse"}.has(:bar), false)
-    end)
+    end
   end
 end
