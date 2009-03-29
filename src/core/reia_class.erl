@@ -93,15 +93,15 @@ ast(_) ->
  
 %% Create an instance of a given class, passing the arguments on to its
 %% initialize function
-inst(Class, Arguments, _Block) ->
+inst(Class, Arguments, Block) ->
   Obj = Class:spawn_link(),
-  call(Obj, {'initialize', Arguments}),
+  call(Obj, {'initialize', Arguments, Block}),
   Obj.
  
 %% Call a method on a Reia object at the given Pid
 call({object, {Pid, _Class}}, Request) ->
   call(Pid, Request);
-call(Pid, {_Method, _Arguments} = Request) when is_pid(Pid) ->
+call(Pid, {_Method, _Arguments, _Block} = Request) when is_pid(Pid) ->
   case gen_server:call(Pid, Request) of
     {ok, Value} -> Value;
     {error, Error} -> throw(Error)
