@@ -19,7 +19,7 @@ build({class, Line, Name, Ancestor, Methods}, OrigExprs) ->
   ParentMethods = build_inherited_methods(build_parent_from_ancestry(Ancestor)),
   
   % Generate the obj.class() method
-  ClassMethod = parse_function("class() -> {constant, '" ++ atom_to_list(Name) ++ "'}."),
+  ClassMethod = parse_function("class({}, nil) -> {constant, '" ++ atom_to_list(Name) ++ "'}."),
   
   % Merge this class's methods with its parent
   FinalMethods = merge_with_parent([ClassMethod|Methods], ParentMethods),
@@ -140,7 +140,7 @@ extract_mangled_name_and_function({function, _, Name, _, _} = Function) ->
 %% Construct the new function and dispatcher clause
 build_dispatcher_clause_and_function({function, Line, Name, _Arity, Clauses}, MangledName) ->
   DispatcherClause = dispatcher_clause(Name, MangledName, Line),
-  Function = {function, Line, MangledName, 3,
+  Function = {function, Line, MangledName, 4,
     [process_method_clause(Clause) || Clause <- Clauses]
   },
   {DispatcherClause, Function}.
@@ -149,12 +149,13 @@ build_dispatcher_clause_and_function({function, Line, Name, _Arity, Clauses}, Ma
 %% to the given mangled name
 dispatcher_clause(RealName, MangledName, Line) ->
   {clause, Line, [
-    {tuple, Line, [{atom, Line, RealName}, {var, Line, 'arguments'}]},
+    {tuple, Line, [{atom, Line, RealName}, {var, Line, 'arguments'}, {var, Line, 'block'}]},
     {var, Line, 'caller'},
     {var, Line, 'instance_variables'}
   ], [], [
     {call, Line, {atom, Line, MangledName}, [
       {var, Line, 'arguments'},
+      {var, Line, 'block'},
       {var, Line, 'caller'},
       {var, Line, 'instance_variables'}
     ]}
@@ -163,9 +164,10 @@ dispatcher_clause(RealName, MangledName, Line) ->
 %% Build a clause for dispatch_method from the original clauses for a method
 process_method_clause({clause, Line, [], [], Expressions}) ->
   process_method_clause({clause, Line, [{tuple, Line, []}, nil], [], Expressions});
-process_method_clause({clause, Line, [{tuple, _, Arguments}, _Block], [], Expressions}) ->
+process_method_clause({clause, Line, [{tuple, _, Arguments}, Block], [], Expressions}) ->
   {clause, Line, [
     argument_list_cons(Arguments, Line),
+    Block,
     {var, Line, '_caller'},
     {var, Line, '___instance_variables_0'}
   ], [], process_return_value(Line, Expressions)}.
@@ -218,7 +220,7 @@ argument_list_cons([Element|Rest], Line) ->
 %% Generate Erlang forms for the class's method dispatch function
 build_method_dispatch_function(Clauses) ->
   % Add a clause which thunks to _ if no method responds
-  CatchallFunc = "dispatch_method({Method, Args}, Caller, State) -> dispatch_method({'_', [Method, Args]}, Caller, State).",
+  CatchallFunc = "dispatch_method({Method, Args, Block}, Caller, State) -> dispatch_method({'_', [Method, Args], Block}, Caller, State).",
   {function, _, _, _, CatchallClause} = parse_function(CatchallFunc),
   {function, 1, dispatch_method, 3, Clauses ++ CatchallClause}.
  

@@ -132,6 +132,8 @@ forms({op, Line, Op, In1, In2}) ->
   reia_operators:forms(Op, Line, forms(In1), forms(In2));
   
 %% Lambda invocations
+forms({funcall, Line, Var, Arguments}) ->
+  forms({funcall, Line, Var, Arguments, nil});
 forms({funcall, Line, {var, _, Var}, Arguments, _Block}) ->
   {call, Line, forms({identifier, Line, Var}), [forms(Argument) || Argument <- Arguments]};
   

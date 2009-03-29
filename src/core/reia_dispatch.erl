@@ -28,8 +28,8 @@ funcall(Receiver, internalize, [], _Block) ->
   reia_erl:r2e(Receiver);
 
 %% Dispatch a method to an object
-funcall({object, {Pid, _Class}}, Method, Arguments, _Block) ->
-  reia_class:call(Pid, {Method, Arguments});
+funcall({object, {Pid, _Class}}, Method, Arguments, Block) ->
+  reia_class:call(Pid, {Method, Arguments, Block});
 funcall({constant, _Name} = Receiver, Method, Arguments, Block) ->
   'Constant':funcall(Receiver, Method, Arguments, Block);
 funcall(Receiver, Method, Arguments, _Block) when is_integer(Receiver) or is_float(Receiver) ->
