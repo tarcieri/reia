@@ -49,7 +49,7 @@ Reia provides three ways to execute programs:
   This compiles Reia to .beam files which may be used in conjunction with 
   Erlang code.  The static Reia compiler is intended for compiling the 
   self-hosted parts of Reia and is not intended for general-purpose use.
-  
+
 h2. Implementation
 
 Here's some thoroughly interesting implementation trivia about Reia:
