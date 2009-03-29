@@ -57,13 +57,14 @@ return_value_pattern(Line, IvarsOut, Nonce) ->
   
 % Invoke the given method
 % Dispatches to dispatch_method({Method, Args}, Caller, State)
-method_invocation(Line, Method, Arguments, _Block, IvarsIn) ->
+method_invocation(Line, Method, Arguments, Block, IvarsIn) ->
   {identifier, Line, Name} = Method,
   Arguments2 = [
     {tuple, Line, [
       {atom, Line, Name},
-      form_list(Arguments, Line)
-    ]}, 
+      form_list(Arguments, Line),
+      Block
+    ]},
     {atom, Line, local}, 
     forms(IvarsIn)
   ],
