@@ -28,6 +28,8 @@ Nonterminals
   class_decl
   functions
   function
+  funref_expr
+  funref
   funcall_expr
   funcall
   function_identifier
@@ -128,7 +130,10 @@ throw_expr -> unary_expr : '$1'.
 
 unary_expr -> unary_op unary_expr : {op, line('$1'), op('$1'), '$2'}.
 unary_expr -> '!' unary_expr : {op, line('$1'), 'not', '$2'}.
-unary_expr -> funcall_expr : '$1'.
+unary_expr -> funref_expr : '$1'.
+
+funref_expr -> funref : '$1'.
+funref_expr -> funcall_expr : '$1'.
 
 funcall_expr -> funcall : '$1'.
 funcall_expr -> class_inst_expr : '$1'.
@@ -267,6 +272,9 @@ function_params -> expr ',' function_params : ['$1'|'$3'].
 function_identifier -> identifier : function_identifier('$1').
 function_identifier -> punctuated_identifier : function_identifier('$1').
 function_identifier -> class : function_identifier('$1').
+
+%% Function references
+funref -> funcall_expr '.' function_identifier : {funref, line('$2'), '$1', '$3'}.
 
 %% Function calls
 funcall -> function_identifier '(' ')' : {funcall, line('$2'), '$1', [], {atom, line('$2'), nil}}.
