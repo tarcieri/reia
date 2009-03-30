@@ -6,11 +6,6 @@
 #
 
 module Lambda
-  def funcall(lambda, :arity, [])
-    (:arity, arity) = erlang::fun_info(lambda, :arity)
-    arity
-  end
-    
   def funcall(lambda, :to_s, [])
     funcall(lambda, :inspect, [])
   end
@@ -18,7 +13,6 @@ module Lambda
   def funcall(lambda, :inspect, [])
     (:name, name)   = erlang::fun_info(lambda, :name)
     (:module, mod)  = erlang::fun_info(lambda, :module)
-    (:arity, arity) = erlang::fun_info(lambda, :arity)
-    "#<Lambda #{name.to_s()} (module: #{mod.to_s()} arity: #{arity.to_s()}>"
+    "#<Lambda #{mod.to_s()}:#{name.to_s()}>"
   end
 end
