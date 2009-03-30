@@ -39,7 +39,7 @@ funcall(Receiver, Method, Arguments, _Block) when is_atom(Receiver) ->
 funcall(Receiver, Method, Arguments, _Block) when is_binary(Receiver) ->
   'Binary':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver = {dict, _}, Method, Arguments, _Block) ->
-  'Hash':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
+  'Map':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver, Method, Arguments, _Block) when is_function(Receiver) ->
   'Lambda':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver, Method, Arguments, _Block) when is_pid(Receiver) ->

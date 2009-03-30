@@ -8,7 +8,7 @@
 load("test/test_helper.re")
 
 tests = [
-  ("builtins", ["list", "tuple", "string", "regex", "numeric", "hash", "atom"]),
+  ("builtins", ["list", "tuple", "string", "regex", "numeric", "map", "atom"]),
   ("core",     ["object", "blocks", "funrefs"]),
   ("lib",      ["file", "dir"])
 ]
