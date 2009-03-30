@@ -17,5 +17,7 @@ funcall({constant, Name}, inspect, [], _Block) ->
   end;  
 funcall(Constant, to_s, [], Block) ->
   funcall(Constant, inspect, [], Block);
+funcall({constant, Name}, module_info, [], _Block) ->
+  Name:module_info();
 funcall({constant, Name}, Method, Arguments, Block) ->
   Name:Method(list_to_tuple(Arguments), Block).
