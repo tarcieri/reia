@@ -137,6 +137,10 @@ forms({funcall, Line, Var, Arguments}) ->
 forms({funcall, Line, {var, _, Var}, Arguments, _Block}) ->
   {call, Line, forms({identifier, Line, Var}), [forms(Argument) || Argument <- Arguments]};
   
+%% Function references
+forms({funref, Line, Receiver, {identifier, _Line, Name}}) ->
+  reia_funrefs:forms(Line, forms(Receiver), Name);
+  
 %% Function calls
 forms({funcall, Line, {identifier, _, Method}, Arguments, Block}) ->
   {call, Line, {atom, Line, Method}, [{tuple, Line, [forms(Argument) || Argument <- Arguments]}, forms(Block)]};

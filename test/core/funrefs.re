@@ -12,11 +12,11 @@ end
 
 module RefsTest
   def run
-    [module_test(), class_test()]
+    [module_test()]
   end
   
   # generate for module functions
-  def standalone_test
+  def module_test
     TestHelper.expect("Refs", "generate for module functions") do
       ref = PlusTwoModule.calc
       (42, ref(40))
