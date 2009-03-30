@@ -1,5 +1,5 @@
 %
-% Constant: Methods for the String pseudo-class
+% Constant: Methods for the String builtin
 % Copyright (C)2008-09 Tony Arcieri
 % 
 % Redistribution is permitted under the MIT license.  See LICENSE for details.

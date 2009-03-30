@@ -1,5 +1,5 @@
 %
-% Str: Methods for the String pseudo-class
+% Str: Methods for the String builtin
 % Copyright (C)2008 Tony Arcieri
 % 
 % Redistribution is permitted under the MIT license.  See LICENSE for details.

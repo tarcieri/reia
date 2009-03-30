@@ -1,5 +1,5 @@
 #
-# Process: Lightweight shared-nothing processes (thunking to Erlang's proc_lib)
+# Process: Methods for Process builtin: lightweight shared-nothing processes
 # Copyright (C)2008-09 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.

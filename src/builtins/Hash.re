@@ -1,5 +1,5 @@
 #
-# Hash: Methods for the Hash pseudo-class
+# Hash: Methods for the Hash builtin
 # Copyright (C)2008 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.

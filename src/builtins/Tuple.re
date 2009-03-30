@@ -1,5 +1,5 @@
 #
-# Tuple: Methods for the Tuple pseudo-class
+# Tuple: Methods for the Tuple builtin
 # Copyright (C)2008 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.

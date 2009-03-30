@@ -1,5 +1,5 @@
 #
-# Binary: Methods for the Binary pseudo-class
+# Binary: Methods for the Binary builtin
 # Copyright (C)2008 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.

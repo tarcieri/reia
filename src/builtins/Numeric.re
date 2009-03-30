@@ -1,5 +1,5 @@
 #
-# Numeric: Methods for the Numeric pseudo-class
+# Numeric: Methods for the Numeric builtin
 # Copyright (C)2008 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.

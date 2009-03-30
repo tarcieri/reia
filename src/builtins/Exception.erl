@@ -1,5 +1,5 @@
 %
-% Exception: Methods for the Exception pseudo-class
+% Exception: Methods for the Exception builtin
 % Copyright (C)2009 Tony Arcieri
 % 
 % Redistribution is permitted under the MIT license.  See LICENSE for details.
