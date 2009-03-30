@@ -11,6 +11,7 @@
   compile/1, 
   compile/2,
   ivars/1,
+  calls/1,
   branches/1,
   ssa/1,
   methods/1,
@@ -21,7 +22,7 @@
 ]).
 
 default_passes() ->
-  [branches, ivars, ssa, methods, r2e, dynamic].
+  [calls, branches, ivars, ssa, methods, r2e, dynamic].
 
 compile(Expressions) ->
   compile(Expressions, default_passes()).
@@ -48,6 +49,10 @@ pass({ssa, Binding}, Expressions) ->
 pass(Pass, Expressions) ->
   ?MODULE:Pass(Expressions).
 
+%% Copy-on-update support for calls to builtins
+calls(Expressions) ->
+  reia_calls:ast(Expressions).
+  
 %% Convert if statements to case statements and add default return values
 branches(Expressions) ->
   reia_branches:ast(Expressions).
