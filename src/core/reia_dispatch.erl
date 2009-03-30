@@ -10,7 +10,7 @@
 
 %% Shim to translate Erlang lists into Reia ones
 funcall(List, Method, Arguments, Block) when is_list(List) ->
-  reia_list:funcall({list, {[], List}}, Method, Arguments, Block);
+  'List':funcall({list, {[], List}}, Method, Arguments, Block);
 
 %% Convert a Reia term from its internal representation
 funcall(Receiver, uninternalize, [], _Block) ->
@@ -45,7 +45,7 @@ funcall(Receiver, Method, Arguments, _Block) when is_function(Receiver) ->
 funcall(Receiver, Method, Arguments, _Block) when is_pid(Receiver) ->
   'Process':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver = {list, _}, Method, Arguments, Block) ->
-  reia_list:funcall(Receiver, Method, Arguments, Block);
+  'List':funcall(Receiver, Method, Arguments, Block);
 funcall(Receiver = {tuple, _}, Method, Arguments, _Block) ->
   'Tuple':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver = {string, _}, Method, Arguments, _Block) ->

@@ -1,11 +1,11 @@
 %
-% reia_list: Methods for the List pseudo-class
+% List: Methods for the List pseudo-class
 % Copyright (C)2008 Tony Arcieri
 % 
 % Redistribution is permitted under the MIT license.  See LICENSE for details.
 %
 
--module(reia_list).
+-module('List').
 -export([funcall/4, to_erl/1]).
 
 %%
