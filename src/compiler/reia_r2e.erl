@@ -108,9 +108,11 @@ forms({binary, Line, String = {string, _, _}}) ->
   
 %% Lambdas
 forms({lambda, Line, Args, Statements}) ->
-  {'fun', Line, 
-    {clauses,[{clause, Line, [forms(Arg) || Arg <- Args], [], [forms(Statement) || Statement <- Statements]}]}
-  };
+  {'fun', Line, {clauses, [
+    {clause, Line, [{tuple, Line, [forms(Arg) || Arg <- Args]}, {var, Line, '_'}], [], 
+      [forms(Statement) || Statement <- Statements]
+    }
+  ]}};
   
 %% Ranges
 forms({range, Line, Begin, End}) ->
@@ -133,9 +135,9 @@ forms({op, Line, Op, In1, In2}) ->
   
 %% Lambda invocations
 forms({funcall, Line, Var, Arguments}) ->
-  forms({funcall, Line, Var, Arguments, nil});
-forms({funcall, Line, {var, _, Var}, Arguments, _Block}) ->
-  {call, Line, forms({identifier, Line, Var}), [forms(Argument) || Argument <- Arguments]};
+  forms({funcall, Line, Var, Arguments, {nil, Line}});
+forms({funcall, Line, {var, _, Var}, Arguments, Block}) ->
+  {call, Line, forms({identifier, Line, Var}), [{tuple, Line, [forms(Argument) || Argument <- Arguments]}, forms(Block)]};
   
 %% Function references
 forms({funref, Line, Receiver, {identifier, _Line, Name}}) ->

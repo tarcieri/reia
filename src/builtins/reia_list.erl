@@ -122,18 +122,17 @@ funcall({list, _} = List, join, [{string, Sep}], nil) ->
 %%
 
 funcall({list, _} = List, each, [], Block) ->
-  lists:foreach(Block, to_erl(List)),
+  lists:foreach(fun(X) -> Block({X}, nil) end, to_erl(List)),
   List;
 
 funcall({list, _} = List, map, [], Block) ->
-  {list, {[], lists:map(Block, to_erl(List))}};
+  {list, {[], lists:map(fun(X) -> Block({X}, nil) end, to_erl(List))}};
 
 funcall({list, _} = List, filter, [], Block) ->
-  {list, {[], lists:filter(Block, to_erl(List))}};
+  {list, {[], lists:filter(fun(X) ->Block({X}, nil) end, to_erl(List))}};
 
 funcall({list, _} = List, reduce, [Acc0], Block) ->
-  lists:foldl(Block, Acc0, to_erl(List)).
-
+  lists:foldl(fun(Elem, AccIn) -> Block({Elem, AccIn}, nil) end, Acc0, to_erl(List)).
 
 element_to_string({string, Binary}) ->
   binary_to_list(Binary);

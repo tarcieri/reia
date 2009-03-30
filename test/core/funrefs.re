@@ -10,7 +10,7 @@ class PlusTwoClass
   end
 end
 
-module RefsTest
+module FunrefsTest
   def run
     [module_test()]
   end
