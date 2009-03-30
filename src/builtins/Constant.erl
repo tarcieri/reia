@@ -18,6 +18,8 @@ funcall({constant, Name}, inspect, [], _Block) ->
 funcall(Constant, to_s, [], Block) ->
   funcall(Constant, inspect, [], Block);
 funcall({constant, Name}, module_info, [], _Block) ->
-  Name:module_info();
+  reia_erl:e2r(Name:module_info());
+funcall({constant, Name}, module_info, [Option], _Block) ->
+  reia_erl:e2r(Name:module_info(Option));
 funcall({constant, Name}, Method, Arguments, Block) ->
   Name:Method(list_to_tuple(Arguments), Block).

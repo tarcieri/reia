@@ -6,7 +6,7 @@
 %
 
 -module('List').
--export([funcall/4, to_erl/1]).
+-export([funcall/4, from_erl/1, to_erl/1]).
 
 %%
 %% Functions which don't take a block
@@ -155,3 +155,7 @@ preflatten(X) ->
 %% Convert a Reia list to its Erlang equivalent
 to_erl({list, {Reverse, Forward}}) ->
   Forward ++ lists:reverse(Reverse).
+  
+%% Convert an Erlang list to its Reia list equivalent
+from_erl(List) when is_list(List) ->
+  {list, {[], List}}.
