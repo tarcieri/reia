@@ -23,7 +23,7 @@ loop(Binding) ->
     eof -> io:format("~n"); % print a newline then exit
     String ->
       NewBinding = try
-        eval_print(String, Binding)
+        parse(String, Binding)
       catch
         Class:Reason -> print_error(Class, Reason), 
         Binding
@@ -40,29 +40,40 @@ read(Prompt) ->
 read(Io, Prompt) ->
   io:get_line(Io, Prompt).
   
-read_until_blank(Input, Prompt) ->
-  case read(Prompt) of
-    "\n" ->
-      lists:flatten(lists:reverse(Input));
-    Line ->
-      read_until_blank([Line|Input], Prompt)
-  end.
-  
-eval_print(String, Binding) ->
-  case reia_parse:string(String) of
-    {ok, Exprs} ->
-      {tuple, {value, Value, NewBinding}} = 'Eval':exprs({Exprs, Binding}, nil),
-      print(Value),
-      NewBinding;
-      
+read_until_complete(Input, Prompt) ->
+  Input2 = [read(Prompt)|Input],
+  case reia_parse:string(lists:flatten(lists:reverse(Input2))) of
     %% Need more tokens
     {error, {999999, _}} ->      
-      eval_print(read_until_blank([String], '.. '), Binding);
+      read_until_complete(Input2, Prompt);      
+    Result ->
+      Result
+  end.
+  
+parse(String, Binding) ->
+  case reia_parse:string(String) of
+    {ok, Exprs} ->
+      eval(Exprs, Binding);
       
+    %% Need more tokens
+    {error, {999999, _}} -> 
+      case read_until_complete([String], '.. ') of
+        {ok, Exprs} ->
+          eval(Exprs, Binding);
+        {error, Error} ->
+          parse_error(Error),
+          Binding
+      end;
+            
     {error, Error} ->
       parse_error(Error),
       Binding
   end.
+  
+eval(Exprs, Binding) ->
+  {tuple, {value, Value, NewBinding}} = 'Eval':exprs({Exprs, Binding}, nil),
+  print(Value),
+  NewBinding.
 
 print(Value) ->
   {string, String} = reia_dispatch:funcall(Value, inspect, [], nil),
