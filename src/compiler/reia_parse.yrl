@@ -294,6 +294,13 @@ funcall -> funcall_expr '.' function_identifier block : {funcall, line('$2'), '$
 funcall -> funcall_expr '.' function_identifier '(' ')' block : {funcall, line('$2'), '$1', '$3', [], '$6'}.
 funcall -> funcall_expr '.' function_identifier '(' exprs ')' block : {funcall, line('$2'), '$1', '$3', '$5', '$7'}.
 
+%% Function calls with lambdas passed as blocks
+funcall -> function_identifier '(' '&' identifier ')' : {funcall, line('$2'), '$1', [], '$4'}.
+funcall -> function_identifier '(' function_params '&' identifier ')' : {funcall, line('$2'), '$1', '$3', '$5'}.
+
+funcall -> funcall_expr '.' function_identifier '(' '&' identifier ')' : {funcall, line('$2'), '$1', '$3', [], '$6'}.
+funcall -> funcall_expr '.' function_identifier '(' function_params '&' identifier ')' : {funcall, line('$2'), '$1', '$3', '$5', '$7'}.
+
 %% Class instantiations
 class_inst -> constant '(' ')' : {class_inst, line('$2'), '$1', []}.
 class_inst -> constant '(' exprs ')' : {class_inst, line('$2'), '$1', '$3'}.

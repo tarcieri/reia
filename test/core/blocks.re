@@ -8,13 +8,20 @@ class BlocksClass
   end
 end
 
+module PlusTwo
+  def calc(n)
+    n + 2
+  end
+end
+
 module BlocksTest
   def run
     [
       standalone_test(), 
       argument_test(), 
       method_standalone_test(), 
-      method_argument_test()
+      method_argument_test(),
+      lambda_as_block_test()
     ]
   end
   
@@ -45,6 +52,14 @@ module BlocksTest
     TestHelper.expect("Blocks", "work with methods and other arguments") do
       obj = BlocksClass()
       (42, obj.block_method_argument_test(3, 6) { |n| n * 2 })
+    end
+  end
+  
+  # allows lambdas to be passed as blocks
+  def lambda_as_block_test
+    TestHelper.expect("Blocks", "can utilize lambdas") do
+      lambda = PlusTwo.calc
+      (42, block_with_args(18, 22, &lambda))
     end
   end
   
