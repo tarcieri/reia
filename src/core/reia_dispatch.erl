@@ -49,7 +49,7 @@ funcall(Receiver = {list, _}, Method, Arguments, Block) ->
 funcall(Receiver = {tuple, _}, Method, Arguments, _Block) ->
   'Tuple':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver = {string, _}, Method, Arguments, _Block) ->
-  reia_string:funcall(Receiver, Method, Arguments);
+  'Str':funcall(Receiver, Method, Arguments);
 funcall(Receiver = {regexp, _}, Method, Arguments, _Block) ->
   'Regex':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver = {exception, _}, Method, Arguments, _Block) ->

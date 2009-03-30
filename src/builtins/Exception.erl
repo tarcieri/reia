@@ -9,7 +9,7 @@
 -export([funcall/3]).
 
 funcall({exception, {Class, Reason}}, inspect, []) ->
-  reia_string:from_list(format_error(Class, Reason));
+  'Str':from_list(format_error(Class, Reason));
 funcall(Constant, to_s, []) ->
   funcall(Constant, inspect, []).
   

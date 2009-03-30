@@ -11,7 +11,7 @@
 funcall({constant, Name}, inspect, [], _Block) ->
   case code:ensure_loaded(Name) of
     {module, _Name} ->
-      reia_string:from_list(atom_to_list(Name));
+      'Str':from_list(atom_to_list(Name));
     {error, _Error} ->
       throw({error, {Name, "not loaded"}})
   end;  

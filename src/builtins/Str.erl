@@ -1,11 +1,11 @@
 %
-% reia_string: Methods for the String pseudo-class
+% Str: Methods for the String pseudo-class
 % Copyright (C)2008 Tony Arcieri
 % 
 % Redistribution is permitted under the MIT license.  See LICENSE for details.
 %
 
--module(reia_string).
+-module('Str').
 -export([funcall/3, from_list/1]).
 
 %% String#to_s
