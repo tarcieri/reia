@@ -30,8 +30,8 @@ apply(Constant, Method, Arguments, Block) ->
 % Invoke a method on the given Reia object
 invoke(Object, Method, Arguments) ->
   invoke(Object, Method, Arguments, nil).
-invoke(Object, Method, Arguments, _Block) ->
-  reia_erl:r2e(reia_class:call(Object, {Method, [reia_erl:e2r(Arg) || Arg <- Arguments]})).
+invoke(Object, Method, Arguments, Block) ->
+  reia_erl:r2e(reia_class:call(Object, {Method, [reia_erl:e2r(Arg) || Arg <- Arguments], Block})).
   
 % Parse a given string (in standard Erlang list form) into its Reia parse tree
 %  parse(String) -> {ok, ParseTree} | {error, Reason}
