@@ -70,7 +70,13 @@ transform(#state{bindings=Dict} = State, {lambda, Line, Arguments, Expressions})
   ),
   {ok, _, Expressions2} = reia_visitor:transform(Expressions, #state{bindings=Dict2}, fun transform/2),
   {stop, State, {lambda, Line, Arguments2, Expressions2}};
-  
+
+% Function references need a pass for the receiver
+transform(#state{mode=Mode} = State, {funref, Line, Receiver, {identifier, _, _} = Name}) ->
+  {ok, #state{bindings=Dict}, Receiver2}  = reia_visitor:transform(Receiver,  State, fun transform/2),
+  {stop, #state{mode=Mode, bindings=Dict}, {funref, Line, Receiver2, Name}};
+    
+% Function calls need a pass over their arguments and block
 transform(#state{mode=Mode, bindings=Dict} = State, {funcall, Line, {identifier, _Line, Name} = Identifier, Arguments, Block}) ->
   {ok, #state{bindings=Dict2}, Arguments2} = reia_visitor:transform(Arguments, State, fun transform/2),
   {ok, #state{bindings=Dict3}, Block2} = reia_visitor:transform(Block, #state{mode=Mode, bindings=Dict2}, fun transform/2),
@@ -97,7 +103,17 @@ transform(#state{mode=Mode} = State, {funcall, Line, Receiver, Name, Arguments, 
   ),
   Node = {funcall, Line, Receiver2, Name, Arguments2, Block2},
   {stop, #state{mode=Mode, bindings=Dict4}, Node};
-  
+
+% Method calls are totally freaking weird due to the need to shuffle hidden 
+% state around.  This pass in fact colludes with two others, reia_ivars
+% before it and reia_methods afterward.  It's insane!  Anyway if you're
+% still trying to comprehend what's going on the prevous pass and next
+% pass need knowledge of the binding to properly complete the overall
+% transformation they're trying to accomplish.  This pass versions the hidden
+% state to ensure it's passed around correctly.
+%
+% Here's the node structure:
+%
 % Input node:  {method_call, Line, Name, Arguments, Block}
 % Output node: {method_call, Line, Name, Arguments, Block, IvarsIn, IvarsOut}
 transform(#state{mode=Mode, bindings=Dict} = State, {method_call, Line, {identifier, _Line, Name} = Identifier, Arguments, Block}) ->
