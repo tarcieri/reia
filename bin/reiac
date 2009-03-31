@@ -14,9 +14,14 @@ main(Options) ->
   case Options of
     ["-o", Outfile, Infile] ->
       result(reiac:file(Infile, Outfile));
+    [_File|_T] ->
+      multi(Options);
     _ ->
       usage()
   end.
+
+multi(Files) ->
+  [result(reiac:file(File)) || File <- Files].
 
 init() ->
   code:add_pathz("./ebin"),
