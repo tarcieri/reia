@@ -15,12 +15,15 @@ all: build test
 build: leex parser reia
 
 erl_compile:
-	bin/erlc +debug_info $(ERL_SRC)
+	bin/erlc -o ebin +debug_info $(ERL_SRC)
 
 reia_compile:
-	bin/reiac $(REIA_SRC)
+	bin/reiac ${REIA_SRC}
 
-reia: erl_compile reia_compile
+reia: erl_compile reia_compile ebin_mv
+
+ebin_mv:
+	mv *.beam ebin
 
 # Leex (lexer generator for Erlang)
 leex: src/leex/leex.beam ebin/reia_scan.beam
