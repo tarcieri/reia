@@ -2,8 +2,8 @@ VERSION =
 PREFIX = /usr/local
 
 # todo: get erlang dir with code:lib_dir()
-ERLANG_LIB = $(PREFIX)/erlang/lib
-REIA_LIB = $(ERLANG_LIB)/reia-$(VERSION)
+ERLANG_LIB = $(PREFIX)/lib/erlang/lib
+REIA_LIB = $(ERLANG_LIB)/reia$(VERSION)
 
 PARSER_SRC = src/**/*.xrl src/**/*.yrl
 ERL_SRC = src/compiler/*.erl src/builtins/*.erl src/core/*.erl
@@ -46,7 +46,7 @@ test: build
 	bin/reia test/runner.re
 
 install:
-	rm -r $(REIA_LIB)
+	-rm -rf $(REIA_LIB)
 	mkdir $(REIA_LIB)
   
 	cp LICENSE $(REIA_LIB)
