@@ -9,6 +9,8 @@ PARSER_SRC = src/**/*.xrl src/**/*.yrl
 ERL_SRC = src/compiler/*.erl src/builtins/*.erl src/core/*.erl
 REIA_SRC = src/builtins/*.re src/core/*.re
 
+REIA_FILE = 
+
 # todo: erlang version check
 all: build test
 
@@ -45,8 +47,7 @@ ebin/reia_parse.beam:
 test: build
 	bin/reia test/runner.re
 
-install:
-	-rm -rf $(REIA_LIB)
+install: uninstall
 	mkdir $(REIA_LIB)
   
 	cp LICENSE $(REIA_LIB)
@@ -57,22 +58,11 @@ install:
 
 	cp bin/ire $(PREFIX)/bin
 	cp bin/reia $(PREFIX)/bin
-  
-# todo: doesn't need -pa
-
-#   File.open(PREFIX + "/bin/reia", "w", 0755) do |f| f << "
-# #!/bin/sh
-# PROGRAM=$1
-# shift
-# erl -noshell +K true -s reia erl_load $PROGRAM -s init stop -extra $*"
-
-#   File.open(PREFIX + "/bin/ire", "w", 0755) do |f| f << "#!/bin/sh
-# erl +K true -noshell -noinput -s ire init -extra $*"
 
 uninstall:
-	rm -r $(REIA_LIB)
-	rm $(PREFIX)/ire
-	rm $(PREFIX)/reia
+	-rm -r $(REIA_LIB)
+	-rm $(PREFIX)/bin/ire
+	-rm $(PREFIX)/bin/reia
 
 distclean:
 	rm -r ebin
