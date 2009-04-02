@@ -237,7 +237,7 @@ default_functions() ->
   [parse_function(Function) || Function <- [
     "init([]) -> {ok, dict:new()}.",
     "handle_call(Request, From, State) -> try dispatch_method(Request, From, State) catch throw:Error -> {reply, {error, Error}, State} end.",
-    "handle_cast(_Msg, State) -> {noreply, State}.",
+    "handle_cast(Request, State) -> {reply, _, NewState} = dispatch_method(Request, cast, State), {noreply, NewState}.",
     "handle_info(Message, State) -> {reply, _, NewState} = dispatch_method({'handle_message', [Message], nil}, unknown, State), {noreply, NewState}.",
     "terminate(_Reason, _State) -> ok.",
     "code_change(_OldVsn, State, _Extra) -> {ok, State}."
