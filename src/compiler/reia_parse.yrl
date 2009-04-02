@@ -286,6 +286,10 @@ funcall -> funcall_expr '.' function_identifier '(' exprs ')' : {funcall, line('
 funcall -> funcall_expr '[' expr ']' : {funcall, line('$2'), '$1', {identifier, line('$2'), '[]'}, ['$3'], {atom, line('$2'), nil}}.
 funcall -> funcall_expr '.' function_identifier '[' expr ']' : {funcall, line('$2'), {funcall, line('$2'), '$1', '$3', []}, {identifier, line('$2'), '[]'}, ['$5'], {atom, line('$2'), nil}}.
 
+%% Async function calls
+funcall -> funcall_expr '<-' function_identifier '(' ')' : {cast, line('$2'), '$1', '$3', [], {atom, line('$2'), nil}}.
+funcall -> funcall_expr '<-' function_identifier '(' exprs ')' : {cast, line('$2'), '$1', '$3', '$5', {atom, line('$2'), nil}}.
+
 %% Local function calls with blocks
 funcall -> function_identifier block : {funcall, line('$2'), '$1', [], '$2'}.
 funcall -> function_identifier '(' ')' block : {funcall, line('$2'), '$1', [], '$4'}.
