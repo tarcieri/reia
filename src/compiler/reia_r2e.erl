@@ -157,7 +157,7 @@ forms({funcall, Line, Receiver, {identifier, _, Method}, Arguments, Block}) ->
 forms({cast, Line, Receiver, {identifier, _, Method}, Arguments, Block}) ->
   {call, Line,
     {remote, Line, {atom, Line, reia_class}, {atom, Line, cast}},
-    [forms(Receiver), {atom, Line, Method}, list_to_forms(Arguments, Line), forms(Block)]
+    [forms(Receiver), {tuple, Line, [{atom, Line, Method}, list_to_forms(Arguments, Line), forms(Block)]}]
   };
   
 %% Class instantiations
