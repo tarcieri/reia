@@ -89,6 +89,24 @@ class InheritanceTest < TestAncestor
   end
 end
 
+class AsyncTest
+  def initialize
+    @state = 24
+  end
+  
+  def cast(n)
+    @state = n
+  end
+  
+  def cast_with_block(n, &block)
+    @state = block(n)
+  end
+  
+  def state
+    @state
+  end
+end
+
 module ObjectTest
   def run
     [
@@ -99,7 +117,8 @@ module ObjectTest
       message_test(),
       initialize_test(),
       inheritance_test(),
-      inheritance_ivar_test()
+      inheritance_ivar_test(),
+      async_call_test()
     ]
   end
         
@@ -167,6 +186,21 @@ module ObjectTest
     TestHelper.expect(Object, "allows instance variable access from inherited methods") do
       obj = InheritanceTest()
       (42, obj.ivars2())
+    end
+  end
+  
+  # can be called asynchronously
+  def async_call_test
+    TestHelper.expect(Object, "can be called asynchronously") do
+      obj = AsyncTest()
+      old_state = obj.state()
+      
+      # Realistically we can't guarantee message delivery works like this
+      # FIXME write a better test?
+      obj<-cast(42)
+      new_state = obj.state()
+      
+      ((24,42), (old_state,new_state))
     end
   end
 end

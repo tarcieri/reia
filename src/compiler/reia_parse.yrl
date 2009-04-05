@@ -77,7 +77,7 @@ Terminals
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**' '!'
   '.' '..' ',' '::' '@' '&'
-  '=' '==' '===' '!=' '>' '<' '=>' '<=' '>='
+  '=' '==' '===' '!=' '>' '<' '=>' '<=' '>=' '<-'
   .
 
 Rootsymbol grammar.
@@ -276,30 +276,46 @@ function_identifier -> class : function_identifier('$1').
 %% Function references
 funref -> funcall_expr '.' function_identifier : {funref, line('$2'), '$1', '$3'}.
 
-%% Function calls
+%% Local function calls
 funcall -> function_identifier '(' ')' : {funcall, line('$2'), '$1', [], {atom, line('$2'), nil}}.
 funcall -> function_identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3', {atom, line('$2'), nil}}.
 
+%% Remote function calls
 funcall -> funcall_expr '.' function_identifier '(' ')' : {funcall, line('$2'), '$1', '$3', [], {atom, line('$2'), nil}}.
 funcall -> funcall_expr '.' function_identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3', '$5', {atom, line('$2'), nil}}.
 funcall -> funcall_expr '[' expr ']' : {funcall, line('$2'), '$1', {identifier, line('$2'), '[]'}, ['$3'], {atom, line('$2'), nil}}.
 funcall -> funcall_expr '.' function_identifier '[' expr ']' : {funcall, line('$2'), {funcall, line('$2'), '$1', '$3', []}, {identifier, line('$2'), '[]'}, ['$5'], {atom, line('$2'), nil}}.
 
-%% Function calls with blocks
+%% Async function calls
+funcall -> funcall_expr '<-' function_identifier '(' ')' : {cast, line('$2'), '$1', '$3', [], {atom, line('$2'), nil}}.
+funcall -> funcall_expr '<-' function_identifier '(' exprs ')' : {cast, line('$2'), '$1', '$3', '$5', {atom, line('$2'), nil}}.
+
+%% Local function calls with blocks
 funcall -> function_identifier block : {funcall, line('$2'), '$1', [], '$2'}.
 funcall -> function_identifier '(' ')' block : {funcall, line('$2'), '$1', [], '$4'}.
 funcall -> function_identifier '(' exprs ')' block : {funcall, line('$2'), '$1', '$3', '$5'}.
 
+%% Remote function calls with blocks
 funcall -> funcall_expr '.' function_identifier block : {funcall, line('$2'), '$1', '$3', [], '$4'}.
 funcall -> funcall_expr '.' function_identifier '(' ')' block : {funcall, line('$2'), '$1', '$3', [], '$6'}.
 funcall -> funcall_expr '.' function_identifier '(' exprs ')' block : {funcall, line('$2'), '$1', '$3', '$5', '$7'}.
 
-%% Function calls with lambdas passed as blocks
+% Async function calls with blocks
+funcall -> funcall_expr '<-' function_identifier block : {cast, line('$2'), '$1', '$3', [], '$4'}.
+funcall -> funcall_expr '<-' function_identifier '(' ')' block : {cast, line('$2'), '$1', '$3', [], '$6'}.
+funcall -> funcall_expr '<-' function_identifier '(' exprs ')' block : {cast, line('$2'), '$1', '$3', '$5', '$7'}.
+
+%% Local function calls with lambdas passed as blocks
 funcall -> function_identifier '(' '&' identifier ')' : {funcall, line('$2'), '$1', [], '$4'}.
 funcall -> function_identifier '(' function_params '&' identifier ')' : {funcall, line('$2'), '$1', '$3', '$5'}.
 
+% Remote function calls with lambdas passed as blocks
 funcall -> funcall_expr '.' function_identifier '(' '&' identifier ')' : {funcall, line('$2'), '$1', '$3', [], '$6'}.
 funcall -> funcall_expr '.' function_identifier '(' function_params '&' identifier ')' : {funcall, line('$2'), '$1', '$3', '$5', '$7'}.
+
+% Async function calls with lambdas passed as blocks
+funcall -> funcall_expr '<-' function_identifier '(' '&' identifier ')' : {cast, line('$2'), '$1', '$3', [], '$6'}.
+funcall -> funcall_expr '<-' function_identifier '(' function_params '&' identifier ')' : {cast, line('$2'), '$1', '$3', '$5', '$7'}.
 
 %% Class instantiations
 class_inst -> constant '(' ')' : {class_inst, line('$2'), '$1', []}.

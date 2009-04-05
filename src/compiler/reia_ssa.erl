@@ -103,6 +103,22 @@ transform(#state{mode=Mode} = State, {funcall, Line, Receiver, Name, Arguments, 
   ),
   Node = {funcall, Line, Receiver2, Name, Arguments2, Block2},
   {stop, #state{mode=Mode, bindings=Dict4}, Node};
+  
+% Casts work like funcalls
+transform(#state{mode=Mode} = State, {cast, Line, Receiver, Name, Arguments, Block}) ->
+  {ok, #state{bindings=Dict2}, Receiver2}  = reia_visitor:transform(Receiver,  State, fun transform/2), 
+  {ok, #state{bindings=Dict3}, Arguments2} = reia_visitor:transform(
+    Arguments, 
+    #state{mode=Mode, bindings=Dict2}, 
+    fun transform/2
+  ),
+  {ok, #state{bindings=Dict4}, Block2} = reia_visitor:transform(
+    Block, 
+    #state{mode=Mode, bindings=Dict3}, 
+    fun transform/2
+  ),
+  Node = {cast, Line, Receiver2, Name, Arguments2, Block2},
+  {stop, #state{mode=Mode, bindings=Dict4}, Node};
 
 % Method calls are totally freaking weird due to the need to shuffle hidden 
 % state around.  This pass in fact colludes with two others, reia_ivars
