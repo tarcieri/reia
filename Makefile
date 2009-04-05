@@ -64,9 +64,11 @@ uninstall:
 	-rm $(PREFIX)/bin/ire
 	-rm $(PREFIX)/bin/reia
 
+clean: distclean
+
 distclean:
-	rm -r ebin
-	mkdir ebin
+	rm -f ebin/*
+	rm -f src/compiler/reia_scan.erl src/compiler/reia_parse.erl
 
 ci: distclean test
 
