@@ -1,5 +1,5 @@
 %
-% reia_funrefs: Lambdas which reference Reia functions and methods
+% reia_funrefs: Funs which reference Reia functions and methods
 % Copyright (C)2009 Tony Arcieri
 % 
 % Redistribution is permitted under the MIT license.  See LICENSE for details.

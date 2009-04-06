@@ -41,7 +41,7 @@ funcall(Receiver, Method, Arguments, _Block) when is_binary(Receiver) ->
 funcall(Receiver = {dict, _}, Method, Arguments, _Block) ->
   'Map':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver, Method, Arguments, _Block) when is_function(Receiver) ->
-  'Lambda':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
+  'Fun':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver, Method, Arguments, _Block) when is_pid(Receiver) ->
   'Process':funcall({Receiver, Method, silly_list_hack(Arguments)}, nil);
 funcall(Receiver = {list, _}, Method, Arguments, Block) ->
