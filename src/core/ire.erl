@@ -13,7 +13,7 @@ init() ->
   user_drv:start('tty_sl -c -e', {ire, start, []}).
 
 start() ->
-  spawn(fun() -> loop() end).
+  spawn(fun() -> reia:apply('Loader', 'stdlib', []), loop() end).
 
 loop() ->
   loop('Eval':new_binding({}, nil)).
