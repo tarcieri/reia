@@ -76,7 +76,7 @@ module Map
   # Map#inspect
   #   Inspect the contents of a map
   def funcall(map, :inspect, [])
-    members = map.to_list().map { |(k, v)| "#{k.inspect()}:#{v.inspect()}" }.join(",")
+    members = map.to_list().map { |(k, v)| "#{k.inspect()}=>#{v.inspect()}" }.join(",")
     "{#{members}}"
   end
 end
