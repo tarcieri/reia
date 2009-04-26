@@ -9,13 +9,13 @@ module Process
   # Process#spawn
   #   Create a new process
   def spawn(&block)
-    proc_lib::spawn(block)
+    proc_lib::spawn(fun_shim::thunk(block, 0))
   end
     
   # Process#spawn_link
   #   Create a new process and links it to the current one
   def spawn_link(&block)
-    proc_lib::spawn_link(block)
+    proc_lib::spawn_link(fun_shim::thunk(block, 0))
   end
     
   # Process#to_s
