@@ -31,7 +31,7 @@ module Ring
     parent
   end
   def start(n, parent)
-    start(n - 1, Process.spawn(fun() { child_loop(parent) }))
+    start(n - 1, Process.spawn { child_loop(parent) })
   end
   
   def child_loop(parent)
