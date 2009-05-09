@@ -14,7 +14,8 @@ module FileTest
       write_test(), 
       copy_test(), 
       move_test(), 
-      delete_test()
+      delete_test(),
+      exists_test()
     ]
   end
   
@@ -33,32 +34,40 @@ module FileTest
   end
   
   def read_test
-    TestHelper.expect(File, "File.read (module version) reads correctly") do
+    TestHelper.expect(File, "read (module version) reads correctly") do
       (<<"bar">>, File.read("foo.txt"))
     end
   end
   
   def write_test
-    TestHelper.expect(File, "File.write (module version) writes correctly") do
+    TestHelper.expect(File, "write (module version) writes correctly") do
       (:ok, File.write("foo.txt", "baz"))
     end
   end
   
   def copy_test
-    TestHelper.expect(File, "File.copy copies file") do
+    TestHelper.expect(File, "copies files") do
       (:ok, File.copy("foo.txt", "bar.txt"))
     end
   end
   
   def move_test
-    TestHelper.expect(File, "File.move moves file") do
+    TestHelper.expect(File, "moves files") do
       (:ok, File.move("foo.txt", "bar.txt"))
     end
   end
   
   def delete_test
-    TestHelper.expect(File, "File.delete removes file") do
+    TestHelper.expect(File, "removes file") do
       (:ok, File.delete("bar.txt"))
     end
+  end
+  
+  def exists_test
+    TestHelper.expect(File, "knows if files exist") do
+      should_be_there = File.exists?("/")
+      should_not_be_there = File.exists?("/hopefullynobodycreatedthis")
+      ((true, false), (should_be_there, should_not_be_there))
+    end    
   end
 end

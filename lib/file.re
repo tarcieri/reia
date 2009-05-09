@@ -75,6 +75,10 @@ module File
   def size(path)
     filelib::file_size(path.to_list())
   end
+  
+  def exists?(path)
+    filelib::is_file(path.to_list())
+  end
     
   def file?(path)
     filelib::is_regular(path.to_list())
