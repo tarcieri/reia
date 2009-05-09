@@ -284,7 +284,7 @@ funcall -> function_identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3',
 funcall -> funcall_expr '.' function_identifier '(' ')' : {funcall, line('$2'), '$1', '$3', [], {atom, line('$2'), nil}}.
 funcall -> funcall_expr '.' function_identifier '(' exprs ')' : {funcall, line('$2'), '$1', '$3', '$5', {atom, line('$2'), nil}}.
 funcall -> funcall_expr '[' expr ']' : {funcall, line('$2'), '$1', {identifier, line('$2'), '[]'}, ['$3'], {atom, line('$2'), nil}}.
-funcall -> funcall_expr '.' function_identifier '[' expr ']' : {funcall, line('$2'), {funcall, line('$2'), '$1', '$3', []}, {identifier, line('$2'), '[]'}, ['$5'], {atom, line('$2'), nil}}.
+funcall -> funcall_expr '.' function_identifier '[' expr ']' : {funcall, line('$2'), {funcall, line('$2'), '$1', '$3', [], {atom, line('$2'), nil}}, {identifier, line('$2'), '[]'}, ['$5'], {atom, line('$2'), nil}}.
 
 %% Async function calls
 funcall -> funcall_expr '<-' function_identifier '(' ')' : {cast, line('$2'), '$1', '$3', [], {atom, line('$2'), nil}}.
