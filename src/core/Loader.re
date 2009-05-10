@@ -49,7 +49,9 @@ module Loader
     else
       # If that fails, look in the current directory
       path = __getcwd()
-      if /reia/.match(path)
+      if filelib::is_file("#{path}/lib")
+        __load_stdlib("#{path}/lib")
+      elseif /reia/.match(path)
         __load_stdlib(path.sub(/reia.*?$/, "reia/lib"))
       else
         throw "can't load stdlib"
