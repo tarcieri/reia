@@ -1,0 +1,43 @@
+h1. Reia Internals
+
+Here's a quick guide to how Reia's compiler works
+
+h2. Scanning and Parsing
+
+Reia uses a scanner based on leex, an Erlangly lex (http://github.com/rvirding/leex):
+
+ src/compiler/reia_scan.xrl
+ 
+Reia's parser is generated using yecc, an Erlangy yacc (erl -man yecc):
+
+ src/compiler/reia_parse.yrl
+ 
+These two files generate Reia's scanner and parser, and thus define the syntax of the language.  If you're interested in working on syntax hacks, these are the files to look in.
+
+Things to look out for: shift/reduce or reduce/reduce conflicts from yecc.  These are only warnings, but they indicate your grammar is somehow ambiguous.  If you want to get a patch accepted to the grammar, be sure it's free of these warnings.
+
+There are a number of ways to parse Reia code to parse trees.  The easiest is to do it straight from "ire":
+
+ >> "2+2".to_parsetree()
+ => [(:op,1,:'+',(:integer,1,2),(:integer,1,2))]
+ 
+This outputs Reia parse trees in Reia syntax.
+
+You can also parse Reia code from Erlang:
+
+ 1> reia:parse("2+2").
+ {ok,[{op,1,'+',{integer,1,2},{integer,1,2}}]}
+ 
+h2. Compiler Passes
+
+Reia's compiler runs a number of passes over the parse tree which progressively transform the code into the Erlang abstract format.
+
+The list of passes and basic compiler API are defined in:
+
+ src/compiler/reia_compiler.erl
+ 
+Here's the present list of passes performed by the compiler:
+
+* Branches: Converts if statements to nested case statements and adds a catchall clause to all if/case statements that returns nil unless another catchall clause is defined.
+* Ivars: Implemenets "instance variables", i.e. adding hidden state to gen_server which compiles to pure functional state passing
+* ssa, methods, r2e, dynamic].
