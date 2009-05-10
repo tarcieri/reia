@@ -18,10 +18,10 @@ Things to look out for: shift/reduce or reduce/reduce conflicts from yecc.  Thes
 
 There are a number of ways to parse Reia code to parse trees.  The easiest is to do it straight from "ire" the Reia shell:
 
-<pre><code>
+<notextile>
  >> "2+2".to_parsetree()
  => [(:op,1,:'+',(:integer,1,2),(:integer,1,2))]
-</code></pre>
+</notextile>
  
 This outputs Reia parse trees in Reia syntax.
 
