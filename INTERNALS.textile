@@ -16,10 +16,12 @@ These two files generate Reia's scanner and parser, and thus define the syntax o
 
 Things to look out for: shift/reduce or reduce/reduce conflicts from yecc.  These are only warnings, but they indicate your grammar is somehow ambiguous.  If you want to get a patch accepted to the grammar, be sure it's free of these warnings.
 
-There are a number of ways to parse Reia code to parse trees.  The easiest is to do it straight from "ire":
+There are a number of ways to parse Reia code to parse trees.  The easiest is to do it straight from "ire" the Reia shell:
 
+<pre><code>
  >> "2+2".to_parsetree()
  => [(:op,1,:'+',(:integer,1,2),(:integer,1,2))]
+</code></pre>
  
 This outputs Reia parse trees in Reia syntax.
 
@@ -38,6 +40,14 @@ The list of passes and basic compiler API are defined in:
  
 Here's the present list of passes performed by the compiler:
 
-* Branches: Converts if statements to nested case statements and adds a catchall clause to all if/case statements that returns nil unless another catchall clause is defined.
-* Ivars: Implemenets "instance variables", i.e. adding hidden state to gen_server which compiles to pure functional state passing
-* ssa, methods, r2e, dynamic].
+* branches: Converts if statements to nested case statements and adds a catchall clause to all if/case statements that returns nil unless another catchall clause is defined
+* ivars: Implemenets "instance variables", i.e. adding hidden state to gen_server which compiles to pure functional state passing
+* ssa: Static single assignment transform, implements destructive assignment
+* methods: Handles hidden state passing between method calls within the same object
+* r2e: Final Reia-to-Erlang pass, handles final conversion of Reia syntax trees into the Erlang abstract format
+
+These passes are defined in the:
+
+ src/compiler/
+ 
+directory.
