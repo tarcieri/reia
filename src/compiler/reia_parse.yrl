@@ -50,8 +50,10 @@ Nonterminals
   after_clause
   if_expr
   inline_if_expr
+  if_clause
+  elseif_clauses
+  elseif_clause
   else_clause
-  if_op
   for_expr
   try_expr
   catch_clauses
@@ -72,7 +74,7 @@ Nonterminals
 Terminals
   true false nil float integer string regexp atom
   identifier punctuated_identifier constant module class
-  eol def fun do 'end' 'case' when else 'if' unless 
+  eol def fun do 'end' 'case' when 'if' elseif else unless 
   'and' 'or' 'not' 'try' 'catch' throw for in 'receive' 'after'
   '(' ')' '[' ']' '{' '}' '|' '<<' '>>'
   '+' '-' '*' '/' '%' '**' '!'
@@ -98,7 +100,8 @@ exprs -> expr ',' exprs : ['$1'|'$3'].
 
 expr -> inline_if_expr : '$1'.
 
-inline_if_expr -> match_expr if_op match_expr : if_forms({'$2', '$3', ['$1']}).
+inline_if_expr -> match_expr 'if' match_expr : {'if', line('$2'), [{clause, line('$2'), '$3', ['$1']}]}.
+inline_if_expr -> match_expr 'unless' match_expr : {'if', line('$2'), [{clause, line('$2'), {op, line('$2'), 'not', '$3'}, ['$1']}]}.
 inline_if_expr -> match_expr : '$1'.
 
 match_expr -> send_expr '=' match_expr : {match, line('$2'), '$1', '$3'}.
@@ -188,13 +191,19 @@ receive_expr -> 'receive' eol after_clause 'end' : {'receive', line('$1'), [], '
 after_clause -> 'after' expr eol expr_list : {'after', line('$1'), '$2', '$4'}.
 
 %% If expressions
-if_expr -> if_op expr eol expr_list 'end' : if_forms({'$1', '$2', '$4'}).
-if_expr -> if_op expr eol expr_list else_clause 'end' : if_forms({'$1', '$2', '$4', '$5'}).
+if_expr -> if_clause end : {'if', line('$1'), ['$1']}.
+if_expr -> if_clause else_clause end : {'if', line('$1'), ['$1','$2']}.
+if_expr -> if_clause elseif_clauses end : {'if', line('$1'), ['$1'|'$2']}.
+if_expr -> if_clause elseif_clauses else_clause end : {'if', line('$1'), ['$1'|['$2'|['$3']]]}.
 
-if_op -> 'if'   : '$1'.
-if_op -> unless : '$1'.
+if_clause -> 'if' expr eol expr_list : {clause, line('$1'), '$2', '$4'}.
+if_clause -> 'unless' expr eol expr_list : {clause, line('$1'), {op, line('$1'), 'not', '$2'}, '$4'}.
 
-else_clause -> else expr_list : {else_clause, line('$1'), '$2'}.
+elseif_clauses -> elseif_clause elseif_clauses : ['$1'|'$2'].
+elseif_clauses -> elseif_clause : ['$1'].
+elseif_clause -> elseif expr eol expr_list : {clause, line('$1'), '$2', '$4'}.
+
+else_clause -> else expr_list : {clause, line('$1'), {true, line('$1')}, '$2'}.
 
 %% For loops
 for_expr -> for match_expr in expr eol expr_list end : {for, line('$1'), '$2', '$4', '$6'}.
@@ -414,16 +423,6 @@ function_identifier({punctuated_identifier, Line, Atom}) ->
   {identifier, Line, Atom};
 function_identifier({class, Line}) ->
   {identifier, Line, class}.
-  
-%% Generate proper forms for if statements
-if_forms({{'if', Line}, Expression, Statements}) ->
-  {'if', Line, Expression, Statements, {else_clause, Line, [{atom, Line, nil}]}};
-if_forms({{'if', Line}, Expression, Statements, ElseClause}) ->
-  {'if', Line, Expression, Statements, ElseClause};
-if_forms({{'unless', Line}, Expression, Statements}) ->
-  {'if', Line, Expression, [{nil, Line}], {else_clause, Line, Statements}};
-if_forms({{'unless', Line}, Expression, Statements, {else_clause, _, ElseStatements}}) ->
-  {'if', Line, Expression, ElseStatements, {else_clause, Line, Statements}}.
     
 %% Interpolate strings, parsing the contents of #{...} tags
 interpolate_string({string, Line, String}) ->

@@ -18,15 +18,8 @@ ast(Ast) ->
   Ast2.
   
 %% If statements
-transform(_, {'if', Line, Expression, Statements, {else_clause, ElseLine, ElseStatements}}) ->
-  Node = {'case', Line, Expression,
-    [
-      {clause, ElseLine, {false, Line}, ElseStatements},
-      {clause, ElseLine, {nil, Line},   ElseStatements},
-      {clause, Line, {identifier, Line, '_'}, Statements}
-    ]
-  },
-  {walk, void, Node};
+transform(_, {'if', _, Clauses}) ->
+  {walk, void, if_to_case(Clauses)};
   
 %% Case statements
 transform(_, {'case', Line, Expression, Clauses} = OrigNode) ->
@@ -43,7 +36,23 @@ transform(_, {'case', Line, Expression, Clauses} = OrigNode) ->
 % Walk unrecognized nodes without transforming them
 transform(_, Node) ->
   {walk, void, Node}.
-    
+
+% Convert if statements to case statements
+if_to_case(Clauses) ->
+  if_to_case(lists:reverse(Clauses), {nil, 1}). % FIXME: umm maybe that should be a real line number
+  
+if_to_case([], Output) ->
+  Output;
+if_to_case([{clause, Line, Pattern, Expressions}|Clauses], Output) ->
+  Node = {'case', Line, Pattern,
+    [
+      {clause, Line, {false, Line}, [Output]},
+      {clause, Line, {nil, Line},   [Output]},
+      {clause, Line, {identifier, Line, '_'}, Expressions}
+    ]
+  },
+  if_to_case(Clauses, Node).
+      
 % Is the given clause a catch-all clause?
 is_catchall_clause({clause, _Line, Pattern, _Expressions}) ->
   catchall_pattern(Pattern).
