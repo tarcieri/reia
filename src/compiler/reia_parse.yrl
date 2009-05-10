@@ -194,7 +194,7 @@ after_clause -> 'after' expr eol expr_list : {'after', line('$1'), '$2', '$4'}.
 if_expr -> if_clause end : {'if', line('$1'), ['$1']}.
 if_expr -> if_clause else_clause end : {'if', line('$1'), ['$1','$2']}.
 if_expr -> if_clause elseif_clauses end : {'if', line('$1'), ['$1'|'$2']}.
-if_expr -> if_clause elseif_clauses else_clause end : {'if', line('$1'), ['$1'|['$2'|['$3']]]}.
+if_expr -> if_clause elseif_clauses else_clause end : {'if', line('$1'), lists:flatten(['$1','$2','$3'])}.
 
 if_clause -> 'if' expr eol expr_list : {clause, line('$1'), '$2', '$4'}.
 if_clause -> 'unless' expr eol expr_list : {clause, line('$1'), {op, line('$1'), 'not', '$2'}, '$4'}.
