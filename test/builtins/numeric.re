@@ -14,7 +14,8 @@ module NumericTest
       int_to_string_test(), 
       float_to_string_test(), 
       str_to_float_test(), 
-      str_to_int_test()
+      str_to_int_test(),
+      pow_test()
     ]
   end
   
@@ -57,6 +58,12 @@ module NumericTest
   def str_to_int_test()
     TestHelper.expect(Numeric, "string converts to int") do
       ("19283".to_int(), 19283)
+    end
+  end
+  
+  def pow_test()
+    TestHelper.expect(Numeric, "calculates exponents") do
+      (2**8, 256)
     end
   end
 end
