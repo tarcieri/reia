@@ -58,10 +58,11 @@ forms('===', Line, Ast1, Ast2) ->
     [{match, Line, Ast1, Ast2}, {atom, Line, true}],
     [],
     [{clause, Line,
-             [{tuple, Line,
-                     [{atom, Line,error},
-                      {tuple, Line, [{atom, Line, badmatch}, {var, Line, '_'}]},
-                      {var, Line, '_'}]}],
-             [],
-             [{atom, Line, false}]}],
+      [{tuple, Line,
+      [{atom, Line,error},
+        {tuple, Line, [{atom, Line, badmatch}, {var, Line, '_'}]},
+        {var, Line, '_'}]}
+      ],
+      [],
+      [{atom, Line, false}]}],
   []}.
