@@ -69,14 +69,14 @@ create_transform(ModName,Dir) when is_atom(ModName) ->
     true -> io:format("'~s' already exists, skipping generation.~n", [XfFile]);
     false -> generate_transform_stub(XfFile, ModName)
   end,
-  ["transform(Symbol,Node,Index) -> ",atom_to_list(ModName),":transform(Symbol, Node, Index)."].
+  ["transform(Symbol,Node) -> ",atom_to_list(ModName),":transform(Symbol, Node)."].
 
 generate_transform_stub(XfFile,ModName) ->
   Data = ["-module(",atom_to_list(ModName),").\n",
-         "-export([transform/3]).\n\n",
+         "-export([transform/2]).\n\n",
          "%% Add clauses to this function to transform syntax nodes\n",
          "%% from the parser into semantic output.\n",
-         "transform(Symbol, Node, _Index) when is_atom(Symbol) ->\n  Node."],
+         "transform(Symbol, Node) when is_atom(Symbol) ->\n  Node."],
   file:write_file(XfFile, Data).
 
 %% @doc Bootstraps the neotoma metagrammar.  Intended only for internal development!

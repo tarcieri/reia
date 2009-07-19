@@ -1,24 +1,24 @@
 -module(csv_gen).
--export([transform/3]).
+-export([transform/2]).
 
 %% Add clauses to this function to transform syntax nodes
 %% from the parser into semantic output.
-transform(rows, Node, _Idx) when length(Node) =:= 1 ->
+transform(rows, Node) when length(Node) =:= 1 ->
   [];
-transform(rows, Node, _Idx) ->
+transform(rows, Node) ->
   Head = proplists:get_value(head, Node),
   Tail = [R || [_,R] <- proplists:get_value(tail, Node)],
   [Head|Tail];
-transform(row, Node, _Idx) when length(Node) =:= 1 ->
+transform(row, Node) when length(Node) =:= 1 ->
   [];
-transform(row, Node, _Idx) ->
+transform(row, Node) ->
   Head = proplists:get_value(head, Node),
   Tail = [F || [_,F] <- proplists:get_value(tail, Node)],
   [Head|Tail];
-transform(field, Node, _Idx) ->
+transform(field, Node) ->
   lists:flatten(Node);
-transform(quoted_field, Node, _Idx) ->
+transform(quoted_field, Node) ->
   String = proplists:get_value(string, Node),
   re:replace(String, "[\"]{2}", "\"",[global, {return, list}]);
-transform(Symbol, Node, _Idx) when is_atom(Symbol) ->
+transform(Symbol, Node) when is_atom(Symbol) ->
   Node.

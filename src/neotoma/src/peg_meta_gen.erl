@@ -1,95 +1,95 @@
 -module(peg_meta_gen).
--export([transform/3]).
+-export([transform/2]).
 -author("Sean Cribbs <seancribbs@gmail.com>").
 
-transform(rules, Node, _Index) ->
+transform(rules, Node) ->
   verify_rules(),
   Rules = string:join(lists:nth(2, Node), ";\n\n"),
   Rules ++ ".\n";
-transform(declaration_sequence, Node, _Index) ->
+transform(declaration_sequence, Node) ->
   FirstRule = proplists:get_value(head, Node),
   OtherRules =  [lists:last(I) || I <- proplists:get_value(tail, Node, [])],
   [FirstRule|OtherRules];
-transform(declaration, [{nonterminal,Symbol}|Node], Index) ->
-  add_lhs(Symbol, Index),
+transform(declaration, [{nonterminal,Symbol}|Node]) ->
+  add_lhs(Symbol),
   "rule("++Symbol++") ->\n  " ++ lists:nth(4, Node);
-transform(sequence, Node, _Index) ->
+transform(sequence, Node) ->
   Tail = [lists:nth(2, S) || S <- proplists:get_value(tail, Node)],
   Statements = [proplists:get_value(head, Node)|Tail],
   "peg:seq(["++ string:join(Statements, ", ") ++ "])";
-transform(choice, Node, _Index) ->
+transform(choice, Node) ->
   Tail = [lists:last(S) || S <- proplists:get_value(tail, Node)],
   Statements = [proplists:get_value(head, Node)|Tail],
   "peg:choose([" ++ string:join(Statements, ", ") ++ "])";
-transform(label, Node, _Index) ->
+transform(label, Node) ->
   String = lists:flatten(Node),
   lists:sublist(String, length(String)-1);
-transform(labeled_sequence_primary, Node, _Index) ->
+transform(labeled_sequence_primary, Node) ->
   case hd(Node) of
     [] -> lists:nth(2, Node);
     Label -> "peg:label('" ++ Label ++ "', "++lists:nth(2, Node)++")"
   end;
-transform(single_quoted_string, Node, Index) ->
-  transform(double_quoted_string, Node, Index);
-transform(double_quoted_string, Node, _Index) ->
+transform(single_quoted_string, Node) ->
+  transform(double_quoted_string, Node);
+transform(double_quoted_string, Node) ->
   "peg:string(\""++escape_quotes(lists:flatten(proplists:get_value(string, Node)))++"\")";
-transform(character_class, Node, _Index) ->
+transform(character_class, Node) ->
   "peg:charclass(\"[" ++ escape_quotes(lists:flatten(proplists:get_value(characters, Node))) ++ "]\")";
-transform(parenthesized_expression, Node, _Index) ->
+transform(parenthesized_expression, Node) ->
   lists:nth(3, Node);
-transform(atomic, {nonterminal, Symbol}, Index) ->
-  add_nt(Symbol, Index),
+transform(atomic, {nonterminal, Symbol}) ->
+  add_nt(Symbol),
   "fun " ++ Symbol ++ "/2";
-transform(primary, [Atomic, one_or_more], _Index) ->
+transform(primary, [Atomic, one_or_more]) ->
   "peg:one_or_more("++Atomic++")";
-transform(primary, [Atomic, zero_or_more], _Index) ->
+transform(primary, [Atomic, zero_or_more]) ->
   "peg:zero_or_more("++Atomic++")";
-transform(primary, [Atomic, optional], _Index) ->
+transform(primary, [Atomic, optional]) ->
   "peg:optional("++Atomic++")";
-transform(primary, [assert, Atomic], _Index)->
+transform(primary, [assert, Atomic])->
   "peg:assert("++Atomic++")";
-transform(primary, [not_, Atomic], _Index) ->
+transform(primary, [not_, Atomic]) ->
   "peg:not_("++Atomic++")";
-transform(nonterminal, Node, _Index) ->
+transform(nonterminal, Node) ->
   {nonterminal, lists:flatten(Node)};
-transform(anything_symbol, _Node, _Index) ->
+transform(anything_symbol, _Node) ->
   "peg:anything()";
-transform(suffix, Node, _Index) ->
+transform(suffix, Node) ->
   case Node of
     "*" -> zero_or_more;
     "+" -> one_or_more;
     "?" -> optional
   end;
-transform(prefix, Node, _Index) ->
+transform(prefix, Node) ->
   case Node of
     "&" -> assert;
     "!" -> not_
   end;
-transform(Rule, Node, _Index) when is_atom(Rule) ->
+transform(Rule, Node) when is_atom(Rule) ->
    Node.
 
 escape_quotes(String) ->
   {ok, RE} = re:compile("\""),
   re:replace(String, RE, "\\\\\"", [global, {return, list}]).
 
-add_lhs(Symbol, Index) ->
+add_lhs(Symbol) ->
   case get(lhs) of
     undefined ->
-      put(lhs, [{Symbol,Index}]);
+      put(lhs, [Symbol]);
     L when is_list(L) ->
-      put(lhs, [{Symbol,Index}|L])
+      put(lhs, [Symbol|L])
   end.
 
-add_nt(Symbol, Index) ->
+add_nt(Symbol) ->
   case get(nts) of
     undefined ->
-      put(nts, [{Symbol,Index}]);
+      put(nts, [Symbol]);
     L when is_list(L) ->
-      case proplists:is_defined(Symbol, L) of
+      case lists:member(Symbol, L) of
         true ->
           ok;
         _ ->
-          put(nts, [{Symbol,Index}|L])
+          put(nts, [Symbol|L])
       end
   end.
 
@@ -97,20 +97,20 @@ verify_rules() ->
   LHS = erase(lhs),
   NTs = erase(nts),
   NonRoots = tl(lists:reverse(LHS)),
-  lists:foreach(fun({Sym,Idx}) ->
-                    case proplists:is_defined(Sym, NTs) of
+  lists:foreach(fun(L) ->
+                    case lists:member(L, NTs) of
                       true ->
                         ok;
                       _ ->
-                        io:format("neotoma warning: rule '~s' is unused. ~p~n", [Sym,Idx])
+                        io:format("neotoma warning: rule '~s' is unused.~n", [L])
                     end
                 end, NonRoots),
-  lists:foreach(fun({S,I}) ->
-                    case proplists:is_defined(S, LHS) of
+  lists:foreach(fun(S) ->
+                    case lists:member(S, LHS) of
                       true ->
                         ok;
                       _ ->
-                        io:format("neotoma error: symbol '~s' has no reduction. (found at ~p) No parser will be generated!~n", [S,I]),
+                        io:format("neotoma error: symbol '~s' has no reduction. No parser will be generated!~n", [S]),
                         exit({neotoma, {no_reduction, list_to_atom(S)}})
                     end
                 end, NTs).

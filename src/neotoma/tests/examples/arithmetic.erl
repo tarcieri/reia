@@ -22,7 +22,7 @@ additive(Input, Index) ->
                                                   peg:string("+"),
                                                   fun additive/2]),
                                          fun multitive/2]))(I,D) end,
-       fun(Node, Idx) -> transform(additive, Node, Idx) end).
+       fun(Node) -> transform(additive, Node) end).
 
 multitive(Input, Index) ->
   peg:p(Input, Index, multitive, fun(I,D) ->
@@ -31,7 +31,7 @@ multitive(Input, Index) ->
                                                    fun multitive/2]),
                                           fun primary/2]))(I,D)
                           end,
-       fun(Node, Idx) -> transform(multitive, Node, Idx) end).
+       fun(Node) -> transform(multitive, Node) end).
 
 primary(Input, Index) ->
   peg:p(Input, Index, primary, fun(I,D) ->
@@ -40,26 +40,26 @@ primary(Input, Index) ->
                                                  peg:string(")")]),
                                         fun decimal/2]))(I,D)
                         end,
-       fun(Node, Idx) -> transform(primary, Node, Idx) end).
+       fun(Node) -> transform(primary, Node) end).
 
 decimal(Input, Index) ->
   peg:p(Input, Index, decimal, fun(I,D) ->
                             (peg:charclass("[0-9]"))(I,D)
                         end,
-       fun(Node, Idx) -> transform(decimal, Node, Idx) end).
+       fun(Node) -> transform(decimal, Node) end).
 
 %% Transform the nodes into the result of the expression
-transform(decimal, Node, _Idx) ->
+transform(decimal, Node) ->
   list_to_integer([Node]);
-transform(primary, Node, _Idx) when is_integer(Node) ->
+transform(primary, Node) when is_integer(Node) ->
   Node;
-transform(primary, Node, _Idx) when is_list(Node) ->
+transform(primary, Node) when is_list(Node) ->
   lists:nth(2, Node);
-transform(multitive, Node, _Idx) when is_integer(Node) ->
+transform(multitive, Node) when is_integer(Node) ->
   Node;
-transform(multitive, Node, _Idx) when is_list(Node) ->
+transform(multitive, Node) when is_list(Node) ->
   hd(Node) * lists:nth(3, Node);
-transform(additive, Node, _Idx) when is_integer(Node) ->
+transform(additive, Node) when is_integer(Node) ->
   Node;
-transform(additive, Node, _Idx) when is_list(Node) ->
+transform(additive, Node) when is_list(Node) ->
   hd(Node) + lists:nth(3, Node).
