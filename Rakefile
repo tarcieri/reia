@@ -87,7 +87,7 @@ end
 #
 
 PARSER_GRAMMAR = 'src/compiler/reia_parse.peg'
-PARSER_SRC     = 'src/compiler/reia_parse.erl'
+PARSER_SRC     = PARSER_GRAMMAR.sub(/peg$/, 'erl')
 
 CLEAN << PARSER_SRC
 
