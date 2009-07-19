@@ -1,6 +1,6 @@
 require 'rake/clean'
 
-task :default => %w(check_erl_version check_previous_install build test)
+task :default => %w(check_erl_version check_previous_install build) #test
 task :build   => :parser
 
 #
