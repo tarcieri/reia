@@ -1,7 +1,7 @@
 require 'rake/clean'
 
 task :default => %w(check_erl_version check_previous_install build test)
-task :build   => :peg
+task :build   => :parser
 
 #
 # Prerequisites
@@ -62,7 +62,7 @@ end
 # Neotoma (PEG-based parser generator for Erlang)
 #
 
-task :peg => %w(neotoma ebin/reia_peg.beam)
+task :parser => %w(neotoma ebin/reia_parse.beam)
 
 NEOTOMA_SRC  = FileList.new('src/neotoma/src/*.erl')
 NEOTOMA_EBIN = 'src/neotoma/ebin/'
@@ -80,4 +80,21 @@ NEOTOMA_SRC.each do |input|
   file output_file(input, NEOTOMA_EBIN) do
     sh "erlc -W0 -I src -pa #{NEOTOMA_EBIN} -o #{NEOTOMA_EBIN} #{input}"
   end
+end
+
+#
+# Parser (generated from a Neotoma grammar)
+#
+
+PARSER_GRAMMAR = 'src/compiler/reia_parse.peg'
+PARSER_SRC     = 'src/compiler/reia_parse.erl'
+
+CLEAN << PARSER_SRC
+
+task PARSER_SRC => PARSER_GRAMMAR do
+  sh "erl -noshell -pa #{NEOTOMA_EBIN} -eval 'peg_gen:file(\"#{PARSER_GRAMMAR}\")' -s init stop"
+end
+
+task 'ebin/reia_parse.beam' => PARSER_SRC do
+  sh "erlc -I src -pa #{NEOTOMA_EBIN} -o ebin #{PARSER_SRC}"
 end
