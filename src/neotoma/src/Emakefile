@@ -1,0 +1,2 @@
+{[peg_transform, peg_itransform, peg, peg_gen, peg_meta, peg_meta_gen],
+	[{outdir, "../ebin"}, {i, "../../"}, debug_info]}.

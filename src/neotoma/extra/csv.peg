@@ -1,0 +1,6 @@
+rows <- head:row tail:(crlf row)* / '';
+row <- head:field tail:(field_sep field)* / '';
+field <- quoted_field / (!(field_sep / crlf) .)*;
+quoted_field <- '"' string:('""' / (!'"' .))* '"';
+field_sep <- ',';
+crlf <- "\r\n" / "\n";
