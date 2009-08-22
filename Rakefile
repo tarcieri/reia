@@ -1,7 +1,6 @@
 require 'rake/clean'
 
-task :default => %w(check_erl_version check_previous_install build) #test
-task :build   => :parser
+task :default => %w(check_erl_version check_previous_install build)
 
 #
 # Prerequisites
@@ -58,11 +57,20 @@ def output_file(input_file, dir = 'ebin/')
   dir + File.basename(input_file).sub(/\.\w+$/, '.beam')
 end
 
+ERL_SRC = FileList.new('src/compiler/**/*.erl')
+ERL_SRC.each do |input|
+  unless output_file(input) == "ebin/reia_parse.beam"
+    file output_file(input) => input do
+      sh "erlc +debug_info -o ebin #{input}"
+    end
+  end
+end
+
+task :build => %w(neotoma) + ERL_SRC.map { |input_file| output_file(input_file) }
+
 #
 # Neotoma (PEG-based parser generator for Erlang)
 #
-
-task :parser => %w(neotoma ebin/reia_parse.beam)
 
 NEOTOMA_SRC  = FileList.new('src/neotoma/src/*.erl')
 NEOTOMA_EBIN = 'src/neotoma/ebin/'
