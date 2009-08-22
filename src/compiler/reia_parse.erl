@@ -12,6 +12,6 @@ rule(primary) ->
   peg:choose([peg:seq([peg:string("("), fun additive/2, peg:string(")")]), fun decimal/2]);
 
 rule(decimal) ->
-  peg:charclass("[0-9]").
+  peg:one_or_more(peg:charclass("[0-9]")).
 
 transform(Type, Node, Idx) -> reia_tree:transform(Type, Node, Idx).
