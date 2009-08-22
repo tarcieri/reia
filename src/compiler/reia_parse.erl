@@ -14,4 +14,4 @@ rule(primary) ->
 rule(decimal) ->
   peg:charclass("[0-9]").
 
-transform(_,Node,_Index) -> Node.
+transform(Type, Node, Idx) -> reia_tree:transform(Type, Node, Idx).

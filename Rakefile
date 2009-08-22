@@ -93,6 +93,11 @@ CLEAN << PARSER_SRC
 
 task PARSER_SRC => PARSER_GRAMMAR do
   sh "erl -noshell -pa #{NEOTOMA_EBIN} -eval 'peg_gen:file(\"#{PARSER_GRAMMAR}\")' -s init stop"
+  src = File.read PARSER_SRC
+
+  # Change the transform function to use the reia_tree module
+  src.sub!(/transform(.+?)\s+->\s+Node\./, "transform(Type, Node, Idx) -> reia_tree:transform(Type, Node, Idx).")
+  File.open(PARSER_SRC, 'w') { |parser| parser << src }
 end
 
 task 'ebin/reia_parse.beam' => PARSER_SRC do
