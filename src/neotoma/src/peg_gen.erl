@@ -62,21 +62,21 @@ parse_grammar(InputFile) ->
   end.
 
 create_transform(false,_) ->
-  "transform(_,Node) -> Node.";
+  "transform(_,Node,_Index) -> Node.";
 create_transform(ModName,Dir) when is_atom(ModName) ->
   XfFile = filename:join(Dir, atom_to_list(ModName) ++ ".erl"),
   case filelib:is_regular(XfFile) of
     true -> io:format("'~s' already exists, skipping generation.~n", [XfFile]);
     false -> generate_transform_stub(XfFile, ModName)
   end,
-  ["transform(Symbol,Node) -> ",atom_to_list(ModName),":transform(Symbol, Node)."].
+  ["transform(Symbol,Node,Index) -> ",atom_to_list(ModName),":transform(Symbol, Node, Index)."].
 
 generate_transform_stub(XfFile,ModName) ->
   Data = ["-module(",atom_to_list(ModName),").\n",
-         "-export([transform/2]).\n\n",
+         "-export([transform/3]).\n\n",
          "%% Add clauses to this function to transform syntax nodes\n",
          "%% from the parser into semantic output.\n",
-         "transform(Symbol, Node) when is_atom(Symbol) ->\n  Node."],
+         "transform(Symbol, Node, _Index) when is_atom(Symbol) ->\n  Node."],
   file:write_file(XfFile, Data).
 
 %% @doc Bootstraps the neotoma metagrammar.  Intended only for internal development!

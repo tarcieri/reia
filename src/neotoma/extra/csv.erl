@@ -20,4 +20,4 @@ rule(field_sep) ->
 rule(crlf) ->
   peg:choose([peg:string("\r\n"), peg:string("\n")]).
 
-transform(Symbol,Node) -> csv_gen:transform(Symbol, Node).
+transform(Symbol,Node,Index) -> csv_gen:transform(Symbol, Node).

@@ -24,7 +24,7 @@
 %% @doc Memoizing parsing function wrapper.  This form does not transform the result of a successful parse.
 %% @see p/5.
 p(Inp, Index, Name, ParseFun) ->
-  p(Inp, Index, Name, ParseFun, fun(N) -> N end).
+  p(Inp, Index, Name, ParseFun, fun(N, _Idx) -> N end).
 
 %% @doc Memoizing and transforming parsing function wrapper.
 %% @spec p(Input::string(), StartIndex::parse_index(), Name::atom(), ParseFun::parse_fun(), TransformFun::transform_fun()) -> parse_result()
@@ -44,7 +44,7 @@ p(Inp, StartIndex, Name, ParseFun, TransformFun) ->
           Failure;
         % If it passes, transform and memoize the result.
         {Result, InpRem, NewIndex} ->
-          Transformed = TransformFun(Result),
+          Transformed = TransformFun(Result, StartIndex),
           memoize(StartIndex, dict:store(Name, {Transformed, InpRem, NewIndex}, Memo)),
           {Transformed, InpRem, NewIndex}
       end

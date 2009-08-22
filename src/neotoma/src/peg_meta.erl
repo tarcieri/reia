@@ -86,4 +86,4 @@ rule(comment_to_eol) ->
 rule(white) ->
   peg:charclass("[ \t\n\r]").
 
-transform(Symbol,Node) -> peg_meta_gen:transform(Symbol, Node).
+transform(Symbol,Node,Index) -> peg_meta_gen:transform(Symbol, Node, Index).

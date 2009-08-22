@@ -105,8 +105,8 @@ semantic_fun(Rule, Line) ->
   {'fun',Line,
    {clauses,
     [{clause,Line,
-      [{var,Line,'Node'}],
+      [{var,Line,'Node'},{var,Line,'Idx'}],
       [],
       [{call,Line,
         {atom,Line,transform},
-        [{atom,Line,Rule},{var,Line,'Node'}]}]}]}}.
+        [{atom,Line,Rule},{var,Line,'Node'},{var,Line,'Idx'}]}]}]}}.
