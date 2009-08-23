@@ -1,4 +1,5 @@
-additive <- multitive "+" additive / multitive;
-multitive <- primary "*" multitive / primary;
-primary <- "(" additive ")" / decimal;
-decimal <- [0-9]+;
+% additive <- multitive "+" additive / multitive;
+% multitive <- primary "*" multitive / primary;
+% primary <- "(" additive ")" / decimal;
+add_expr <- integer "+" integer;
+integer <- [0-9]+;

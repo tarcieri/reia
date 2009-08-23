@@ -1,0 +1,2 @@
+-record(integer, {line, value}).
+-record(op,      {line, type, val1, val2}).
