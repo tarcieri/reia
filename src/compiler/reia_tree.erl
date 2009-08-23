@@ -1,3 +1,10 @@
+%
+% reia_tree: Transform Neotoma output to Reia node records
+% Copyright (C)2009 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(reia_tree).
 -export([transform/3]).
 -include("reia_nodes.hrl").
