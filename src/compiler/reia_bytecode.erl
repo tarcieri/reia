@@ -11,11 +11,11 @@
 
 % Pseudo string eval which generates a single-use module
 string(Str) ->
-  case reia_parse:string(Str) of
-    {ok, Expressions} ->
-      transform(Expressions);
-    Error ->
-      Error
+  case reia_parse:parse(Str) of
+	  {fail, Error} ->
+		  {error, Error};
+		Expression ->
+      transform([Expression])
   end.
 
 % Compiled evaluation of a list of Reia expressions
@@ -27,7 +27,8 @@ transform(Filename, Expressions) ->
   {ok, _Module, Bin} = transform_expressions(Filename, Expressions),
   Module = #reia_module{filename=Filename, base_module=Bin, submodules=[]},
   {ok, term_to_binary(Module)}.
-  
+
+% Output raw Erlang bytecode for inclusion into compiled Reia bytecode
 transform_expressions(Filename, Expressions) ->  
   % Create a "toplevel" function which is called when the module is loaded
   Function = {function, 1, toplevel, 1, [
