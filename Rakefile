@@ -57,7 +57,7 @@ def output_file(input_file, dir = 'ebin/')
   dir + File.basename(input_file).sub(/\.\w+$/, '.beam')
 end
 
-ERL_SRC = FileList.new('src/compiler/**/*.erl')
+ERL_SRC = FileList.new('src/{compiler,core}/**/*.erl')
 ERL_SRC.each do |input|
   unless output_file(input) == "ebin/reia_parse.beam"
     file output_file(input) => input do

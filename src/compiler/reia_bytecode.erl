@@ -6,20 +6,11 @@
 %
 
 -module(reia_bytecode).
--export([string/1, transform/1, transform/2, load/1]).
+-export([compile/1, compile/2, load/1]).
 
 % Ideally this record is opaque to everything except this module
 % No other modules should operate directly on raw Reia bytecode
 -record(reia_module, {version=0, filename, base_module}).
-
-% Pseudo string eval which generates a single-use module
-string(Str) ->
-  case reia_parse:parse(Str) of
-	  {fail, Error} ->
-		  {error, Error};
-		Expression ->
-      transform([Expression])
-  end.
 
 % Load the given compiled Reia module, executing its toplevel function
 load(Bin) ->
@@ -30,17 +21,17 @@ load(Bin) ->
 	{ok, Name, Result}.
 
 % Compiled evaluation of a list of Reia expressions
-transform(Expressions) ->
-  transform(nonce_filename(), Expressions).
+compile(Expressions) ->
+  compile(nonce_filename(), Expressions).
   
 % Compiled evaluation of a parsed Reia file
-transform(Filename, Expressions) ->
-  {ok, _Module, Bin} = transform_expressions(Filename, Expressions),
+compile(Filename, Expressions) ->
+  {ok, _Module, Bin} = compile_expressions(Filename, Expressions),
   Module = #reia_module{filename=Filename, base_module=Bin},
   {ok, term_to_binary(Module)}.
 
 % Output raw Erlang bytecode for inclusion into compiled Reia bytecode
-transform_expressions(Filename, Expressions) ->  
+compile_expressions(Filename, Expressions) ->
   % Create a "toplevel" function which is called when the module is loaded
   Function = {function, 1, toplevel, 0, [
     {clause, 1, [], [], Expressions}
