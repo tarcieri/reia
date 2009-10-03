@@ -12,7 +12,7 @@ transform(declaration_sequence, Node, _Index) ->
   [FirstRule|OtherRules];
 transform(declaration, [{nonterminal,Symbol}|Node], Index) ->
   add_lhs(Symbol, Index),
-  "rule("++Symbol++") ->\n  " ++ lists:nth(4, Node);
+  "rule("++escape_symbol(Symbol)++") ->\n  " ++ lists:nth(4, Node);
 transform(sequence, Node, _Index) ->
   Tail = [lists:nth(2, S) || S <- proplists:get_value(tail, Node)],
   Statements = [proplists:get_value(head, Node)|Tail],
@@ -39,7 +39,7 @@ transform(parenthesized_expression, Node, _Index) ->
   lists:nth(3, Node);
 transform(atomic, {nonterminal, Symbol}, Index) ->
   add_nt(Symbol, Index),
-  "fun " ++ Symbol ++ "/2";
+  "fun " ++ escape_symbol(Symbol) ++ "/2";
 transform(primary, [Atomic, one_or_more], _Index) ->
   "peg:one_or_more("++Atomic++")";
 transform(primary, [Atomic, zero_or_more], _Index) ->
@@ -114,3 +114,34 @@ verify_rules() ->
                         exit({neotoma, {no_reduction, list_to_atom(S)}})
                     end
                 end, NTs).
+
+escape_symbol("after")   -> "'after'";
+escape_symbol("and")     -> "'and'";
+escape_symbol("andalso") -> "'andalso'";
+escape_symbol("band")    -> "'band'";
+escape_symbol("begin")   -> "'begin'";
+escape_symbol("bnot")    -> "'bnot'";
+escape_symbol("bor")     -> "'bor'";
+escape_symbol("bsl")     -> "'bsl'";
+escape_symbol("bsr")     -> "'bsr'";
+escape_symbol("bxor")    -> "'bxor'";
+escape_symbol("case")    -> "'case'";
+escape_symbol("catch")   -> "'catch'";
+escape_symbol("cond")    -> "'cond'";
+escape_symbol("div")     -> "'div'";
+escape_symbol("end")     -> "'end'";
+escape_symbol("fun")     -> "'fun'";
+escape_symbol("if")      -> "'if'";
+escape_symbol("let")     -> "'let'";
+escape_symbol("not")     -> "'not'";
+escape_symbol("of")      -> "'of'";
+escape_symbol("or")      -> "'or'";
+escape_symbol("orelse")  -> "'orelse'";
+escape_symbol("query")   -> "'query'";
+escape_symbol("receive") -> "'receive'";
+escape_symbol("rem")     -> "'rem'";
+escape_symbol("try")     -> "'try'";
+escape_symbol("when")    -> "'when'";
+escape_symbol("xor")     -> "'xor'";
+
+escape_symbol(Symbol) -> Symbol.
