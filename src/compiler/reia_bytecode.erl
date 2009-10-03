@@ -44,8 +44,6 @@ compile_expressions(Filename, Expressions) ->
     Function
   ],
   
-  io:format("Code: ~p~n", [Module]),
-  
   compile:forms(Module, [
     debug_info, 
     export_all, 
