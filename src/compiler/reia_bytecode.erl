@@ -7,6 +7,9 @@
 
 -module(reia_bytecode).
 -export([string/1, transform/1, transform/2, load/1]).
+
+% Ideally this record is opaque to everything except this module
+% No other modules should operate directly on raw Reia bytecode
 -record(reia_module, {version=0, filename, base_module}).
 
 % Pseudo string eval which generates a single-use module
