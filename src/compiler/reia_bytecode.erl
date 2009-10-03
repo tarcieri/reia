@@ -6,8 +6,8 @@
 %
 
 -module(reia_bytecode).
--export([string/1, transform/1, transform/2]).
--record(reia_module, {version=0, filename, base_module, submodules}).
+-export([string/1, transform/1, transform/2, load/1]).
+-record(reia_module, {version=0, filename, base_module}).
 
 % Pseudo string eval which generates a single-use module
 string(Str) ->
@@ -18,6 +18,14 @@ string(Str) ->
       transform([Expression])
   end.
 
+% Load the given compiled Reia module, executing its toplevel function
+load(Bin) ->
+	#reia_module{filename = Filename, base_module = Module} = binary_to_term(Bin),
+	Name = list_to_atom(Filename),
+	code:load_binary(Name, Filename, Module),
+	Result = Name:toplevel(),
+	{ok, Name, Result}.
+
 % Compiled evaluation of a list of Reia expressions
 transform(Expressions) ->
   transform(nonce_filename(), Expressions).
@@ -25,14 +33,14 @@ transform(Expressions) ->
 % Compiled evaluation of a parsed Reia file
 transform(Filename, Expressions) ->
   {ok, _Module, Bin} = transform_expressions(Filename, Expressions),
-  Module = #reia_module{filename=Filename, base_module=Bin, submodules=[]},
+  Module = #reia_module{filename=Filename, base_module=Bin},
   {ok, term_to_binary(Module)}.
 
 % Output raw Erlang bytecode for inclusion into compiled Reia bytecode
 transform_expressions(Filename, Expressions) ->  
   % Create a "toplevel" function which is called when the module is loaded
-  Function = {function, 1, toplevel, 1, [
-    {clause, 1, [{var, 1, '__module_data'}], [], Expressions}
+  Function = {function, 1, toplevel, 0, [
+    {clause, 1, [], [], Expressions}
   ]},
   
   Module = [
