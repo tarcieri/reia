@@ -98,7 +98,7 @@ end
 PARSER_GRAMMAR = 'src/compiler/reia_parse.peg'
 PARSER_SRC     = PARSER_GRAMMAR.sub(/peg$/, 'erl')
 
-CLEAN << PARSER_SRC
+CLEAN << PARSER_SRC << 'erl_crash.dump'
 
 task PARSER_SRC => PARSER_GRAMMAR do
   cmd = "peg_gen:file(\"#{PARSER_GRAMMAR}\", [{transform_module, reia_tree}])"
