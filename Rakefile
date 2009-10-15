@@ -86,8 +86,10 @@ task :neotoma => [NEOTOMA_EBIN, *output]
 task 'src/neotoma/ebin/peg_meta.beam' => 'src/neotoma/ebin/peg_transform.beam'
 
 NEOTOMA_SRC.each do |input|
-  file output_file(input, NEOTOMA_EBIN) do
+  of = output_file(input, NEOTOMA_EBIN)
+  file of do
     sh "erlc -W0 -I src -pa #{NEOTOMA_EBIN} -o #{NEOTOMA_EBIN} #{input}"
+    cp of, "ebin/"
   end
 end
 

@@ -8,4 +8,4 @@ rule(add_expr) ->
 rule(integer) ->
   peg:one_or_more(peg:charclass("[0-9]")).
 
-transform(Type, Node, Idx) -> reia_tree:transform(Type, Node, Idx).
+transform(Symbol,Node,Index) -> reia_tree:transform(Symbol, Node, Index).
