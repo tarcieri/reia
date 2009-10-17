@@ -66,47 +66,4 @@ ERL_SRC.each do |input|
   end
 end
 
-task :build => %w(neotoma ebin/reia_parse.beam) +
-               ERL_SRC.map { |input_file| output_file(input_file) }
-
-#
-# Neotoma (PEG-based parser generator for Erlang)
-#
-
-NEOTOMA_SRC  = FileList.new('src/neotoma/src/*.erl')
-NEOTOMA_EBIN = 'src/neotoma/ebin/'
-
-output = NEOTOMA_SRC.map { |input| output_file input, NEOTOMA_EBIN }
-Rake::FileList[output].each { |file| CLEAN << file }
-
-directory NEOTOMA_EBIN
-task :neotoma => [NEOTOMA_EBIN, *output] 
-
-# peg_meta uses a parse transform in peg_transform
-task 'src/neotoma/ebin/peg_meta.beam' => 'src/neotoma/ebin/peg_transform.beam'
-
-NEOTOMA_SRC.each do |input|
-  of = output_file(input, NEOTOMA_EBIN)
-  file of do
-    sh "erlc -W0 -I src -pa #{NEOTOMA_EBIN} -o #{NEOTOMA_EBIN} #{input}"
-    cp of, "ebin/"
-  end
-end
-
-#
-# Parser (generated from a Neotoma grammar)
-#
-
-PARSER_GRAMMAR = 'src/compiler/reia_parse.peg'
-PARSER_SRC     = PARSER_GRAMMAR.sub(/peg$/, 'erl')
-
-CLEAN << PARSER_SRC << 'erl_crash.dump'
-
-task PARSER_SRC => PARSER_GRAMMAR do
-  cmd = "peg_gen:file(\"#{PARSER_GRAMMAR}\", [{transform_module, reia_tree}])"
-  sh "erl -noshell -pa #{NEOTOMA_EBIN} -eval '#{cmd}' -s init stop"
-end
-
-task 'ebin/reia_parse.beam' => PARSER_SRC do
-  sh "erlc -I src -pa #{NEOTOMA_EBIN} -o ebin #{PARSER_SRC}"
-end
+task :build => ERL_SRC.map { |input_file| output_file(input_file) }
