@@ -17,11 +17,11 @@ string(Str) ->
 
 % Parse and evaluate the given string with the given binding
 string(Str, Binding) ->
-  case reia_parse:parse(Str) of
+  case reia_parse:string(Str) of
 	  {fail, Error} ->
 		  {error, Error};
-		Expression ->
-			exprs([Expression], Binding)
+		{ok, Exprs} ->
+			exprs(Exprs, Binding)
   end.
 
 % Evaluate the given set of expressions
