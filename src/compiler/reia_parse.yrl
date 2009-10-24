@@ -390,6 +390,7 @@ lc_expr -> expr 'in' expr : {generate, line('$2'), '$1', '$3'}.
 Erlang code.
 
 -export([string/1]).
+-include("reia_nodes.hrl").
 
 %% Easy interface for parsing a given string with nicely formatted errors
 string(String) ->

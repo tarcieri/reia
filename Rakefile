@@ -17,10 +17,17 @@ def erlang_version
   version[0]
 end
 
+# Evaluate the given Erlang statement
+def erl_eval(cmd, *pa)
+  pa_str = pa.empty? ? "" : "-pa #{pa.join(' ')}"
+  sh "erl -noshell -pa #{pa_str} -eval '#{cmd}' -s init stop"
+end
+
 # Retrieve the directory Erlang libraries are stored in
 def erl_lib_dir
   `erl -noshell -eval "io:format(code:lib_dir())" -s init stop`
 end
+
 
 # Directory to install Reia into
 def reia_install_dir
@@ -58,25 +65,38 @@ def output_file(input_file, dir = 'ebin/')
 end
 
 ERL_SRC = FileList.new('src/{compiler,core}/**/*.erl')
+QUIET_SRC = %w(src/compiler/reia_parse.erl)
+
 ERL_SRC.each do |input|
-  unless output_file(input) == "ebin/reia_parse.beam"
+  unless QUIET_SRC.include? input
     file output_file(input) => input do
       sh "erlc +debug_info -o ebin #{input}"
     end
   end
 end
 
+QUIET_SRC.each do |input|
+  file output_file(input) => input do
+    sh "erlc -o ebin #{input}"
+  end
+end
+
 # Build rules
-task :build   => %w(scanner reia)
+task :build   => %w(scanner parser reia)
 task :reia    => ERL_SRC.map { |input_file| output_file(input_file) }
 task :scanner => %w(src/leex/leex.beam src/compiler/reia_scan.erl)
+task :parser  => %w(src/compiler/reia_parse.erl)
 
 # Scanner
 file "src/leex/leex.beam" => "src/leex/leex.erl" do
   sh "erlc -W0 -o src/leex src/leex/leex.erl"
 end
 
-file "src/compiler/reia_scan.erl" => %w[src/leex/leex.beam src/compiler/reia_scan.xrl] do
-  cmd = 'leex:file("src/compiler/reia_scan.xrl")'
-  sh "erl -noshell -pa src/leex -eval '#{cmd}' -s init stop"
+file "src/compiler/reia_scan.erl" => %w(src/leex/leex.beam src/compiler/reia_scan.xrl) do
+  erl_eval 'leex:file("src/compiler/reia_scan.xrl")', 'src/leex'
+end
+
+# Parser
+file "src/compiler/reia_parse.erl" do
+  erl_eval 'yecc:file("src/compiler/reia_parse.yrl", [verbose])'
 end
