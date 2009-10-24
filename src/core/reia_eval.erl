@@ -18,16 +18,16 @@ string(Str) ->
 % Parse and evaluate the given string with the given binding
 string(Str, Binding) ->
   case reia_parse:string(Str) of
-	  {fail, Error} ->
-		  {error, Error};
+	  {error, _} = Error ->
+	    Error;
 		{ok, Exprs} ->
 			exprs(Exprs, Binding)
   end.
 
 % Evaluate the given set of expressions
 exprs(Expressions, Binding) ->
-	io:format("Code: ~p~n", [Expressions]),
-  {ok, Module} = reia_bytecode:compile(Expressions),
+	io:format("Input Code: ~p~n", [Expressions]),
+  {ok, Module} = reia_bytecode:compile(nonce_filename(), Expressions),
   {ok, Name, Value} = reia_bytecode:load(Module),
 
 	% FIXME: In the future it's possible eval will create things which persist
@@ -35,3 +35,7 @@ exprs(Expressions, Binding) ->
 	% are added a different solution will be needed than a simple code:purge.
   code:purge(Name),
   {value, Value, Binding}.
+
+nonce_filename() ->
+  ["#Ref" ++ Ref] = io_lib:format("~p", [make_ref()]),
+  "reia_eval#" ++ Ref.

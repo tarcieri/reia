@@ -6,7 +6,7 @@
 %
 
 -module(reia_bytecode).
--export([compile/1, compile/2, load/1]).
+-export([compile/2, load/1]).
 
 % Ideally this record is opaque to everything except this module
 % No other modules should operate directly on raw Reia bytecode
@@ -19,10 +19,6 @@ load(Bin) ->
 	code:load_binary(Name, Filename, Module),
 	Result = Name:toplevel(),
 	{ok, Name, Result}.
-
-% Compiled evaluation of a list of Reia expressions
-compile(Expressions) ->
-  compile(nonce_filename(), Expressions).
   
 % Compiled evaluation of a parsed Reia file
 compile(Filename, Expressions) ->
@@ -51,8 +47,4 @@ compile_expressions(Filename, Expressions) ->
     report_errors, 
     report_warnings
   ]).
-  
-nonce_filename() ->
-  ["#Ref" ++ Ref] = io_lib:format("~p", [make_ref()]),
-  "reia_eval#" ++ Ref.
   
