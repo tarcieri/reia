@@ -66,4 +66,17 @@ ERL_SRC.each do |input|
   end
 end
 
-task :build => ERL_SRC.map { |input_file| output_file(input_file) }
+# Build rules
+task :build   => %w(scanner reia)
+task :reia    => ERL_SRC.map { |input_file| output_file(input_file) }
+task :scanner => %w(src/leex/leex.beam src/compiler/reia_scan.erl)
+
+# Scanner
+file "src/leex/leex.beam" => "src/leex/leex.erl" do
+  sh "erlc -W0 -o src/leex src/leex/leex.erl"
+end
+
+file "src/compiler/reia_scan.erl" => %w[src/leex/leex.beam src/compiler/reia_scan.xrl] do
+  cmd = 'leex:file("src/compiler/reia_scan.xrl")'
+  sh "erl -noshell -pa src/leex -eval '#{cmd}' -s init stop"
+end
