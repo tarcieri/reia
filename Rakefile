@@ -64,7 +64,8 @@ def output_file(input_file, dir = 'ebin/')
   dir + File.basename(input_file).sub(/\.\w+$/, '.beam')
 end
 
-ERL_SRC = FileList.new('src/{compiler,core}/**/*.erl')
+GENERATED_SRC = %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
+ERL_SRC = FileList.new('src/{compiler,core}/**/*.erl') + GENERATED_SRC
 QUIET_SRC = %w(src/compiler/reia_parse.erl)
 
 ERL_SRC.each do |input|
@@ -100,3 +101,7 @@ end
 file "src/compiler/reia_parse.erl" do
   erl_eval 'yecc:file("src/compiler/reia_parse.yrl", [verbose])'
 end
+
+# Cleaning
+CLEAN.include %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
+CLEAN.include "ebin/*"
