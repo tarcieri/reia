@@ -90,12 +90,12 @@ Erlang code.
 build_integer([$-|Chars], Line) ->
   {token, #integer{line = Line, value = -list_to_integer(Chars)}};
 build_integer(Chars, Line) ->
-  {token, #integer{line = Line, value = list_to_integer(Chars)}}.
+  {token, #integer{line = Line, value =  list_to_integer(Chars)}}.
 
 build_float([$-|Chars], Line) ->
-  {token, {float, Line, -list_to_float(Chars)}};
+  {token, #float{line = Line, value = -list_to_float(Chars)}};
 build_float(Chars, Line) ->
-  {token, {float, Line, list_to_float(Chars)}}.
+  {token, #float{line = Line, value =  list_to_float(Chars)}}.
   
 build_string(Type, Chars, Line, Len) ->
   String = unescape_string(lists:sublist(Chars, 2, Len - 2)), 
