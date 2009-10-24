@@ -85,10 +85,12 @@ Rules.
 
 Erlang code.  
 
+-include("reia_nodes.hrl").
+
 build_integer([$-|Chars], Line) ->
-  {token, {integer, Line, -list_to_integer(Chars)}};
+  {token, #integer{line = Line, value = -list_to_integer(Chars)}};
 build_integer(Chars, Line) ->
-  {token, {integer, Line, list_to_integer(Chars)}}.
+  {token, #integer{line = Line, value = list_to_integer(Chars)}}.
 
 build_float([$-|Chars], Line) ->
   {token, {float, Line, -list_to_float(Chars)}};
