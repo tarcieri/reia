@@ -27,7 +27,7 @@ string(Str, Binding) ->
 % Evaluate the given set of expressions
 exprs(Expressions, Binding) ->
 	io:format("Input Code: ~p~n", [Expressions]),
-  {ok, Module} = reia_bytecode:compile(nonce_filename(), Expressions),
+  {ok, Module} = reia_compiler:compile(nonce_filename(), Expressions),
   {ok, Name, Value} = reia_bytecode:load(Module),
 
 	% FIXME: In the future it's possible eval will create things which persist

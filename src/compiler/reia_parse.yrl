@@ -39,16 +39,16 @@ expr_list -> expr eol expr_list : ['$1'|'$3'].
 
 expr -> add_expr : '$1'.
 
-add_expr -> mult_expr add_op add_expr : {op, line('$1'), op('$2'), '$1', '$3'}.
+add_expr -> mult_expr add_op add_expr :   #binary_op{line=line('$1'), type=op('$2'), val1='$1', val2='$3'}.
 add_expr -> mult_expr : '$1'.
 
-mult_expr -> pow_expr mult_op mult_expr : {op, line('$1'), op('$2'), '$1', '$3'}.
+mult_expr -> pow_expr mult_op mult_expr : #binary_op{line=line('$1'), type=op('$2'), val1='$1', val2='$3'}.
 mult_expr -> pow_expr : '$1'.
 
-pow_expr -> unary_expr pow_op pow_expr : {op, line('$1'), op('$2'), '$1', '$3'}.
+pow_expr -> unary_expr pow_op pow_expr :  #binary_op{line=line('$1'), type=op('$2'), val1='$1', val2='$3'}.
 pow_expr -> unary_expr : '$1'.
 
-unary_expr -> unary_op unary_expr : {op, line('$1'), op('$1'), '$2'}.
+unary_expr -> unary_op unary_expr : #unary_op{line=line('$1'), type=op('$1'), val='$2'}.
 unary_expr -> terminal_expr : '$1'.
 
 % Terminals

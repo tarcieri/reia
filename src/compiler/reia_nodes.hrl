@@ -3,4 +3,5 @@
 -record(float,   {line, value}).
 
 % Operators
--record(op,      {line, type, val1, val2}).
+-record(unary_op,  {line, type, val}).
+-record(binary_op, {line, type, val1, val2}).
