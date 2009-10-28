@@ -15,7 +15,7 @@ transform(Exprs = #float{})   -> Exprs;
   
 %% Operators
 transform(#unary_op{line=Line, type=Type, val=Val}) ->
-  {op, Line, Type, Val};
+  {op, Line, Type, transform(Val)};
 
 transform(#binary_op{line=Line, type=Type, val1=Val1, val2=Val2}) ->
-  {op, Line, Type, Val1, Val2}.
+  {op, Line, Type, transform(Val1), transform(Val2)}.
