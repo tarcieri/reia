@@ -22,6 +22,7 @@ load(Bin) ->
   
 % Compiled evaluation of a parsed Reia file
 compile(Filename, Expressions) ->
+  io:format("Output Code: ~p~n", [Expressions]),
   {ok, _Module, Bin} = compile_expressions(Filename, Expressions),
   Module = #reia_module{filename=Filename, base_module=Bin},
   {ok, term_to_binary(Module)}.
