@@ -37,5 +37,6 @@ exprs(Expressions, Binding) ->
   {value, Value, Binding}.
 
 nonce_filename() ->
-  ["#Ref" ++ Ref] = io_lib:format("~p", [make_ref()]),
-  "reia_eval#" ++ Ref.
+  Hash = erlang:md5(term_to_binary(make_ref())),
+  Nonce = lists:flatten([io_lib:format("~.16b",[N]) || <<N>> <= Hash]),
+  "reia_eval#" ++ Nonce.
