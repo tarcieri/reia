@@ -98,7 +98,7 @@ file "src/compiler/reia_scan.erl" => %w(src/leex/leex.beam src/compiler/reia_sca
 end
 
 # Parser
-file "src/compiler/reia_parse.erl" do
+file "src/compiler/reia_parse.erl" => %w(src/compiler/reia_parse.yrl) do
   erl_eval 'yecc:file("src/compiler/reia_parse.yrl", [verbose])'
 end
 
