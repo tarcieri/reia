@@ -8,23 +8,25 @@
 Nonterminals
   grammar
   expr_list
+  exprs
   expr
   add_expr
   mult_expr
   pow_expr
   unary_expr
-  terminal_expr
+  max_expr
   add_op
   mult_op
   pow_op
   unary_op
   number
+  list
   .
   
 Terminals
-  eol '(' ')'
+  eol '(' ')' '[' ']'
   float integer
-  '+' '-' '*' '/' '%' '**'
+  '+' '-' '*' '/' '%' '**' ','
   .
 
 Rootsymbol grammar.
@@ -37,6 +39,12 @@ expr_list -> expr eol : ['$1'].
 expr_list -> eol expr_list : '$2'.
 expr_list -> expr eol expr_list : ['$1'|'$3'].
 
+%% Expressions (comma delimited)
+exprs -> expr : ['$1'].
+exprs -> expr eol : ['$1'].
+exprs -> eol exprs : '$2'.
+exprs -> expr ',' exprs : ['$1'|'$3'].
+
 expr -> add_expr : '$1'.
 
 add_expr -> mult_expr add_op add_expr :   #binary_op{line=line('$1'), type=op('$2'), val1='$1', val2='$3'}.
@@ -48,12 +56,12 @@ mult_expr -> pow_expr : '$1'.
 pow_expr -> unary_expr pow_op pow_expr :  #binary_op{line=line('$1'), type=op('$2'), val1='$1', val2='$3'}.
 pow_expr -> unary_expr : '$1'.
 
-unary_expr -> unary_op unary_expr : #unary_op{line=line('$1'), type=op('$1'), val='$2'}.
-unary_expr -> terminal_expr : '$1'.
+unary_expr -> unary_op unary_expr :       #unary_op{line=line('$1'), type=op('$1'), val='$2'}.
+unary_expr -> max_expr : '$1'.
 
-% Terminals
-terminal_expr -> number     : '$1'.
-terminal_expr -> '(' expr ')' : '$2'.
+max_expr -> number       : '$1'.
+max_expr -> list         : '$1'.
+max_expr -> '(' expr ')' : '$2'.
 
 %% Addition operators
 add_op -> '+' : '$1'.
@@ -74,6 +82,10 @@ unary_op -> '-'   : '$1'.
 %% Numbers
 number -> float : '$1'.
 number -> integer : '$1'.
+
+%% Lists
+list -> '[' ']' :       #list{line=line('$1'), elements=[]}.
+list -> '[' exprs ']' : #list{line=line('$1'), elements='$2'}.
 
 Erlang code.
 
