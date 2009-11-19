@@ -20,6 +20,10 @@ transform(#cons{line=Line, expr=Expr, tail=Tail}) ->
 transform({nil, _} = Nil) ->
   Nil;
 
+%% Tuples
+transform(#tuple{line=Line, elements=Exprs}) ->
+  {tuple, Line, [transform(Expr) || Expr <- Exprs]};
+
 %% Operators
 transform(#unary_op{line=Line, type=Type, val=Val}) ->
   {op, Line, Type, transform(Val)};

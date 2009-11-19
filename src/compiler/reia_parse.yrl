@@ -21,6 +21,7 @@ Nonterminals
   unary_op
   number
   list
+  tuple
   tail
   .
   
@@ -62,6 +63,7 @@ unary_expr -> max_expr : '$1'.
 
 max_expr -> number       : '$1'.
 max_expr -> list         : '$1'.
+max_expr -> tuple        : '$1'.
 max_expr -> '(' expr ')' : '$2'.
 
 %% Addition operators
@@ -91,6 +93,11 @@ list -> '[' expr tail : #cons{line=line('$1'), expr='$2', tail='$3'}.
 tail -> ']' : {nil, line('$1')}.
 tail -> ',' '*' expr ']' : '$3'.
 tail -> ',' expr tail : #cons{line=line('$1'), expr='$2', tail='$3'}.
+
+%% Tuples
+tuple -> '(' ')' : #tuple{line=line('$1'), elements=[]}.
+tuple -> '(' expr ',' ')' : #tuple{line=line('$1'), elements=['$2']}.
+tuple -> '(' expr ',' exprs ')': #tuple{line=line('$1'), elements=['$2'|'$4']}.
 
 Erlang code.
 
