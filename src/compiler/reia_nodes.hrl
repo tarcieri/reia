@@ -8,4 +8,5 @@
 
 % Other Expressions
 -record(cons,  {line, expr, tail}).
+-record(empty, {line}).
 -record(tuple, {line, elements}).

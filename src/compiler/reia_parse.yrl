@@ -87,10 +87,10 @@ number -> float : '$1'.
 number -> integer : '$1'.
 
 %% Lists
-list -> '[' ']' :       {nil, line('$1')}.
+list -> '[' ']' :       #empty{line=line('$1')}.
 list -> '[' expr tail : #cons{line=line('$1'), expr='$2', tail='$3'}.
 
-tail -> ']' : {nil, line('$1')}.
+tail -> ']' : #empty{line=line('$1')}.
 tail -> ',' '*' expr ']' : '$3'.
 tail -> ',' expr tail : #cons{line=line('$1'), expr='$2', tail='$3'}.
 

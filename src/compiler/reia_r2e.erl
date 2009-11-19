@@ -17,8 +17,8 @@ transform(Expr = #float{})   -> Expr;
 transform(#cons{line=Line, expr=Expr, tail=Tail}) ->
   {cons, Line, transform(Expr), transform(Tail)};
 
-transform({nil, _} = Nil) ->
-  Nil;
+transform(#empty{line=Line}) ->
+  {nil, Line};
 
 %% Tuples
 transform(#tuple{line=Line, elements=Exprs}) ->
