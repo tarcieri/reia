@@ -9,6 +9,10 @@
 -export([transform/1]).
 -include("reia_nodes.hrl").
 
+%% Matches
+transform(#match{line=Line, left=Left, right=Right}) ->
+  {match, Line, transform(Left), transform(Right)};
+
 %% Numerical types
 transform(Expr = #integer{}) -> Expr;
 transform(Expr = #float{})   -> Expr;

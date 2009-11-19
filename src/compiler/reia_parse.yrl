@@ -10,6 +10,7 @@ Nonterminals
   expr_list
   exprs
   expr
+  match_expr
   add_expr
   mult_expr
   pow_expr
@@ -28,7 +29,7 @@ Nonterminals
 Terminals
   eol '(' ')' '[' ']'
   float integer
-  '+' '-' '*' '/' '%' '**' ','
+  '+' '-' '*' '/' '%' '**' ',' '='
   .
 
 Rootsymbol grammar.
@@ -47,7 +48,10 @@ exprs -> expr eol : ['$1'].
 exprs -> eol exprs : '$2'.
 exprs -> expr ',' exprs : ['$1'|'$3'].
 
-expr -> add_expr : '$1'.
+expr -> match_expr : '$1'.
+
+match_expr -> add_expr '=' match_expr : #match{line=line('$2'), left='$1', right='$3'}.
+match_expr -> add_expr : '$1'.
 
 add_expr -> mult_expr add_op add_expr :   #binary_op{line=line('$1'), type=op('$2'), val1='$1', val2='$3'}.
 add_expr -> mult_expr : '$1'.
