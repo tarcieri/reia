@@ -23,9 +23,13 @@ load(Bin) ->
 % Compiled evaluation of a parsed Reia file
 compile(Filename, Expressions) ->
   io:format("Output Code: ~p~n", [Expressions]),
-  {ok, _Module, Bin} = compile_expressions(Filename, Expressions),
-  Module = #reia_module{filename=Filename, base_module=Bin},
-  {ok, term_to_binary(Module)}.
+  case compile_expressions(Filename, Expressions) of
+    {ok, _Module, Bin} ->
+      Module = #reia_module{filename=Filename, base_module=Bin},
+      {ok, term_to_binary(Module)};
+    error ->
+      throw({error, "internal Erlang compiler error"})
+  end.
 
 % Output raw Erlang bytecode for inclusion into compiled Reia bytecode
 compile_expressions(Filename, Expressions) ->
@@ -45,7 +49,5 @@ compile_expressions(Filename, Expressions) ->
     debug_info, 
     export_all, 
     verbose, 
-    report_errors, 
-    report_warnings
+    report_errors
   ]).
-  
