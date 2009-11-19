@@ -21,6 +21,7 @@ Nonterminals
   unary_op
   number
   list
+  tail
   .
   
 Terminals
@@ -84,8 +85,12 @@ number -> float : '$1'.
 number -> integer : '$1'.
 
 %% Lists
-list -> '[' ']' :       #list{line=line('$1'), elements=[]}.
-list -> '[' exprs ']' : #list{line=line('$1'), elements='$2'}.
+list -> '[' ']' :       {nil, line('$1')}.
+list -> '[' expr tail : #cons{line=line('$1'), expr='$2', tail='$3'}.
+
+tail -> ']' : {nil, line('$1')}.
+tail -> ',' '*' expr ']' : '$3'.
+tail -> ',' expr tail : #cons{line=line('$1'), expr='$2', tail='$3'}.
 
 Erlang code.
 

@@ -10,12 +10,15 @@
 -include("reia_nodes.hrl").
 
 %% Numerical types
-transform(Exprs = #integer{}) -> Exprs;
-transform(Exprs = #float{})   -> Exprs;
+transform(Expr = #integer{}) -> Expr;
+transform(Expr = #float{})   -> Expr;
 
 %% Lists
-transform(#list{line=Line, elements=Elements}) ->
-  list_cons(Elements, Line);
+transform(#cons{line=Line, expr=Expr, tail=Tail}) ->
+  {cons, Line, transform(Expr), transform(Tail)};
+
+transform({nil, _} = Nil) ->
+  Nil;
 
 %% Operators
 transform(#unary_op{line=Line, type=Type, val=Val}) ->
@@ -29,9 +32,3 @@ transform(#binary_op{line=Line, type='**', val1=Val1, val2=Val2}) ->
 
 transform(#binary_op{line=Line, type=Type, val1=Val1, val2=Val2}) ->
   {op, Line, Type, transform(Val1), transform(Val2)}.
-
-%% Generate cons for lists
-list_cons([], Line) ->
-  {nil, Line};
-list_cons([Element|Rest], Line) ->
-  {cons, Line, transform(Element), list_cons(Rest, Line)}.
