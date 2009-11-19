@@ -1,6 +1,7 @@
 % Terminals
--record(integer, {line, value}).
--record(float,   {line, value}).
+-record(integer,    {line, value}).
+-record(float,      {line, value}).
+-record(identifier, {line, name}).
 
 % Operators
 -record(unary_op,  {line, type, val}).

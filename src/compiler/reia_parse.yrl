@@ -28,7 +28,7 @@ Nonterminals
   
 Terminals
   eol '(' ')' '[' ']'
-  float integer
+  float integer identifier
   '+' '-' '*' '/' '%' '**' ',' '='
   .
 
@@ -68,6 +68,7 @@ unary_expr -> max_expr : '$1'.
 max_expr -> number       : '$1'.
 max_expr -> list         : '$1'.
 max_expr -> tuple        : '$1'.
+max_expr -> identifier   : '$1'.
 max_expr -> '(' expr ')' : '$2'.
 
 %% Addition operators

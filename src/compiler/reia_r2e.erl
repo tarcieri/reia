@@ -9,13 +9,15 @@
 -export([transform/1]).
 -include("reia_nodes.hrl").
 
+%% Terminals
+transform(#integer{} = Expr) -> Expr;
+transform(#float{} = Expr)   -> Expr;
+transform(#identifier{line=Line, name=Name}) ->
+  {var, Line, Name};
+
 %% Matches
 transform(#match{line=Line, left=Left, right=Right}) ->
   {match, Line, transform(Left), transform(Right)};
-
-%% Numerical types
-transform(Expr = #integer{}) -> Expr;
-transform(Expr = #float{})   -> Expr;
 
 %% Lists
 transform(#cons{line=Line, expr=Expr, tail=Tail}) ->
