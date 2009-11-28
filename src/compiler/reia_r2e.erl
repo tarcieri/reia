@@ -12,8 +12,8 @@
 %% Terminals
 transform(#integer{} = Expr) -> Expr;
 transform(#float{} = Expr)   -> Expr;
-transform(#identifier{line=Line, name=Name}) ->
-  {var, Line, Name};
+transform(#atom{} = Expr)    -> Expr;
+transform(#identifier{line=Line, name=Name}) -> {var, Line, Name};
 
 %% Matches
 transform(#match{line=Line, left=Left, right=Right}) ->
