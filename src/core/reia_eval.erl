@@ -43,9 +43,9 @@ exprs(Exprs, _Bindings) ->
 
 % Generate a temporary module name
 temporary_module() ->
-  Hash = erlang:md5(term_to_binary(make_ref())),
-  Nonce = lists:flatten([io_lib:format("~.16b",[N]) || <<N>> <= Hash]),
-  "reia_eval#" ++ Nonce.
+  RawHash = erlang:md5(term_to_binary(make_ref())),
+  HexHash = lists:flatten([io_lib:format("~.16b",[N]) || <<N>> <= Hash]),
+  "reia_eval#" ++ HexHash.
 
 % Annotate the return value of the expression to include the bindings
 annotate_return_value(Exprs) ->
