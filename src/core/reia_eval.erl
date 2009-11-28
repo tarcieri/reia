@@ -63,14 +63,17 @@ output_bindings(Exprs) ->
 
 % Generate the return value for eval, appending the binding nodes
 return_value(Bindings, Line) ->
-  {tuple, Line, [
+  #tuple{line=Line, elements = [
       ?return_value_var,
       binding_forms([binding_node(Name, Line) || Name <- Bindings], Line)
   ]}.
 
 % Generate the AST representing a given binding
 binding_node(Name, Line) ->
-  {tuple, Line, [{atom, Line, Name}, {identifier, Line, Name}]}.
+  #tuple{line=Line, elements=[
+    #atom{line=Line, name=Name},
+    #identifier{line=Line, name=Name}
+  ]}.
 
 % Explode bindings into cons expressions
 binding_forms([], Line) ->
