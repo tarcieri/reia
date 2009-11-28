@@ -7,7 +7,9 @@
 
 -module(reia_eval).
 -export([new_binding/0, string/1, string/2, exprs/2]).
+-include("../compiler/reia_nodes.hrl").
 -include("../compiler/reia_bindings.hrl").
+-define(return_value_var, #identifier{line=1, name='__reia_eval_return_value'}).
 
 % Create a new local variable binding
 new_binding() -> [].
@@ -26,19 +28,18 @@ string(Str, Bindings) ->
   end.
 
 % Evaluate the given set of expressions
-exprs(Exprs, Bindings) ->
+exprs(Exprs, _Bindings) ->
 	io:format("Input Code: ~p~n", [Exprs]),
-  Exprs2 = annotate_return_value(Exprs),
-  io:format("Annotated: ~p~n", [Exprs2]),
+	Exprs2 = annotate_return_value(Exprs),
 
   {ok, Module} = reia_compiler:compile(temporary_module(), Exprs2),
-  {ok, Name, Value} = reia_bytecode:load(Module),
+  {ok, Name, {Value, NewBindings}} = reia_bytecode:load(Module),
 
 	% FIXME: In the future it's possible eval will create things which persist
 	% beyond initial evaluation (e.g. lambdas, processes).  Once these features
 	% are added a different solution will be needed than a simple code:purge.
   code:purge(Name),
-  {value, Value, Bindings}.
+  {value, Value, NewBindings}.
 
 % Generate a temporary module name
 temporary_module() ->
@@ -48,8 +49,11 @@ temporary_module() ->
 
 % Annotate the return value of the expression to include the bindings
 annotate_return_value(Exprs) ->
-  [LastExpr|Exprs2] = lists:reverse(Exprs),
-  lists:reverse([return_value(LastExpr, output_bindings(Exprs))|Exprs2]).
+  [LastExpr|Rest] = lists:reverse(Exprs),
+  Line = element(2, LastExpr),
+  LastExpr2 = #match{line=Line, left=?return_value_var, right=LastExpr},
+  ReturnValue = return_value(output_bindings(Exprs), Line),
+  lists:reverse([ReturnValue, LastExpr2 | Rest]).
 
 % Obtain a list of all variables which will be bound when eval is complete
 output_bindings(Exprs) ->
@@ -58,10 +62,9 @@ output_bindings(Exprs) ->
   dict:fetch_keys(Entries).
 
 % Generate the return value for eval, appending the binding nodes
-return_value(Expr, Bindings) ->
-  Line = element(2, Expr),
+return_value(Bindings, Line) ->
   {tuple, Line, [
-      Expr,
+      ?return_value_var,
       binding_forms([binding_node(Name, Line) || Name <- Bindings], Line)
   ]}.
 
