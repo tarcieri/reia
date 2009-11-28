@@ -6,7 +6,7 @@
 %
 
 -module(reia_bytecode).
--export([compile/2, load/1]).
+-export([compile/2, compile/3, load/1]).
 
 % Ideally this record is opaque to everything except this module
 % No other modules should operate directly on raw Reia bytecode
@@ -22,6 +22,9 @@ load(Bin) ->
   
 % Compiled evaluation of a parsed Reia file
 compile(Filename, Expressions) ->
+  compile(Filename, Expressions, []).
+
+compile(Filename, Expressions, _Options) ->
   io:format("Output Code: ~p~n", [Expressions]),
   case compile_expressions(Filename, Expressions) of
     {ok, _Module, Bin} ->
