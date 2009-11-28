@@ -6,30 +6,38 @@
 % Internal state of the bindings annotator
 -record(state, {scope=normal, bindings=dict:new()}).
 
+%
+% Public functions
+%
+
 % Annotate the given node with its current bindings
-transform(Node) -> transform(Node, normal).
+transform(Exprs) -> transform(Exprs, normal).
 
 % Annotate the given node, assuming the given scope
-transform(Node, Scope) ->
-  {Node2, _State} = reia_syntax:mapfold_subtrees(
+transform(Exprs, Scope) ->
+  {BAExprs, _State} = lists:mapfoldl(
     fun transform_node/2,
     #state{scope=Scope},
-    Node
+    Exprs
   ),
-  Node2.
+  {ok, BAExprs}.
+
+%
+% Node transformations
+%
 
 % Walk the LHS of a match expression in match scope
 transform_node(#match{} = Node, State) ->
   {Right, State2} = reia_syntax:mapfold_subtrees(
     fun transform_node/2,
     State,
-    Node#match.right
+    [Node#match.right]
   ),
 
   {Left, State3} = reia_syntax:mapfold_subtrees(
     fun transform_node/2,
     State2#state{scope=match},
-    Node#match.left
+    [Node#match.left]
   ),
 
   Node2  = Node#match{left=Left, right=Right},
@@ -37,15 +45,20 @@ transform_node(#match{} = Node, State) ->
   output(Node2, State4);
 
 % Variables are (re)bound while in match scope
-transform_node(#identifier{name=Name} = Node, #state{scope=match} = State) ->
-  NewBindings = case dict:find(Name, State#state.bindings) of
-    {ok, Version} -> dict:store(Name, Version + 1);
-    error         -> dict:store(Name, 0)
+transform_node(#identifier{name=Name} = Node, #state{scope=match, bindings=Bindings} = State) ->
+  NewBindings = case dict:find(Name, Bindings) of
+    {ok, Version} -> dict:store(Name, Version + 1, Bindings);
+    error         -> dict:store(Name, 0, Bindings)
   end,
   output(Node, State#state{bindings=NewBindings});
 
+transform_node(Node, State) when is_integer(Node) or is_float(Node) or is_atom(Node) ->
+  {Node, State};
+
 transform_node(Node, State) ->
-  output(Node, State).
+%  io:format("Unrecognized node: ~p in state ~p~n", [Node, State]),
+  {Node2, State2} = reia_syntax:mapfold_subtrees(fun transform_node/2, State, Node),
+  output(Node2, State2).
 
 output(Node, State) ->
   {#bindings{node=Node, entries=State#state.bindings}, State}.

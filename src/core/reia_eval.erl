@@ -7,6 +7,7 @@
 
 -module(reia_eval).
 -export([new_binding/0, string/1, string/2, exprs/2]).
+-include("../compiler/reia_bindings.hrl").
 
 % Create a new local variable binding
 new_binding() -> [].
@@ -16,27 +17,37 @@ string(Str) ->
 	string(Str, []).
 
 % Parse and evaluate the given string with the given binding
-string(Str, Binding) ->
+string(Str, Bindings) ->
   case reia_parse:string(Str) of
 	  {error, _} = Error ->
 	    Error;
 		{ok, Exprs} ->
-			exprs(Exprs, Binding)
+			exprs(Exprs, Bindings)
   end.
 
 % Evaluate the given set of expressions
-exprs(Expressions, Binding) ->
-	io:format("Input Code: ~p~n", [Expressions]),
-  {ok, Module} = reia_compiler:compile(nonce_filename(), Expressions),
+exprs(Exprs, Bindings) ->
+	io:format("Input Code: ~p~n", [Exprs]),
+	NewBindings = output_bindings(Exprs),
+	io:format("New Bindings: ~p~n", [NewBindings]),
+
+  {ok, Module} = reia_compiler:compile(temporary_module(), Exprs),
   {ok, Name, Value} = reia_bytecode:load(Module),
 
 	% FIXME: In the future it's possible eval will create things which persist
 	% beyond initial evaluation (e.g. lambdas, processes).  Once these features
 	% are added a different solution will be needed than a simple code:purge.
   code:purge(Name),
-  {value, Value, Binding}.
+  {value, Value, Bindings}.
 
-nonce_filename() ->
+% Generate a temporary module name
+temporary_module() ->
   Hash = erlang:md5(term_to_binary(make_ref())),
   Nonce = lists:flatten([io_lib:format("~.16b",[N]) || <<N>> <= Hash]),
   "reia_eval#" ++ Nonce.
+
+% Obtain a list of all variables which will be bound when eval is complete
+output_bindings(Exprs) ->
+  {ok, BAExprs} = reia_bindings:transform(Exprs),
+  [#bindings{entries=Entries}|_] = lists:reverse(BAExprs),
+  dict:fetch_keys(Entries).
