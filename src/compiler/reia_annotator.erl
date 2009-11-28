@@ -13,7 +13,7 @@ annotate(Node) ->
   ),
   Node2.
 
-% Match expressions mutate variables on the LHS
+% Walk the LHS of a match expression in match scope
 annotate(#match{} = Node, State) ->
   {Right, State2} = reia_syntax:mapfold_subtrees(
     fun annotate/2,
@@ -30,6 +30,14 @@ annotate(#match{} = Node, State) ->
   Node2  = Node#match{left=Left, right=Right},
   State4 = State3#state{scope=State#state.scope},
   {Node2, State4};
+
+% Variables are (re)bound while in match scope
+annotate(#identifier{name=Name} = Node, #state{scope=match} = State) ->
+  NewBindings = case dict:find(Name, State#state.bindings) of
+    {ok, Version} -> dict:store(Name, Version + 1);
+    error         -> dict:store(Name, 0)
+  end,
+  {Node, State#state{bindings=NewBindings}};
 
 annotate(Node, State) ->
   io:format("annotating: ~p~n", [Node]),
