@@ -2,10 +2,6 @@ require 'rake/clean'
 
 task :default => %w(check_erl_version check_previous_install build)
 
-#
-# Prerequisites
-#
-
 # Returns the installed Erlang version
 def erlang_version
   version = `erl -version 2>&1`.strip.match(/\d\.\d\.\d$/)
