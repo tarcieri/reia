@@ -1,0 +1,193 @@
+rules <- space? declaration_sequence space? code_block? space?
+`
+  RootRule = verify_rules(),
+  Rules = string:join(lists:nth(2, Node), "\n\n"),
+  Code = case lists:nth(4, Node) of
+             {code, Block} -> Block;
+             _ -> []
+         end,
+  [{rules, Rules ++ "\n" ++ Code}, {root, RootRule}, {transform, ets:lookup(?MODULE,gen_transform)}]
+`;
+
+declaration_sequence <- head:declaration tail:(space declaration)*
+`
+  FirstRule = proplists:get_value(head, Node),
+  OtherRules =  [lists:last(I) || I <- proplists:get_value(tail, Node, [])],
+  [FirstRule|OtherRules]
+`;
+
+declaration <- nonterminal space '<-' space parsing_expression space? code_block? space? ';'
+`
+  [{nonterminal,Symbol}|Tail] = Node,
+  add_lhs(Symbol, Index),
+  Transform = case lists:nth(6,Tail) of
+                  {code, CodeBlock} -> CodeBlock;
+                  _ ->
+                      ets:insert_new(?MODULE,{gen_transform, true}),
+                      "transform('"++Symbol++"', Node, Idx)"
+                  end,
+  "'"++Symbol++"'"++"(Input, Index) ->\n  " ++
+        "p(Input, Index, '"++Symbol++"', fun(I,D) -> ("++
+        lists:nth(4, Tail) ++
+        ")(I,D) end, fun(Node, Idx) -> "++Transform++" end)."
+`;
+
+parsing_expression <- choice / sequence / primary ~;
+
+choice <- head:alternative tail:(space '/' space alternative)+
+`  
+  Tail = [lists:last(S) || S <- proplists:get_value(tail, Node)],
+  Statements = [proplists:get_value(head, Node)|Tail],
+  "p_choose([" ++ string:join(Statements, ", ") ++ "])"
+`;
+
+alternative <- sequence / primary ~;
+
+primary <- prefix atomic / atomic suffix / atomic
+`
+case Node of
+  [Atomic, one_or_more] -> "p_one_or_more("++Atomic++")";
+  [Atomic, zero_or_more] -> "p_zero_or_more("++Atomic++")";
+  [Atomic, optional] -> "p_optional("++Atomic++")";
+  [assert, Atomic] -> "p_assert("++Atomic++")";
+  [not_, Atomic] -> "p_not("++Atomic++")";
+  _ -> Node
+end
+`;
+
+sequence <- head:labeled_sequence_primary tail:(space labeled_sequence_primary)+
+`
+  Tail = [lists:nth(2, S) || S <- proplists:get_value(tail, Node)],
+  Statements = [proplists:get_value(head, Node)|Tail],
+  "p_seq(["++ string:join(Statements, ", ") ++ "])"
+`;
+
+labeled_sequence_primary <- label? primary
+`
+  case hd(Node) of
+    [] -> lists:nth(2, Node);
+    Label -> "p_label('" ++ Label ++ "', "++lists:nth(2, Node)++")"
+  end
+`;
+
+label <- alpha_char alphanumeric_char* ':'
+`
+  String = lists:flatten(Node),
+  lists:sublist(String, length(String)-1)
+`;
+
+suffix <- repetition_suffix / optional_suffix
+`
+  case Node of
+    "*" -> zero_or_more;
+    "+" -> one_or_more;
+    "?" -> optional
+  end
+`;
+
+optional_suffix <- '?' ~;
+
+repetition_suffix <- '+' / '*' ~;
+
+prefix <- '&' / '!'
+`
+  case Node of
+    "&" -> assert;
+    "!" -> not_
+  end
+`;
+
+atomic <- terminal / nonterminal / parenthesized_expression
+`
+case Node of
+  {nonterminal, Symbol} ->
+                add_nt(Symbol, Index), 
+                "fun '" ++ Symbol ++ "'/2";
+  _ -> Node
+end
+`;
+
+parenthesized_expression <- '(' space? parsing_expression space? ')' `lists:nth(3, Node)`;
+
+nonterminal <- alpha_char alphanumeric_char* `{nonterminal, lists:flatten(Node)}`;
+
+terminal <- quoted_string / character_class / anything_symbol ~;
+
+quoted_string <- single_quoted_string / double_quoted_string `"p_string(\""++escape_quotes(lists:flatten(proplists:get_value(string, Node)))++"\")"`;
+
+double_quoted_string <- '"' string:(!'"' ("\\\\" / '\\"' / .))* '"' ~;
+
+single_quoted_string <- "'" string:(!"'" ("\\\\" / "\\'" / .))* "'" ~;
+
+character_class <- '[' characters:(!']' ('\\\\' . / !'\\\\' .))+ ']' `"p_charclass(\"[" ++ escape_quotes(lists:flatten(proplists:get_value(characters, Node))) ++ "]\")"`;
+
+anything_symbol <- '.' ` "p_anything()" `;
+
+alpha_char <- [a-z_] ~;
+
+alphanumeric_char <- alpha_char / [0-9] ~;
+
+space <- (white / comment_to_eol)+ ~;
+
+comment_to_eol <- '%' (!"\n" .)* ~;
+
+white <- [ \t\n\r] ~;
+
+code_block <- ('`' code:('\\`' / '$`' / !'`' .)+ '`') / '~'
+`
+   case Node of
+       "~" -> {code, "Node"};
+       _   -> {code, lists:flatten(proplists:get_value('code', Node))}
+   end
+`;
+
+%% Extra functions
+`
+escape_quotes(String) ->
+  {ok, RE} = re:compile("\""),
+  re:replace(String, RE, "\\\\\"", [global, {return, list}]).
+
+add_lhs(Symbol, Index) ->
+  case ets:lookup(?MODULE, lhs) of
+    [] ->
+      ets:insert(?MODULE, {lhs, [{Symbol,Index}]});
+    [{lhs, L}] when is_list(L) ->
+      ets:insert(?MODULE, {lhs, [{Symbol,Index}|L]})
+  end.
+
+add_nt(Symbol, Index) ->
+  case ets:lookup(?MODULE, nts) of
+    [] ->
+      ets:insert(?MODULE, {nts, [{Symbol,Index}]});
+    [{nts, L}] when is_list(L) ->
+      case proplists:is_defined(Symbol, L) of
+        true ->
+          ok;
+        _ ->
+          ets:insert(?MODULE, {nts, [{Symbol,Index}|L]})
+      end
+  end.
+
+verify_rules() ->
+  [{lhs, LHS}] = ets:lookup(?MODULE, lhs),
+  [{nts, NTs}] = ets:lookup(?MODULE, nts),
+  [Root|NonRoots] = lists:reverse(LHS),
+  lists:foreach(fun({Sym,Idx}) ->
+                    case proplists:is_defined(Sym, NTs) of
+                      true ->
+                        ok;
+                      _ ->
+                        io:format("neotoma warning: rule '~s' is unused. ~p~n", [Sym,Idx])
+                    end
+                end, NonRoots),
+  lists:foreach(fun({S,I}) ->
+                    case proplists:is_defined(S, LHS) of
+                      true ->
+                        ok;
+                      _ ->
+                        io:format("neotoma error: nonterminal '~s' has no reduction. (found at ~p) No parser will be generated!~n", [S,I]),
+                        exit({neotoma, {no_reduction, list_to_atom(S)}})
+                    end
+                end, NTs),
+    Root.
+`
