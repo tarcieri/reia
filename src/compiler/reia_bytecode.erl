@@ -56,4 +56,18 @@ compile_expressions(Filename, Expressions, Options) ->
     Function
   ],
   
-  compile:forms(Module, Options#compile_options.erlc_options).
+  compile:forms(Module, compile_options(Options)).
+
+compile_options(Options) ->
+  ErlOptions = Options#compile_options.erlc_options,
+  HiPEAvailable = hipe_available(),
+  if
+    Options#compile_options.autohipe and HiPEAvailable -> [native|ErlOptions];
+    true -> ErlOptions
+  end.
+
+hipe_available() ->
+  case erlang:system_info(hipe_architecture) of
+    undefined -> false;
+    _         -> true
+  end.

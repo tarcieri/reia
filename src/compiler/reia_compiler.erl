@@ -32,6 +32,8 @@ process_option({scope, Scope}, Options) ->
   Options#compile_options{scope = Scope};
 process_option({passes, Passes}, Options) ->
   Options#compile_options{passes = Passes};
+process_option({autohipe, AutoHiPE}, Options) ->
+  Options#compile_options{autohipe = AutoHiPE};
 process_option({toplevel_args, Args}, Options) ->
   Options#compile_options{toplevel_args = Args};
 process_option({erlc_options, Opts}, Options) ->
