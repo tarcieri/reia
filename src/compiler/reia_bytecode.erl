@@ -52,9 +52,4 @@ compile_expressions(Filename, Expressions, Options) ->
     Function
   ],
   
-  compile:forms(Module, [
-    debug_info, 
-    export_all, 
-    verbose, 
-    report_errors
-  ]).
+  compile:forms(Module, Options#compile_options.erlc_options).
