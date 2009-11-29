@@ -64,13 +64,8 @@ annotate_return_value(Exprs, Bindings) ->
 % Obtain a list of all variables which will be bound when eval is complete
 output_bindings(Exprs, Bindings) ->
   {ok, BAExprs} = reia_bindings:transform(Exprs),
-  [#bindings{entries=Entries}|_] = lists:reverse(BAExprs),
-  NewBindings = dict:merge(
-    fun(_, _, _) -> void end, % Don't care, since we're just grabbing unique keys
-    Entries,
-    dict:from_list(Bindings)
-  ),
-  dict:fetch_keys(NewBindings).
+  [#bindings{entries=NewBindings}|_] = lists:reverse(BAExprs),
+  lists:usort([Var || {Var, _} <- Bindings] ++ dict:fetch_keys(NewBindings)).
 
 % Generate the return value for eval, appending the binding nodes
 return_value(Bindings, Line) ->
