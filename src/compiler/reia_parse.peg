@@ -1,4 +1,7 @@
-additive <- multitive "+" additive / multitive;
-multitive <- primary "*" multitive / primary;
-primary <- "(" additive ")" / decimal;
-decimal <- [0-9];
+%% Grammar
+
+additive <- decimal "+" additive / decimal;
+decimal <- [0-9]+ `{integer, line(Idx), list_to_integer(Node)}`;
+
+%% Extra functions
+`line({{line, Line},_}) -> Line.`
