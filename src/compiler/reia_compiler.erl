@@ -40,6 +40,6 @@ process_option({erlc_options, Opts}, Options) ->
 run_passes(Filename, Expressions, Options) ->
   Passes = Options#compile_options.passes,
   Modules = [list_to_atom("reia_" ++ atom_to_list(Pass)) || Pass <- Passes],
-  Fun = fun(Pass, Exprs) -> [Pass:transform(Expr) || Expr <- Exprs] end,
+  Fun = fun(Pass, Exprs) -> Pass:transform(Exprs, Options) end,
   Expressions2 = lists:foldl(Fun, Expressions, Modules),
   reia_bytecode:compile(Filename, Expressions2, Options).

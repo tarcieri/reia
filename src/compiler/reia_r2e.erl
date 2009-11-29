@@ -6,31 +6,35 @@
 %
 
 -module(reia_r2e).
--export([transform/1]).
+-export([transform/2]).
 -include("reia_nodes.hrl").
 
-%% Terminals
+% Lists of expressions
+transform(Exprs, _Options) ->
+  [transform(Expr) || Expr <- Exprs].
+
+% Terminals
 transform(#integer{} = Expr) -> Expr;
 transform(#float{} = Expr)   -> Expr;
 transform(#atom{} = Expr)    -> Expr;
 transform(#identifier{line=Line, name=Name}) -> {var, Line, Name};
 
-%% Matches
+% Matches
 transform(#match{line=Line, left=Left, right=Right}) ->
   {match, Line, transform(Left), transform(Right)};
 
-%% Lists
+% Lists
 transform(#cons{line=Line, expr=Expr, tail=Tail}) ->
   {cons, Line, transform(Expr), transform(Tail)};
 
 transform(#empty{line=Line}) ->
   {nil, Line};
 
-%% Tuples
+% Tuples
 transform(#tuple{line=Line, elements=Exprs}) ->
   {tuple, Line, [transform(Expr) || Expr <- Exprs]};
 
-%% Operators
+% Operators
 transform(#unary_op{line=Line, type=Type, val=Val}) ->
   {op, Line, Type, transform(Val)};
 
