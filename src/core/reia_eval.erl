@@ -71,7 +71,7 @@ output_bindings(Exprs, Bindings) ->
 return_value(Bindings, Line) ->
   #tuple{line=Line, elements = [
       ?return_value_var,
-      binding_forms([binding_node(Name, Line) || Name <- Bindings], Line)
+      bindings_list([binding_node(Name, Line) || Name <- Bindings], Line)
   ]}.
 
 % Generate the AST representing a given binding
@@ -81,8 +81,8 @@ binding_node(Name, Line) ->
     #identifier{line=Line, name=Name}
   ]}.
 
-% Explode bindings into cons expressions
-binding_forms([], Line) ->
+% Construct the output list for the bindings
+bindings_list([], Line) ->
   {empty, Line};
-binding_forms([Expr|Rest], Line) ->
-  {cons, Line, Expr, binding_forms(Rest, Line)}.
+bindings_list([Expr|Rest], Line) ->
+  {cons, Line, Expr, bindings_list(Rest, Line)}.
