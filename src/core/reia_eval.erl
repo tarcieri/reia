@@ -69,10 +69,13 @@ output_bindings(Exprs, Bindings) ->
 
 % Generate the return value for eval, appending the binding nodes
 return_value(Bindings, Line) ->
-  #tuple{line=Line, elements = [
-      ?return_value_var,
-      bindings_list([binding_node(Name, Line) || Name <- Bindings], Line)
-  ]}.
+  #tuple{line=Line, elements = [?return_value_var, bindings_list(Bindings, Line)]}.
+
+% Construct the output list for the bindings
+bindings_list([], Line) ->
+  {empty, Line};
+bindings_list([Name|Rest], Line) ->
+  {cons, Line, binding_node(Name, Line), bindings_list(Rest, Line)}.
 
 % Generate the AST representing a given binding
 binding_node(Name, Line) ->
@@ -80,9 +83,3 @@ binding_node(Name, Line) ->
     #atom{line=Line, name=Name},
     #identifier{line=Line, name=Name}
   ]}.
-
-% Construct the output list for the bindings
-bindings_list([], Line) ->
-  {empty, Line};
-bindings_list([Expr|Rest], Line) ->
-  {cons, Line, Expr, bindings_list(Rest, Line)}.
