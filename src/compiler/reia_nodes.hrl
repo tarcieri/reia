@@ -3,6 +3,11 @@
 -record(float,      {line, value}).
 -record(identifier, {line, name}).
 -record(atom,       {line, name}).
+-record(nil,        {line}).
+
+% Function calls
+-record(remote_call, {line, receiver, name, arguments, block}).
+-record(native_call, {line, module, function, arguments}).
 
 % Operators
 -record(unary_op,  {line, type, val}).

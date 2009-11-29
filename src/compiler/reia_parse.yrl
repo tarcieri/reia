@@ -15,11 +15,13 @@ Nonterminals
   mult_expr
   pow_expr
   unary_expr
+  call_expr
   max_expr
   add_op
   mult_op
   pow_op
   unary_op
+  call
   number
   list
   tail
@@ -30,8 +32,8 @@ Nonterminals
   
 Terminals
   eol '(' ')' '[' ']' '{' '}'
-  float integer identifier atom
-  '+' '-' '*' '/' '%' '**' ',' '=' '=>'
+  float integer identifier atom erl
+  '+' '-' '*' '/' '%' '**' ',' '.' '=' '=>'
   .
 
 Rootsymbol grammar.
@@ -65,7 +67,10 @@ pow_expr -> unary_expr pow_op pow_expr :  #binary_op{line=line('$1'), type=op('$
 pow_expr -> unary_expr : '$1'.
 
 unary_expr -> unary_op unary_expr :       #unary_op{line=line('$1'), type=op('$1'), val='$2'}.
-unary_expr -> max_expr : '$1'.
+unary_expr -> call_expr : '$1'.
+
+call_expr -> call : '$1'.
+call_expr -> max_expr : '$1'.
 
 max_expr -> number       : '$1'.
 max_expr -> list         : '$1'.
@@ -90,6 +95,33 @@ pow_op -> '**' : '$1'.
 %% Unary operators
 unary_op -> '+'   : '$1'.
 unary_op -> '-'   : '$1'.
+
+%% Remote function calls
+call -> call_expr '.' identifier '(' ')' :
+#remote_call{
+  line      = line('$2'),
+  receiver  = '$1',
+  name      = '$3',
+  arguments = [],
+  block     = #nil{line=line('$2')}
+}.
+
+call -> call_expr '.' identifier '(' exprs ')' :
+#remote_call{
+  line      = line('$2'),
+  receiver  = '$1',
+  name      = '$3',
+  arguments = '$5',
+  block     = #nil{line=line('$2')}
+}.
+
+call -> erl '.' identifier '.' identifier '(' exprs ')' :
+#native_call{
+  line      = line('$2'),
+  module    = '$3',
+  function  = '$5',
+  arguments = #nil{line=line('$2')}
+}.
 
 %% Numbers
 number -> float : '$1'.
