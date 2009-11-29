@@ -55,6 +55,17 @@ task :check_previous_install do
   end
 end
 
+# Neotoma (PEG for Erlang)
+NEOTOMA_FILES = %w(neotoma neotoma_parse neotoma_peg)
+task :neotoma => NEOTOMA_FILES.map { |f| "src/neotoma/ebin/#{f}.beam" }
+
+NEOTOMA_FILES.each do |f|
+  input = "src/neotoma/src/#{f}.erl"
+  file "src/neotoma/ebin/#{f}.beam" => input do
+    sh "erlc -o src/neotoma/ebin #{input}"
+  end
+end
+
 # Generate an output path for the given input file
 def output_file(input_file, dir = 'ebin/')
   dir + File.basename(input_file).sub(/\.\w+$/, '.beam')
@@ -72,6 +83,7 @@ ERL_SRC.each do |input|
   end
 end
 
+# FIXME: LOL this logic is silly, merge above plztks
 QUIET_SRC.each do |input|
   file output_file(input) => input do
     sh "erlc -o ebin #{input}"
@@ -79,25 +91,8 @@ QUIET_SRC.each do |input|
 end
 
 # Build rules
-task :build   => %w(scanner parser reia)
+task :build   => %w(neotoma reia)
 task :reia    => ERL_SRC.map { |input_file| output_file(input_file) }
-task :scanner => %w(src/leex/leex.beam src/compiler/reia_scan.erl)
-task :parser  => %w(src/compiler/reia_parse.erl)
-
-# Scanner
-file "src/leex/leex.beam" => "src/leex/leex.erl" do
-  sh "erlc -W0 -o src/leex src/leex/leex.erl"
-end
-
-file "src/compiler/reia_scan.erl" => %w(src/leex/leex.beam src/compiler/reia_scan.xrl) do
-  erl_eval 'leex:file("src/compiler/reia_scan.xrl")', 'src/leex'
-end
-
-# Parser
-file "src/compiler/reia_parse.erl" => %w(src/compiler/reia_parse.yrl) do
-  erl_eval 'yecc:file("src/compiler/reia_parse.yrl", [verbose])'
-end
 
 # Cleaning
-CLEAN.include %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
-CLEAN.include "ebin/*"
+CLEAN.include %w(ebin/* src/neotoma/ebin/*)
