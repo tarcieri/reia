@@ -13,3 +13,4 @@
 -record(cons,  {line, expr, tail}).
 -record(empty, {line}).
 -record(tuple, {line, elements}).
+-record(map,   {line, elements}).

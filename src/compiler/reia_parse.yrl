@@ -104,13 +104,13 @@ tail -> ',' '*' expr ']' : '$3'.
 tail -> ',' expr tail : #cons{line=line('$1'), expr='$2', tail='$3'}.
 
 %% Tuples
-tuple -> '(' ')' : #tuple{line=line('$1'), elements=[]}.
-tuple -> '(' expr ',' ')' : #tuple{line=line('$1'), elements=['$2']}.
+tuple -> '(' ')' :               #tuple{line=line('$1'), elements=[]}.
+tuple -> '(' expr ',' ')' :      #tuple{line=line('$1'), elements='$2'}.
 tuple -> '(' expr ',' exprs ')': #tuple{line=line('$1'), elements=['$2'|'$4']}.
 
 %% Maps
-map -> '{' '}' : {map, line('$1'), []}.
-map -> '{' map_entries '}' : {map, line('$1'), '$2'}.
+map -> '{' '}' :             #map{line=line('$1'), elements=[]}.
+map -> '{' map_entries '}' : #map{line=line('$1'), elements='$2'}.
 
 map_entries -> add_expr '=>' expr : [{'$1','$3'}]. % FIXME: change add_expr to 1 below match
 map_entries -> add_expr '=>' expr ',' map_entries : [{'$1','$3'}|'$5'].

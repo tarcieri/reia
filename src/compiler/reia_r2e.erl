@@ -34,6 +34,13 @@ transform(#empty{line=Line}) ->
 transform(#tuple{line=Line, elements=Exprs}) ->
   {tuple, Line, [transform(Expr) || Expr <- Exprs]};
 
+% Maps
+transform(#map{line=Line, elements=Elements}) ->
+  {call, Line,
+    {remote, Line, {atom, Line, dict}, {atom, Line, from_list}},
+    [map_elements(Elements, Line)]
+  };
+
 % Operators
 transform(#unary_op{line=Line, type=Type, val=Val}) ->
   {op, Line, Type, transform(Val)};
@@ -46,3 +53,8 @@ transform(#binary_op{line=Line, type='**', val1=Val1, val2=Val2}) ->
 
 transform(#binary_op{line=Line, type=Type, val1=Val1, val2=Val2}) ->
   {op, Line, Type, transform(Val1), transform(Val2)}.
+
+map_elements([], Line) ->
+  {nil, Line};
+map_elements([{Key,Value}|Rest], Line) ->
+  {cons, Line, {tuple, Line, [transform(Key), transform(Value)]}, map_elements(Rest, Line)}.
