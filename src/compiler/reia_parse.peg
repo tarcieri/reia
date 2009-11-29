@@ -1,6 +1,6 @@
 %% Grammar
 
-additive <- decimal "+" additive / decimal
+add_expr <- integer add_op add_expr / integer
 `
 if
   is_list(Node) ->
@@ -10,7 +10,9 @@ if
 end
 `;
 
-decimal <- [0-9]+ `{integer, line(Idx), list_to_integer(Node)}`;
+add_op  <- "+" / "-";
+
+integer <- [0-9]+ `{integer, line(Idx), list_to_integer(Node)}`;
 
 %% Extra functions
 `line({{line, Line},_}) -> Line.`
