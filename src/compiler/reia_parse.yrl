@@ -28,7 +28,7 @@ Nonterminals
   
 Terminals
   eol '(' ')' '[' ']'
-  float integer identifier
+  float integer identifier atom
   '+' '-' '*' '/' '%' '**' ',' '='
   .
 
@@ -50,7 +50,7 @@ exprs -> expr ',' exprs : ['$1'|'$3'].
 
 expr -> match_expr : '$1'.
 
-match_expr -> add_expr '=' match_expr : #match{line=line('$2'), left='$1', right='$3'}.
+match_expr -> add_expr '=' match_expr :   #match{line=line('$2'), left='$1', right='$3'}.
 match_expr -> add_expr : '$1'.
 
 add_expr -> mult_expr add_op add_expr :   #binary_op{line=line('$1'), type=op('$2'), val1='$1', val2='$3'}.
@@ -69,6 +69,7 @@ max_expr -> number       : '$1'.
 max_expr -> list         : '$1'.
 max_expr -> tuple        : '$1'.
 max_expr -> identifier   : '$1'.
+max_expr -> atom         : '$1'.
 max_expr -> '(' expr ')' : '$2'.
 
 %% Addition operators
