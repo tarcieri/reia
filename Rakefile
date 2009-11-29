@@ -76,17 +76,10 @@ ERL_SRC = (FileList.new('src/{compiler,core}/**/*.erl') + GENERATED_SRC).uniq
 QUIET_SRC = %w(src/compiler/reia_parse.erl)
 
 ERL_SRC.each do |input|
-  unless QUIET_SRC.include? input
-    file output_file(input) => input do
-      sh "erlc +debug_info -o ebin #{input}"
-    end
-  end
-end
-
-# FIXME: LOL this logic is silly, merge above plztks
-QUIET_SRC.each do |input|
   file output_file(input) => input do
-    sh "erlc -o ebin #{input}"
+    opts = ""
+    opts << "+debug_info" unless QUIET_SRC.include? input
+    sh "erlc #{opts} -o ebin #{input}"
   end
 end
 
