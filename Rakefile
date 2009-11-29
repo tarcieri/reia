@@ -67,7 +67,7 @@ NEOTOMA_FILES.each do |f|
 end
 
 # Parser
-task "src/compiler/reia_parse.erl" => "src/compiler/reia_parse.peg" do
+file "src/compiler/reia_parse.erl" => "src/compiler/reia_parse.peg" do
   erl_eval 'neotoma:file("src/compiler/reia_parse.peg")', 'src/neotoma/ebin'
 end
 
@@ -77,7 +77,7 @@ def output_file(input_file, dir = 'ebin/')
 end
 
 GENERATED_SRC = %w(src/compiler/reia_parse.erl)
-ERL_SRC = (FileList.new('src/{compiler,core}/**/*.erl') + GENERATED_SRC).uniq
+ERL_SRC = (GENERATED_SRC + FileList.new('src/{compiler,core}/**/*.erl')).uniq
 
 ERL_SRC.each do |input|
   file output_file(input) => input do
@@ -86,8 +86,9 @@ ERL_SRC.each do |input|
 end
 
 # Build rules
-task :build   => %w(neotoma reia)
+task :build   => %w(parser reia)
+task :parser  => %w(neotoma src/compiler/reia_parse.erl)
 task :reia    => ERL_SRC.map { |input_file| output_file(input_file) }
 
 # Cleaning
-CLEAN.include %w(ebin/* src/neotoma/ebin/*)
+CLEAN.include %w(ebin/* src/neotoma/ebin/* src/compiler/reia_parse.erl)
