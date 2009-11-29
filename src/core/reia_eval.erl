@@ -9,7 +9,7 @@
 -export([new_binding/0, string/1, string/2, exprs/2]).
 -include("../compiler/reia_nodes.hrl").
 -include("../compiler/reia_bindings.hrl").
--define(return_value_var, #identifier{line=1, name='__reia_eval_return_value'}).
+-define(return_value_var(Line), #identifier{line=Line, name='__reia_eval_return_value'}).
 
 % Create a new local variable binding
 new_binding() -> [].
@@ -57,7 +57,7 @@ temporary_module() ->
 annotate_return_value(Exprs, Bindings) ->
   [LastExpr|Rest] = lists:reverse(Exprs),
   Line = element(2, LastExpr),
-  LastExpr2 = #match{line=Line, left=?return_value_var, right=LastExpr},
+  LastExpr2 = #match{line=Line, left=?return_value_var(Line), right=LastExpr},
   ReturnValue = return_value(output_bindings(Exprs, Bindings), Line),
   lists:reverse([ReturnValue, LastExpr2 | Rest]).
 
@@ -69,7 +69,7 @@ output_bindings(Exprs, Bindings) ->
 
 % Generate the return value for eval, appending the binding nodes
 return_value(Bindings, Line) ->
-  #tuple{line=Line, elements = [?return_value_var, bindings_list(Bindings, Line)]}.
+  #tuple{line=Line, elements = [?return_value_var(Line), bindings_list(Bindings, Line)]}.
 
 % Construct the output list for the bindings
 bindings_list([], Line) ->
