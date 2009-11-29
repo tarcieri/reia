@@ -3,7 +3,7 @@
 -record(compile_options, {
   scope         = toplevel,
   passes        = [r2e],
-  autohipe      = true,
+  autohipe      = false,
   toplevel_args = [],
   erlc_options  = [debug_info, export_all, verbose, report_errors]
 }).
