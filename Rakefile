@@ -16,7 +16,7 @@ end
 # Evaluate the given Erlang statement
 def erl_eval(cmd, *pa)
   pa_str = pa.empty? ? "" : "-pa #{pa.join(' ')}"
-  sh "erl -noshell -pa #{pa_str} -eval '#{cmd}' -s init stop"
+  sh "erl -noshell #{pa_str} -eval '#{cmd}' -s init stop"
 end
 
 # Retrieve the directory Erlang libraries are stored in
@@ -66,27 +66,22 @@ NEOTOMA_FILES.each do |f|
   end
 end
 
+# Parser
+task "src/compiler/reia_parse.erl" => "src/compiler/reia_parse.peg" do
+  erl_eval 'neotoma:file("src/compiler/reia_parse.peg")', 'src/neotoma/ebin'
+end
+
 # Generate an output path for the given input file
 def output_file(input_file, dir = 'ebin/')
   dir + File.basename(input_file).sub(/\.\w+$/, '.beam')
 end
 
-GENERATED_SRC = %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
+GENERATED_SRC = %w(src/compiler/reia_parse.erl)
 ERL_SRC = (FileList.new('src/{compiler,core}/**/*.erl') + GENERATED_SRC).uniq
-QUIET_SRC = %w(src/compiler/reia_parse.erl)
 
 ERL_SRC.each do |input|
-  unless QUIET_SRC.include? input
-    file output_file(input) => input do
-      sh "erlc +debug_info -o ebin #{input}"
-    end
-  end
-end
-
-# FIXME: LOL this logic is silly, merge above plztks
-QUIET_SRC.each do |input|
   file output_file(input) => input do
-    sh "erlc -o ebin #{input}"
+    sh "erlc +debug_info -o ebin #{input}"
   end
 end
 
