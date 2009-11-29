@@ -1,6 +1,15 @@
 %% Grammar
 
-additive <- decimal "+" additive / decimal;
+additive <- decimal "+" additive / decimal
+`
+if
+  is_list(Node) ->
+    [Left, Op, Right] = Node,
+    {binary_op, line(Idx), list_to_atom(Op), Left, Right};
+  true -> Node
+end
+`;
+
 decimal <- [0-9]+ `{integer, line(Idx), list_to_integer(Node)}`;
 
 %% Extra functions
