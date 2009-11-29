@@ -30,7 +30,7 @@ string(Str, Bindings) ->
 % Evaluate the given set of expressions
 exprs(Exprs, Bindings) ->
 	io:format("Input Code: ~p~n", [Exprs]),
-	Exprs2 = annotate_return_value(Exprs),
+	Exprs2 = annotate_return_value(Exprs, Bindings),
 
   {ok, Module} = reia_compiler:compile(
     temporary_module(),
@@ -54,18 +54,23 @@ temporary_module() ->
   "reia_eval#" ++ HexHash.
 
 % Annotate the return value of the expression to include the bindings
-annotate_return_value(Exprs) ->
+annotate_return_value(Exprs, Bindings) ->
   [LastExpr|Rest] = lists:reverse(Exprs),
   Line = element(2, LastExpr),
   LastExpr2 = #match{line=Line, left=?return_value_var, right=LastExpr},
-  ReturnValue = return_value(output_bindings(Exprs), Line),
+  ReturnValue = return_value(output_bindings(Exprs, Bindings), Line),
   lists:reverse([ReturnValue, LastExpr2 | Rest]).
 
 % Obtain a list of all variables which will be bound when eval is complete
-output_bindings(Exprs) ->
+output_bindings(Exprs, Bindings) ->
   {ok, BAExprs} = reia_bindings:transform(Exprs),
   [#bindings{entries=Entries}|_] = lists:reverse(BAExprs),
-  dict:fetch_keys(Entries).
+  NewBindings = dict:merge(
+    fun(_, _, _) -> void end, % Don't care, since we're just grabbing unique keys
+    Entries,
+    dict:from_list(Bindings)
+  ),
+  dict:fetch_keys(NewBindings).
 
 % Generate the return value for eval, appending the binding nodes
 return_value(Bindings, Line) ->
