@@ -28,12 +28,18 @@ string(Str, Bindings) ->
   end.
 
 % Evaluate the given set of expressions
-exprs(Exprs, _Bindings) ->
+exprs(Exprs, Bindings) ->
 	io:format("Input Code: ~p~n", [Exprs]),
 	Exprs2 = annotate_return_value(Exprs),
 
-  {ok, Module} = reia_compiler:compile(temporary_module(), Exprs2),
-  {ok, Name, {Value, NewBindings}} = reia_bytecode:load(Module),
+  {ok, Module} = reia_compiler:compile(
+    temporary_module(),
+    Exprs2,
+    [{toplevel_args, [Var || {Var, _} <- Bindings]}]
+  ),
+
+  Args = [Val || {_, Val} <- Bindings],
+  {ok, Name, {Value, NewBindings}} = reia_bytecode:load(Module, Args),
 
 	% FIXME: In the future it's possible eval will create things which persist
 	% beyond initial evaluation (e.g. lambdas, processes).  Once these features

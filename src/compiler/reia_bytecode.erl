@@ -6,7 +6,7 @@
 %
 
 -module(reia_bytecode).
--export([compile/2, compile/3, load/1]).
+-export([compile/2, compile/3, load/1, load/2]).
 -include("reia_compile_options.hrl").
 
 % Ideally this record is opaque to everything except this module
@@ -14,11 +14,15 @@
 -record(reia_module, {version=0, filename, base_module}).
 
 % Load the given compiled Reia module, executing its toplevel function
-load(Bin) ->
+load(Bin) -> load(Bin, []).
+
+% Load the given compiled Reia module, executing its toplevel function with
+% the given arguments (in order to pass along a default binding)
+load(Bin, Args) ->
 	#reia_module{filename = Filename, base_module = Module} = binary_to_term(Bin),
 	Name = list_to_atom(Filename),
 	code:load_binary(Name, Filename, Module),
-	Result = Name:toplevel(),
+	Result = apply(Name, toplevel, Args),
 	{ok, Name, Result}.
   
 % Compiled evaluation of a parsed Reia file
