@@ -6,19 +6,18 @@
 %
 
 -module(reia_eval).
--export([new_binding/0, string/1, string/2, exprs/2]).
+-export([new_binding/0, string/1, string/2, exprs/1, exprs/2]).
 -include("../compiler/reia_nodes.hrl").
 -include("../compiler/reia_bindings.hrl").
 -define(return_value_var(Line), #identifier{line=Line, name='__reia_eval_return_value'}).
 
-% Create a new local variable binding
+% Create a new set of local variable bindings
 new_binding() -> [].
 
 % Parse and evaluate the given string
-string(Str) ->
-	string(Str, []).
+string(Str) -> string(Str, new_binding()).
 
-% Parse and evaluate the given string with the given binding
+% Parse and evaluate the given string with the given bindings
 string(Str, Bindings) ->
   case reia_parse:string(Str) of
 	  {error, _} = Error ->
@@ -28,6 +27,9 @@ string(Str, Bindings) ->
   end.
 
 % Evaluate the given set of expressions
+exprs(Exprs) -> exprs(Exprs, new_binding()).
+
+% Evaluate the given set of expressions with the given bindings
 exprs(Exprs, Bindings) ->
 	io:format("Input Code: ~p~n", [Exprs]),
 	Exprs2 = annotate_return_value(Exprs, Bindings),
