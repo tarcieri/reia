@@ -7,6 +7,7 @@
 
 -module(reia_bytecode).
 -export([compile/2, compile/3, load/1]).
+-include("reia_compile_options.hrl").
 
 % Ideally this record is opaque to everything except this module
 % No other modules should operate directly on raw Reia bytecode
@@ -22,11 +23,11 @@ load(Bin) ->
   
 % Compiled evaluation of a parsed Reia file
 compile(Filename, Expressions) ->
-  compile(Filename, Expressions, []).
+  compile(Filename, Expressions, #compile_options{}).
 
-compile(Filename, Expressions, _Options) ->
+compile(Filename, Expressions, Options) ->
   io:format("Output Code: ~p~n", [Expressions]),
-  case compile_expressions(Filename, Expressions) of
+  case compile_expressions(Filename, Expressions, Options) of
     {ok, _Module, Bin} ->
       Module = #reia_module{filename=Filename, base_module=Bin},
       {ok, term_to_binary(Module)};
@@ -35,10 +36,13 @@ compile(Filename, Expressions, _Options) ->
   end.
 
 % Output raw Erlang bytecode for inclusion into compiled Reia bytecode
-compile_expressions(Filename, Expressions) ->
+compile_expressions(Filename, Expressions, Options) ->
+  % Build argument list in the abstract format
+  Args = [{var, 1, Name} || Name <- Options#compile_options.toplevel_args],
+
   % Create a "toplevel" function which is called when the module is loaded
-  Function = {function, 1, toplevel, 0, [
-    {clause, 1, [], [], Expressions}
+  Function = {function, 1, toplevel, length(Args), [
+    {clause, 1, Args, [], Expressions}
   ]},
   
   Module = [

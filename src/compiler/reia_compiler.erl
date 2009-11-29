@@ -17,10 +17,10 @@ compile(Filename, Expressions) ->
 %
 % Accepts a list of compile options, given as 2-tuples.  The compiler
 % recognizes the following option keys in the form {Key, Value}:
-% * scope:              Scope the given expressions are considered to exist in
-% * passes:             Passes which should be applied to the input expressions
-% * toplevel_arguments: A list of arguments the toplevel method accepts
-% * erlc_args:          A list of options to be passed alogn to erlc
+% * scope:         Scope the given expressions are considered to exist in
+% * passes:        Passes which should be applied to the input expressions
+% * toplevel_args: A list of arguments the toplevel method accepts
+% * erlc_args:     A list of options to be passed alogn to erlc
 compile(Filename, Expressions, Options) ->
   OptRecord = lists:foldl(fun process_option/2, #compile_options{}, Options),
   run_passes(Filename, Expressions, OptRecord).
@@ -32,8 +32,8 @@ process_option({scope, Scope}, Options) ->
   Options#compile_options{scope = Scope};
 process_option({passes, Passes}, Options) ->
   Options#compile_options{passes = Passes};
-process_option({toplevel_arguments, Args}, Options) ->
-  Options#compile_options{toplevel_arguments = Args};
+process_option({toplevel_args, Args}, Options) ->
+  Options#compile_options{toplevel_args = Args};
 process_option({erlc_options, Opts}, Options) ->
   Options#compile_options{erlc_options = Opts}.
 
