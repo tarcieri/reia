@@ -54,19 +54,19 @@ exprs -> expr ',' exprs : ['$1'|'$3'].
 
 expr -> match_expr : '$1'.
 
-match_expr -> add_expr '=' match_expr :   #match{line=line('$2'), left='$1', right='$3'}.
+match_expr -> add_expr '=' match_expr :   #match{line=?line('$2'), left='$1', right='$3'}.
 match_expr -> add_expr : '$1'.
 
-add_expr -> mult_expr add_op add_expr :   #binary_op{line=line('$1'), type=op('$2'), val1='$1', val2='$3'}.
+add_expr -> mult_expr add_op add_expr :   #binary_op{line=?line('$1'), type=op('$2'), val1='$1', val2='$3'}.
 add_expr -> mult_expr : '$1'.
 
-mult_expr -> pow_expr mult_op mult_expr : #binary_op{line=line('$1'), type=op('$2'), val1='$1', val2='$3'}.
+mult_expr -> pow_expr mult_op mult_expr : #binary_op{line=?line('$1'), type=op('$2'), val1='$1', val2='$3'}.
 mult_expr -> pow_expr : '$1'.
 
-pow_expr -> unary_expr pow_op pow_expr :  #binary_op{line=line('$1'), type=op('$2'), val1='$1', val2='$3'}.
+pow_expr -> unary_expr pow_op pow_expr :  #binary_op{line=?line('$1'), type=op('$2'), val1='$1', val2='$3'}.
 pow_expr -> unary_expr : '$1'.
 
-unary_expr -> unary_op unary_expr :       #unary_op{line=line('$1'), type=op('$1'), val='$2'}.
+unary_expr -> unary_op unary_expr :       #unary_op{line=?line('$1'), type=op('$1'), val='$2'}.
 unary_expr -> call_expr : '$1'.
 
 call_expr -> call : '$1'.
@@ -99,25 +99,25 @@ unary_op -> '-'   : '$1'.
 %% Remote function calls
 call -> call_expr '.' identifier '(' ')' :
 #remote_call{
-  line      = line('$2'),
+  line      = ?line('$2'),
   receiver  = '$1',
   name      = '$3',
   arguments = [],
-  block     = #nil{line=line('$2')}
+  block     = #nil{line=?line('$2')}
 }.
 
 call -> call_expr '.' identifier '(' exprs ')' :
 #remote_call{
-  line      = line('$2'),
+  line      = ?line('$2'),
   receiver  = '$1',
   name      = '$3',
   arguments = '$5',
-  block     = #nil{line=line('$2')}
+  block     = #nil{line=?line('$2')}
 }.
 
 call -> erl '.' identifier '.' identifier '(' ')' :
 #native_call{
-  line      = line('$2'),
+  line      = ?line('$2'),
   module    = '$3',
   function  = '$5',
   arguments = []
@@ -125,7 +125,7 @@ call -> erl '.' identifier '.' identifier '(' ')' :
 
 call -> erl '.' identifier '.' identifier '(' exprs ')' :
 #native_call{
-  line      = line('$2'),
+  line      = ?line('$2'),
   module    = '$3',
   function  = '$5',
   arguments = '$7'
@@ -136,21 +136,21 @@ number -> float : '$1'.
 number -> integer : '$1'.
 
 %% Lists
-list -> '[' ']' :       #empty{line=line('$1')}.
-list -> '[' expr tail : #cons{line=line('$1'), expr='$2', tail='$3'}.
+list -> '[' ']' :       #empty{line=?line('$1')}.
+list -> '[' expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
 
-tail -> ']' : #empty{line=line('$1')}.
+tail -> ']' : #empty{line=?line('$1')}.
 tail -> ',' '*' expr ']' : '$3'.
-tail -> ',' expr tail : #cons{line=line('$1'), expr='$2', tail='$3'}.
+tail -> ',' expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
 
 %% Tuples
-tuple -> '(' ')' :               #tuple{line=line('$1'), elements=[]}.
-tuple -> '(' expr ',' ')' :      #tuple{line=line('$1'), elements='$2'}.
-tuple -> '(' expr ',' exprs ')': #tuple{line=line('$1'), elements=['$2'|'$4']}.
+tuple -> '(' ')' :               #tuple{line=?line('$1'), elements=[]}.
+tuple -> '(' expr ',' ')' :      #tuple{line=?line('$1'), elements='$2'}.
+tuple -> '(' expr ',' exprs ')': #tuple{line=?line('$1'), elements=['$2'|'$4']}.
 
 %% Maps
-map -> '{' '}' :             #map{line=line('$1'), elements=[]}.
-map -> '{' map_entries '}' : #map{line=line('$1'), elements='$2'}.
+map -> '{' '}' :             #map{line=?line('$1'), elements=[]}.
+map -> '{' map_entries '}' : #map{line=?line('$1'), elements='$2'}.
 
 map_entries -> add_expr '=>' expr : [{'$1','$3'}]. % FIXME: change add_expr to 1 below match
 map_entries -> add_expr '=>' expr ',' map_entries : [{'$1','$3'}|'$5'].
@@ -159,6 +159,8 @@ Erlang code.
 
 -export([string/1]).
 -include("reia_nodes.hrl").
+-define(line(Node), element(2, Node)).
+-define(identifier_name(Id), Id#identifier.name).
 
 %% Easy interface for parsing a given string with nicely formatted errors
 string(String) ->
@@ -173,9 +175,6 @@ string(String) ->
     {error, {Line, _, {Message, Token}}, _} ->
       {error, {Line, lists:flatten(io_lib:format("~p ~p", [Message, Token]))}}
   end.
-
-%% Keep track of line info in tokens
-line(Tup) -> element(2, Tup).
 
 %% Extract operators from op tokens
 op({Op, _Line}) ->
