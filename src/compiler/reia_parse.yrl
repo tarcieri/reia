@@ -115,12 +115,20 @@ call -> call_expr '.' identifier '(' exprs ')' :
   block     = #nil{line=line('$2')}
 }.
 
+call -> erl '.' identifier '.' identifier '(' ')' :
+#native_call{
+  line      = line('$2'),
+  module    = '$3',
+  function  = '$5',
+  arguments = []
+}.
+
 call -> erl '.' identifier '.' identifier '(' exprs ')' :
 #native_call{
   line      = line('$2'),
   module    = '$3',
   function  = '$5',
-  arguments = #nil{line=line('$2')}
+  arguments = '$7'
 }.
 
 %% Numbers

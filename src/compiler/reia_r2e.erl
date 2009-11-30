@@ -52,7 +52,19 @@ transform(#binary_op{line=Line, type='**', val1=Val1, val2=Val2}) ->
   };
 
 transform(#binary_op{line=Line, type=Type, val1=Val1, val2=Val2}) ->
-  {op, Line, Type, transform(Val1), transform(Val2)}.
+  {op, Line, Type, transform(Val1), transform(Val2)};
+
+% Function calls
+transform(#native_call{
+  line      = Line,
+  module    = #identifier{name=Module},
+  function  = #identifier{name=Function},
+  arguments = Args
+}) ->
+  {call, Line,
+    {remote, Line, {atom, Line, Module}, {atom, Line, Function}},
+    [transform(Arg) || Arg <- Args]
+  }.
 
 map_elements([], Line) ->
   {nil, Line};
