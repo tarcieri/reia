@@ -69,7 +69,7 @@ transform(#remote_call{
     {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, call}},
     [
       transform(Receiver),
-      Name,
+      {atom, Line, Name},
       {tuple, Line, [transform(Arg) || Arg <- Args]},
       transform(Block)
     ]
