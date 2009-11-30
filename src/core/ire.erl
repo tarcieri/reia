@@ -76,9 +76,7 @@ eval(Exprs, Binding) ->
   NewBinding.
 
 print(Value) ->
-  io:format("=> ~p~n", [Value]).
-  %{string, String} = reia_dispatch:funcall(Value, inspect, [], nil),
-  %io:format("=> ~s~n", [binary_to_list(String)]).
+  io:format("=> ~s~n", [reia_dispatch:call(Value, to_s, {}, nil)]).
 
 parse_error({Line, Error}) ->
   io:format("Error: Line ~w: ~s~n", [Line, Error]).
