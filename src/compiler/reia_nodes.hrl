@@ -3,6 +3,8 @@
 -record(float,      {line, value}).
 -record(identifier, {line, name}).
 -record(atom,       {line, name}).
+-record(true,       {line}).
+-record(false,      {line}).
 -record(nil,        {line}).
 
 % Function calls

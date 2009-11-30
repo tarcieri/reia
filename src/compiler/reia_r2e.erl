@@ -17,6 +17,9 @@ transform(Exprs, _Options) ->
 transform(#integer{} = Expr) -> Expr;
 transform(#float{} = Expr)   -> Expr;
 transform(#atom{} = Expr)    -> Expr;
+transform(#true{line=Line})  -> {atom, Line, true};
+transform(#false{line=Line}) -> {atom, Line, false};
+transform(#nil{line=Line})   -> {atom, Line, nil};
 transform(#identifier{line=Line, name=Name}) -> {var, Line, Name};
 
 % Matches

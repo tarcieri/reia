@@ -21,6 +21,7 @@ Nonterminals
   mult_op
   pow_op
   unary_op
+  boolean
   call
   number
   list
@@ -32,7 +33,7 @@ Nonterminals
   
 Terminals
   eol '(' ')' '[' ']' '{' '}'
-  float integer identifier atom erl
+  float integer identifier atom true false nil erl
   '+' '-' '*' '/' '%' '**' ',' '.' '=' '=>'
   .
 
@@ -78,6 +79,7 @@ max_expr -> tuple        : '$1'.
 max_expr -> map          : '$1'.
 max_expr -> identifier   : '$1'.
 max_expr -> atom         : '$1'.
+max_expr -> boolean      : '$1'.
 max_expr -> '(' expr ')' : '$2'.
 
 %% Addition operators
@@ -95,6 +97,11 @@ pow_op -> '**' : '$1'.
 %% Unary operators
 unary_op -> '+'   : '$1'.
 unary_op -> '-'   : '$1'.
+
+%% Boolean values
+boolean -> true  : '$1'.
+boolean -> false : '$1'.
+boolean -> nil   : '$1'.
 
 %% Remote function calls
 call -> call_expr '.' identifier '(' ')' :
