@@ -55,10 +55,27 @@ transform(#binary_op{line=Line, type=Type, val1=Val1, val2=Val2}) ->
   {op, Line, Type, transform(Val1), transform(Val2)};
 
 % Function calls
+transform(#remote_call{
+  line      = Line,
+  receiver  = Receiver,
+  name      = Name,
+  arguments = Args,
+  block     = Block
+}) ->
+  {call, Line,
+    {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, call}},
+    [
+      transform(Receiver),
+      Name,
+      {tuple, Line, [transform(Arg) || Arg <- Args]},
+      transform(Block)
+    ]
+  };
+
 transform(#native_call{
   line      = Line,
-  module    = #identifier{name=Module},
-  function  = #identifier{name=Function},
+  module    = Module,
+  function  = Function,
   arguments = Args
 }) ->
   {call, Line,
