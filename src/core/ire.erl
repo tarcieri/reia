@@ -42,30 +42,29 @@ read(Io, Prompt) ->
 
 read_until_complete(Input, Prompt) ->
   Input2 = [read(Prompt)|Input],
-  case reia_parse:string(lists:flatten(lists:reverse(Input2))) of
+  case reia_parse:parse(lists:flatten(lists:reverse(Input2))) of
     %% Need more tokens
-    {error, {999999, _}} ->
+    {_Remaining, _Token, _Idx} ->
       read_until_complete(Input2, Prompt);
     Result ->
       Result
   end.
 
 parse(String, Binding) ->
-  case reia_parse:string(String) of
-    {ok, Exprs} ->
-      eval(Exprs, Binding);
-
+  io:format("String is: ~p~n", [String]),
+  case reia_parse:parse(String) of
     %% Need more tokens
-    {error, {999999, _}} ->
+    {_Remaining, _Token, _Idx} ->
       case read_until_complete([String], '.. ') of
         {ok, Exprs} ->
           eval(Exprs, Binding);
-        {error, Error} ->
+        {fail, Error} ->
           parse_error(Error),
           Binding
       end;
-
-    {error, Error} ->
+    Exprs when is_list(Exprs) ->
+      eval(Exprs, Binding);
+    {fail, Error} ->
       parse_error(Error),
       Binding
   end.
