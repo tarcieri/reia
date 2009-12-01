@@ -2,11 +2,9 @@
 
 add_expr <- integer add_op add_expr / integer
 `
-if
-  is_list(Node) ->
-    [Left, Op, Right] = Node,
-    {binary_op, line(Idx), list_to_atom(Op), Left, Right};
-  true -> Node
+case Node of
+  [Left, Op, Right] -> {binary_op, line(Idx), list_to_atom(Op), Left, Right};
+  _ -> Node
 end
 `;
 
