@@ -3,12 +3,12 @@
 add_expr <- integer add_op add_expr / integer
 `
 case Node of
-  [Left, Op, Right] -> {binary_op, line(Idx), list_to_atom(Op), Left, Right};
+  [Left, Op, Right] -> {binary_op, line(Idx), Op, Left, Right};
   _ -> Node
 end
 `;
 
-add_op  <- "+" / "-";
+add_op  <- "+" / "-" `list_to_atom(Node)`;
 
 integer <- [0-9]+ `{integer, line(Idx), list_to_integer(Node)}`;
 
