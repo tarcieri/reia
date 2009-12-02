@@ -1,7 +1,14 @@
 %% Grammar
 
-expressions <- head:expr tail:(separator expr?)*
-`[{head, Head}, {tail, Tail}] = Node, [Head|[Expr || [_Separator,[_|_] = Expr] <- Tail]]`;
+expressions <- separator* expr? (separator+ expr)* separator*
+`
+[_, Expr, Exprs, _] = Node,
+Head = case Expr of
+  [] -> [];
+  _  -> [Expr]
+end,
+Head ++ [Ex || [_Sep, Ex] <- Exprs]
+`;
 
 expr <- add_expr;
 
