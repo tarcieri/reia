@@ -22,12 +22,15 @@ compile(Filename, Expressions) ->
 % * toplevel_args: A list of arguments the toplevel method accepts
 % * erlc_args:     A list of options to be passed alogn to erlc
 compile(Filename, Expressions, Options) ->
-  OptRecord = lists:foldl(fun process_option/2, #compile_options{}, Options),
+  Options2 = [{code, Expressions}|Options],
+  OptRecord = lists:foldl(fun process_option/2, #compile_options{}, Options2),
   run_passes(Filename, Expressions, OptRecord).
 
 % Build a compile_options record from the specified options list
 % Since records suck so much, we have to manually specify all of the possible
 % patterns and their behaviors.  Can't DRY it out.  Records suck :(
+process_option({code, Code}, Options) ->
+  Options#compile_options{code = Code};
 process_option({scope, Scope}, Options) ->
   Options#compile_options{scope = Scope};
 process_option({passes, Passes}, Options) ->
