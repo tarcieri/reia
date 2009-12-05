@@ -1,13 +1,8 @@
-%% Grammar
-
+% Toplevel expressions
 expressions <- separator* expr? (separator+ expr)* separator*
 `
 [_, Expr, Exprs, _] = Node,
-Head = case Expr of
-  [] -> [];
-  _  -> [Expr]
-end,
-Head ++ [Ex || [_Sep, Ex] <- Exprs]
+lists:flatten([Expr]) ++ [Ex || [_Sep, Ex] <- Exprs]
 `;
 
 expr <- add_expr;
