@@ -41,31 +41,31 @@ compile(Filename, Expressions, Options) ->
 
 % Output raw Erlang bytecode for inclusion into compiled Reia bytecode
 compile_expressions(Filename, Expressions, Options) ->
-  case Options#compile_options.toplevel_wrapper of
-    true ->
-      % Build argument list in the abstract format
-      Args = [{var, 1, Name} || Name <- []],
-
-      % Create a "toplevel" function which is called when the module is loaded
-      Function = {function, 1, toplevel, length(Args), [
-        {clause, 1, Args, [], Expressions}
-      ]},
-  
-      Module = [
-        {attribute, 1, module, list_to_atom(Filename)},
-        {attribute, 1, file, {Filename, 1}},
-        {attribute, 1, code, Expressions},
-        Function
-      ];
-    false ->
+%  case Options#compile_options.toplevel_wrapper of
+%    true ->
+%      % Build argument list in the abstract format
+%      Args = [{var, 1, Name} || Name <- []],
+%
+%      % Create a "toplevel" function which is called when the module is loaded
+%      Function = {function, 1, toplevel, length(Args), [
+%        {clause, 1, Args, [], Expressions}
+%      ]},
+%
+%      Module = [
+%        {attribute, 1, module, list_to_atom(Filename)},
+%        {attribute, 1, file, {Filename, 1}},
+%        {attribute, 1, code, Expressions},
+%        Function
+%      ];
+%    false ->
       [{module, _Line, Name, Functions}] = Expressions,
       Module = [
         {attribute, 1, module, Name},
         {attribute, 1, file, {Filename, 1}},
         {attribute, 1, code, Expressions}
         |Functions
-      ]
-  end,
+      ],
+%  end,
   compile:forms(Module, compile_options(Options)).
 
 compile_options(Options) ->
