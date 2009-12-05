@@ -35,7 +35,7 @@ exprs(Exprs, Bindings) ->
 	Exprs2 = annotate_return_value(Exprs, Bindings),
 
   {ok, Module} = reia_compiler:compile(
-    temporary_module(),
+    "reia_eval#" ++ stamp(),
     Exprs2,
     [{toplevel_args, [Var || {Var, _} <- Bindings]}]
   ),
@@ -49,11 +49,10 @@ exprs(Exprs, Bindings) ->
   code:purge(Name),
   {value, Value, NewBindings}.
 
-% Generate a temporary module name
-temporary_module() ->
-  RawHash = erlang:md5(term_to_binary(make_ref())),
-  HexHash = lists:flatten([io_lib:format("~.16b",[N]) || <<N>> <= RawHash]),
-  "reia_eval#" ++ HexHash.
+% Generate a timestamp to be used in a Reia module name
+stamp() ->
+  Timestamp = [integer_to_list(N) || N <- tuple_to_list(now())],
+  string:join(Timestamp, ".").
 
 % Annotate the return value of the expression to include the bindings
 annotate_return_value(Exprs, Bindings) ->
