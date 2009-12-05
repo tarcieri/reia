@@ -33,16 +33,16 @@ exprs(Exprs) -> exprs(Exprs, new_binding()).
 exprs(Exprs, Bindings) ->
 	io:format("Input Code: ~p~n", [Exprs]),
 	Exprs2 = annotate_return_value(Exprs, Bindings),
-  Name = "reia_eval#" ++ stamp(),
+  Filename = "reia_eval#" ++ stamp(),
+  Name = list_to_atom(Filename),
 
   {ok, Module} = reia_compiler:compile(
-    Name,
-    temporary_module(Name, [Var || {Var, _} <- Bindings], Exprs2),
-    [{toplevel_wrapper, false}]
+    Filename,
+    [temporary_module(Name, [Var || {Var, _} <- Bindings], Exprs2)]
   ),
 
-  Args = [Val || {_, Val} <- Bindings],
-  {ok, Name, {Value, NewBindings}} = reia_bytecode:load(Module, Args),
+  Args = list_to_tuple([Val || {_, Val} <- Bindings]),
+  {ok, Name, {Value, NewBindings}} = reia_bytecode:load(Module, [Args, nil]),
 
 	% FIXME: In the future it's possible eval will create things which persist
 	% beyond initial evaluation (e.g. lambdas, processes).  Once these features

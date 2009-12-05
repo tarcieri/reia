@@ -13,6 +13,24 @@
 transform(Exprs, _Options) ->
   [transform(Expr) || Expr <- Exprs].
 
+% Modules
+transform(#module{line=Line, name=Name, functions=Funcs}) ->
+  % Modules need some postprocessing, so we leave them in a similar form but
+  % with their subtrees converted
+  #module{
+    line = Line,
+    name = Name,
+    functions = group_clauses([transform(Func) || Func <- Funcs])
+  };
+
+% Functions
+transform(#function{line=Line, name=Name, arguments=Args, block=Block, body=Exprs}) ->
+  {function, Line, Name, 2, [{clause, Line,
+    [{tuple, Line, [transform(Arg) || Arg <- Args]}, transform(Block)],
+    [],
+    [transform(Expr) || Expr <- Exprs]
+  }]};
+
 % Terminals
 transform(#integer{} = Expr) -> Expr;
 transform(#float{} = Expr)   -> Expr;
@@ -86,6 +104,24 @@ transform(#native_call{
     [transform(Arg) || Arg <- Args]
   }.
 
+%% Group clauses of functions with the same name and arity
+group_clauses(Functions) ->
+  group_clauses(Functions, dict:new()).
+group_clauses([], Functions) ->
+  [
+    {function, Line, Name, Arity, lists:reverse(Clauses)} ||
+    {{Name, Arity},{Line, Clauses}} <- dict:to_list(Functions)
+  ];
+group_clauses([Function|Rest], Functions) ->
+  {function, Line, Name, Arity, [Clause]} = Function,
+  case dict:find({Name, Arity}, Functions) of
+    {ok, {Line2, Clauses}} ->
+      group_clauses(Rest, dict:store({Name, Arity}, {Line2, [Clause|Clauses]}, Functions));
+    error ->
+      group_clauses(Rest, dict:store({Name, Arity}, {Line, [Clause]}, Functions))
+  end.
+
+%% Transform the elements of Maps
 map_elements([], Line) ->
   {nil, Line};
 map_elements([{Key,Value}|Rest], Line) ->

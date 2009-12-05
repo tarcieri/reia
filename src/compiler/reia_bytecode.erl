@@ -58,7 +58,7 @@ compile_expressions(Filename, Expressions, Options) ->
         Function
       ];
     false ->
-      {module, _Line, Name, Functions} = Expressions,
+      [{module, _Line, Name, Functions}] = Expressions,
       Module = [
         {attribute, 1, module, Name},
         {attribute, 1, file, {Filename, 1}},
