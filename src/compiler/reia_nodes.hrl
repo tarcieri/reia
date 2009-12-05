@@ -1,3 +1,9 @@
+% Modules
+-record(module,     {line, name, functions}).
+
+% Functions
+-record(function,   {line, name, arguments, block, body}).
+
 % Terminals
 -record(integer,    {line, value}).
 -record(float,      {line, value}).

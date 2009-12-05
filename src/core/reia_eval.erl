@@ -33,11 +33,12 @@ exprs(Exprs) -> exprs(Exprs, new_binding()).
 exprs(Exprs, Bindings) ->
 	io:format("Input Code: ~p~n", [Exprs]),
 	Exprs2 = annotate_return_value(Exprs, Bindings),
+  Name = "reia_eval#" ++ stamp(),
 
   {ok, Module} = reia_compiler:compile(
-    "reia_eval#" ++ stamp(),
-    Exprs2,
-    [{toplevel_args, [Var || {Var, _} <- Bindings]}]
+    Name,
+    temporary_module(Name, [Var || {Var, _} <- Bindings], Exprs2),
+    [{toplevel_wrapper, false}]
   ),
 
   Args = [Val || {_, Val} <- Bindings],
@@ -53,6 +54,11 @@ exprs(Exprs, Bindings) ->
 stamp() ->
   Timestamp = [integer_to_list(N) || N <- tuple_to_list(now())],
   string:join(Timestamp, ".").
+
+temporary_module(Name, Args, Exprs) ->
+  #module{line=1, name=Name, functions=[
+    #function{line=1, name=toplevel, arguments=Args, body=Exprs}
+  ]}.
 
 % Annotate the return value of the expression to include the bindings
 annotate_return_value(Exprs, Bindings) ->

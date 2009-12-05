@@ -4,6 +4,6 @@
   scope         = toplevel,
   passes        = [r2e],
   autohipe      = false,
-  toplevel_args = [],
+  toplevel_wrapper = true,
   erlc_options  = [debug_info, export_all, verbose, report_errors]
 }).
