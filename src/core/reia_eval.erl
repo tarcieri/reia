@@ -38,7 +38,7 @@ exprs(Exprs, Bindings) ->
 
   {ok, Module} = reia_compiler:compile(
     Filename,
-    [temporary_module(Name, [Var || {Var, _} <- Bindings], Exprs2)]
+    [temporary_module(Name, [{identifier, 1, Var} || {Var, _} <- Bindings], Exprs2)]
   ),
 
   Args = list_to_tuple([Val || {_, Val} <- Bindings]),
