@@ -62,7 +62,7 @@ compile_expressions(Filename, Expressions, Options) ->
       Module = [
         {attribute, 1, module, Name},
         {attribute, 1, file, {Filename, 1}},
-        {attribute, 1, code, Expressions}
+        {attribute, 1, code, Options#compile_options.code}
         |Functions
       ],
 %  end,
