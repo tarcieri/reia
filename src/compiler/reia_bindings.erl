@@ -1,5 +1,5 @@
 -module(reia_bindings).
--export([transform/1, transform/2]).
+-export([transform/1, transform/2, revert/1]).
 -include("reia_nodes.hrl").
 -include("reia_bindings.hrl").
 
@@ -13,7 +13,7 @@
 % Annotate the given node with its current bindings
 transform(Exprs) -> transform(Exprs, normal).
 
-% Annotate the given node, assuming the given scope
+% Annotate the given expressions, assuming the given scope
 transform(Exprs, Scope) ->
   {BAExprs, _State} = lists:mapfoldl(
     fun transform_node/2,
@@ -22,6 +22,10 @@ transform(Exprs, Scope) ->
   ),
   {ok, BAExprs}.
 
+% Return these expressions back to their standard form
+revert(BAExprs) ->
+  reia_syntax:map_subtrees(fun revert_node/1, BAExprs).
+
 %
 % Node transformations
 %
@@ -29,7 +33,7 @@ transform(Exprs, Scope) ->
 % Module declarations create a new scope
 transform_node(#module{functions=Functions} = Node, State) ->
   Fun = fun(Function) ->
-    {Function2, _State2} = reia_syntax:mapfold_subtrees(
+    {[Function2], _State2} = reia_syntax:mapfold_subtrees(
       fun transform_node/2,
       #state{scope=module},
       [Function]
@@ -63,13 +67,13 @@ transform_node(#function{line=Line, name=Name, arguments=Args, block=Block, body
 
 % Walk the LHS of a match expression in match scope
 transform_node(#match{} = Node, State) ->
-  {Right, State2} = reia_syntax:mapfold_subtrees(
+  {[Right], State2} = reia_syntax:mapfold_subtrees(
     fun transform_node/2,
     State,
     [Node#match.right]
   ),
 
-  {Left, State3} = reia_syntax:mapfold_subtrees(
+  {[Left], State3} = reia_syntax:mapfold_subtrees(
     fun transform_node/2,
     State2#state{scope=match},
     [Node#match.left]
@@ -101,3 +105,8 @@ transform_node(Node, State) ->
 
 output(Node, State) ->
   {#bindings{node=Node, entries=State#state.bindings}, State}.
+
+revert_node(#bindings{node=Node}) ->
+  reia_syntax:map_subtrees(fun revert_node/1, Node);
+revert_node(Node) ->
+  reia_syntax:map_subtrees(fun revert_node/1, Node).

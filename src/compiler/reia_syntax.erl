@@ -6,10 +6,17 @@ mapfold_subtrees(Fun, State, Tree) when is_list(Tree) ->
   lists:mapfoldl(Fun, State, Tree);
 mapfold_subtrees(Fun, State, Tree) when is_tuple(Tree) ->
   [Type, Line | Elements] = tuple_to_list(Tree),
-  {Elements2, State2} = lists:mapfoldl(Fun, State, Elements),
+  {Elements2, {_, State2}} = lists:mapfoldl(fun mapfold_element/2, {Fun, State}, Elements),
   {list_to_tuple([Type, Line | Elements2]), State2};
 mapfold_subtrees(_Fun, State, Tree) ->
   {Tree, State}.
+
+% Process an individual element, automatically walking sublists
+mapfold_element(Elem, State) when is_list(Elem) ->
+  lists:mapfoldl(fun mapfold_element/2, State, Elem);
+mapfold_element(Elem, {Fun, State}) ->
+  {Elem2, State2} = Fun(Elem, State),
+  {Elem2, {Fun, State2}}.
 
 % Iterate across all the subtrees fo a given tree
 map_subtrees(Fun, Tree) ->
