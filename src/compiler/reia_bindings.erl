@@ -28,14 +28,15 @@ transform(Exprs, Scope) ->
 
 % Module declarations create a new scope
 transform_node(#module{functions=Functions} = Node, State) ->
-  {Functions2, _State2} = [
-    reia_syntax:mapfold_subtrees(
+  Fun = fun(Function) ->
+    {Function2, _State2} = reia_syntax:mapfold_subtrees(
       fun transform_node/2,
       #state{scope=module},
       [Function]
-    ) || Function <- Functions
-  ],
-  output(Node#module{functions=Functions2}, State);
+    ),
+    Function2
+  end,
+  output(Node#module{functions=lists:map(Fun, Functions)}, State);
 
 % Function declarations create a new scope
 transform_node(#function{line=Line, name=Name, arguments=Args, block=Block, body=Exprs}, State) ->
