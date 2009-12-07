@@ -53,7 +53,7 @@ exprs(Exprs, Bindings) ->
 % Generate a timestamp to be used in a Reia module name
 stamp() ->
   Timestamp = [integer_to_list(N) || N <- tuple_to_list(now())],
-  string:join(Timestamp, ".").
+  string:join(Timestamp, "_").
 
 temporary_module(Name, Args, Exprs) ->
   #module{line=1, name=Name, functions=[
