@@ -17,6 +17,7 @@ Nonterminals
   unary_expr
   call_expr
   max_expr
+  rebind_op
   add_op
   mult_op
   pow_op
@@ -35,6 +36,7 @@ Terminals
   eol '(' ')' '[' ']' '{' '}'
   float integer identifier atom true false nil erl
   '+' '-' '*' '/' '%' '**' ',' '.' '=' '=>'
+  '+=' '-=' '*=' '/=' '**='
   .
 
 Rootsymbol grammar.
@@ -55,19 +57,20 @@ exprs -> expr ',' exprs : ['$1'|'$3'].
 
 expr -> match_expr : '$1'.
 
-match_expr -> add_expr '=' match_expr :   #match{line=?line('$2'), left='$1', right='$3'}.
+match_expr -> add_expr '=' match_expr :       #match{line=?line('$2'), left='$1', right='$3'}.
+match_expr -> add_expr rebind_op match_expr : #binary_op{line=?line('$1'), type=op('$2'), val1='$1', val2='$3'}.
 match_expr -> add_expr : '$1'.
 
-add_expr -> mult_expr add_op add_expr :   #binary_op{line=?line('$1'), type=op('$2'), val1='$1', val2='$3'}.
+add_expr -> mult_expr add_op add_expr :       #binary_op{line=?line('$1'), type=op('$2'), val1='$1', val2='$3'}.
 add_expr -> mult_expr : '$1'.
 
-mult_expr -> pow_expr mult_op mult_expr : #binary_op{line=?line('$1'), type=op('$2'), val1='$1', val2='$3'}.
+mult_expr -> pow_expr mult_op mult_expr :     #binary_op{line=?line('$1'), type=op('$2'), val1='$1', val2='$3'}.
 mult_expr -> pow_expr : '$1'.
 
-pow_expr -> unary_expr pow_op pow_expr :  #binary_op{line=?line('$1'), type=op('$2'), val1='$1', val2='$3'}.
+pow_expr -> unary_expr pow_op pow_expr :      #binary_op{line=?line('$1'), type=op('$2'), val1='$1', val2='$3'}.
 pow_expr -> unary_expr : '$1'.
 
-unary_expr -> unary_op unary_expr :       #unary_op{line=?line('$1'), type=op('$1'), val='$2'}.
+unary_expr -> unary_op unary_expr :           #unary_op{line=?line('$1'), type=op('$1'), val='$2'}.
 unary_expr -> call_expr : '$1'.
 
 call_expr -> call : '$1'.
@@ -81,6 +84,13 @@ max_expr -> identifier   : '$1'.
 max_expr -> atom         : '$1'.
 max_expr -> boolean      : '$1'.
 max_expr -> '(' expr ')' : '$2'.
+
+%% Rebind operators
+rebind_op -> '+='  : '$1'.
+rebind_op -> '-='  : '$1'.
+rebind_op -> '*='  : '$1'.
+rebind_op -> '/='  : '$1'.
+rebind_op -> '**=' : '$1'.
 
 %% Addition operators
 add_op -> '+' : '$1'.
