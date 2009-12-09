@@ -24,8 +24,7 @@ transform_node(#binary_op{line=Line, type='/=', val1=Left, val2=Right}) ->
 transform_node(#binary_op{line=Line, type='**=', val1=Left, val2=Right}) ->
   rebind_op(Line, '**', Left, Right);
 transform_node(#match{left=Left} = Node) ->
-  [Left2] = reia_syntax:map_subtrees(fun transform_setters/1, [Left]),
-  Node#match{left=rebind_setters(Left2)};
+  Node#match{left=reia_syntax:map_subtrees(fun transform_setters/1, [Left]);
 transform_node(Node) ->
   reia_syntax:map_subtrees(fun transform_node/1, Node).
 
