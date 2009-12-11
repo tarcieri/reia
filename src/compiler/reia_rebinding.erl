@@ -9,6 +9,9 @@
 -export([transform/2]).
 -include("reia_nodes.hrl").
 
+% Internal state of the rebinding transformation
+-record(state, {exprs=[], count=0}).
+
 transform(Exprs, _Options) ->
   reia_syntax:map_subtrees(fun transform_node/1, Exprs).
 
@@ -24,9 +27,9 @@ transform_node(#binary_op{line=Line, type='/=', val1=Left, val2=Right}) ->
 transform_node(#binary_op{line=Line, type='**=', val1=Left, val2=Right}) ->
   rebind_op(Line, '**', Left, Right);
 transform_node(#match{left=Left} = Node) ->
-  Node#match{left=reia_syntax:map_subtrees(fun transform_setters/1, [Left])};
+  Node#match{left=reia_syntax:map_subtrees(fun transform_setters/2, [Left])};
 transform_node(Node) ->
-  reia_syntax:map_subtrees(fun transform_node/1, Node).
+  reia_syntax:mapfold_subtrees(fun transform_node/1, #state{}, Node).
 
 % Transform shorthand operations that rebind a variable
 rebind_op(Line, Type, Left, Right) ->
@@ -37,5 +40,5 @@ rebind_op(Line, Type, Left, Right) ->
   }.
 
 % Transform expressions that behave differently in match scope
-transform_setters(Node) ->
-  reia_syntax:map_subtrees(fun transform_node/1, Node).
+transform_setters(Node, State) ->
+  reia_syntax:map_subtrees(fun transform_node/1, State, Node).
