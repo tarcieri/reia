@@ -27,9 +27,10 @@ transform_node(#binary_op{line=Line, type='/=', val1=Left, val2=Right}) ->
 transform_node(#binary_op{line=Line, type='**=', val1=Left, val2=Right}) ->
   rebind_op(Line, '**', Left, Right);
 transform_node(#match{left=Left} = Node) ->
-  Node#match{left=reia_syntax:map_subtrees(fun transform_setters/2, [Left])};
+  {[Left2], _} = reia_syntax:mapfold_subtrees(fun transform_setters/2, #state{}, [Left]),
+  Node#match{left=Left2};
 transform_node(Node) ->
-  reia_syntax:mapfold_subtrees(fun transform_node/1, #state{}, Node).
+  reia_syntax:map_subtrees(fun transform_node/1, Node).
 
 % Transform shorthand operations that rebind a variable
 rebind_op(Line, Type, Left, Right) ->
@@ -41,4 +42,4 @@ rebind_op(Line, Type, Left, Right) ->
 
 % Transform expressions that behave differently in match scope
 transform_setters(Node, State) ->
-  reia_syntax:map_subtrees(fun transform_node/1, State, Node).
+  reia_syntax:mapfold_subtrees(fun transform_setters/2, State, Node).
