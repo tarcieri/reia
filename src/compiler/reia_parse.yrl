@@ -113,7 +113,7 @@ boolean -> true  : '$1'.
 boolean -> false : '$1'.
 boolean -> nil   : '$1'.
 
-%% Remote function calls
+%% Function calls
 call -> call_expr '.' identifier '(' ')' :
 #remote_call{
   line      = ?line('$2'),
@@ -146,6 +146,15 @@ call -> erl '.' identifier '.' identifier '(' exprs ')' :
   module    = ?identifier_name('$3'),
   function  = ?identifier_name('$5'),
   arguments = '$7'
+}.
+
+%% Index operation
+call -> call_expr '[' expr ']' :
+#binary_op{
+  line=?line('$1'),
+  type='[]',
+  val1='$1',
+  val2='$3'
 }.
 
 %% Numbers
