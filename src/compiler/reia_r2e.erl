@@ -8,7 +8,17 @@
 -module(reia_r2e).
 -export([transform/2]).
 -include("reia_nodes.hrl").
--include("reia_dispatch.hrl").
+-define(reia_dispatch(Receiver, Line, Method, Args, Block),
+  {call, Line,
+    {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, call}},
+    [
+      transform(Receiver),
+      {atom, Line, Method},
+      {tuple, Line, [transform(Arg) || Arg <- Args]},
+      transform(Block)
+    ]
+  }
+).
 
 % Lists of expressions
 transform(Exprs, _Options) ->
@@ -72,6 +82,9 @@ transform(#binary_op{line=Line, type='**', left=Val1, right=Val2}) ->
     {remote, Line, {atom, Line, math}, {atom, Line, pow}},
     [transform(Val1), transform(Val2)]
   };
+
+transform(#binary_op{line=Line, type='[]', left=Val1, right=Val2}) ->
+  ?reia_dispatch(Val1, Line, '[]', [Val2], transform(#nil{line=Line}));
 
 transform(#binary_op{line=Line, type=Type, left=Val1, right=Val2}) ->
   {op, Line, Type, transform(Val1), transform(Val2)};
