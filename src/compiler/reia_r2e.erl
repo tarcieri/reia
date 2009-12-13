@@ -77,17 +77,17 @@ transform(#map{line=Line, elements=Elements}) ->
 transform(#unary_op{line=Line, type=Type, val=Val}) ->
   {op, Line, Type, transform(Val)};
 
-transform(#binary_op{line=Line, type='**', left=Val1, right=Val2}) ->
+transform(#binary_op{line=Line, type='**', left=Left, right=Right}) ->
   {call, Line,
     {remote, Line, {atom, Line, math}, {atom, Line, pow}},
-    [transform(Val1), transform(Val2)]
+    [transform(Left), transform(Right)]
   };
 
-transform(#binary_op{line=Line, type='[]', left=Val1, right=Val2}) ->
-  ?reia_dispatch(Val1, Line, '[]', [Val2], transform(#nil{line=Line}));
+transform(#binary_op{line=Line, type='[]', left=Left, right=Right}) ->
+  ?reia_dispatch(Left, Line, '[]', [Right], transform(#nil{line=Line}));
 
-transform(#binary_op{line=Line, type=Type, left=Val1, right=Val2}) ->
-  {op, Line, Type, transform(Val1), transform(Val2)};
+transform(#binary_op{line=Line, type=Type, left=Left, right=Right}) ->
+  {op, Line, Type, transform(Left), transform(Right)};
 
 % Function calls
 transform(#remote_call{
