@@ -8,6 +8,7 @@
 -module(reia_r2e).
 -export([transform/2]).
 -include("reia_nodes.hrl").
+-include("reia_dispatch.hrl").
 
 % Lists of expressions
 transform(Exprs, _Options) ->
@@ -82,16 +83,7 @@ transform(#remote_call{
   name      = Name,
   arguments = Args,
   block     = Block
-}) ->
-  {call, Line,
-    {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, call}},
-    [
-      transform(Receiver),
-      {atom, Line, Name},
-      {tuple, Line, [transform(Arg) || Arg <- Args]},
-      transform(Block)
-    ]
-  };
+}) -> ?reia_dispatch(Receiver, Line, Name, Args, Block);
 
 transform(#native_call{
   line      = Line,
