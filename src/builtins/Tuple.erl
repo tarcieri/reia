@@ -7,6 +7,9 @@ call(Tuple, '[]', {Index}, _Block) ->
     true      -> element(Index + 1, Tuple)
   end;
 
+call(Tuple, size, _Args, _Block) ->
+  tuple_size(Tuple);
+
 call(Tuple, to_s, _Args, _Block) ->
   List = tuple_to_list(Tuple),
   lists:flatten(["(", string:join([convert(Elem) || Elem <- List], ","), ")"]).
