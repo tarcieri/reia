@@ -67,13 +67,13 @@ transform(#map{line=Line, elements=Elements}) ->
 transform(#unary_op{line=Line, type=Type, val=Val}) ->
   {op, Line, Type, transform(Val)};
 
-transform(#binary_op{line=Line, type='**', val1=Val1, val2=Val2}) ->
+transform(#binary_op{line=Line, type='**', left=Val1, right=Val2}) ->
   {call, Line,
     {remote, Line, {atom, Line, math}, {atom, Line, pow}},
     [transform(Val1), transform(Val2)]
   };
 
-transform(#binary_op{line=Line, type=Type, val1=Val1, val2=Val2}) ->
+transform(#binary_op{line=Line, type=Type, left=Val1, right=Val2}) ->
   {op, Line, Type, transform(Val1), transform(Val2)};
 
 % Function calls

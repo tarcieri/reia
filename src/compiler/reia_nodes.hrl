@@ -19,7 +19,7 @@
 
 % Operators
 -record(unary_op,  {line, type, val}).
--record(binary_op, {line, type, val1, val2}).
+-record(binary_op, {line, type, left, right}).
 
 % Other Expressions
 -record(match, {line, left, right}).
