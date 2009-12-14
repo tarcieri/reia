@@ -71,5 +71,7 @@ transform_setters(#binary_op{line=Line, type='[]', left=#identifier{}=Left, righ
   RebindExpr = #match{line=Line, left=Left, right=SetExpr},
   
   {TmpVar, State#state{exprs=[RebindExpr|Exprs], count=Count+1}};
+transform_setters(#binary_op{line=Line, type='[]'}, _State) ->
+  throw({error, {Line, "illegal [] on a literal in a match expression"}});
 transform_setters(Node, State) ->
   reia_syntax:mapfold_subtrees(fun transform_setters/2, State, Node).
