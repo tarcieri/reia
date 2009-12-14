@@ -107,7 +107,11 @@ transform(#native_call{
   {call, Line,
     {remote, Line, {atom, Line, Module}, {atom, Line, Function}},
     [transform(Arg) || Arg <- Args]
-  }.
+  };
+
+% Code blocks (Erlang-style, not to be confused with Ruby-style block arguments)
+transform(#block{line=Line, exprs=Exprs}) -> 
+  {block, Line, [transform(Expr) || Expr <- Exprs]}.
 
 %% Group clauses of functions with the same name and arity
 group_clauses(Functions) ->
