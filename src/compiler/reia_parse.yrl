@@ -17,6 +17,7 @@ Nonterminals
   unary_expr
   call_expr
   max_expr
+  function_identifier
   rebind_op
   add_op
   mult_op
@@ -34,7 +35,8 @@ Nonterminals
   
 Terminals
   eol '(' ')' '[' ']' '{' '}'
-  float integer identifier atom true false nil erl
+  float integer atom true false nil 
+  identifier punctuated_identifier erl
   '+' '-' '*' '/' '%' '**' ',' '.' '=' '=>'
   '+=' '-=' '*=' '/=' '**='
   .
@@ -113,8 +115,12 @@ boolean -> true  : '$1'.
 boolean -> false : '$1'.
 boolean -> nil   : '$1'.
 
+%% Function identifiers
+function_identifier -> identifier : '$1'.
+function_identifier -> punctuated_identifier : '$1'.
+
 %% Function calls
-call -> call_expr '.' identifier '(' ')' :
+call -> call_expr '.' function_identifier '(' ')' :
 #remote_call{
   line      = ?line('$2'),
   receiver  = '$1',
@@ -123,7 +129,7 @@ call -> call_expr '.' identifier '(' ')' :
   block     = #nil{line=?line('$2')}
 }.
 
-call -> call_expr '.' identifier '(' exprs ')' :
+call -> call_expr '.' function_identifier '(' exprs ')' :
 #remote_call{
   line      = ?line('$2'),
   receiver  = '$1',
@@ -186,7 +192,7 @@ Erlang code.
 -export([string/1]).
 -include("reia_nodes.hrl").
 -define(line(Node), element(2, Node)).
--define(identifier_name(Id), Id#identifier.name).
+-define(identifier_name(Id), element(3, Id)).
 
 %% Easy interface for parsing a given string with nicely formatted errors
 string(String) ->
