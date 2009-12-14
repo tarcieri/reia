@@ -17,7 +17,10 @@ call(List, size, _Args, _Block) ->
   length(List);
   
 call(List, to_s, _Args, _Block) ->
-  lists:flatten(["[", string:join([convert(Elem) || Elem <- List], ","), "]"]).
+  lists:flatten(["[", string:join([convert(Elem) || Elem <- List], ","), "]"]);
+
+call(List, reverse, _Args, _Block) ->
+  lists:reverse(List).
 
 replace(List, Index, Value) ->
   replace(List, 0, Index, Value).

@@ -18,6 +18,9 @@ call(Tuple, size, _Args, _Block) ->
 
 call(Tuple, to_s, _Args, _Block) ->
   List = tuple_to_list(Tuple),
-  lists:flatten(["(", string:join([convert(Elem) || Elem <- List], ","), ")"]).
+  lists:flatten(["(", string:join([convert(Elem) || Elem <- List], ","), ")"]);
+  
+call(Tuple, reverse, _Args, _Block) ->
+  list_to_tuple(lists:reverse(tuple_to_list(Tuple))).
 
 convert(Value) -> reia_dispatch:call(Value, to_s, [], nil).
