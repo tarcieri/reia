@@ -6,6 +6,12 @@ call(Tuple, '[]', {Index}, _Block) ->
     Index < 0 -> element(tuple_size(Tuple) + Index + 1, Tuple);
     true      -> element(Index + 1, Tuple)
   end;
+  
+call(Tuple, '[]=', {Index, Value}, _Block) ->
+  if
+    Index < 0 -> setelement(tuple_size(Tuple) + Index + 1, Tuple, Value);
+    true      -> setelement(Index + 1, Tuple, Value)
+  end;
 
 call(Tuple, size, _Args, _Block) ->
   tuple_size(Tuple);
