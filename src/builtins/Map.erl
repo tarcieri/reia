@@ -6,6 +6,9 @@ call(Map, '[]', {Key}, _Block) ->
     {ok, Value} -> Value;
     error       -> nil
   end;
+  
+call(Map, '[]=', {Key, Value}, _Block) ->
+  dict:store(Key, Value, Map);
 
 call(Map, to_s, _Args, _Block) ->
   List = [
