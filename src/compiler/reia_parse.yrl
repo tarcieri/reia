@@ -138,6 +138,22 @@ call -> call_expr '.' function_identifier '(' exprs ')' :
   block     = #nil{line=?line('$2')}
 }.
 
+call -> erl '.' identifier '(' ')' :
+#native_call{
+  line      = ?line('$2'),
+  module    = erlang,
+  function  = ?identifier_name('$3'),
+  arguments = []
+}.
+
+call -> erl '.' identifier '(' exprs ')' :
+#native_call{
+  line      = ?line('$2'),
+  module    = 'erlang',
+  function  = ?identifier_name('$3'),
+  arguments = '$5'
+}.
+
 call -> erl '.' identifier '.' identifier '(' ')' :
 #native_call{
   line      = ?line('$2'),
