@@ -28,6 +28,18 @@ transform_node(#binary_op{line=Line, type='**=', left=Left, right=Right}) ->
   rebind_op(Line, '**', Left, Right);
 transform_node(#match{} = Node) ->
   reia_syntax:map_subtrees(fun transform_node/1, transform_setters(Node));
+transform_node(#remote_call{line=Line, name=Name, receiver=#identifier{} = Receiver} = Node) ->
+  Node2 = reia_syntax:map_subtrees(fun transform_node/1, Node),
+
+  % Handle 'bang' methods which modify their receivers
+  [Last|Rest] = lists:reverse(atom_to_list(Name)),
+  case Last of
+    $! ->
+      Name2 = list_to_atom(lists:reverse(Rest)),
+      #match{line=Line, left=Receiver, right=Node2#remote_call{name=Name2}};
+    _  -> 
+      Node2
+  end;
 transform_node(Node) ->
   reia_syntax:map_subtrees(fun transform_node/1, Node).
 
@@ -38,7 +50,7 @@ rebind_op(Line, Type, Left, Right) ->
     left=Left,
     right=#binary_op{line=Line, type=Type, left=Left, right=Right}
   }.
-
+  
 %
 % Transform expressions that behave differently in match scope
 %
