@@ -40,6 +40,12 @@ transform_node(#remote_call{line=Line, name=Name, receiver=#identifier{} = Recei
     _  -> 
       Node2
   end;
+transform_node(#remote_call{line=Line, name=Name} = Node) ->
+  [Last|_] = lists:reverse(atom_to_list(Name)),
+  case Last of
+    $! -> throw({error, {Line, "bang methods are not supported on literals"}});
+    _  -> reia_syntax:map_subtrees(fun transform_node/1, Node)
+  end;
 transform_node(Node) ->
   reia_syntax:map_subtrees(fun transform_node/1, Node).
 
