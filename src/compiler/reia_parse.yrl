@@ -60,8 +60,8 @@ exprs -> expr ',' exprs : ['$1'|'$3'].
 
 expr -> match_expr : '$1'.
 
-match_expr -> range_expr '=' match_expr :       #match{line=?line('$2'), left='$1', right='$3'}.
-match_expr -> range_expr rebind_op match_expr : #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
+match_expr -> match_expr '=' range_expr :       #match{line=?line('$2'), left='$1', right='$3'}.
+match_expr -> match_expr rebind_op range_expr : #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
 match_expr -> range_expr : '$1'.
 
 range_expr -> range_expr '..' add_expr :      #range{line=?line('$1'), from='$1', to='$3'}.
