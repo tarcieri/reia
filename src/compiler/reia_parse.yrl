@@ -60,23 +60,62 @@ exprs -> expr ',' exprs : ['$1'|'$3'].
 
 expr -> match_expr : '$1'.
 
-match_expr -> match_expr '=' range_expr :       #match{line=?line('$2'), left='$1', right='$3'}.
-match_expr -> match_expr rebind_op range_expr : #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
+match_expr -> match_expr '=' range_expr :
+#match{
+  line=?line('$2'), 
+  left='$1', 
+  right='$3'
+}.
+match_expr -> match_expr rebind_op range_expr :
+#binary_op{
+  line=?line('$1'), 
+  type=op('$2'), 
+  left='$1', 
+  right='$3'
+}.
 match_expr -> range_expr : '$1'.
 
-range_expr -> range_expr '..' add_expr :      #range{line=?line('$1'), from='$1', to='$3'}.
+range_expr -> range_expr '..' add_expr :
+#range{
+  line=?line('$1'), 
+  from='$1', 
+  to='$3'
+}.
 range_expr -> add_expr : '$1'.
 
-add_expr -> add_expr add_op mult_expr :       #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
+add_expr -> add_expr add_op mult_expr :
+#binary_op{
+  line=?line('$1'),
+  type=op('$2'),
+  left='$1',
+  right='$3'
+}.
 add_expr -> mult_expr : '$1'.
 
-mult_expr -> mult_expr mult_op pow_expr :     #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
+mult_expr -> mult_expr mult_op pow_expr :
+#binary_op{
+  line=?line('$1'),
+  type=op('$2'),
+  left='$1',
+  right='$3'
+}.
 mult_expr -> pow_expr : '$1'.
 
-pow_expr -> pow_expr pow_op unary_expr :      #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
+pow_expr -> pow_expr pow_op unary_expr :
+#binary_op{
+  line=?line('$1'), 
+  type=op('$2'), 
+  left='$1', 
+  right='$3'
+}.
 pow_expr -> unary_expr : '$1'.
 
-unary_expr -> unary_op unary_expr :           #unary_op{line=?line('$1'), type=op('$1'), val='$2'}.
+unary_expr -> unary_op unary_expr :
+#unary_op{
+  line=?line('$1'),
+  type=op('$1'),
+  val='$2'
+}.
 unary_expr -> call_expr : '$1'.
 
 call_expr -> call : '$1'.
@@ -206,8 +245,8 @@ tuple -> '(' expr ',' exprs ')': #tuple{line=?line('$1'), elements=['$2'|'$4']}.
 dict -> '{' '}' :                #dict{line=?line('$1'), elements=[]}.
 dict -> '{' dict_entries '}' :   #dict{line=?line('$1'), elements='$2'}.
 
-dict_entries -> add_expr '=>' expr : [{'$1','$3'}]. % FIXME: change add_expr to 1 below match
-dict_entries -> add_expr '=>' expr ',' dict_entries : [{'$1','$3'}|'$5'].
+dict_entries -> range_expr '=>' expr : [{'$1','$3'}]. % FIXME: change add_expr to 1 below match
+dict_entries -> range_expr '=>' expr ',' dict_entries : [{'$1','$3'}|'$5'].
 
 Erlang code.
 
