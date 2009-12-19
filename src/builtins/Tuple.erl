@@ -18,7 +18,12 @@ call(Tuple, size, _Args, _Block) ->
 
 call(Tuple, to_s, _Args, _Block) ->
   List = tuple_to_list(Tuple),
-  lists:flatten(["(", string:join([convert(Elem) || Elem <- List], ","), ")"]);
+  case List of
+    [Expr] -> 
+      lists:flatten(["(", convert(Expr), ",)"]);
+    _      ->
+      lists:flatten(["(", string:join([convert(Elem) || Elem <- List], ","), ")"])
+  end;
   
 call(Tuple, reverse, _Args, _Block) ->
   list_to_tuple(lists:reverse(tuple_to_list(Tuple))).

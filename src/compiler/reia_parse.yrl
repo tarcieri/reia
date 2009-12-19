@@ -193,7 +193,7 @@ tail -> ',' expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
 
 %% Tuples
 tuple -> '(' ')' :               #tuple{line=?line('$1'), elements=[]}.
-tuple -> '(' expr ',' ')' :      #tuple{line=?line('$1'), elements='$2'}.
+tuple -> '(' expr ',' ')' :      #tuple{line=?line('$1'), elements=['$2']}.
 tuple -> '(' expr ',' exprs ')': #tuple{line=?line('$1'), elements=['$2'|'$4']}.
 
 %% Maps
