@@ -11,6 +11,7 @@ Nonterminals
   exprs
   expr
   match_expr
+  range_expr
   add_expr
   mult_expr
   pow_expr
@@ -37,7 +38,7 @@ Terminals
   eol '(' ')' '[' ']' '{' '}'
   float integer string atom regexp true false nil 
   identifier punctuated_identifier erl
-  '+' '-' '*' '/' '%' '**' ',' '.' '=' '=>'
+  '+' '-' '*' '/' '%' '**' ',' '.' '..' '=' '=>'
   '+=' '-=' '*=' '/=' '**='
   .
 
@@ -59,9 +60,12 @@ exprs -> expr ',' exprs : ['$1'|'$3'].
 
 expr -> match_expr : '$1'.
 
-match_expr -> add_expr '=' match_expr :       #match{line=?line('$2'), left='$1', right='$3'}.
-match_expr -> add_expr rebind_op match_expr : #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
-match_expr -> add_expr : '$1'.
+match_expr -> range_expr '=' match_expr :       #match{line=?line('$2'), left='$1', right='$3'}.
+match_expr -> range_expr rebind_op match_expr : #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
+match_expr -> range_expr : '$1'.
+
+range_expr -> range_expr '..' add_expr :      #range{line=?line('$1'), from='$1', to='$3'}.
+range_expr -> add_expr : '$1'.
 
 add_expr -> add_expr add_op mult_expr :       #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
 add_expr -> mult_expr : '$1'.

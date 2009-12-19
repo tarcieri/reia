@@ -11,6 +11,7 @@
 -record(string,     {line, characters}).
 -record(regexp,     {line, pattern}).
 -record(atom,       {line, name}).
+-record(range,      {line, from, to}).
 -record(true,       {line}).
 -record(false,      {line}).
 -record(nil,        {line}).
