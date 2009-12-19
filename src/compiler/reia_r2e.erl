@@ -43,7 +43,7 @@ transform(#function{line=Line, name=Name, arguments=Args, block=Block, body=Expr
     [transform(Expr) || Expr <- Exprs]
   }]};
 
-% Terminals
+% Simple Terminals
 transform(#integer{} = Expr) -> Expr;
 transform(#float{} = Expr)   -> Expr;
 transform(#atom{} = Expr)    -> Expr;
@@ -51,6 +51,8 @@ transform(#true{line=Line})  -> {atom, Line, true};
 transform(#false{line=Line}) -> {atom, Line, false};
 transform(#nil{line=Line})   -> {atom, Line, nil};
 transform(#identifier{line=Line, name=Name}) -> {var, Line, Name};
+
+% Strings
 transform(#string{line=Line, characters=Chars}) ->
   {tuple, Line, [
     {atom, Line, reia_string},
@@ -58,6 +60,13 @@ transform(#string{line=Line, characters=Chars}) ->
       {bin, Line, [{bin_element, Line, {string, Line, Chars}, default, default}]},
       {nil, Line}
     }
+  ]};
+  
+% Regexps
+transform(#regexp{line=Line, pattern=Pattern}) ->
+  {tuple, Line, [
+    {atom, Line, reia_regexp}, 
+    {bin, Line, [{bin_element, Line, {string, Line, Pattern}, default, default}]}
   ]};
 
 % Matches

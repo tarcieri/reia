@@ -35,7 +35,7 @@ Nonterminals
   
 Terminals
   eol '(' ')' '[' ']' '{' '}'
-  float integer string atom true false nil 
+  float integer string atom regexp true false nil 
   identifier punctuated_identifier erl
   '+' '-' '*' '/' '%' '**' ',' '.' '=' '=>'
   '+=' '-=' '*=' '/=' '**='
@@ -82,10 +82,11 @@ max_expr -> number       : '$1'.
 max_expr -> string       : '$1'.
 max_expr -> list         : '$1'.
 max_expr -> tuple        : '$1'.
-max_expr -> dict          : '$1'.
+max_expr -> dict         : '$1'.
 max_expr -> identifier   : '$1'.
 max_expr -> atom         : '$1'.
 max_expr -> boolean      : '$1'.
+max_expr -> regexp       : '$1'.
 max_expr -> '(' expr ')' : '$2'.
 
 %% Rebind operators

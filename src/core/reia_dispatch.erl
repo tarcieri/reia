@@ -12,12 +12,14 @@
 % Dispatch incoming calls
 call(Receiver, Method, Arguments, Block) when is_integer(Receiver) or is_float(Receiver) ->
   'Numeric':call(Receiver, Method, Arguments, Block);
-call(#reia_string{} = Receiver, Method, Arguments, Block) ->
-  'String':call(Receiver, Method, Arguments, Block);
 call(Receiver, Method, Arguments, Block) when is_list(Receiver) ->
   'List':call(Receiver, Method, Arguments, Block);
 call({dict,_,_,_,_,_,_,_,_} = Receiver, Method, Arguments, Block) ->
   'Dict':call(Receiver, Method, Arguments, Block);
+call(#reia_string{} = Receiver, Method, Arguments, Block) ->
+  'String':call(Receiver, Method, Arguments, Block);
+call(#reia_regexp{} = Receiver, Method, Arguments, Block) ->
+  'Regexp':call(Receiver, Method, Arguments, Block);
 call(Receiver, Method, Arguments, Block) when is_tuple(Receiver) ->
   'Tuple':call(Receiver, Method, Arguments, Block);
 call(Receiver, Method, Arguments, Block) when is_binary(Receiver) ->
