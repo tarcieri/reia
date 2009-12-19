@@ -69,7 +69,7 @@ match_expr -> match_expr '=' range_expr :
 match_expr -> match_expr rebind_op range_expr :
 #binary_op{
   line=?line('$1'), 
-  type=op('$2'), 
+  type=?op('$2'), 
   left='$1', 
   right='$3'
 }.
@@ -86,7 +86,7 @@ range_expr -> add_expr : '$1'.
 add_expr -> add_expr add_op mult_expr :
 #binary_op{
   line=?line('$1'),
-  type=op('$2'),
+  type=?op('$2'),
   left='$1',
   right='$3'
 }.
@@ -95,7 +95,7 @@ add_expr -> mult_expr : '$1'.
 mult_expr -> mult_expr mult_op pow_expr :
 #binary_op{
   line=?line('$1'),
-  type=op('$2'),
+  type=?op('$2'),
   left='$1',
   right='$3'
 }.
@@ -104,7 +104,7 @@ mult_expr -> pow_expr : '$1'.
 pow_expr -> pow_expr pow_op unary_expr :
 #binary_op{
   line=?line('$1'), 
-  type=op('$2'), 
+  type=?op('$2'), 
   left='$1', 
   right='$3'
 }.
@@ -113,7 +113,7 @@ pow_expr -> unary_expr : '$1'.
 unary_expr -> unary_op unary_expr :
 #unary_op{
   line=?line('$1'),
-  type=op('$1'),
+  type=?op('$1'),
   val='$2'
 }.
 unary_expr -> call_expr : '$1'.
@@ -253,6 +253,7 @@ Erlang code.
 -export([string/1]).
 -include("reia_nodes.hrl").
 -define(line(Node), element(2, Node)).
+-define(op(Node), element(1, Node)).
 -define(identifier_name(Id), element(3, Id)).
 
 %% Parse a given string with nicely formatted errors
@@ -268,7 +269,3 @@ string(String) ->
     {error, {Line, _, {Message, Token}}, _} ->
       {error, {Line, lists:flatten(io_lib:format("~p ~p", [Message, Token]))}}
   end.
-
-%% Extract operators from op tokens
-op({Op, _Line}) ->
-  Op.
