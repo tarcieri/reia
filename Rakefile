@@ -16,7 +16,7 @@ end
 # Evaluate the given Erlang statement
 def erl_eval(cmd, *pa)
   pa_str = pa.empty? ? "" : "-pa #{pa.join(' ')}"
-  sh "erl -noshell -pa #{pa_str} -eval '#{cmd}' -s init stop"
+  sh "erl -noshell #{pa_str} -eval '#{cmd}' -s init stop"
 end
 
 # Retrieve the directory Erlang libraries are stored in
