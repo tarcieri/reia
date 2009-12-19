@@ -61,7 +61,7 @@ def output_file(input_file, dir = 'ebin/')
 end
 
 GENERATED_SRC = %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
-ERL_SRC = (FileList.new('src/{compiler,core,builtins}/**/*.erl') + GENERATED_SRC).uniq
+ERL_SRC = (GENERATED_SRC + FileList.new('src/{compiler,core,builtins}/**/*.erl')).uniq
 QUIET_SRC = %w(src/compiler/reia_parse.erl)
 
 ERL_SRC.each do |input|
