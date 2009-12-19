@@ -7,10 +7,13 @@
 
 -module(reia_dispatch).
 -export([call/4]).
+-include("../compiler/reia_types.hrl").
 
 % Dispatch incoming calls
 call(Receiver, Method, Arguments, Block) when is_integer(Receiver) or is_float(Receiver) ->
   'Numeric':call(Receiver, Method, Arguments, Block);
+call(#reia_string{} = Receiver, Method, Arguments, Block) ->
+  'String':call(Receiver, Method, Arguments, Block);
 call(Receiver, Method, Arguments, Block) when is_atom(Receiver) ->
   'Atom':call(Receiver, Method, Arguments, Block);
 call(Receiver, Method, Arguments, Block) when is_list(Receiver) ->
