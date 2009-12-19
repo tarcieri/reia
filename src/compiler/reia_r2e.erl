@@ -76,10 +76,10 @@ transform(#tuple{line=Line, elements=Exprs}) ->
   {tuple, Line, [transform(Expr) || Expr <- Exprs]};
 
 % Maps
-transform(#map{line=Line, elements=Elements}) ->
+transform(#dict{line=Line, elements=Elements}) ->
   {call, Line,
     {remote, Line, {atom, Line, dict}, {atom, Line, from_list}},
-    [map_elements(Elements, Line)]
+    [dict_elements(Elements, Line)]
   };
 
 % Operators
@@ -139,8 +139,8 @@ group_clauses([Function|Rest], Functions) ->
       group_clauses(Rest, dict:store({Name, Arity}, {Line, [Clause]}, Functions))
   end.
 
-%% Transform the elements of Maps
-map_elements([], Line) ->
+%% Transform the elements of Dicts
+dict_elements([], Line) ->
   {nil, Line};
-map_elements([{Key,Value}|Rest], Line) ->
-  {cons, Line, {tuple, Line, [transform(Key), transform(Value)]}, map_elements(Rest, Line)}.
+dict_elements([{Key,Value}|Rest], Line) ->
+  {cons, Line, {tuple, Line, [transform(Key), transform(Value)]}, dict_elements(Rest, Line)}.

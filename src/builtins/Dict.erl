@@ -1,19 +1,19 @@
--module('Map').
+-module('Dict').
 -export([call/4]).
 
-call(Map, '[]', {Key}, _Block) ->
-  case dict:find(Key, Map) of
+call(Dict, '[]', {Key}, _Block) ->
+  case dict:find(Key, Dict) of
     {ok, Value} -> Value;
     error       -> nil
   end;
   
-call(Map, '[]=', {Key, Value}, _Block) ->
-  dict:store(Key, Value, Map);
+call(Dict, '[]=', {Key, Value}, _Block) ->
+  dict:store(Key, Value, Dict);
 
-call(Map, to_s, _Args, _Block) ->
+call(Dict, to_s, _Args, _Block) ->
   List = [
     io_lib:format("~s=>~s", [convert(Key), convert(Value)]) ||
-    {Key, Value} <- dict:to_list(Map)
+    {Key, Value} <- dict:to_list(Dict)
   ],
   lists:flatten(["{", string:join(List, ","), "}"]).
 

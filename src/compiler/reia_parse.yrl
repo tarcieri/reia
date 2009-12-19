@@ -29,8 +29,8 @@ Nonterminals
   list
   tail
   tuple
-  map
-  map_entries
+  dict
+  dict_entries
   .
   
 Terminals
@@ -82,7 +82,7 @@ max_expr -> number       : '$1'.
 max_expr -> string       : '$1'.
 max_expr -> list         : '$1'.
 max_expr -> tuple        : '$1'.
-max_expr -> map          : '$1'.
+max_expr -> dict          : '$1'.
 max_expr -> identifier   : '$1'.
 max_expr -> atom         : '$1'.
 max_expr -> boolean      : '$1'.
@@ -197,12 +197,12 @@ tuple -> '(' ')' :               #tuple{line=?line('$1'), elements=[]}.
 tuple -> '(' expr ',' ')' :      #tuple{line=?line('$1'), elements=['$2']}.
 tuple -> '(' expr ',' exprs ')': #tuple{line=?line('$1'), elements=['$2'|'$4']}.
 
-%% Maps
-map -> '{' '}' :             #map{line=?line('$1'), elements=[]}.
-map -> '{' map_entries '}' : #map{line=?line('$1'), elements='$2'}.
+%% Dicts
+dict -> '{' '}' :                #dict{line=?line('$1'), elements=[]}.
+dict -> '{' dict_entries '}' :   #dict{line=?line('$1'), elements='$2'}.
 
-map_entries -> add_expr '=>' expr : [{'$1','$3'}]. % FIXME: change add_expr to 1 below match
-map_entries -> add_expr '=>' expr ',' map_entries : [{'$1','$3'}|'$5'].
+dict_entries -> add_expr '=>' expr : [{'$1','$3'}]. % FIXME: change add_expr to 1 below match
+dict_entries -> add_expr '=>' expr ',' dict_entries : [{'$1','$3'}|'$5'].
 
 Erlang code.
 
@@ -211,7 +211,7 @@ Erlang code.
 -define(line(Node), element(2, Node)).
 -define(identifier_name(Id), element(3, Id)).
 
-%% Easy interface for parsing a given string with nicely formatted errors
+%% Parse a given string with nicely formatted errors
 string(String) ->
   case reia_scan:string(String) of
     {ok, Tokens, _} -> 

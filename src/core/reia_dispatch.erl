@@ -19,7 +19,7 @@ call(Receiver, Method, Arguments, Block) when is_atom(Receiver) ->
 call(Receiver, Method, Arguments, Block) when is_list(Receiver) ->
   'List':call(Receiver, Method, Arguments, Block);
 call({dict,_,_,_,_,_,_,_,_} = Receiver, Method, Arguments, Block) ->
-  'Map':call(Receiver, Method, Arguments, Block);
+  'Dict':call(Receiver, Method, Arguments, Block);
 call(Receiver, Method, Arguments, Block) when is_tuple(Receiver) ->
   'Tuple':call(Receiver, Method, Arguments, Block);
 call(Receiver, Method, Arguments, Block) when is_binary(Receiver) ->
