@@ -1,3 +1,10 @@
+%
+% reia_syntax: Functions for manipulating Reia parse trees
+% Copyright (C)2009 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(reia_syntax).
 -export([mapfold_subtrees/3, map_subtrees/2]).
 

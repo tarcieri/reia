@@ -1,3 +1,10 @@
+%
+% reia_ssa: Convert destructive assignments into Static Single Assignment form
+% Copyright (C)2009 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(reia_ssa).
 -export([transform/2]).
 -include("reia_nodes.hrl").

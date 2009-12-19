@@ -1,3 +1,10 @@
+%
+% reia_bindings: Convert Reia parse trees into Binding Annotated Format
+% Copyright (C)2009 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module(reia_bindings).
 -export([transform/1, transform/2, revert/1]).
 -include("reia_nodes.hrl").
