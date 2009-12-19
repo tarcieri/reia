@@ -13,6 +13,7 @@ init() ->
   user_drv:start('tty_sl -c -e', {ire, start, []}).
 
 start() ->
+  reia:init(),
   spawn(fun() -> loop() end).
 
 loop() ->
