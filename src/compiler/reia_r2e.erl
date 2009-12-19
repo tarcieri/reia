@@ -8,6 +8,7 @@
 -module(reia_r2e).
 -export([transform/2]).
 -include("reia_nodes.hrl").
+-include("reia_types.hrl").
 -define(reia_dispatch(Receiver, Line, Method, Args, Block),
   {call, Line,
     {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, call}},
@@ -50,6 +51,14 @@ transform(#true{line=Line})  -> {atom, Line, true};
 transform(#false{line=Line}) -> {atom, Line, false};
 transform(#nil{line=Line})   -> {atom, Line, nil};
 transform(#identifier{line=Line, name=Name}) -> {var, Line, Name};
+transform(#string{line=Line, characters=Chars}) ->
+  {tuple, Line, [
+    {atom, Line, reia_string},
+    {cons, Line,
+      {bin, Line, [{bin_element, Line, {string, Line, Chars}, default, default}]},
+      {nil, Line}
+    }
+  ]};
 
 % Matches
 transform(#match{line=Line, left=Left, right=Right}) ->

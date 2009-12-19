@@ -35,7 +35,7 @@ Nonterminals
   
 Terminals
   eol '(' ')' '[' ']' '{' '}'
-  float integer atom true false nil 
+  float integer string atom true false nil 
   identifier punctuated_identifier erl
   '+' '-' '*' '/' '%' '**' ',' '.' '=' '=>'
   '+=' '-=' '*=' '/=' '**='
@@ -79,6 +79,7 @@ call_expr -> call : '$1'.
 call_expr -> max_expr : '$1'.
 
 max_expr -> number       : '$1'.
+max_expr -> string       : '$1'.
 max_expr -> list         : '$1'.
 max_expr -> tuple        : '$1'.
 max_expr -> map          : '$1'.

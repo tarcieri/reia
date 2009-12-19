@@ -8,6 +8,7 @@
 -record(integer,    {line, value}).
 -record(float,      {line, value}).
 -record(identifier, {line, name}).
+-record(string,     {line, characters}).
 -record(atom,       {line, name}).
 -record(true,       {line}).
 -record(false,      {line}).
