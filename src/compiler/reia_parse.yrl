@@ -63,13 +63,13 @@ match_expr -> add_expr '=' match_expr :       #match{line=?line('$2'), left='$1'
 match_expr -> add_expr rebind_op match_expr : #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
 match_expr -> add_expr : '$1'.
 
-add_expr -> mult_expr add_op add_expr :       #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
+add_expr -> add_expr add_op mult_expr :       #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
 add_expr -> mult_expr : '$1'.
 
-mult_expr -> pow_expr mult_op mult_expr :     #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
+mult_expr -> mult_expr mult_op pow_expr :     #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
 mult_expr -> pow_expr : '$1'.
 
-pow_expr -> unary_expr pow_op pow_expr :      #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
+pow_expr -> pow_expr pow_op unary_expr :      #binary_op{line=?line('$1'), type=op('$2'), left='$1', right='$3'}.
 pow_expr -> unary_expr : '$1'.
 
 unary_expr -> unary_op unary_expr :           #unary_op{line=?line('$1'), type=op('$1'), val='$2'}.
