@@ -1,3 +1,10 @@
+%
+% Boolean: Methods of the Boolean builtin
+% Copyright (C)2009 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module('Boolean').
 -export([call/4]).
 

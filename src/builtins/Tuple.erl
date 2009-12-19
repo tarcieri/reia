@@ -1,3 +1,10 @@
+%
+% Tuple: Methods of the Tuple builtin
+% Copyright (C)2009 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module('Tuple').
 -export([call/4]).
 

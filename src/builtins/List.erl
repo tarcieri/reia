@@ -1,3 +1,10 @@
+%
+% List: Methods of the List builtin
+% Copyright (C)2009 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module('List').
 -export([call/4]).
 

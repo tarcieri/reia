@@ -1,3 +1,10 @@
+%
+% Numeric: Methods of the Numeric builtin
+% Copyright (C)2009 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module('Numeric').
 -export([call/4]).
 

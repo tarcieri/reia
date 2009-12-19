@@ -1,3 +1,10 @@
+%
+% Dict: Methods of the Dict builtin
+% Copyright (C)2009 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module('Dict').
 -export([call/4]).
 

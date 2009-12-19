@@ -1,3 +1,10 @@
+%
+% String: Methods of the String builtin
+% Copyright (C)2009 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 -module('String').
 -export([call/4]).
 -include("../compiler/reia_types.hrl").
