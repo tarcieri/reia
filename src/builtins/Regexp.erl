@@ -7,7 +7,7 @@
 
 -module('Regexp').
 -export([call/4]).
--include("../compiler/reia_types.hrl").
+-include("../core/reia_types.hrl").
 
 call(#reia_regexp{pattern=Pattern}, to_s, _Args, _Block) ->
   "/" ++ binary_to_list(Pattern) ++ "/".

@@ -8,7 +8,7 @@
 -module(reia_r2e).
 -export([transform/2]).
 -include("reia_nodes.hrl").
--include("reia_types.hrl").
+-include("../core/reia_types.hrl").
 -define(reia_dispatch(Receiver, Line, Method, Args, Block),
   {call, Line,
     {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, call}},
