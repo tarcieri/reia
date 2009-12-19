@@ -3,6 +3,19 @@ h1. Reia
 Welcome to Reia (pronounced RAY-uh), a Ruby/Python-like scripting language for
 the Erlang virtual machine (BEAM).
 
+h2. New branch underway!
+
+Looking for the latest Reia developments?  They're not happening here, sorry.
+Reia is undergoing a rewrite and the latest code is available here:
+
+"http://github.com/tarcieri/reia/tree/minimalist":http://github.com/tarcieri/reia/tree/minimalist
+
+This branch is preserved as a mostly-working dead end, so people can experiment
+with the features the new branch will eventually have until they reach a certain
+level of feature parity.  For more information, see the roadmap:
+
+"http://wiki.reia-lang.org/wiki/Roadmap":http://wiki.reia-lang.org/wiki/Roadmap
+
 h2. Compiling Reia
 
 Reia requires Erlang version R12B-3 (5.6.3) or later. The latest version of 
