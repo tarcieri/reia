@@ -84,12 +84,20 @@ transform(#empty{line=Line}) ->
 transform(#tuple{line=Line, elements=Exprs}) ->
   {tuple, Line, [transform(Expr) || Expr <- Exprs]};
 
-% Maps
+% Dicts
 transform(#dict{line=Line, elements=Elements}) ->
   {call, Line,
     {remote, Line, {atom, Line, dict}, {atom, Line, from_list}},
     [dict_elements(Elements, Line)]
   };
+  
+% Ranges
+transform(#range{line=Line, from=From, to=To}) ->
+  {tuple, Line, [
+    {atom, Line, reia_range}, 
+    transform(From),
+    transform(To)
+  ]};
 
 % Operators
 transform(#unary_op{line=Line, type=Type, val=Val}) ->

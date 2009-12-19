@@ -2,4 +2,5 @@
 % These are hopefully temporary and will be replaced by immutable objects
 
 -record(reia_string, {members = []}).
--record(reia_regexp,  {pattern}).
+-record(reia_regexp, {pattern}).
+-record(reia_range,  {from, to}).
