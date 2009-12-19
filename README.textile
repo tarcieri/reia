@@ -1,0 +1,57 @@
+h1. Reia
+
+Welcome to Reia (pronounced RAY-uh), a Ruby-like scripting language for the 
+Erlang virtual machine (BEAM).
+
+h2. Rewrite
+
+This branch contains a rewrite of the original implementation.  The goals of
+this rewrite are a better overall implementation, core types with identical
+semantics to Erlang's core types, and simplifying the implementation so it is
+easier to test and debug.
+
+This branch is presently missing many of the features presently available in
+the "master" branch.  These features are being readded as part of the new
+implementation, however some of them (such as the concurrent object model) have
+been delayed until the core implementation can be properly tested and debugged.
+
+For more information, see the roadmap:
+
+"http://wiki.reia-lang.org/wiki/Roadmap":http://wiki.reia-lang.org/wiki/Roadmap
+
+h2. Compiling Reia
+
+Reia requires Erlang version R12B-3 (5.6.3) or later. The latest version of 
+Erlang is available here:
+
+"http://www.erlang.org/download.html":http://www.erlang.org/download.html
+
+To compile Reia, type:
+
+ rake
+
+under the Reia source tree to build Reia.
+
+h2. Implementation
+
+Here's some thoroughly interesting implementation trivia about Reia:
+
+* Leex-based scanner
+* Yecc-based grammar (a Neotoma-based branch is also available)
+* Successive parse transforms convert Reia parse trees into the Erlang abstract
+  format, then into BEAM/HiPE bytecode
+
+h2. Links
+
+* Home Page: "http://reia-lang.org":http://reia-lang.org
+* Reia Wiki: "http://wiki.reia-lang.org/":http://wiki.reia-lang.org/
+* Mailing List: "http://groups.google.com/group/reia":http://groups.google.com/group/reia
+* Author's Blog: "http://unlimitednovelty.com/":http://unlimitednovelty.com/
+* Author's Twitter: "http://twitter.com/bascule":http://twitter.com/bascule
+* IRC: irc.freenode.net #reia
+
+h2. About the Author
+
+Reia was created by Tony Arcieri, a programmer from Boulder, Colorado, USA.
+Tony has a background in network services and distributed peer-to-peer systems.  
+His favorite programming languages are Ruby and Erlang.
