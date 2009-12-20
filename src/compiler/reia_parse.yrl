@@ -231,6 +231,7 @@ pow_op -> '**' : '$1'.
 unary_op -> '+'   : '$1'.
 unary_op -> '-'   : '$1'.
 unary_op -> 'not' : '$1'.
+unary_op -> '!'   : '$1'.
 
 %% Boolean values
 boolean -> true  : '$1'.
