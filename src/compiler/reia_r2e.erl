@@ -62,6 +62,16 @@ transform(#string{line=Line, characters=Chars}) ->
     }
   ]};
   
+% Interpolated strings
+transform(#dstring{line=Line, members=Members}) ->
+  transform(#remote_call{
+    line=Line,
+    receiver=explode_list(Members, Line),
+    name=join,
+    arguments=[],
+    block=#nil{line=Line}
+  });
+  
 % Regexps
 transform(#regexp{line=Line, pattern=Pattern}) ->
   {tuple, Line, [
@@ -161,3 +171,9 @@ dict_elements([], Line) ->
   {nil, Line};
 dict_elements([{Key,Value}|Rest], Line) ->
   {cons, Line, {tuple, Line, [transform(Key), transform(Value)]}, dict_elements(Rest, Line)}.
+  
+%% Explode a list of expressions into cons nodes
+explode_list([], Line) ->
+  #empty{line=Line};
+explode_list([Expr|Tail], Line) ->
+  #cons{line=Line, expr=Expr, tail=explode_list(Tail, Line)}.

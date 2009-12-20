@@ -122,7 +122,6 @@ call_expr -> call : '$1'.
 call_expr -> max_expr : '$1'.
 
 max_expr -> number       : '$1'.
-max_expr -> string       : '$1'.
 max_expr -> list         : '$1'.
 max_expr -> tuple        : '$1'.
 max_expr -> dict         : '$1'.
@@ -130,6 +129,7 @@ max_expr -> identifier   : '$1'.
 max_expr -> atom         : '$1'.
 max_expr -> boolean      : '$1'.
 max_expr -> regexp       : '$1'.
+max_expr -> string       : interpolate_string('$1').
 max_expr -> '(' expr ')' : '$2'.
 
 %% Rebind operators
@@ -269,3 +269,50 @@ string(String) ->
     {error, {Line, _, {Message, Token}}, _} ->
       {error, {Line, lists:flatten(io_lib:format("~p ~p", [Message, Token]))}}
   end.
+  
+%% Interpolate strings, parsing the contents of #{...} tags
+interpolate_string(#string{line=Line, characters=Chars}) ->
+  interpolate_string(Chars, Line, [], []).
+
+interpolate_string([], Line, CharAcc, ExprAcc) ->
+  Result = case CharAcc of
+    [] -> lists:reverse(ExprAcc);
+    _  -> lists:reverse([#string{line=Line, characters=lists:reverse(CharAcc)}|ExprAcc])
+  end,
+  case Result of
+    [#string{} = Res] -> Res;
+    _ -> #dstring{line=Line, members=Result}
+  end;
+interpolate_string("#{" ++ String, Line, CharAcc, ExprAcc) ->
+  {String2, Expr} = extract_fragment([], String, Line),
+  ExprAcc2 = case CharAcc of
+    [] -> ExprAcc;
+    _  -> [#string{line=Line, characters=lists:reverse(CharAcc)}|ExprAcc]
+  end,
+  interpolate_string(String2, Line, [], [Expr|ExprAcc2]);
+interpolate_string([Char|Rest], Line, CharAcc, ExprAcc) ->
+  interpolate_string(Rest, Line, [Char|CharAcc], ExprAcc).
+
+extract_fragment(_Continuation, [], Line) ->
+  throw({error, {Line, "unexpected end of interpolated string"}});
+extract_fragment(_Continuation, [$"|_], Line) ->
+  throw({error, {Line, "invalid quote within interpolated string"}});
+extract_fragment(Continuation, [$}|String], Line) ->
+  {more, Continuation2} = reia_scan:tokens(Continuation, [$}], Line),
+  case Continuation2 of
+    {tokens, _, _, _, _, [{'}', _}|Tokens], _, _} ->
+      case reia_parse:parse(lists:reverse(Tokens)) of
+        {ok, [Expr]} ->
+          {String, Expr};
+        %% Need more tokens
+        {error, {999999, _}} ->
+          extract_fragment(Continuation2, String, Line);
+        Error ->
+          throw(Error)
+      end;
+    {skip_tokens, _, _, _, _, {_, _, Error}, _, _} ->
+      throw({error, {Line, Error}})
+  end;
+extract_fragment(Continuation, [Char|String], Line) ->
+  {more, Continuation2} = reia_scan:tokens(Continuation, [Char], Line),
+  extract_fragment(Continuation2, String, Line).
