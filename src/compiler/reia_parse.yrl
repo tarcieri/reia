@@ -71,70 +71,70 @@ exprs -> expr ',' exprs : ['$1'|'$3'].
 expr -> match_expr : '$1'.
 
 match_expr -> match_expr '=' range_expr :
-#match{
-  line=?line('$2'), 
-  left='$1', 
-  right='$3'
-}.
+  #match{
+    line=?line('$2'), 
+    left='$1', 
+    right='$3'
+  }.
 match_expr -> match_expr rebind_op comp_expr :
-#binary_op{
-  line=?line('$1'), 
-  type=?op('$2'), 
-  left='$1', 
-  right='$3'
-}.
+  #binary_op{
+    line=?line('$1'), 
+    type=?op('$2'), 
+    left='$1', 
+    right='$3'
+  }.
 match_expr -> comp_expr : '$1'.
 
 comp_expr -> range_expr comp_op range_expr : 
-#binary_op{
-  line=?line('$1'), 
-  type=?op('$2'), 
-  left='$1', 
-  right='$3'
-}.
+  #binary_op{
+    line=?line('$1'), 
+    type=?op('$2'), 
+    left='$1', 
+    right='$3'
+  }.
 comp_expr -> range_expr : '$1'.
 
 range_expr -> range_expr '..' add_expr :
-#range{
-  line=?line('$1'), 
-  from='$1', 
-  to='$3'
-}.
+  #range{
+    line=?line('$1'), 
+    from='$1', 
+    to='$3'
+  }.
 range_expr -> add_expr : '$1'.
 
 add_expr -> add_expr add_op mult_expr :
-#binary_op{
-  line=?line('$1'),
-  type=?op('$2'),
-  left='$1',
-  right='$3'
-}.
+  #binary_op{
+    line=?line('$1'),
+    type=?op('$2'),
+    left='$1',
+    right='$3'
+  }.
 add_expr -> mult_expr : '$1'.
 
 mult_expr -> mult_expr mult_op pow_expr :
-#binary_op{
-  line=?line('$1'),
-  type=?op('$2'),
-  left='$1',
-  right='$3'
-}.
+  #binary_op{
+    line=?line('$1'),
+    type=?op('$2'),
+    left='$1',
+    right='$3'
+  }.
 mult_expr -> pow_expr : '$1'.
 
 pow_expr -> pow_expr pow_op unary_expr :
-#binary_op{
-  line=?line('$1'), 
-  type=?op('$2'), 
-  left='$1', 
-  right='$3'
-}.
+  #binary_op{
+    line=?line('$1'), 
+    type=?op('$2'), 
+    left='$1', 
+    right='$3'
+  }.
 pow_expr -> unary_expr : '$1'.
 
 unary_expr -> unary_op unary_expr :
-#unary_op{
-  line=?line('$1'),
-  type=?op('$1'),
-  val='$2'
-}.
+  #unary_op{
+    line=?line('$1'),
+    type=?op('$1'),
+    val='$2'
+  }.
 unary_expr -> call_expr : '$1'.
 
 call_expr -> call : '$1'.
@@ -195,63 +195,63 @@ function_identifier -> punctuated_identifier : '$1'.
 
 %% Function calls
 call -> call_expr '.' function_identifier '(' ')' :
-#remote_call{
-  line      = ?line('$2'),
-  receiver  = '$1',
-  name      = ?identifier_name('$3'),
-  arguments = [],
-  block     = #nil{line=?line('$2')}
-}.
+  #remote_call{
+    line      = ?line('$2'),
+    receiver  = '$1',
+    name      = ?identifier_name('$3'),
+    arguments = [],
+    block     = #nil{line=?line('$2')}
+  }.
 
 call -> call_expr '.' function_identifier '(' exprs ')' :
-#remote_call{
-  line      = ?line('$2'),
-  receiver  = '$1',
-  name      = ?identifier_name('$3'),
-  arguments = '$5',
-  block     = #nil{line=?line('$2')}
-}.
+  #remote_call{
+    line      = ?line('$2'),
+    receiver  = '$1',
+    name      = ?identifier_name('$3'),
+    arguments = '$5',
+    block     = #nil{line=?line('$2')}
+  }.
 
 call -> erl '.' identifier '(' ')' :
-#native_call{
-  line      = ?line('$2'),
-  module    = erlang,
-  function  = ?identifier_name('$3'),
-  arguments = []
-}.
+  #native_call{
+    line      = ?line('$2'),
+    module    = erlang,
+    function  = ?identifier_name('$3'),
+    arguments = []
+  }.
 
 call -> erl '.' identifier '(' exprs ')' :
-#native_call{
-  line      = ?line('$2'),
-  module    = 'erlang',
-  function  = ?identifier_name('$3'),
-  arguments = '$5'
-}.
+  #native_call{
+    line      = ?line('$2'),
+    module    = 'erlang',
+    function  = ?identifier_name('$3'),
+    arguments = '$5'
+  }.
 
 call -> erl '.' identifier '.' identifier '(' ')' :
-#native_call{
-  line      = ?line('$2'),
-  module    = ?identifier_name('$3'),
-  function  = ?identifier_name('$5'),
-  arguments = []
-}.
+  #native_call{
+    line      = ?line('$2'),
+    module    = ?identifier_name('$3'),
+    function  = ?identifier_name('$5'),
+    arguments = []
+  }.
 
 call -> erl '.' identifier '.' identifier '(' exprs ')' :
-#native_call{
-  line      = ?line('$2'),
-  module    = ?identifier_name('$3'),
-  function  = ?identifier_name('$5'),
-  arguments = '$7'
-}.
+  #native_call{
+    line      = ?line('$2'),
+    module    = ?identifier_name('$3'),
+    function  = ?identifier_name('$5'),
+    arguments = '$7'
+  }.
 
 %% Index operation
 call -> call_expr '[' expr ']' :
-#binary_op{
-  line=?line('$1'),
-  type='[]',
-  left='$1',
-  right='$3'
-}.
+  #binary_op{
+    line=?line('$1'),
+    type='[]',
+    left='$1',
+    right='$3'
+  }.
 
 %% Numbers
 number -> float   : '$1'.
@@ -269,21 +269,21 @@ tail -> ',' expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
 binary -> '$' '[' ']' : #binary{line=?line('$1'), elements=[]}.
 binary -> '$' '[' bin_elements ']' : #binary{line=?line('$1'), elements='$3'}.
 binary -> '$' string :
-#binary{
-  line=?line('$1'),
-  elements=[#bin_element{line=?line('$1'), expression='$2'}]
-}.
+  #binary{
+    line=?line('$1'),
+    elements=[#bin_element{line=?line('$1'), expression='$2'}]
+  }.
 
 bin_elements -> bin_element : ['$1'].
 bin_elements -> bin_element ',' bin_elements : ['$1'|'$3'].
 
 bin_element -> max_expr bit_size bit_type_list: 
-#bin_element{
-  line=?line('$1'), 
-  expression='$1', 
-  size='$2', 
-  type_list='$3'
-}.
+  #bin_element{
+    line=?line('$1'), 
+    expression='$1', 
+    size='$2', 
+    type_list='$3'
+  }.
 
 bit_size -> ':' max_expr : '$2'.
 bit_size -> '$empty' : default.
