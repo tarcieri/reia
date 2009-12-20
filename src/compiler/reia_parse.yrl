@@ -321,7 +321,7 @@ interpolate_string([], Line, CharAcc, ExprAcc) ->
   end,
   case Result of
     [#string{} = Res] -> Res;
-    _ -> #dstring{line=Line, members=Result}
+    _ -> #dstring{line=Line, elements=Result}
   end;
 interpolate_string("#{" ++ String, Line, CharAcc, ExprAcc) ->
   {String2, Expr} = extract_fragment([], String, Line),

@@ -63,10 +63,10 @@ transform(#string{line=Line, characters=Chars}) ->
   ]};
   
 % Interpolated strings
-transform(#dstring{line=Line, members=Members}) ->
+transform(#dstring{line=Line, elements=Elements}) ->
   transform(#remote_call{
     line=Line,
-    receiver=explode_list(Members, Line),
+    receiver=explode_list(Elements, Line),
     name=join,
     arguments=[],
     block=#nil{line=Line}

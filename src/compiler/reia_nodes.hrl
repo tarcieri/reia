@@ -9,7 +9,7 @@
 -record(float,      {line, value}).
 -record(identifier, {line, name}).
 -record(string,     {line, characters}).
--record(dstring,    {line, members}).
+-record(dstring,    {line, elements}).
 -record(regexp,     {line, pattern}).
 -record(atom,       {line, name}).
 -record(true,       {line}).
