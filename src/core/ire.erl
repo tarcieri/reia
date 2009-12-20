@@ -20,56 +20,33 @@ start() ->
 loop() ->
   loop(reia_eval:new_binding()).
 
-  loop(Binding) ->
-    case read() of
-      eof -> io:format("~n"); % print a newline then exit
-      String ->
-        NewBinding = try
-          parse(String, Binding)
-        catch
-          Class:Reason -> print_error(Class, Reason),
-          Binding
-        end,
-        loop(NewBinding)
-    end.
-
-read() ->
-  read('>> ').
+loop(Binding) ->
+  NewBinding = try
+    parse("", Binding, '>> ')
+  catch
+    Class:Reason -> print_error(Class, Reason),
+    Binding
+  end,
+  loop(NewBinding).
 
 read(Prompt) ->
   read(standard_io, Prompt).
 
 read(Io, Prompt) ->
   io:get_line(Io, Prompt).
-
-parse(String, Binding) ->
-  case reia_parse:string(String) of
-    {ok, Exprs} ->
-      eval(Exprs, Binding);
-
-    %% Need more tokens
-    {error, {eof, _}} ->
-      case read_until_complete([String], '.. ') of
-        {ok, Exprs} ->
-          eval(Exprs, Binding);
-        {error, Error} ->
-          parse_error(Error),
-          Binding
-      end;
-
-    {error, Error} ->
-      parse_error(Error),
-      Binding
-  end.
   
-read_until_complete(Input, Prompt) ->
+parse(Input, Binding, Prompt) ->
   Input2 = [read(Prompt)|Input],
   case reia_parse:string(lists:flatten(lists:reverse(Input2))) of
-    %% Need more tokens
-    {error, {eof, _}} ->
-      read_until_complete(Input2, Prompt);
-    Result ->
-      Result
+    {ok, []} -> %% Need more tokens
+      parse(Input2, Binding, '.. ');
+    {error, {eof, _}} -> %% Need more tokens
+      parse(Input2, Binding, '.. ');
+    {error, Error} ->
+      parse_error(Error),
+      Binding;
+    {ok, Exprs} ->
+      eval(Exprs, Binding)    
   end.
 
 eval(Exprs, Binding) ->
