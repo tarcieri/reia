@@ -114,6 +114,12 @@ transform(#range{line=Line, from=From, to=To}) ->
   ]};
 
 % Operators
+transform(#unary_op{line=Line, type='!', val=Val}) ->
+  {op, Line, 'not', transform(Val)};
+
+transform(#unary_op{line=Line, type='~', val=Val}) ->
+  {op, Line, 'bnot', transform(Val)};
+    
 transform(#unary_op{line=Line, type=Type, val=Val}) ->
   {op, Line, Type, transform(Val)};
 
