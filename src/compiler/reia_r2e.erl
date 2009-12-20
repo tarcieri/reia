@@ -117,6 +117,9 @@ transform(#range{line=Line, from=From, to=To}) ->
 transform(#unary_op{line=Line, type=Type, val=Val}) ->
   {op, Line, Type, transform(Val)};
 
+transform(#binary_op{line=Line, type='%', left=Left, right=Right}) ->
+  {op, Line, 'rem', transform(Left), transform(Right)};
+  
 transform(#binary_op{line=Line, type='**', left=Left, right=Right}) ->
   {call, Line,
     {remote, Line, {atom, Line, math}, {atom, Line, pow}},
