@@ -122,6 +122,20 @@ transform(#binary_op{line=Line, type='**', left=Left, right=Right}) ->
     {remote, Line, {atom, Line, math}, {atom, Line, pow}},
     [transform(Left), transform(Right)]
   };
+  
+transform(#binary_op{line=Line, type='===', left=Left, right=Right}) ->
+  {'try', Line,
+    [{match, Line, transform(Left), transform(Right)}, {atom, Line, true}],
+    [],
+    [{clause, Line,
+      [{tuple, Line,
+      [{atom, Line,error},
+        {tuple, Line, [{atom, Line, badmatch}, {var, Line, '_'}]},
+        {var, Line, '_'}]}
+      ],
+      [],
+      [{atom, Line, false}]}],
+  []};
 
 transform(#binary_op{line=Line, type='[]', left=Left, right=Right}) ->
   ?reia_dispatch(Left, Line, '[]', [Right], transform(#nil{line=Line}));
