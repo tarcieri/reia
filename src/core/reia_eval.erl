@@ -62,10 +62,14 @@ temporary_module(Name, Args, Exprs) ->
 
 % Annotate the return value of the expression to include the bindings
 annotate_return_value(Exprs, Bindings) ->
-  [LastExpr|Rest] = lists:reverse(Exprs),
+  Exprs2 = case Exprs of
+    []    -> [#nil{line=1}];
+    [_|_] -> Exprs
+  end,
+  [LastExpr|Rest] = lists:reverse(Exprs2),
   Line = element(2, LastExpr),
   LastExpr2 = #match{line=Line, left=?return_value_var(Line), right=LastExpr},
-  ReturnValue = return_value(output_bindings(Exprs, Bindings), Line),
+  ReturnValue = return_value(output_bindings(Exprs2, Bindings), Line),
   lists:reverse([ReturnValue, LastExpr2 | Rest]).
 
 % Obtain a list of all variables which will be bound when eval is complete
