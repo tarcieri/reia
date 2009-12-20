@@ -88,8 +88,9 @@ Rules.
 \|\|= : {token,{'||=',TokenLine}}.
 &     : {token,{'&',TokenLine}}.
 &&    : {token,{'and',TokenLine}}.
-!     : {token,{'!',TokenLine}}.
+\^     : {token,{'^',TokenLine}}.
 ~     : {token,{'~',TokenLine}}.
+!     : {token,{'!',TokenLine}}.
 \$    : {token,{'$',TokenLine}}.
 
 Erlang code.  
