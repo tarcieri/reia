@@ -52,7 +52,7 @@ Nonterminals
 Terminals
   eol '(' ')' '[' ']' '{' '}'
   float integer string atom regexp true false nil 
-  identifier punctuated_identifier erl 'and' 'or'
+  identifier punctuated_identifier erl 'and' 'or' 'not'
   'case' 'when' 'end'
   '+' '-' '*' '/' '%' '**' ',' '.' '..' '=' '=>' '$' ':'
   '===' '==' '!=' '>' '<' '>=' '<='
@@ -230,6 +230,7 @@ pow_op -> '**' : '$1'.
 %% Unary operators
 unary_op -> '+'   : '$1'.
 unary_op -> '-'   : '$1'.
+unary_op -> 'not' : '$1'.
 
 %% Boolean values
 boolean -> true  : '$1'.
