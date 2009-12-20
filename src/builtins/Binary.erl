@@ -12,6 +12,6 @@
 call(Binary, to_s, _Args, _Block) ->
   List = binary_to_list(Binary),
   case io_lib:char_list(List) of
-    true  -> "$[" ++ List ++ "]";
+    true  -> "$[\"" ++ List ++ "\"]";
     false -> "$[" ++ reia_dispatch:call(List, join, {#reia_string{members=[","]}}, nil) ++ "]"
   end.
