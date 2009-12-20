@@ -11,6 +11,7 @@ Nonterminals
   exprs
   expr
   match_expr
+  comp_expr
   range_expr
   add_expr
   mult_expr
@@ -20,6 +21,7 @@ Nonterminals
   max_expr
   function_identifier
   rebind_op
+  comp_op
   add_op
   mult_op
   pow_op
@@ -46,6 +48,7 @@ Terminals
   float integer string atom regexp true false nil 
   identifier punctuated_identifier erl
   '+' '-' '*' '/' '%' '**' ',' '.' '..' '=' '=>' '$' ':'
+  '===' '==' '!=' '>' '<' '>=' '<='
   '+=' '-=' '*=' '/=' '**='
   .
 
@@ -73,14 +76,23 @@ match_expr -> match_expr '=' range_expr :
   left='$1', 
   right='$3'
 }.
-match_expr -> match_expr rebind_op range_expr :
+match_expr -> match_expr rebind_op comp_expr :
 #binary_op{
   line=?line('$1'), 
   type=?op('$2'), 
   left='$1', 
   right='$3'
 }.
-match_expr -> range_expr : '$1'.
+match_expr -> comp_expr : '$1'.
+
+comp_expr -> range_expr comp_op range_expr : 
+#binary_op{
+  line=?line('$1'), 
+  type=?op('$2'), 
+  left='$1', 
+  right='$3'
+}.
+comp_expr -> range_expr : '$1'.
 
 range_expr -> range_expr '..' add_expr :
 #range{
@@ -146,6 +158,15 @@ rebind_op -> '-='  : '$1'.
 rebind_op -> '*='  : '$1'.
 rebind_op -> '/='  : '$1'.
 rebind_op -> '**=' : '$1'.
+
+%% Comparison operators
+comp_op -> '===' : '$1'.
+comp_op -> '==' : '$1'.
+comp_op -> '!=' : '$1'.
+comp_op -> '>'  : '$1'.
+comp_op -> '<'  : '$1'.
+comp_op -> '>=' : '$1'.
+comp_op -> '<=' : '$1'.
 
 %% Addition operators
 add_op -> '+' : '$1'.
