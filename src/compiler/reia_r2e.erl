@@ -132,7 +132,7 @@ transform(#binary_op{line=Line, type='===', left=Left, right=Right}) ->
     [],
     [{clause, Line,
       [{tuple, Line,
-      [{atom, Line,error},
+      [{atom, Line, error},
         {tuple, Line, [{atom, Line, badmatch}, {var, Line, '_'}]},
         {var, Line, '_'}]}
       ],
@@ -140,14 +140,14 @@ transform(#binary_op{line=Line, type='===', left=Left, right=Right}) ->
       [{atom, Line, false}]}],
   []};
 
-transform(#binary_op{line=Line, type='[]', left=Left, right=Right}) ->
-  ?reia_dispatch(Left, Line, '[]', [Right], transform(#nil{line=Line}));
-
 transform(#binary_op{line=Line, type='!=', left=Left, right=Right}) ->
   {op, Line, '/=', transform(Left), transform(Right)};
   
 transform(#binary_op{line=Line, type='<=', left=Left, right=Right}) ->
   {op, Line, '=<', transform(Left), transform(Right)};
+  
+transform(#binary_op{line=Line, type='[]', left=Left, right=Right}) ->
+  ?reia_dispatch(Left, Line, '[]', [Right], transform(#nil{line=Line}));
   
 transform(#binary_op{line=Line, type=Type, left=Left, right=Right}) ->
   {op, Line, Type, transform(Left), transform(Right)};
