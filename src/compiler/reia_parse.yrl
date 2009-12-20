@@ -9,6 +9,7 @@ Nonterminals
   grammar
   expr_list
   exprs
+  inline_exprs
   expr
   match_expr
   bool_expr
@@ -20,6 +21,9 @@ Nonterminals
   unary_expr
   call_expr
   max_expr
+  case_expr
+  clauses
+  clause
   function_identifier
   rebind_op
   bool_op
@@ -49,6 +53,7 @@ Terminals
   eol '(' ')' '[' ']' '{' '}'
   float integer string atom regexp true false nil 
   identifier punctuated_identifier erl 'and' 'or'
+  'case' 'when' 'end'
   '+' '-' '*' '/' '%' '**' ',' '.' '..' '=' '=>' '$' ':'
   '===' '==' '!=' '>' '<' '>=' '<='
   '+=' '-=' '*=' '/=' '**='
@@ -70,6 +75,11 @@ exprs -> expr eol : ['$1'].
 exprs -> eol exprs : '$2'.
 exprs -> expr ',' exprs : ['$1'|'$3'].
 
+%% Inline expressions
+inline_exprs -> expr ',' inline_exprs : ['$1'|'$3'].
+inline_exprs -> expr : ['$1'].
+
+%% Expression hierarchy
 expr -> match_expr : '$1'.
 
 match_expr -> match_expr '=' range_expr :
@@ -161,8 +171,28 @@ max_expr -> atom         : '$1'.
 max_expr -> boolean      : '$1'.
 max_expr -> regexp       : '$1'.
 max_expr -> string       : interpolate_string('$1').
+max_expr -> case_expr    : '$1'.
 max_expr -> '(' expr ')' : '$2'.
 
+%% Clauses
+clauses -> clause clauses : ['$1'|'$2'].
+clauses -> clause : ['$1'].
+
+clause -> when inline_exprs eol expr_list : 
+  #clause{
+    line=?line('$1'), 
+    patterns='$2', 
+    exprs='$4'
+  }.
+
+%% Case expressions
+case_expr -> 'case' expr eol clauses 'end': 
+  #'case'{
+    line=?line('$1'), 
+    expr='$2', 
+    clauses='$4'
+  }.
+  
 %% Rebind operators
 rebind_op -> '+='  : '$1'.
 rebind_op -> '-='  : '$1'.
@@ -339,8 +369,10 @@ string(String) ->
       case reia_parse:parse(Tokens) of
         {ok, Exprs} ->
           {ok, Exprs};
+        {error, {_, _, [Message, []]}} ->
+          {error, {eof, lists:flatten([Message, "end of file"])}};
         {error, {Line, _, [Message, Token]}} ->
-          {error, {Line, lists:flatten(io_lib:format("~s~s", [Message, Token]))}}
+          {error, {Line, lists:flatten([Message, Token])}}
       end;
     {error, {Line, _, {Message, Token}}, _} ->
       {error, {Line, lists:flatten(io_lib:format("~p ~p", [Message, Token]))}}

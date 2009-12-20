@@ -48,7 +48,7 @@ parse(String, Binding) ->
       eval(Exprs, Binding);
 
     %% Need more tokens
-    {error, {999999, _}} ->
+    {error, {eof, _}} ->
       case read_until_complete([String], '.. ') of
         {ok, Exprs} ->
           eval(Exprs, Binding);
@@ -66,7 +66,7 @@ read_until_complete(Input, Prompt) ->
   Input2 = [read(Prompt)|Input],
   case reia_parse:string(lists:flatten(lists:reverse(Input2))) of
     %% Need more tokens
-    {error, {999999, _}} ->
+    {error, {eof, _}} ->
       read_until_complete(Input2, Prompt);
     Result ->
       Result

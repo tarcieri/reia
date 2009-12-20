@@ -34,3 +34,5 @@
 -record(range,       {line, from, to}).
 -record(dict,        {line, elements}).
 -record(block,       {line, exprs}).
+-record(clause,      {line, patterns, exprs}).
+-record('case',      {line, expr, clauses}).
