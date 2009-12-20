@@ -9,6 +9,8 @@
 -export([call/4]).
 -include("../core/reia_types.hrl").
 
+call(#reia_range{from=From, to=To}, to_list, _Args, _Block) ->
+  lists:seq(From, To);
 call(#reia_range{from=From, to=To}, to_s, _Args, _Block) ->
   convert(From) ++ ".." ++ convert(To).
   
