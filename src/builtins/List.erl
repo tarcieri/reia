@@ -8,6 +8,7 @@
 -module('List').
 -export([call/4]).
 -include("../core/reia_types.hrl").
+-include("../core/reia_invoke.hrl").
 
 call(List, '[]', {Index}, _Block) ->
   if
@@ -24,8 +25,12 @@ call(List, '[]=', {Index, Value}, _Block) ->
 call(List, size, _Args, _Block) ->
   length(List);
   
-call(List, to_s, _Args, _Block) ->
-  lists:flatten(["[", string:join([convert(Elem) || Elem <- List], ","), "]"]);
+call(List, inspect, _Args, _Block) ->
+  Res = lists:flatten(["[", string:join([convert(Elem, inspect) || Elem <- List], ","), "]"]),
+  call(Res, to_string, {}, nil);
+  
+call(List, to_string, _Args, _Block) ->
+  #reia_string{members=List};
 
 call(List, reverse, _Args, _Block) ->
   lists:reverse(List);
@@ -49,12 +54,10 @@ replace([_|Tail], Index, Index, Value) ->
 replace([Head|Tail], N, Index, Value) ->
   [Head|replace(Tail, N + 1, Index, Value)].
 
-convert(Value) -> reia_dispatch:call(Value, to_s, [], nil).
+convert(Value, Method) -> 
+  ?invoke(?invoke(Value, Method, {}, nil), to_list, {}, nil).
 
 join_list(Result, [Elem], _) ->
-  lists:reverse([element_to_string(Elem)|Result]);
+  lists:reverse([convert(Elem, to_s)|Result]);
 join_list(Result, [Elem|Rest], Separator) ->
-  join_list([Separator,element_to_string(Elem)|Result], Rest, Separator).
-  
-element_to_string(Elem) ->
-  reia_dispatch:call(Elem, to_s, {}, nil).
+  join_list([Separator, convert(Elem, to_s)|Result], Rest, Separator).

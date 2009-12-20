@@ -7,11 +7,16 @@
 
 -module('Numeric').
 -export([call/4]).
+-include("../core/reia_invoke.hrl").
 
 call(Number, to_s, _Args, _Block) ->
-  if
+  List = if
     is_integer(Number) ->
       integer_to_list(Number);
     is_float(Number) ->
-      lists:flatten(io_lib:format("~f", [Number]))
-  end.
+      io_lib:format("~f", [Number])
+  end,
+  ?invoke(List, to_string, {}, nil);
+  
+call(Number, inspect, Args, Block) ->
+  call(Number, to_s, Args, Block).

@@ -7,6 +7,7 @@
 
 -module(ire).
 -export([init/0, start/0]).
+-include("reia_types.hrl").
 
 init() ->
   io:format("Reia Interactive Shell (prerelease)~nRunning on "),
@@ -77,7 +78,8 @@ eval(Exprs, Binding) ->
   NewBinding.
 
 print(Value) ->
-  io:format("=> ~s~n", [reia_dispatch:call(Value, to_s, {}, nil)]).
+  #reia_string{members=Members} = reia_dispatch:call(Value, inspect, {}, nil),
+  io:format("=> ~s~n", [iolist_to_binary(Members)]).
 
 parse_error({Line, Error}) ->
   io:format("Error: Line ~w: ~s~n", [Line, Error]).

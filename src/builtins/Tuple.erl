@@ -7,6 +7,7 @@
 
 -module('Tuple').
 -export([call/4]).
+-include("../core/reia_invoke.hrl").
 
 call(Tuple, '[]', {Index}, _Block) ->
   if
@@ -24,15 +25,23 @@ call(Tuple, size, _Args, _Block) ->
   tuple_size(Tuple);
 
 call(Tuple, to_s, _Args, _Block) ->
-  List = tuple_to_list(Tuple),
-  case List of
-    [Expr] -> 
-      lists:flatten(["(", convert(Expr), ",)"]);
-    _      ->
-      lists:flatten(["(", string:join([convert(Elem) || Elem <- List], ","), ")"])
-  end;
+  stringify(Tuple, to_s);
+  
+call(Tuple, inspect, _Args, _Block) ->
+  stringify(Tuple, inspect);
   
 call(Tuple, reverse, _Args, _Block) ->
   list_to_tuple(lists:reverse(tuple_to_list(Tuple))).
 
-convert(Value) -> reia_dispatch:call(Value, to_s, [], nil).
+stringify(Tuple, Method) ->
+  List = tuple_to_list(Tuple),
+  List2 = case List of
+    [Expr] -> 
+      lists:flatten(["(", convert(Expr, Method), ",)"]);
+    _      ->
+      lists:flatten(["(", string:join([convert(Elem, Method) || Elem <- List], ","), ")"])
+  end,
+  ?invoke(List2, to_string, {}, nil).
+
+convert(Value, Method) ->
+  ?invoke(?invoke(Value, Method, [], nil), to_list, {}, nil).

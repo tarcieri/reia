@@ -7,6 +7,10 @@
 
 -module('Atom').
 -export([call/4]).
+-include("../core/reia_invoke.hrl").
 
 call(Atom, to_s, _Args, _Block) ->
-  ":" ++ atom_to_list(Atom).
+  ?invoke(atom_to_list(Atom), to_string, {}, nil);
+  
+call(Atom, inspect, _Args, _Block) ->
+  ?invoke(":" ++ atom_to_list(Atom), to_string, {}, nil).

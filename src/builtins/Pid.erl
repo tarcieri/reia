@@ -7,6 +7,9 @@
 
 -module('Pid').
 -export([call/4]).
+-include("../core/reia_invoke.hrl").
 
 call(Pid, to_s, _Args, _Block) ->
-  pid_to_list(Pid).
+  ?invoke(pid_to_list(Pid), to_string, {}, nil);
+call(Pid, inspect, _Args, _Block) ->
+  ?invoke(pid_to_list(Pid), to_string, {}, nil).

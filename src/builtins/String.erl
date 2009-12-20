@@ -9,5 +9,14 @@
 -export([call/4]).
 -include("../core/reia_types.hrl").
 
-call(#reia_string{members=Members}, to_s, _Args, _Block) ->
-  "\"" ++ binary_to_list(iolist_to_binary(Members)) ++ "\"".
+call(#reia_string{members=Members}, to_binary, _Args, _Block) ->
+  iolist_to_binary(Members);
+  
+call(String, to_list, _Args, _Block) ->
+  binary_to_list(call(String, to_binary, {}, nil));
+  
+call(String, to_s, _Args, _Block) ->
+  String;
+  
+call(#reia_string{members=Members}, inspect, _Args, _Block) ->
+  #reia_string{members=[$", Members, $"]}.
