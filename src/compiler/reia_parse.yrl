@@ -243,6 +243,11 @@ tail -> ',' expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
 %% Binaries
 binary -> '$' '[' ']' : #binary{line=?line('$1'), elements=[]}.
 binary -> '$' '[' bin_elements ']' : #binary{line=?line('$1'), elements='$3'}.
+binary -> '$' string :
+#binary{
+  line=?line('$1'),
+  elements=[#bin_element{line=?line('$1'), expression='$2'}]
+}.
 
 bin_elements -> bin_element : ['$1'].
 bin_elements -> bin_element ',' bin_elements : ['$1'|'$3'].
