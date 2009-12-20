@@ -31,6 +31,10 @@ Nonterminals
   binary
   bin_elements
   bin_element
+  bit_size
+  bit_type_list
+  bit_type_elements
+  bit_type
   tail
   tuple
   dict
@@ -41,7 +45,7 @@ Terminals
   eol '(' ')' '[' ']' '{' '}'
   float integer string atom regexp true false nil 
   identifier punctuated_identifier erl
-  '+' '-' '*' '/' '%' '**' ',' '.' '..' '=' '=>' '$'
+  '+' '-' '*' '/' '%' '**' ',' '.' '..' '=' '=>' '$' ':'
   '+=' '-=' '*=' '/=' '**='
   .
 
@@ -252,7 +256,25 @@ binary -> '$' string :
 bin_elements -> bin_element : ['$1'].
 bin_elements -> bin_element ',' bin_elements : ['$1'|'$3'].
 
-bin_element -> max_expr : #bin_element{line=?line('$1'), expression='$1'}.
+bin_element -> max_expr bit_size bit_type_list: 
+#bin_element{
+  line=?line('$1'), 
+  expression='$1', 
+  size='$2', 
+  type_list='$3'
+}.
+
+bit_size -> ':' max_expr : '$2'.
+bit_size -> '$empty' : default.
+
+bit_type_list -> '/' bit_type_elements : '$2'.
+bit_type_list -> '$empty' : default.
+
+bit_type_elements -> bit_type '-' bit_type_elements : ['$1'|'$3'].
+bit_type_elements -> bit_type : ['$1'].
+
+bit_type -> atom             : element(3, '$1').
+bit_type -> atom ':' integer : {element(3, '$1'), element(3,'$3')}.
 
 %% Tuples
 tuple -> '(' ')' :               #tuple{line=?line('$1'), elements=[]}.
