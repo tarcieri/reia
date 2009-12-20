@@ -33,5 +33,5 @@ base_directory() ->
   {ok, Dir} = file:get_cwd(),
   case filelib:is_dir(Dir ++ "/ebin") of
     true  -> Dir;
-    false -> {error, "can't locate the Reia distribution"}
+    false -> throw({error, "can't locate the Reia distribution"})
   end.
