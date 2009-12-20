@@ -78,8 +78,8 @@ eval(Exprs, Binding) ->
   NewBinding.
 
 print(Value) ->
-  #reia_string{members=Members} = reia_dispatch:call(Value, inspect, {}, nil),
-  io:format("=> ~s~n", [iolist_to_binary(Members)]).
+  #reia_string{elements=Elements} = reia_dispatch:call(Value, inspect, {}, nil),
+  io:format("=> ~s~n", [iolist_to_binary(Elements)]).
 
 parse_error({Line, Error}) ->
   io:format("Error: Line ~w: ~s~n", [Line, Error]).

@@ -24,25 +24,27 @@ call(List, '[]=', {Index, Value}, _Block) ->
   
 call(List, size, _Args, _Block) ->
   length(List);
+
+call(List, to_string, _Args, _Block) ->
+  #reia_string{elements=List};
+
+call(List, to_s, _Args, _Block) ->
+  stringify(List, to_s);
   
 call(List, inspect, _Args, _Block) ->
-  Res = lists:flatten(["[", string:join([convert(Elem, inspect) || Elem <- List], ","), "]"]),
-  call(Res, to_string, {}, nil);
+  stringify(List, inspect);
   
-call(List, to_string, _Args, _Block) ->
-  #reia_string{members=List};
-
 call(List, reverse, _Args, _Block) ->
   lists:reverse(List);
   
 call(List, join, {}, Block) ->
-  call(List, join, {#reia_string{members=[]}}, Block);
-call(List, join, {#reia_string{members=Separator}}, _Block) ->
-  Members = case List of
-    [] -> #reia_string{members=[]};
+  call(List, join, {#reia_string{elements=[]}}, Block);
+call(List, join, {#reia_string{elements=Separator}}, _Block) ->
+  Elements = case List of
+    [] -> [];
     _  -> join_list([], List, Separator)
   end,
-  #reia_string{members=Members}.
+  #reia_string{elements=Elements}.
 
 replace(List, Index, Value) ->
   replace(List, 0, Index, Value).
@@ -53,6 +55,10 @@ replace([_|Tail], Index, Index, Value) ->
   [Value|Tail];
 replace([Head|Tail], N, Index, Value) ->
   [Head|replace(Tail, N + 1, Index, Value)].
+
+stringify(List, Method) ->
+  Res = lists:flatten(["[", string:join([convert(Elem, Method) || Elem <- List], ","), "]"]),
+  call(Res, to_string, {}, nil).
 
 convert(Value, Method) -> 
   ?invoke(?invoke(Value, Method, {}, nil), to_list, {}, nil).

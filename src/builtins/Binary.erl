@@ -10,8 +10,11 @@
 -include("../core/reia_types.hrl").
 -include("../core/reia_invoke.hrl").
 
+call(Binary, to_string, _Args, _Block) ->
+  #reia_string{elements=[Binary]};
+
 call(Binary, to_s, _Args, _Block) ->
-  #reia_string{members=[Binary]};
+  #reia_string{elements=[Binary]};
   
 call(Binary, inspect, _Args, _Block) ->
   List = binary_to_list(Binary),
@@ -19,7 +22,7 @@ call(Binary, inspect, _Args, _Block) ->
     true  -> 
       "$\"" ++ List ++ "\"";
     false ->
-      #reia_string{members=Members} = ?invoke(List, join, {#reia_string{members=[","]}}, nil),
-      "$[" ++ Members ++ "]"
+      Elements = ?invoke(?invoke(List, join, {#reia_string{elements=[","]}}, nil), to_list, {}, nil),
+      "$[" ++ Elements ++ "]"
   end,
   ?invoke(List2, to_string, {}, nil).
