@@ -131,7 +131,13 @@ transform(#binary_op{line=Line, type='|', left=Left, right=Right}) ->
 
 transform(#binary_op{line=Line, type='^', left=Left, right=Right}) ->
   {op, Line, 'bxor', transform(Left), transform(Right)};
-          
+
+transform(#binary_op{line=Line, type='<<', left=Left, right=Right}) ->
+  {op, Line, 'bsl', transform(Left), transform(Right)};
+    
+transform(#binary_op{line=Line, type='>>', left=Left, right=Right}) ->
+  {op, Line, 'bsr', transform(Left), transform(Right)};
+
 transform(#binary_op{line=Line, type='%', left=Left, right=Right}) ->
   {op, Line, 'rem', transform(Left), transform(Right)};
   

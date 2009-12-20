@@ -55,7 +55,7 @@ Terminals
   identifier punctuated_identifier erl 'and' 'or' 'not'
   'case' 'when' 'end'
   '+' '-' '*' '/' '%' '**' ',' '.' '..' 
-  '=' '=>' '$' ':' '!' '~' '&' '|' '^'
+  '=' '=>' '$' ':' '!' '~' '&' '|' '^' '<<' '>>'
   '===' '==' '!=' '>' '<' '>=' '<='
   '+=' '-=' '*=' '/=' '**='
   .
@@ -217,10 +217,12 @@ comp_op -> '>=' : '$1'.
 comp_op -> '<=' : '$1'.
 
 %% Addition operators
-add_op -> '+' : '$1'.
-add_op -> '-' : '$1'.
-add_op -> '|' : '$1'.
-add_op -> '^' : '$1'.
+add_op -> '+'  : '$1'.
+add_op -> '-'  : '$1'.
+add_op -> '|'  : '$1'.
+add_op -> '^'  : '$1'.
+add_op -> '<<' : '$1'.
+add_op -> '>>' : '$1'.
 
 %% Multiplication operators
 mult_op -> '*' : '$1'.
