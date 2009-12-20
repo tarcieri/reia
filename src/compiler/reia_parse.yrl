@@ -62,24 +62,26 @@ Terminals
 Rootsymbol grammar.
 
 grammar -> expr_list : '$1'.
+grammar -> '$empty' : [].
 
 %% Expression lists (eol delimited)
+expr_list -> eol : [].
 expr_list -> expr : ['$1'].
 expr_list -> expr eol : ['$1'].
 expr_list -> eol expr_list : '$2'.
 expr_list -> expr eol expr_list : ['$1'|'$3'].
 
-%% Expressions (comma delimited)
+%% Expression lists (comma delimited)
 exprs -> expr : ['$1'].
 exprs -> expr eol : ['$1'].
 exprs -> eol exprs : '$2'.
 exprs -> expr ',' exprs : ['$1'|'$3'].
 
-%% Inline expressions
+%% Inline expression lists
 inline_exprs -> expr ',' inline_exprs : ['$1'|'$3'].
 inline_exprs -> expr : ['$1'].
 
-%% Expression hierarchy
+%% Expressions
 expr -> match_expr : '$1'.
 
 match_expr -> match_expr '=' range_expr :
