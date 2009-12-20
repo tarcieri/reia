@@ -54,7 +54,8 @@ Terminals
   float integer string atom regexp true false nil 
   identifier punctuated_identifier erl 'and' 'or' 'not'
   'case' 'when' 'end'
-  '+' '-' '*' '/' '%' '**' ',' '.' '..' '=' '=>' '$' ':'
+  '+' '-' '*' '/' '%' '**' ',' '.' '..' '=' '=>' '$' ':' '!'
+  '~'
   '===' '==' '!=' '>' '<' '>=' '<='
   '+=' '-=' '*=' '/=' '**='
   .
@@ -232,6 +233,7 @@ unary_op -> '+'   : '$1'.
 unary_op -> '-'   : '$1'.
 unary_op -> 'not' : '$1'.
 unary_op -> '!'   : '$1'.
+unary_op -> '~'   : '$1'.
 
 %% Boolean values
 boolean -> true  : '$1'.
