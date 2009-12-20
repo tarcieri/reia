@@ -123,6 +123,12 @@ transform(#unary_op{line=Line, type='~', val=Val}) ->
 transform(#unary_op{line=Line, type=Type, val=Val}) ->
   {op, Line, Type, transform(Val)};
 
+transform(#binary_op{line=Line, type='&', left=Left, right=Right}) ->
+  {op, Line, 'band', transform(Left), transform(Right)};
+  
+transform(#binary_op{line=Line, type='|', left=Left, right=Right}) ->
+  {op, Line, 'bor', transform(Left), transform(Right)};
+      
 transform(#binary_op{line=Line, type='%', left=Left, right=Right}) ->
   {op, Line, 'rem', transform(Left), transform(Right)};
   
