@@ -78,6 +78,10 @@ transform(#regexp{line=Line, pattern=Pattern}) ->
     {atom, Line, reia_regexp}, 
     {bin, Line, [{bin_element, Line, {string, Line, Pattern}, default, default}]}
   ]};
+  
+%% Binaries
+transform(#binary{line=Line, elements=Elements}) ->
+  {bin, Line, [binary_element(Element) || Element <- Elements]};
 
 % Matches
 transform(#match{line=Line, left=Left, right=Right}) ->
@@ -172,6 +176,9 @@ dict_elements([], Line) ->
 dict_elements([{Key,Value}|Rest], Line) ->
   {cons, Line, {tuple, Line, [transform(Key), transform(Value)]}, dict_elements(Rest, Line)}.
   
+%% Transform an element of a binary
+binary_element(Element) -> Element.
+
 %% Explode a list of expressions into cons nodes
 explode_list([], Line) ->
   #empty{line=Line};

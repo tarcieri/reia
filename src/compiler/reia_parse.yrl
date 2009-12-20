@@ -28,6 +28,9 @@ Nonterminals
   call
   number
   list
+  binary
+  bin_elements
+  bin_element
   tail
   tuple
   dict
@@ -38,7 +41,7 @@ Terminals
   eol '(' ')' '[' ']' '{' '}'
   float integer string atom regexp true false nil 
   identifier punctuated_identifier erl
-  '+' '-' '*' '/' '%' '**' ',' '.' '..' '=' '=>'
+  '+' '-' '*' '/' '%' '**' ',' '.' '..' '=' '=>' '$'
   '+=' '-=' '*=' '/=' '**='
   .
 
@@ -123,6 +126,7 @@ call_expr -> max_expr : '$1'.
 
 max_expr -> number       : '$1'.
 max_expr -> list         : '$1'.
+max_expr -> binary       : '$1'.
 max_expr -> tuple        : '$1'.
 max_expr -> dict         : '$1'.
 max_expr -> identifier   : '$1'.
@@ -225,7 +229,7 @@ call -> call_expr '[' expr ']' :
 }.
 
 %% Numbers
-number -> float : '$1'.
+number -> float   : '$1'.
 number -> integer : '$1'.
 
 %% Lists
@@ -235,6 +239,15 @@ list -> '[' expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
 tail -> ']' : #empty{line=?line('$1')}.
 tail -> ',' '*' expr ']' : '$3'.
 tail -> ',' expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
+
+%% Binaries
+binary -> '$' '[' ']' : #binary{line=?line('$1'), elements=[]}.
+binary -> '$' '[' bin_elements ']' : #binary{line=?line('$1'), elements='$3'}.
+
+bin_elements -> bin_element : ['$1'].
+bin_elements -> bin_element ',' bin_elements : ['$1'|'$3'].
+
+bin_element -> max_expr : #bin_element{line=?line('$1'), expression='$1'}.
 
 %% Tuples
 tuple -> '(' ')' :               #tuple{line=?line('$1'), elements=[]}.

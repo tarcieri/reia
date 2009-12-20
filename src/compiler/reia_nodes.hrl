@@ -12,7 +12,6 @@
 -record(dstring,    {line, members}).
 -record(regexp,     {line, pattern}).
 -record(atom,       {line, name}).
--record(range,      {line, from, to}).
 -record(true,       {line}).
 -record(false,      {line}).
 -record(nil,        {line}).
@@ -26,9 +25,12 @@
 -record(binary_op, {line, type, left, right}).
 
 % Other Expressions
--record(match, {line, left, right}).
--record(cons,  {line, expr, tail}).
--record(empty, {line}).
--record(tuple, {line, elements}).
--record(dict,  {line, elements}).
--record(block, {line, exprs}).
+-record(match,       {line, left, right}).
+-record(cons,        {line, expr, tail}).
+-record(empty,       {line}).
+-record(tuple,       {line, elements}).
+-record(binary,      {line, elements}).
+-record(bin_element, {line, expression, size=default, type_list=default}).
+-record(range,       {line, from, to}).
+-record(dict,        {line, elements}).
+-record(block,       {line, exprs}).
