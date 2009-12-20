@@ -11,6 +11,7 @@ Nonterminals
   exprs
   expr
   match_expr
+  bool_expr
   comp_expr
   range_expr
   add_expr
@@ -21,6 +22,7 @@ Nonterminals
   max_expr
   function_identifier
   rebind_op
+  bool_op
   comp_op
   add_op
   mult_op
@@ -46,7 +48,7 @@ Nonterminals
 Terminals
   eol '(' ')' '[' ']' '{' '}'
   float integer string atom regexp true false nil 
-  identifier punctuated_identifier erl
+  identifier punctuated_identifier erl 'and' 'or'
   '+' '-' '*' '/' '%' '**' ',' '.' '..' '=' '=>' '$' ':'
   '===' '==' '!=' '>' '<' '>=' '<='
   '+=' '-=' '*=' '/=' '**='
@@ -76,14 +78,23 @@ match_expr -> match_expr '=' range_expr :
     left='$1', 
     right='$3'
   }.
-match_expr -> match_expr rebind_op comp_expr :
+match_expr -> match_expr rebind_op bool_expr :
   #binary_op{
     line=?line('$1'), 
     type=?op('$2'), 
     left='$1', 
     right='$3'
   }.
-match_expr -> comp_expr : '$1'.
+match_expr -> bool_expr : '$1'.
+
+bool_expr -> bool_expr bool_op comp_expr : 
+  #binary_op{
+    line=?line('$1'), 
+    type=?op('$2'), 
+    left='$1', 
+    right='$3'
+  }.
+bool_expr -> comp_expr : '$1'.
 
 comp_expr -> range_expr comp_op range_expr : 
   #binary_op{
@@ -158,6 +169,10 @@ rebind_op -> '-='  : '$1'.
 rebind_op -> '*='  : '$1'.
 rebind_op -> '/='  : '$1'.
 rebind_op -> '**=' : '$1'.
+
+%% Boolean operators
+bool_op -> 'and' : '$1'.
+bool_op -> 'or'  : '$1'.
 
 %% Comparison operators
 comp_op -> '===' : '$1'.
@@ -306,8 +321,8 @@ tuple -> '(' expr ',' exprs ')': #tuple{line=?line('$1'), elements=['$2'|'$4']}.
 dict -> '{' '}' :                #dict{line=?line('$1'), elements=[]}.
 dict -> '{' dict_entries '}' :   #dict{line=?line('$1'), elements='$2'}.
 
-dict_entries -> range_expr '=>' expr : [{'$1','$3'}]. % FIXME: change add_expr to 1 below match
-dict_entries -> range_expr '=>' expr ',' dict_entries : [{'$1','$3'}|'$5'].
+dict_entries -> bool_expr '=>' expr : [{'$1','$3'}]. % FIXME: change add_expr to 1 below match
+dict_entries -> bool_expr '=>' expr ',' dict_entries : [{'$1','$3'}|'$5'].
 
 Erlang code.
 
