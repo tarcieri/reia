@@ -57,7 +57,7 @@ Terminals
   '+' '-' '*' '/' '%' '**' ',' '.' '..' 
   '=' '=>' '$' ':' '!' '~' '&' '|' '^' '<<' '>>'
   '===' '==' '!=' '>' '<' '>=' '<='
-  '+=' '-=' '*=' '/=' '**='
+  '+=' '-=' '*=' '/=' '**=' '&=' '|=' '^=' '<<=' '>>='
   .
 
 Rootsymbol grammar.
@@ -196,12 +196,17 @@ case_expr -> 'case' expr eol clauses 'end':
     clauses='$4'
   }.
   
-%% Rebind operators
+%% Assignment operators
 rebind_op -> '+='  : '$1'.
 rebind_op -> '-='  : '$1'.
 rebind_op -> '*='  : '$1'.
 rebind_op -> '/='  : '$1'.
 rebind_op -> '**=' : '$1'.
+rebind_op -> '&='  : '$1'.
+rebind_op -> '|='  : '$1'.
+rebind_op -> '^='  : '$1'.
+rebind_op -> '<<=' : '$1'.
+rebind_op -> '>>=' : '$1'.
 
 %% Boolean operators
 bool_op -> 'and' : '$1'.
