@@ -26,6 +26,16 @@ transform_node(#binary_op{line=Line, type='/=', left=Left, right=Right}) ->
   rebind_op(Line, '/', Left, Right);
 transform_node(#binary_op{line=Line, type='**=', left=Left, right=Right}) ->
   rebind_op(Line, '**', Left, Right);
+transform_node(#binary_op{line=Line, type='&=', left=Left, right=Right}) ->
+  rebind_op(Line, '&', Left, Right);
+transform_node(#binary_op{line=Line, type='|=', left=Left, right=Right}) ->
+  rebind_op(Line, '|', Left, Right);
+transform_node(#binary_op{line=Line, type='^=', left=Left, right=Right}) ->
+  rebind_op(Line, '^', Left, Right);
+transform_node(#binary_op{line=Line, type='<<=', left=Left, right=Right}) ->
+  rebind_op(Line, '<<', Left, Right);
+transform_node(#binary_op{line=Line, type='>>=', left=Left, right=Right}) ->
+  rebind_op(Line, '>>', Left, Right);
 transform_node(#match{} = Node) ->
   reia_syntax:map_subtrees(fun transform_node/1, transform_setters(Node));
 transform_node(#remote_call{line=Line, name=Name, receiver=#identifier{} = Receiver} = Node) ->
