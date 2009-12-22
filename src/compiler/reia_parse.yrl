@@ -85,7 +85,7 @@ inline_exprs -> expr : ['$1'].
 %% Expressions
 expr -> match_expr : '$1'.
 
-match_expr -> match_expr '=' range_expr :
+match_expr -> match_expr '=' bool_expr :
   #match{
     line=?line('$2'), 
     left='$1', 
