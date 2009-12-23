@@ -12,6 +12,7 @@ Nonterminals
   inline_exprs
   expr
   match_expr
+  ternary_expr
   bool_expr
   comp_expr
   range_expr
@@ -55,7 +56,7 @@ Terminals
   identifier punctuated_identifier erl 'and' 'or' 'not'
   'case' 'when' 'end'
   '+' '-' '*' '/' '%' '**' ',' '.' '..' 
-  '=' '=>' '$' ':' '!' '~' '&' '|' '^' '<<' '>>'
+  '=' '=>' '$' ':' '?' '!' '~' '&' '|' '^' '<<' '>>'
   '===' '==' '!=' '>' '<' '>=' '<='
   '+=' '-=' '*=' '/=' '**=' '&=' '|=' '^=' '<<=' '>>='
   .
@@ -85,20 +86,28 @@ inline_exprs -> expr : ['$1'].
 %% Expressions
 expr -> match_expr : '$1'.
 
-match_expr -> bool_expr '=' match_expr :
+match_expr -> ternary_expr '=' match_expr :
   #match{
     line=?line('$2'), 
     left='$1', 
     right='$3'
   }.
-match_expr -> bool_expr rebind_op match_expr :
+match_expr -> ternary_expr rebind_op match_expr :
   #binary_op{
     line=?line('$1'), 
     type=?op('$2'), 
     left='$1', 
     right='$3'
   }.
-match_expr -> bool_expr : '$1'.
+match_expr -> ternary_expr : '$1'.
+
+ternary_expr -> bool_expr '?' bool_expr ':' bool_expr :
+  #ternary_op{
+    line=?line('$1'),
+    left='$1',
+    middle='$3',
+    right='$5'
+  }.
 
 bool_expr -> bool_expr bool_op comp_expr : 
   #binary_op{

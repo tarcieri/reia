@@ -90,6 +90,7 @@ Rules.
 &&    : {token,{'and',TokenLine}}.
 \^     : {token,{'^',TokenLine}}.
 ~     : {token,{'~',TokenLine}}.
+\?     : {token,{'?',TokenLine}}.
 !     : {token,{'!',TokenLine}}.
 \$    : {token,{'$',TokenLine}}.
 &=    : {token,{'&=',TokenLine}}.

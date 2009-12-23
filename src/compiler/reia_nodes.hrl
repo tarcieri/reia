@@ -21,8 +21,9 @@
 -record(native_call, {line, module, function, arguments}).
 
 % Operators
--record(unary_op,  {line, type, val}).
--record(binary_op, {line, type, left, right}).
+-record(unary_op,    {line, type, val}).
+-record(binary_op,   {line, type, left, right}).
+-record(ternary_op,  {line, left, middle, right}).
 
 % Other Expressions
 -record(match,       {line, left, right}).
