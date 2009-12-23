@@ -85,13 +85,13 @@ inline_exprs -> expr : ['$1'].
 %% Expressions
 expr -> match_expr : '$1'.
 
-match_expr -> match_expr '=' bool_expr :
+match_expr -> bool_expr '=' match_expr :
   #match{
     line=?line('$2'), 
     left='$1', 
     right='$3'
   }.
-match_expr -> match_expr rebind_op bool_expr :
+match_expr -> bool_expr rebind_op match_expr :
   #binary_op{
     line=?line('$1'), 
     type=?op('$2'), 
