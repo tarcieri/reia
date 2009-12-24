@@ -79,13 +79,9 @@ transform(#regexp{line=Line, pattern=Pattern}) ->
     {bin, Line, [{bin_element, Line, {string, Line, Pattern}, default, default}]}
   ]};
   
-%% Binaries
+% Binaries
 transform(#binary{line=Line, elements=Elements}) ->
   {bin, Line, [binary_element(Element) || Element <- Elements]};
-
-% Matches
-transform(#match{line=Line, left=Left, right=Right}) ->
-  {match, Line, transform(Left), transform(Right)};
 
 % Lists
 transform(#cons{line=Line, expr=Expr, tail=Tail}) ->
@@ -113,6 +109,20 @@ transform(#range{line=Line, from=From, to=To}) ->
     transform(To)
   ]};
 
+% Clauses
+transform(#clause{line=Line, patterns=Patterns, exprs=Exprs}) ->
+  Exprs2 = [transform(Expr) || Expr <- Exprs],
+  [{clause, Line, transform(Pattern), [], Exprs2} || Pattern <- Patterns];
+
+% Case statements
+transform(#'case'{line=Line, expr=Expr, clauses=Clauses}) ->
+  Clauses2 = lists:flatten([transform(Clause) || Clause <- Clauses]),
+  {'case', Line, transform(Expr), Clauses2};
+
+% Matches
+transform(#match{line=Line, left=Left, right=Right}) ->
+  {match, Line, transform(Left), transform(Right)};
+    
 % Operators
 transform(#unary_op{line=Line, type='!', val=Val}) ->
   {op, Line, 'not', transform(Val)};
