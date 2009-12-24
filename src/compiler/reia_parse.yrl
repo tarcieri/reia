@@ -107,12 +107,11 @@ match_expr -> ternary_expr rebind_op match_expr :
 match_expr -> ternary_expr : '$1'.
 
 ternary_expr -> bool_expr '?' bool_expr ':' bool_expr :
-  #ternary_op{
-    line=?line('$1'),
-    left='$1',
-    middle='$3',
-    right='$5'
-  }.
+  #'if'{line=?line('$1'), clauses=[
+    #clause{line=?line('$1'), patterns=['$1'], exprs=['$3']},
+    #clause{line=?line('$1'), patterns=[#true{line=?line('$1')}], exprs=['$5']}
+  ]}.
+  
 ternary_expr -> bool_expr : '$1'.
 
 bool_expr -> bool_expr bool_op comp_expr : 
