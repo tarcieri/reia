@@ -108,6 +108,7 @@ ternary_expr -> bool_expr '?' bool_expr ':' bool_expr :
     middle='$3',
     right='$5'
   }.
+ternary_expr -> bool_expr : '$1'.
 
 bool_expr -> bool_expr bool_op comp_expr : 
   #binary_op{
