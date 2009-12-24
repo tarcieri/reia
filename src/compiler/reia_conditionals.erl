@@ -42,14 +42,10 @@ if_to_case(Clauses) ->
 if_to_case([], Output) ->
   Output;
 if_to_case([Clause|Clauses], Output) ->
-  % FIXME: rather than duplicating the output expression body, it would be
-  % better to first 'cast' the condition to a boolean, then perform a case
-  % expression based off that
   #clause{line=Line, patterns=[Condition], exprs=Exprs} = Clause,
-  Node = #'case'{line=Line, expr=Condition, clauses=[
+  Node = #'case'{line=Line, expr=cast_boolean(Condition), clauses=[
     #clause{line=Line, patterns=[#false{line=Line}], exprs=[Output]},
-    #clause{line=Line, patterns=[#nil{line=Line}],   exprs=[Output]},
-    #clause{line=Line, patterns=[#identifier{line=Line, name='_'}], exprs=Exprs}
+    #clause{line=Line, patterns=[#true {line=Line}], exprs=Exprs}
   ]},
   if_to_case(Clauses, Node).
       
@@ -67,3 +63,13 @@ catchall_pattern(#identifier{}) ->
   true;
 catchall_pattern(_) ->
   false.
+  
+% "Cast" Reia-style booleans to the Erlang equivalent.  In Reia (as in Ruby),
+% everything is considered "true" in a boolean context except false and nil.
+cast_boolean(Condition) ->
+  Line = element(2, Condition),
+  #'case'{line=Line, expr=Condition, clauses=[
+    #clause{line=Line, patterns=[#false{line=Line}], exprs=[#false{line=Line}]},
+    #clause{line=Line, patterns=[#nil{line=Line}],   exprs=[#false{line=Line}]},
+    #clause{line=Line, patterns=[#identifier{line=Line, name='_'}], exprs=[#true{line=Line}]}
+  ]}.
