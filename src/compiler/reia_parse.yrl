@@ -11,6 +11,7 @@ Nonterminals
   exprs
   inline_exprs
   expr
+  inline_if_expr
   match_expr
   ternary_expr
   bool_expr
@@ -89,7 +90,21 @@ inline_exprs -> expr ',' inline_exprs : ['$1'|'$3'].
 inline_exprs -> expr : ['$1'].
 
 %% Expressions
-expr -> match_expr : '$1'.
+expr -> inline_if_expr : '$1'.
+
+inline_if_expr -> match_expr 'if' match_expr :
+  #'if'{line=?line('$2'), clauses=[
+    #clause{line=?line('$2'), patterns=['$3'], exprs=['$1']}
+  ]}.
+inline_if_expr -> match_expr 'unless' match_expr :
+  #'if'{line=?line('$2'), clauses=[
+    #clause{
+      line=?line('$2'), 
+      patterns=[#unary_op{line=?line('$1'), type='not', val='$3'}],
+      exprs=['$1']
+    }
+  ]}.
+inline_if_expr -> match_expr : '$1'.
 
 match_expr -> ternary_expr '=' match_expr :
   #match{
