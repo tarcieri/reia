@@ -112,7 +112,7 @@ transform(#range{line=Line, from=From, to=To}) ->
 % Clauses
 transform(#clause{line=Line, patterns=Patterns, exprs=Exprs}) ->
   Exprs2 = [transform(Expr) || Expr <- Exprs],
-  [{clause, Line, transform(Pattern), [], Exprs2} || Pattern <- Patterns];
+  [{clause, Line, [transform(Pattern)], [], Exprs2} || Pattern <- Patterns];
 
 % Case statements
 transform(#'case'{line=Line, expr=Expr, clauses=Clauses}) ->
