@@ -22,9 +22,14 @@ Nonterminals
   unary_expr
   call_expr
   max_expr
-  case_expr
   clauses
   clause
+  case_expr
+  if_expr
+  if_clause
+  elseif_clauses
+  elseif_clause
+  else_clause
   function_identifier
   rebind_op
   bool_op
@@ -54,7 +59,7 @@ Terminals
   eol '(' ')' '[' ']' '{' '}'
   float integer string atom regexp true false nil 
   identifier punctuated_identifier erl 'and' 'or' 'not'
-  'case' 'when' 'end'
+  'case' 'when' 'end' 'if' 'unless' 'elseif' 'else'
   '+' '-' '*' '/' '%' '**' ',' '.' '..' 
   '=' '=>' '$' ':' '?' '!' '~' '&' '|' '^' '<<' '>>'
   '===' '==' '!=' '>' '<' '>=' '<='
@@ -185,26 +190,8 @@ max_expr -> boolean      : '$1'.
 max_expr -> regexp       : '$1'.
 max_expr -> string       : interpolate_string('$1').
 max_expr -> case_expr    : '$1'.
+max_expr -> if_expr    : '$1'.
 max_expr -> '(' expr ')' : '$2'.
-
-%% Clauses
-clauses -> clause clauses : ['$1'|'$2'].
-clauses -> clause : ['$1'].
-
-clause -> when inline_exprs eol expr_list : 
-  #clause{
-    line=?line('$1'), 
-    patterns='$2', 
-    exprs='$4'
-  }.
-
-%% Case expressions
-case_expr -> 'case' expr eol clauses 'end': 
-  #'case'{
-    line=?line('$1'), 
-    expr='$2', 
-    clauses='$4'
-  }.
   
 %% Assignment operators
 rebind_op -> '+='  : '$1'.
@@ -259,6 +246,62 @@ unary_op -> '~'   : '$1'.
 boolean -> true  : '$1'.
 boolean -> false : '$1'.
 boolean -> nil   : '$1'.
+
+%% Numbers
+number -> float   : '$1'.
+number -> integer : '$1'.
+
+%% Lists
+list -> '[' ']' :       #empty{line=?line('$1')}.
+list -> '[' expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
+
+tail -> ']' : #empty{line=?line('$1')}.
+tail -> ',' '*' expr ']' : '$3'.
+tail -> ',' expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
+
+%% Binaries
+binary -> '$' '[' ']' : #binary{line=?line('$1'), elements=[]}.
+binary -> '$' '[' bin_elements ']' : #binary{line=?line('$1'), elements='$3'}.
+binary -> '$' string :
+  #binary{
+    line=?line('$1'),
+    elements=[#bin_element{line=?line('$1'), expression='$2'}]
+  }.
+
+bin_elements -> bin_element : ['$1'].
+bin_elements -> bin_element ',' bin_elements : ['$1'|'$3'].
+
+bin_element -> max_expr bit_size bit_type_list: 
+  #bin_element{
+    line=?line('$1'), 
+    expression='$1', 
+    size='$2', 
+    type_list='$3'
+  }.
+
+bit_size -> ':' max_expr : '$2'.
+bit_size -> '$empty' : default.
+
+bit_type_list -> '/' bit_type_elements : '$2'.
+bit_type_list -> '$empty' : default.
+
+bit_type_elements -> bit_type '-' bit_type_elements : ['$1'|'$3'].
+bit_type_elements -> bit_type : ['$1'].
+
+bit_type -> atom             : element(3, '$1').
+bit_type -> atom ':' integer : {element(3, '$1'), element(3,'$3')}.
+
+%% Tuples
+tuple -> '(' ')' :               #tuple{line=?line('$1'), elements=[]}.
+tuple -> '(' expr ',' ')' :      #tuple{line=?line('$1'), elements=['$2']}.
+tuple -> '(' expr ',' exprs ')': #tuple{line=?line('$1'), elements=['$2'|'$4']}.
+
+%% Dicts
+dict -> '{' '}' :                #dict{line=?line('$1'), elements=[]}.
+dict -> '{' dict_entries '}' :   #dict{line=?line('$1'), elements='$2'}.
+
+dict_entries -> bool_expr '=>' expr : [{'$1','$3'}]. % FIXME: change add_expr to 1 below match
+dict_entries -> bool_expr '=>' expr ',' dict_entries : [{'$1','$3'}|'$5'].
 
 %% Function identifiers
 function_identifier -> identifier : '$1'.
@@ -323,62 +366,52 @@ call -> call_expr '[' expr ']' :
     left='$1',
     right='$3'
   }.
+  
+%% Clauses
+clauses -> clause clauses : ['$1'|'$2'].
+clauses -> clause : ['$1'].
 
-%% Numbers
-number -> float   : '$1'.
-number -> integer : '$1'.
-
-%% Lists
-list -> '[' ']' :       #empty{line=?line('$1')}.
-list -> '[' expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
-
-tail -> ']' : #empty{line=?line('$1')}.
-tail -> ',' '*' expr ']' : '$3'.
-tail -> ',' expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
-
-%% Binaries
-binary -> '$' '[' ']' : #binary{line=?line('$1'), elements=[]}.
-binary -> '$' '[' bin_elements ']' : #binary{line=?line('$1'), elements='$3'}.
-binary -> '$' string :
-  #binary{
-    line=?line('$1'),
-    elements=[#bin_element{line=?line('$1'), expression='$2'}]
-  }.
-
-bin_elements -> bin_element : ['$1'].
-bin_elements -> bin_element ',' bin_elements : ['$1'|'$3'].
-
-bin_element -> max_expr bit_size bit_type_list: 
-  #bin_element{
+clause -> when inline_exprs eol expr_list : 
+  #clause{
     line=?line('$1'), 
-    expression='$1', 
-    size='$2', 
-    type_list='$3'
+    patterns='$2', 
+    exprs='$4'
   }.
 
-bit_size -> ':' max_expr : '$2'.
-bit_size -> '$empty' : default.
+%% Case expressions
+case_expr -> 'case' expr eol clauses 'end': 
+  #'case'{
+    line=?line('$1'), 
+    expr='$2', 
+    clauses='$4'
+  }.
+  
+%% If expressions
+if_expr -> if_clause 'end' : 
+  #'if'{line=?line('$1'), clauses=['$1']}.
+if_expr -> if_clause else_clause 'end' : 
+  #'if'{line=?line('$1'), clauses=['$1','$2']}.
+if_expr -> if_clause elseif_clauses 'end' :
+  #'if'{line=?line('$1'), clauses=['$1'|'$2']}.
+if_expr -> if_clause elseif_clauses else_clause 'end' : 
+  #'if'{line=?line('$1'), clauses=lists:flatten(['$1','$2','$3'])}.
 
-bit_type_list -> '/' bit_type_elements : '$2'.
-bit_type_list -> '$empty' : default.
+if_clause -> 'if' expr eol expr_list : 
+  #clause{line=?line('$1'), patterns=['$2'], exprs='$4'}.
+if_clause -> 'unless' expr eol expr_list : 
+  #clause{
+    line=?line('$1'), 
+    patterns=[#unary_op{line=?line('$1'), type='not', val='$2'}], 
+    exprs='$4'
+  }.
 
-bit_type_elements -> bit_type '-' bit_type_elements : ['$1'|'$3'].
-bit_type_elements -> bit_type : ['$1'].
+elseif_clauses -> elseif_clause elseif_clauses : ['$1'|'$2'].
+elseif_clauses -> elseif_clause : ['$1'].
+elseif_clause  -> elseif expr eol expr_list : 
+  #clause{line=?line('$1'), patterns=['$2'], exprs='$4'}.
 
-bit_type -> atom             : element(3, '$1').
-bit_type -> atom ':' integer : {element(3, '$1'), element(3,'$3')}.
-
-%% Tuples
-tuple -> '(' ')' :               #tuple{line=?line('$1'), elements=[]}.
-tuple -> '(' expr ',' ')' :      #tuple{line=?line('$1'), elements=['$2']}.
-tuple -> '(' expr ',' exprs ')': #tuple{line=?line('$1'), elements=['$2'|'$4']}.
-
-%% Dicts
-dict -> '{' '}' :                #dict{line=?line('$1'), elements=[]}.
-dict -> '{' dict_entries '}' :   #dict{line=?line('$1'), elements='$2'}.
-
-dict_entries -> bool_expr '=>' expr : [{'$1','$3'}]. % FIXME: change add_expr to 1 below match
-dict_entries -> bool_expr '=>' expr ',' dict_entries : [{'$1','$3'}|'$5'].
+else_clause    -> else expr_list : 
+  #clause{line=?line('$1'), patterns=[#true{line=?line('$1')}], exprs='$2'}.
 
 Erlang code.
 

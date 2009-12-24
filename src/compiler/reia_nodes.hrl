@@ -37,3 +37,4 @@
 -record(block,       {line, exprs}).
 -record(clause,      {line, patterns, exprs}).
 -record('case',      {line, expr, clauses}).
+-record('if',        {line, clauses}).
