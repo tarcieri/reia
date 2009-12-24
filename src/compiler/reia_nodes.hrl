@@ -21,7 +21,7 @@
 -record(native_call, {line, module, function, arguments}).
 
 % Operators
--record(unary_op,    {line, type, val}).
+-record(unary_op,    {line, type, expr}).
 -record(binary_op,   {line, type, left, right}).
 
 % Other Expressions

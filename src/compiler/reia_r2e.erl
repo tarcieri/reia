@@ -124,14 +124,14 @@ transform(#match{line=Line, left=Left, right=Right}) ->
   {match, Line, transform(Left), transform(Right)};
     
 % Operators
-transform(#unary_op{line=Line, type='!', val=Val}) ->
-  {op, Line, 'not', transform(Val)};
+transform(#unary_op{line=Line, type='!', expr=Expr}) ->
+  {op, Line, 'not', transform(Expr)};
 
-transform(#unary_op{line=Line, type='~', val=Val}) ->
-  {op, Line, 'bnot', transform(Val)};
+transform(#unary_op{line=Line, type='~', expr=Expr}) ->
+  {op, Line, 'bnot', transform(Expr)};
     
-transform(#unary_op{line=Line, type=Type, val=Val}) ->
-  {op, Line, Type, transform(Val)};
+transform(#unary_op{line=Line, type=Type, expr=Expr}) ->
+  {op, Line, Type, transform(Expr)};
 
 transform(#binary_op{line=Line, type='&', left=Left, right=Right}) ->
   {op, Line, 'band', transform(Left), transform(Right)};

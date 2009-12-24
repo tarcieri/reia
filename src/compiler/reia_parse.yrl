@@ -100,7 +100,7 @@ inline_if_expr -> match_expr 'unless' match_expr :
   #'if'{line=?line('$2'), clauses=[
     #clause{
       line=?line('$2'), 
-      patterns=[#unary_op{line=?line('$1'), type='not', val='$3'}],
+      patterns=[#unary_op{line=?line('$1'), type='not', expr='$3'}],
       exprs=['$1']
     }
   ]}.
@@ -186,7 +186,7 @@ unary_expr -> unary_op unary_expr :
   #unary_op{
     line=?line('$1'),
     type=?op('$1'),
-    val='$2'
+    expr='$2'
   }.
 unary_expr -> call_expr : '$1'.
 
@@ -415,7 +415,7 @@ if_clause -> 'if' expr eol expr_list :
 if_clause -> 'unless' expr eol expr_list : 
   #clause{
     line=?line('$1'), 
-    patterns=[#unary_op{line=?line('$1'), type='not', val='$2'}], 
+    patterns=[#unary_op{line=?line('$1'), type='not', expr='$2'}], 
     exprs='$4'
   }.
 
