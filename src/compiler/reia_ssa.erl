@@ -16,12 +16,17 @@ transform(Exprs, Options) ->
   {ok, BAExprs} = reia_bindings:transform(Exprs, Options#compile_options.scope),
   reia_syntax:map_subtrees(fun transform_node/1, BAExprs).
 
-transform_node(#bindings{node=#identifier{line=Line, name=Name}, entries=Bindings}) ->
+transform_node(#bindings{node=#identifier{line=Line, name=Name}=Node, entries=Bindings}) ->
   case dict:find(Name, Bindings) of
     {ok, Version} ->
       #identifier{line=Line, name=ssa_name(Name, Version)};
     error ->
-      throw({error, {Line, lists:flatten(io_lib:format("unbound variable: '~s'", [Name]))}})
+      case Name of
+        '_' -> 
+          Node;
+        _   ->
+          throw({error, {Line, lists:flatten(io_lib:format("unbound variable: '~s'", [Name]))}})
+      end
   end;
 transform_node(#bindings{node=Node}) ->
   reia_syntax:map_subtrees(fun transform_node/1, Node);
