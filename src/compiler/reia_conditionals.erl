@@ -30,6 +30,12 @@ transform(#'case'{line=Line, clauses=Clauses} = Node) ->
       Node#'case'{clauses=Clauses ++ [Catchall]} 
   end,
   reia_syntax:map_subtrees(fun transform/1, Node);
+    
+% Unary not
+transform(#unary_op{type='not', expr=Expr}=Node) ->
+  reia_syntax:map_subtrees(fun transform/1, Node#unary_op{expr=cast_boolean(Expr)});
+transform(#unary_op{type='!',   expr=Expr}=Node) ->
+  reia_syntax:map_subtrees(fun transform/1, Node#unary_op{expr=cast_boolean(Expr)});
   
 % Walk unrecognized nodes without transforming them
 transform(Node) ->
