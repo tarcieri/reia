@@ -36,7 +36,15 @@ transform(#unary_op{type='not', expr=Expr}=Node) ->
   reia_syntax:map_subtrees(fun transform/1, Node#unary_op{expr=cast_boolean(Expr)});
 transform(#unary_op{type='!',   expr=Expr}=Node) ->
   reia_syntax:map_subtrees(fun transform/1, Node#unary_op{expr=cast_boolean(Expr)});
-  
+
+% Boolean binary ops
+transform(#binary_op{type='and', left=Left, right=Right}=Node) ->
+  Node2 = Node#binary_op{left=cast_boolean(Left), right=cast_boolean(Right)},
+  reia_syntax:map_subtrees(fun transform/1, Node2);
+transform(#binary_op{type='or',  left=Left, right=Right}=Node) ->
+  Node2 = Node#binary_op{left=cast_boolean(Left), right=cast_boolean(Right)},
+  reia_syntax:map_subtrees(fun transform/1, Node2);
+      
 % Walk unrecognized nodes without transforming them
 transform(Node) ->
   reia_syntax:map_subtrees(fun transform/1, Node).
