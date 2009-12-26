@@ -28,6 +28,8 @@ transform_node(#bindings{node=#identifier{line=Line, name=Name}=Node, entries=Bi
           throw({error, {Line, lists:flatten(io_lib:format("unbound variable: '~s'", [Name]))}})
       end
   end;
+transform_node(#bindings{node=#bound_var{line=Line, name=Name}}=Bindings) ->
+  transform_node(Bindings#bindings{node=#identifier{line=Line, name=Name}});
 transform_node(#bindings{node=Node}) ->
   reia_syntax:map_subtrees(fun transform_node/1, Node);
 transform_node(Node) ->
