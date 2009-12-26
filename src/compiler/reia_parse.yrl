@@ -32,6 +32,7 @@ Nonterminals
   elseif_clause
   else_clause
   function_identifier
+  bound_var
   rebind_op
   bool_op
   comp_op
@@ -199,6 +200,7 @@ max_expr -> binary       : '$1'.
 max_expr -> tuple        : '$1'.
 max_expr -> dict         : '$1'.
 max_expr -> identifier   : '$1'.
+max_expr -> bound_var    : '$1'.
 max_expr -> atom         : '$1'.
 max_expr -> boolean      : '$1'.
 max_expr -> regexp       : '$1'.
@@ -320,6 +322,9 @@ dict_entries -> bool_expr '=>' expr ',' dict_entries : [{'$1','$3'}|'$5'].
 %% Function identifiers
 function_identifier -> identifier : '$1'.
 function_identifier -> punctuated_identifier : '$1'.
+
+%% Bound variables
+bound_var -> '^' identifier : #bound_var{line=?line('$1'), name=element(3, '$2')}.
 
 %% Function calls
 call -> call_expr '.' function_identifier '(' ')' :

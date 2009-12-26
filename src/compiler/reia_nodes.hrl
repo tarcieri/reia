@@ -8,6 +8,7 @@
 -record(integer,    {line, value}).
 -record(float,      {line, value}).
 -record(identifier, {line, name}).
+-record(bound_var,  {line, name}).
 -record(string,     {line, characters}).
 -record(dstring,    {line, elements}).
 -record(regexp,     {line, pattern}).
