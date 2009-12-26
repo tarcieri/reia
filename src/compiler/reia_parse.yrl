@@ -40,6 +40,9 @@ Nonterminals
   mult_op
   pow_op
   unary_op
+  module_decl
+  functions
+  function
   boolean
   call
   number
@@ -58,10 +61,11 @@ Nonterminals
   .
   
 Terminals
-  eol '(' ')' '[' ']' '{' '}'
+  '(' ')' '[' ']' '{' '}' def eol
   float integer string atom regexp true false nil 
-  identifier punctuated_identifier erl 'and' 'or' 'not'
+  module module_name identifier punctuated_identifier erl 
   'case' 'when' 'end' 'if' 'unless' 'elseif' 'else'
+  'and' 'or' 'not'
   '+' '-' '*' '/' '%' '**' ',' '.' '..' 
   '=' '=>' '$' ':' '?' '!' '~' '&' '|' '^' '<<' '>>'
   '===' '==' '!=' '>' '<' '>=' '<='
@@ -204,9 +208,10 @@ max_expr -> bound_var    : '$1'.
 max_expr -> atom         : '$1'.
 max_expr -> boolean      : '$1'.
 max_expr -> regexp       : '$1'.
-max_expr -> string       : interpolate_string('$1').
 max_expr -> case_expr    : '$1'.
-max_expr -> if_expr    : '$1'.
+max_expr -> if_expr      : '$1'.
+max_expr -> module_decl  : '$1'.
+max_expr -> string       : interpolate_string('$1').
 max_expr -> '(' expr ')' : '$2'.
   
 %% Assignment operators
@@ -258,6 +263,47 @@ unary_op -> 'not' : '$1'.
 unary_op -> '!'   : '$1'.
 unary_op -> '~'   : '$1'.
 
+%% Module declaration
+module_decl -> module module_name eol functions 'end' : 
+  #module{
+    line=?line('$1'), 
+    name=element(3, '$2'), 
+    functions='$4'
+  }.
+  
+%% Functions
+functions -> function : ['$1'].
+functions -> function eol : ['$1'].
+functions -> eol functions : '$2'.
+functions -> function eol functions : ['$1'|'$3'].
+
+%% Function definitions
+function -> def function_identifier eol expr_list 'end' : 
+  #function{
+    line=?line('$1'), 
+    name=element(3, '$2'), 
+    arguments=[], 
+    body='$4'
+  }.
+function -> def function_identifier '(' ')' eol expr_list 'end' :
+  #function{
+    line=?line('$1'), 
+    name=element(3, '$2'), 
+    arguments=[], 
+    body='$6'
+  }.
+function -> def function_identifier '(' exprs ')' eol expr_list 'end' :
+  #function{
+    line=?line('$1'), 
+    name=element(3, '$2'), 
+    arguments='$4', 
+    body='$7'
+  }.
+
+%% Function identifiers
+function_identifier -> identifier : '$1'.
+function_identifier -> punctuated_identifier : '$1'.
+  
 %% Boolean values
 boolean -> true  : '$1'.
 boolean -> false : '$1'.
@@ -318,10 +364,6 @@ dict -> '{' dict_entries '}' :   #dict{line=?line('$1'), elements='$2'}.
 
 dict_entries -> bool_expr '=>' expr : [{'$1','$3'}]. % FIXME: change add_expr to 1 below match
 dict_entries -> bool_expr '=>' expr ',' dict_entries : [{'$1','$3'}|'$5'].
-
-%% Function identifiers
-function_identifier -> identifier : '$1'.
-function_identifier -> punctuated_identifier : '$1'.
 
 %% Bound variables
 bound_var -> '^' identifier : #bound_var{line=?line('$1'), name=element(3, '$2')}.

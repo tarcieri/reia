@@ -20,7 +20,7 @@ Rules.
 
 %% Numbers
 -?{Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
--?{Digit}+ : build_integer(TokenChars, TokenLine).
+-?{Digit}+           : build_integer(TokenChars, TokenLine).
 
 %% Strings
 {DoubleQuoted} : build_string(string, TokenChars, TokenLine, TokenLen).
@@ -34,8 +34,8 @@ Rules.
 \:{DoubleQuoted} : build_quoted_atom(TokenChars, TokenLine, TokenLen).
 \:{SingleQuoted} : build_quoted_atom(TokenChars, TokenLine, TokenLen).
 
-%% Identifiers and constants
-{UpperCase}({UpperCase}|{LowerCase}|{Digit}|_)* : build_constant(TokenChars, TokenLine).
+%% Module and Variable Names
+{UpperCase}({UpperCase}|{LowerCase}|{Digit}|_)* : build_module_name(TokenChars, TokenLine).
 ({LowerCase}|_)({UpperCase}|{LowerCase}|{Digit}|_)* : build_identifier(TokenChars, TokenLine).
 ({LowerCase}|_)({UpperCase}|{LowerCase}|{Digit}|_)*[?!] : build_punctuated_identifier(TokenChars, TokenLine).
 
@@ -88,14 +88,14 @@ Rules.
 \|\|= : {token,{'||=',TokenLine}}.
 &     : {token,{'&',TokenLine}}.
 &&    : {token,{'and',TokenLine}}.
-\^     : {token,{'^',TokenLine}}.
+\^    : {token,{'^',TokenLine}}.
 ~     : {token,{'~',TokenLine}}.
-\?     : {token,{'?',TokenLine}}.
+\?    : {token,{'?',TokenLine}}.
 !     : {token,{'!',TokenLine}}.
 \$    : {token,{'$',TokenLine}}.
 &=    : {token,{'&=',TokenLine}}.
-\|=    : {token,{'|=',TokenLine}}.
-\^=    : {token,{'^=',TokenLine}}.
+\|=   : {token,{'|=',TokenLine}}.
+\^=   : {token,{'^=',TokenLine}}.
 <<=   : {token,{'<<=',TokenLine}}.
 >>=   : {token,{'>>=',TokenLine}}.
 
@@ -150,9 +150,9 @@ build_quoted_atom(Chars, Line, Len) ->
   String = lists:sublist(Chars, 2, Len - 2),
   build_atom(String, Line, Len - 2).
   
-build_constant(Chars, Line) ->
+build_module_name(Chars, Line) ->
   Atom = list_to_atom(Chars),
-  {token, {constant, Line, Atom}}.
+  {token, {module_name, Line, Atom}}.
   
 build_identifier(Chars, Line) ->  
     Atom = list_to_atom(Chars),
