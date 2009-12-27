@@ -106,7 +106,6 @@ transform_node(Node, State) when is_integer(Node) or is_float(Node) or is_atom(N
   {Node, State};
 
 transform_node(Node, State) ->
-%  io:format("Unrecognized node: ~p in state ~p~n", [Node, State]),
   {Node2, State2} = reia_syntax:mapfold_subtrees(fun transform_node/2, State, Node),
   output(Node2, State2).
 
