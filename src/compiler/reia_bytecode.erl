@@ -27,12 +27,12 @@ load(Bin, Args) ->
 	{ok, Name, Result}.
   
 % Compiled evaluation of a parsed Reia file
-compile(Filename, Expressions) ->
-  compile(Filename, Expressions, #compile_options{}).
+compile(Filename, Exprs) ->
+  compile(Filename, Exprs, #compile_options{}).
 
-compile(Filename, Expressions, Options) ->
-  io:format("Output Code: ~p~n", [Expressions]),
-  case compile_expressions(Filename, Expressions, Options) of
+compile(Filename, Exprs, Options) ->
+  io:format("Output Code: ~p~n", [Exprs]),
+  case compile_expressions(Filename, Exprs, Options) of
     {ok, _Module, Bin} ->
       Module = #reia_module{filename=Filename, base_module=Bin},
       {ok, term_to_binary(Module)};
@@ -41,10 +41,10 @@ compile(Filename, Expressions, Options) ->
   end.
 
 % Output raw Erlang bytecode for inclusion into compiled Reia bytecode
-compile_expressions(Filename, Expressions, Options) ->  
-  Module = case Options#compile_options.toplevel_wrapper of
-    true  -> wrapped_module(Expressions);
-    false -> unwrapped_module(Expressions)
+compile_expressions(Filename, Exprs, Options) ->  
+  {Module, _Submodules} = case Options#compile_options.toplevel_wrapper of
+    true  -> wrapped_module(Exprs);
+    false -> unwrapped_module(Exprs)
   end,
   
   ErlModule = [
@@ -56,15 +56,15 @@ compile_expressions(Filename, Expressions, Options) ->
   
   compile:forms(ErlModule, compile_options(Options)).
 
-wrapped_module(_Expressions) ->
+wrapped_module(_Exprs) ->
   throw({error, "toplevel wrapper not supported yet, sorry!"}).
   
-unwrapped_module(Expressions) ->
-  case Expressions of
+unwrapped_module(Exprs) ->
+  case Exprs of
     [{module, Line, Name, Functions}] -> 
-      {Functions2, Submodules} = extract_submodules(Functions),
-      io:format("Extracted the following submodules: ~p~n", [Submodules]),
-      #module{line=Line, name=Name, functions=Functions2};
+      {ok, Functions2, Submodules} = reia_modules:replace(Functions, fun module_loader/1),
+      Module = #module{line=Line, name=Name, functions=Functions2},
+      {Module, Submodules};
     _ ->
       throw({error, "code without a toplevel wrapper should define exactly one module"})
   end.
@@ -82,13 +82,8 @@ hipe_available() ->
     undefined -> false;
     _         -> true
   end.
-
-extract_submodules(Exprs) ->
-  {ok, Exprs2, Submodules} = reia_modules:replace(Exprs, fun module_loader/1),
-  {Exprs2, Submodules}.
   
 module_loader(Module) ->
-  io:format("Building loader for: ~p~n", [Module]),
   Name = Module#module.name,
   {call,1,
     {remote,1,{atom,1,io},{atom,1,format}}, [
