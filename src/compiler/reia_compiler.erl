@@ -37,6 +37,8 @@ process_option({passes, Passes}, Options) ->
   Options#compile_options{passes = Passes};
 process_option({autohipe, AutoHiPE}, Options) ->
   Options#compile_options{autohipe = AutoHiPE};
+process_option({toplevel_wrapper, ToplevelWrapper}, Options) ->
+  Options#compile_options{toplevel_wrapper = ToplevelWrapper};
 process_option({erlc_options, Opts}, Options) ->
   Options#compile_options{erlc_options = Opts}.
 

@@ -7,6 +7,7 @@
 
 -module(reia_bytecode).
 -export([compile/2, compile/3, load/1, load/2]).
+-include("reia_nodes.hrl").
 -include("reia_compile_options.hrl").
 
 % Ideally this record is opaque to everything except this module
@@ -40,33 +41,33 @@ compile(Filename, Expressions, Options) ->
   end.
 
 % Output raw Erlang bytecode for inclusion into compiled Reia bytecode
-compile_expressions(Filename, Expressions, Options) ->
-%  case Options#compile_options.toplevel_wrapper of
-%    true ->
-%      % Build argument list in the abstract format
-%      Args = [{var, 1, Name} || Name <- []],
-%
-%      % Create a "toplevel" function which is called when the module is loaded
-%      Function = {function, 1, toplevel, length(Args), [
-%        {clause, 1, Args, [], Expressions}
-%      ]},
-%
-%      Module = [
-%        {attribute, 1, module, list_to_atom(Filename)},
-%        {attribute, 1, file, {Filename, 1}},
-%        {attribute, 1, code, Expressions},
-%        Function
-%      ];
-%    false ->
-      [{module, _Line, Name, Functions}] = Expressions,
-      Module = [
-        {attribute, 1, module, Name},
-        {attribute, 1, file, {Filename, 1}},
-        {attribute, 1, code, Options#compile_options.code}
-        |Functions
-      ],
-%  end,
-  compile:forms(Module, compile_options(Options)).
+compile_expressions(Filename, Expressions, Options) ->  
+  Module = case Options#compile_options.toplevel_wrapper of
+    true  -> wrapped_module(Expressions);
+    false -> unwrapped_module(Expressions)
+  end,
+  
+  ErlModule = [
+    {attribute, 1, module, Module#module.name},
+    {attribute, 1, file, {Filename, 1}},
+    {attribute, 1, code, Options#compile_options.code}
+    |Module#module.functions
+  ],
+  
+  compile:forms(ErlModule, compile_options(Options)).
+
+wrapped_module(_Expressions) ->
+  throw({error, "toplevel wrapper not supported yet, sorry!"}).
+  
+unwrapped_module(Expressions) ->
+  case Expressions of
+    [{module, Line, Name, Functions}] -> 
+      {Functions2, Submodules} = extract_submodules(Functions),
+      io:format("Extracted the following submodules: ~p~n", [Submodules]),
+      #module{line=Line, name=Name, functions=Functions2};
+    _ ->
+      throw({error, "code without a toplevel wrapper should define exactly one module"})
+  end.
 
 compile_options(Options) ->
   ErlOptions = Options#compile_options.erlc_options,
@@ -81,3 +82,16 @@ hipe_available() ->
     undefined -> false;
     _         -> true
   end.
+
+extract_submodules(Exprs) ->
+  {ok, Exprs2, Submodules} = reia_modules:replace(Exprs, fun module_loader/1),
+  {Exprs2, Submodules}.
+  
+module_loader(Module) ->
+  io:format("Building loader for: ~p~n", [Module]),
+  Name = Module#module.name,
+  {call,1,
+    {remote,1,{atom,1,io},{atom,1,format}}, [
+      {string,1,"Here's where I'd normally load: ~p~n"},
+      {cons,1,{atom,1,Name},{nil,1}}
+  ]}.
