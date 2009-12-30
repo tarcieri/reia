@@ -53,6 +53,9 @@ Nonterminals
   number
   list
   tail
+  list_comprehension
+  lc_exprs
+  lc_expr
   binary
   bin_elements
   bin_element
@@ -71,7 +74,7 @@ Terminals
   float integer string atom regexp true false nil 
   module module_name identifier punctuated_identifier erl 
   'case' 'when' 'end' 'if' 'unless' 'elseif' 'else' fun do
-  'and' 'or' 'not' 'try' 'catch'
+  'and' 'or' 'not' 'try' 'catch' for in
   '+' '-' '*' '/' '%' '**' ',' '.' '..' 
   '=' '=>' '$' ':' '?' '!' '~' '&' '|' '^' '<<' '>>'
   '===' '==' '!=' '>' '<' '>=' '<='
@@ -221,6 +224,7 @@ max_expr -> try_expr     : '$1'.
 max_expr -> module_name  : '$1'.
 max_expr -> module_decl  : '$1'.
 max_expr -> string       : interpolate_string('$1').
+max_expr -> list_comprehension : '$1'.
 max_expr -> '(' expr ')' : '$2'.
   
 %% Assignment operators
@@ -472,6 +476,25 @@ tail -> eol ',' '*' expr ']'         : '$4'.
 tail -> eol ',' '*' expr eol ']'     : '$4'.
 tail -> eol ',' eol '*' expr ']'     : '$5'.
 tail -> eol ',' eol '*' expr eol ']' : '$5'.
+
+%% List comprehensions
+list_comprehension -> '[' expr for lc_exprs ']' : 
+  #lc{
+    line=?line('$1'), 
+    expr='$2', 
+    generators='$4'
+  }.
+
+lc_exprs -> lc_expr : ['$1'].
+lc_exprs -> lc_expr ',' lc_exprs: ['$1'|'$3'].
+
+lc_expr -> expr : '$1'.
+lc_expr -> expr 'in' expr : 
+  #generate{
+    line=?line('$2'), 
+    pattern='$1', 
+    source='$3'
+  }.
 
 %% Binaries
 binary -> '$' '[' ']' : #binary{line=?line('$1'), elements=[]}.

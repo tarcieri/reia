@@ -38,6 +38,8 @@
 -record(dict,        {line, elements}).
 -record(lambda,      {line, args, body}).
 -record(block,       {line, exprs}).
+-record(lc,          {line, expr, generators}).
+-record(generate,    {line, pattern, source}).
 -record(clause,      {line, patterns, exprs}).
 -record('case',      {line, expr, clauses}).
 -record('if',        {line, clauses}).
