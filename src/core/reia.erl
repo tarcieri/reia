@@ -34,7 +34,7 @@ execute_file(Filename) ->
   try
     load(Filename)
   catch _Type:Error ->
-    io:format("~s", [Error])
+    io:format("~s~n", [Error])
   end.
 
 % Internal function for loading submodules

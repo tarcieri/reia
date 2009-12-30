@@ -8,6 +8,7 @@
 -module(reia_compiler).
 -export([file/1, file/2, string/2, string/3, compile/2, compile/3]).
 -include("reia_compile_options.hrl").
+-define(parse_error(File, Line, Error), throw(lists:flatten(io_lib:format("~s:~w: ~s", [File, Line, Error])))).
 
 % Compile the given file
 file(Filename) ->
@@ -24,11 +25,18 @@ string(Filename, String) ->
   
 % Compile the given string with the given options.  See compile/3 below.
 string(Filename, String, Options) ->
-  case reia_parse:string(String) of
-    {ok, Exprs} -> 
-      compile(Filename, Exprs, Options);
-    {error, {Line, Error}} ->
-      throw(lists:flatten(io_lib:format("Error: Line ~w: ~s~n", [Line, Error])))
+  case reia_scan:string(String) of
+    {ok, Tokens, _} -> 
+      case reia_parse:parse(Tokens) of
+        {ok, Exprs} ->
+          compile(Filename, Exprs, Options);
+        {error, {_, _, [Error, []]}} ->
+          ?parse_error(Filename, eof, lists:flatten([Error, "end of file"]));
+        {error, {Line, _, [Error, Token]}} ->
+          ?parse_error(Filename, Line, lists:flatten([Error, Token]))
+      end;
+    {error, {Line, _, {Error, Token}}, _} ->
+      ?parse_error(Filename, Line, lists:flatten([Error, Token]))
   end.
 
 % Compile the given expressions, which came from the given source filename
