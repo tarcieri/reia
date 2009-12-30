@@ -22,6 +22,8 @@ call(#reia_regexp{} = Receiver, Method, Arguments, Block) ->
   'Regexp':call(Receiver, Method, Arguments, Block);
 call(#reia_range{} = Receiver, Method, Arguments, Block) ->
   'Range':call(Receiver, Method, Arguments, Block);
+call(#reia_module{} = Receiver, Method, Arguments, Block) ->
+  'Module':call(Receiver, Method, Arguments, Block);
 call(Receiver, Method, Arguments, Block) when is_tuple(Receiver) ->
   'Tuple':call(Receiver, Method, Arguments, Block);
 call(Receiver, Method, Arguments, Block) when is_binary(Receiver) ->

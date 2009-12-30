@@ -7,6 +7,7 @@
 
 -module(reia).
 -export([init/0, load_submodule/2]).
+-include("reia_types.hrl").
 
 % Initialize the Reia environment
 init() -> load_core().
@@ -19,7 +20,8 @@ load_submodule(Name, Attributes) ->
   {value, {static, Name, Bin}} = lists:keysearch(Name, 2, Submodules),
   
   % FIXME: should probably fix the filename here
-  code:load_binary(Name, "submodule", Bin).
+  {module, Name} = code:load_binary(Name, "submodule", Bin),
+  #reia_module{name = Name}.
 
 % Load the core modules AOT
 % This prevents naming conflicts on case insensitive filesystems between Reia
