@@ -313,12 +313,32 @@ call -> function_identifier '(' ')' :
     line  = ?line('$2'), 
     name  = ?identifier_name('$1')
   }.
-
 call -> function_identifier '(' exprs ')' :
   #local_call{
     line = ?line('$2'), 
     name = ?identifier_name('$1'), 
     args = '$3'
+  }.
+  
+%% Local function calls with blocks
+call -> function_identifier block : 
+  #local_call{
+    line  = ?line('$2'), 
+    name  = ?identifier_name('$1'), 
+    block = '$2'
+  }.
+call -> function_identifier '(' ')' block : 
+  #local_call{
+    line  = ?line('$2'), 
+    name  = ?identifier_name('$1'), 
+    block = '$4'
+  }.
+call -> function_identifier '(' exprs ')' block : 
+  #local_call{
+    line  = ?line('$2'), 
+    name  = ?identifier_name('$1'), 
+    args  = '$3', 
+    block = '$5'
   }.
 
 %% Remote function calls
@@ -328,7 +348,6 @@ call -> call_expr '.' function_identifier '(' ')' :
     receiver = '$1',
     name     = ?identifier_name('$3')
   }.
-
 call -> call_expr '.' function_identifier '(' exprs ')' :
   #remote_call{
     line     = ?line('$2'),
@@ -345,15 +364,13 @@ call -> call_expr '.' function_identifier block :
     name     = ?identifier_name('$3'), 
     block    = '$4'
   }.
-  
 call -> call_expr '.' function_identifier '(' ')' block :
   #remote_call{
     line     = ?line('$2'), 
     receiver = '$1', 
     name     = ?identifier_name('$3'), 
     block    = '$6'
-  }.
-  
+  }. 
 call -> call_expr '.' function_identifier '(' exprs ')' block :
   #remote_call{
     line     = ?line('$2'), 
@@ -364,26 +381,22 @@ call -> call_expr '.' function_identifier '(' exprs ')' block :
   }.
   
 %% Blocks
-
 block -> '{' expr_list '}' : 
   #lambda{
     line=?line('$1'), 
     body='$2'
   }.
-  
 block -> '{' '|' block_args '|' expr_list '}' :
   #lambda{
     line=?line('$1'), 
     args='$3', 
     body='$5'
   }.
-
 block -> do expr_list 'end' :
   #lambda{
     line=?line('$1'),
     body='$2'
-  }.
-  
+  }. 
 block -> do '|' block_args '|' expr_list 'end' :
   #lambda{
     line=?line('$1'), 
@@ -401,7 +414,6 @@ call -> erl '.' identifier '(' ')' :
     module    = erlang,
     function  = ?identifier_name('$3')
   }.
-
 call -> erl '.' identifier '(' exprs ')' :
   #native_call{
     line      = ?line('$2'),
@@ -409,14 +421,12 @@ call -> erl '.' identifier '(' exprs ')' :
     function  = ?identifier_name('$3'),
     args      = '$5'
   }.
-
 call -> erl '.' identifier '.' identifier '(' ')' :
   #native_call{
     line      = ?line('$2'),
     module    = ?identifier_name('$3'),
     function  = ?identifier_name('$5')
   }.
-
 call -> erl '.' identifier '.' identifier '(' exprs ')' :
   #native_call{
     line      = ?line('$2'),
