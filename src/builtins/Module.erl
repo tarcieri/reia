@@ -20,5 +20,8 @@ call(Module, inspect, _Args, _Block) ->
   end;
   
 call(Module, to_s, Args, Block) ->
-  call(Module, inspect, Args, Block).
+  call(Module, inspect, Args, Block);
   
+call(Module, Method, Arguments, Block) ->
+  Name = Module#reia_module.name,
+  Name:Method(Arguments, Block).
