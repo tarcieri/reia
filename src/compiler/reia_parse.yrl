@@ -49,6 +49,7 @@ Nonterminals
   call
   number
   list
+  tail
   binary
   bin_elements
   bin_element
@@ -56,7 +57,7 @@ Nonterminals
   bit_type_list
   bit_type_elements
   bit_type
-  tail
+  lambda
   tuple
   dict
   dict_entries
@@ -66,7 +67,7 @@ Terminals
   '(' ')' '[' ']' '{' '}' def eol
   float integer string atom regexp true false nil 
   module module_name identifier punctuated_identifier erl 
-  'case' 'when' 'end' 'if' 'unless' 'elseif' 'else' do
+  'case' 'when' 'end' 'if' 'unless' 'elseif' 'else' fun do
   'and' 'or' 'not'
   '+' '-' '*' '/' '%' '**' ',' '.' '..' 
   '=' '=>' '$' ':' '?' '!' '~' '&' '|' '^' '<<' '>>'
@@ -203,6 +204,7 @@ call_expr -> max_expr : '$1'.
 max_expr -> number       : '$1'.
 max_expr -> list         : '$1'.
 max_expr -> binary       : '$1'.
+max_expr -> lambda       : '$1'.
 max_expr -> tuple        : '$1'.
 max_expr -> dict         : '$1'.
 max_expr -> identifier   : '$1'.
@@ -498,6 +500,40 @@ bit_type_elements -> bit_type : ['$1'].
 
 bit_type -> atom             : element(3, '$1').
 bit_type -> atom ':' integer : {element(3, '$1'), element(3,'$3')}.
+
+%% Lambdas
+lambda -> fun '{' expr_list '}' :
+  #lambda{
+    line = ?line('$1'), 
+    body = '$3'
+  }.
+lambda -> fun '(' ')' '{' expr_list '}' : 
+  #lambda{
+    line = ?line('$1'),
+    body = '$5'
+  }.
+lambda -> fun '(' exprs ')' '{' expr_list '}' :
+  #lambda{
+    line = ?line('$1'), 
+    args = '$3',
+    body = '$6'
+  }.
+lambda -> fun do expr_list 'end' :
+  #lambda{
+    line = ?line('$1'),
+    body = '$3'
+  }.
+lambda -> fun '(' ')' do expr_list 'end' :
+  #lambda{
+    line = ?line('$1'), 
+    body = '$5'
+  }.
+lambda -> fun '(' exprs ')' do expr_list 'end' :
+  #lambda{
+    line = ?line('$1'), 
+    args = '$3', 
+    body = '$6'
+  }.
 
 %% Tuples
 tuple -> '(' ')' :               #tuple{line=?line('$1'), elements=[]}.
