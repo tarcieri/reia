@@ -11,6 +11,16 @@
 % Initialize the Reia environment
 init() -> load_core().
 
+% Internal function for loading submodules
+load_submodule(Name, Attributes) ->
+  {value, {parent, [Parent]}} = lists:keysearch(parent, 1, Attributes),
+  ParentAttrs = Parent:module_info(attributes),
+  {value, {submodules, Submodules}} = lists:keysearch(submodules, 1, ParentAttrs),
+  {value, {static, Name, Bin}} = lists:keysearch(Name, 2, Submodules),
+  
+  % FIXME: should probably fix the filename here
+  code:load_binary(Name, "submodule", Bin).
+
 % Load the core modules AOT
 % This prevents naming conflicts on case insensitive filesystems between Reia
 % and Erlang modules (e.g. string and String)
@@ -35,13 +45,3 @@ base_directory() ->
     true  -> Dir;
     false -> throw({error, "can't locate the Reia distribution"})
   end.
-  
-% Internal function for loading submodules
-load_submodule(Name, Attributes) ->
-  {value, {parent, [Parent]}} = lists:keysearch(parent, 1, Attributes),
-  ParentAttrs = Parent:module_info(attributes),
-  {value, {submodules, Submodules}} = lists:keysearch(submodules, 1, ParentAttrs),
-  {value, {static, Name, Bin}} = lists:keysearch(Name, 2, Submodules),
-  
-  % FIXME: should probably fix the filename here
-  code:load_binary(Name, "submodule", Bin).
