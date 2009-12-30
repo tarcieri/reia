@@ -686,7 +686,7 @@ extract_fragment(Continuation, [$}|String], Line) ->
         {ok, [Expr]} ->
           {String, Expr};
         %% Need more tokens
-        {error, {999999, _}} ->
+        {error, {_, _, [_, []]}} ->
           extract_fragment(Continuation2, String, Line);
         Error ->
           throw(Error)
