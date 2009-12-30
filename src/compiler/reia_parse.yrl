@@ -278,6 +278,10 @@ functions -> function eol : ['$1'].
 functions -> eol functions : '$2'.
 functions -> function eol functions : ['$1'|'$3'].
 
+%% Function identifiers
+function_identifier -> identifier : '$1'.
+function_identifier -> punctuated_identifier : '$1'.
+
 %% Function definitions
 function -> def function_identifier eol expr_list 'end' : 
   #function{
@@ -301,9 +305,65 @@ function -> def function_identifier '(' exprs ')' eol expr_list 'end' :
     body='$7'
   }.
 
-%% Function identifiers
-function_identifier -> identifier : '$1'.
-function_identifier -> punctuated_identifier : '$1'.
+%% Local function calls
+call -> function_identifier '(' ')' : 
+  #local_call{
+    line  = ?line('$2'), 
+    name  = ?identifier_name('$1')
+  }.
+
+call -> function_identifier '(' exprs ')' :
+  #local_call{
+    line = ?line('$2'), 
+    name = ?identifier_name('$1'), 
+    args = '$3'
+  }.
+
+%% Remote function calls
+call -> call_expr '.' function_identifier '(' ')' :
+  #remote_call{
+    line     = ?line('$2'),
+    receiver = '$1',
+    name     = ?identifier_name('$3')
+  }.
+
+call -> call_expr '.' function_identifier '(' exprs ')' :
+  #remote_call{
+    line     = ?line('$2'),
+    receiver = '$1',
+    name     = ?identifier_name('$3'),
+    args     = '$5'
+  }.
+
+call -> erl '.' identifier '(' ')' :
+  #native_call{
+    line      = ?line('$2'),
+    module    = erlang,
+    function  = ?identifier_name('$3')
+  }.
+
+call -> erl '.' identifier '(' exprs ')' :
+  #native_call{
+    line      = ?line('$2'),
+    module    = 'erlang',
+    function  = ?identifier_name('$3'),
+    args      = '$5'
+  }.
+
+call -> erl '.' identifier '.' identifier '(' ')' :
+  #native_call{
+    line      = ?line('$2'),
+    module    = ?identifier_name('$3'),
+    function  = ?identifier_name('$5')
+  }.
+
+call -> erl '.' identifier '.' identifier '(' exprs ')' :
+  #native_call{
+    line      = ?line('$2'),
+    module    = ?identifier_name('$3'),
+    function  = ?identifier_name('$5'),
+    args      = '$7'
+  }.
   
 %% Boolean values
 boolean -> true  : '$1'.
@@ -383,66 +443,6 @@ dict_entries -> bool_expr '=>' expr ',' dict_entries : [{'$1','$3'}|'$5'].
 
 %% Bound variables
 bound_var -> '^' identifier : #bound_var{line=?line('$1'), name=element(3, '$2')}.
-
-%% Local function calls
-call -> function_identifier '(' ')' : 
-  #local_call{
-    line  = ?line('$2'), 
-    name  = ?identifier_name('$1')
-  }.
-  
-call -> function_identifier '(' exprs ')' :
-  #local_call{
-    line = ?line('$2'), 
-    name = ?identifier_name('$1'), 
-    args = '$3'
-  }.
-
-%% Remote function calls
-call -> call_expr '.' function_identifier '(' ')' :
-  #remote_call{
-    line     = ?line('$2'),
-    receiver = '$1',
-    name     = ?identifier_name('$3')
-  }.
-
-call -> call_expr '.' function_identifier '(' exprs ')' :
-  #remote_call{
-    line     = ?line('$2'),
-    receiver = '$1',
-    name     = ?identifier_name('$3'),
-    args     = '$5'
-  }.
-
-call -> erl '.' identifier '(' ')' :
-  #native_call{
-    line      = ?line('$2'),
-    module    = erlang,
-    function  = ?identifier_name('$3')
-  }.
-
-call -> erl '.' identifier '(' exprs ')' :
-  #native_call{
-    line      = ?line('$2'),
-    module    = 'erlang',
-    function  = ?identifier_name('$3'),
-    args      = '$5'
-  }.
-
-call -> erl '.' identifier '.' identifier '(' ')' :
-  #native_call{
-    line      = ?line('$2'),
-    module    = ?identifier_name('$3'),
-    function  = ?identifier_name('$5')
-  }.
-
-call -> erl '.' identifier '.' identifier '(' exprs ')' :
-  #native_call{
-    line      = ?line('$2'),
-    module    = ?identifier_name('$3'),
-    function  = ?identifier_name('$5'),
-    args      = '$7'
-  }.
 
 %% Index operation
 call -> call_expr '[' expr ']' :
