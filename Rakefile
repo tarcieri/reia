@@ -1,6 +1,6 @@
 require 'rake/clean'
 
-task :default => %w(check_erl_version check_previous_install build)
+task :default => %w(check_erl_version check_previous_install build test)
 
 # Returns the installed Erlang version
 def erlang_version
@@ -90,6 +90,11 @@ end
 # Parser
 file "src/compiler/reia_parse.erl" => %w(src/compiler/reia_parse.yrl) do
   erl_eval 'yecc:file("src/compiler/reia_parse.yrl", [verbose])'
+end
+
+# Test suite
+task :test => :build do
+  sh "bin/reia test/runner.re"
 end
 
 # Cleaning

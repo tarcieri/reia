@@ -1,0 +1,6 @@
+#!/bin/sh
+
+PROGRAM=$1
+shift
+
+erl -pz ebin -pz ../ebin -noshell +K true -s reia init -s reia load $PROGRAM -s init stop -extra $*

@@ -1,6 +1,0 @@
-#!/bin/sh
-
-PROGRAM=$1
-shift
-
-erl -pa ebin -pa ../ebin -noshell +K true -s reia erl_load $PROGRAM -s init stop -extra $*

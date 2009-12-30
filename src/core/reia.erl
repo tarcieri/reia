@@ -6,11 +6,15 @@
 %
 
 -module(reia).
--export([init/0, load_submodule/2]).
+-export([init/0, load/1, load_submodule/2]).
 -include("reia_types.hrl").
 
 % Initialize the Reia environment
 init() -> load_core().
+
+% Load the given Reia file
+load(Filename) ->
+  io:format("Here's where I'd ordinarly load: ~p~n", [Filename]).
 
 % Internal function for loading submodules
 load_submodule(Name, Attributes) ->
