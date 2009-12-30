@@ -18,7 +18,8 @@ load([Filename]) when is_atom(Filename) ->
   load(atom_to_list(Filename));
 load(Filename) ->
   Absname = filename:absname(Filename),
-  io:format("Here's where I'd ordinarly load: ~p~n", [Absname]).
+  Res = reia_compiler:file(Absname),
+  io:format("Result: ~p~n", [Res]).
 
 % Internal function for loading submodules
 load_submodule(Name, Attributes) ->
