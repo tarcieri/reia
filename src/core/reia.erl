@@ -6,8 +6,12 @@
 %
 
 -module(reia).
--export([init/0, load/1, load_submodule/2]).
+-export([init/0, load/1, execute_file/1, load_submodule/2]).
 -include("reia_types.hrl").
+
+%
+% Public functions
+%
 
 % Initialize the Reia environment
 init() -> load_core().
@@ -20,6 +24,18 @@ load(Filename) ->
   Absname = filename:absname(Filename),
   Res = reia_compiler:file(Absname),
   io:format("Result: ~p~n", [Res]).
+
+%
+% Internal functions
+%
+  
+% Internal function for loading code from the 'reia' command line script
+execute_file(Filename) ->
+  try
+    load(Filename)
+  catch _Type:Error ->
+    io:format("~s", [Error])
+  end.
 
 % Internal function for loading submodules
 load_submodule(Name, Attributes) ->
