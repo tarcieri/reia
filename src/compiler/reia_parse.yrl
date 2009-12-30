@@ -210,6 +210,7 @@ max_expr -> boolean      : '$1'.
 max_expr -> regexp       : '$1'.
 max_expr -> case_expr    : '$1'.
 max_expr -> if_expr      : '$1'.
+max_expr -> module_name  : '$1'.
 max_expr -> module_decl  : '$1'.
 max_expr -> string       : interpolate_string('$1').
 max_expr -> '(' expr ')' : '$2'.

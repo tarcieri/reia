@@ -108,6 +108,10 @@ transform(#range{line=Line, from=From, to=To}) ->
     transform(From),
     transform(To)
   ]};
+  
+% Module references
+transform(#module_name{line=Line, name=Name}) ->
+  {tuple, Line, [{atom, Line, reia_module}, {atom, Line, Name}]};
 
 % Clauses
 transform(#clause{line=Line, patterns=Patterns, exprs=Exprs}) ->
