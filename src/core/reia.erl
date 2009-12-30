@@ -17,7 +17,8 @@ load([Filename]) when is_atom(Filename) ->
   % Thunk for loading files from the CLI
   load(atom_to_list(Filename));
 load(Filename) ->
-  io:format("Here's where I'd ordinarly load: ~p~n", [Filename]).
+  Absname = filename:absname(Filename),
+  io:format("Here's where I'd ordinarly load: ~p~n", [Absname]).
 
 % Internal function for loading submodules
 load_submodule(Name, Attributes) ->
