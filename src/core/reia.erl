@@ -42,4 +42,6 @@ load_submodule(Name, Attributes) ->
   ParentAttrs = Parent:module_info(attributes),
   {value, {submodules, Submodules}} = lists:keysearch(submodules, 1, ParentAttrs),
   {value, {static, Name, Bin}} = lists:keysearch(Name, 2, Submodules),
+  
+  % FIXME: should probably fix the filename here
   code:load_binary(Name, "submodule", Bin).
