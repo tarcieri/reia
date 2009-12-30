@@ -23,6 +23,8 @@ Nonterminals
   unary_expr
   call_expr
   max_expr
+  block
+  block_args
   clauses
   clause
   case_expr
@@ -64,7 +66,7 @@ Terminals
   '(' ')' '[' ']' '{' '}' def eol
   float integer string atom regexp true false nil 
   module module_name identifier punctuated_identifier erl 
-  'case' 'when' 'end' 'if' 'unless' 'elseif' 'else'
+  'case' 'when' 'end' 'if' 'unless' 'elseif' 'else' do
   'and' 'or' 'not'
   '+' '-' '*' '/' '%' '**' ',' '.' '..' 
   '=' '=>' '$' ':' '?' '!' '~' '&' '|' '^' '<<' '>>'
@@ -335,6 +337,64 @@ call -> call_expr '.' function_identifier '(' exprs ')' :
     args     = '$5'
   }.
 
+%% Remote function calls with blocks
+call -> call_expr '.' function_identifier block :
+  #remote_call{
+    line     = ?line('$2'), 
+    receiver = '$1', 
+    name     = ?identifier_name('$3'), 
+    block    = '$4'
+  }.
+  
+call -> call_expr '.' function_identifier '(' ')' block :
+  #remote_call{
+    line     = ?line('$2'), 
+    receiver = '$1', 
+    name     = ?identifier_name('$3'), 
+    block    = '$6'
+  }.
+  
+call -> call_expr '.' function_identifier '(' exprs ')' block :
+  #remote_call{
+    line     = ?line('$2'), 
+    receiver = '$1', 
+    name     = ?identifier_name('$3'),
+    args     = '$5', 
+    block    = '$7'
+  }.
+  
+%% Blocks
+
+block -> '{' expr_list '}' : 
+  #lambda{
+    line=?line('$1'), 
+    body='$2'
+  }.
+  
+block -> '{' '|' block_args '|' expr_list '}' :
+  #lambda{
+    line=?line('$1'), 
+    args='$3', 
+    body='$5'
+  }.
+
+block -> do expr_list 'end' :
+  #lambda{
+    line=?line('$1'),
+    body='$2'
+  }.
+  
+block -> do '|' block_args '|' expr_list 'end' :
+  #lambda{
+    line=?line('$1'), 
+    args='$3',
+    body='$5'
+  }.
+
+block_args -> max_expr : ['$1'].
+block_args -> max_expr ',' block_args : ['$1'|'$3'].
+
+%% Native Erlang function calls
 call -> erl '.' identifier '(' ')' :
   #native_call{
     line      = ?line('$2'),

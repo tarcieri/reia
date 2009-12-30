@@ -36,6 +36,7 @@
 -record(bin_element, {line, expression, size=default, type_list=default}).
 -record(range,       {line, from, to}).
 -record(dict,        {line, elements}).
+-record(lambda,      {line, args, body}).
 -record(block,       {line, exprs}).
 -record(clause,      {line, patterns, exprs}).
 -record('case',      {line, expr, clauses}).
