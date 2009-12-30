@@ -33,6 +33,9 @@ Nonterminals
   elseif_clauses
   elseif_clause
   else_clause
+  try_expr
+  catch_clauses
+  catch_clause
   function_identifier
   bound_var
   rebind_op
@@ -68,7 +71,7 @@ Terminals
   float integer string atom regexp true false nil 
   module module_name identifier punctuated_identifier erl 
   'case' 'when' 'end' 'if' 'unless' 'elseif' 'else' fun do
-  'and' 'or' 'not'
+  'and' 'or' 'not' 'try' 'catch'
   '+' '-' '*' '/' '%' '**' ',' '.' '..' 
   '=' '=>' '$' ':' '?' '!' '~' '&' '|' '^' '<<' '>>'
   '===' '==' '!=' '>' '<' '>=' '<='
@@ -214,6 +217,7 @@ max_expr -> boolean      : '$1'.
 max_expr -> regexp       : '$1'.
 max_expr -> case_expr    : '$1'.
 max_expr -> if_expr      : '$1'.
+max_expr -> try_expr     : '$1'.
 max_expr -> module_name  : '$1'.
 max_expr -> module_decl  : '$1'.
 max_expr -> string       : interpolate_string('$1').
@@ -604,6 +608,24 @@ elseif_clause  -> elseif expr eol expr_list :
 
 else_clause    -> else expr_list : 
   #clause{line=?line('$1'), patterns=[#true{line=?line('$1')}], exprs='$2'}.
+  
+%% Try expressions
+try_expr -> 'try' expr_list catch_clauses 'end' :
+  #'try'{
+    line    = ?line('$1'), 
+    body    = '$2', 
+    clauses = '$3'
+  }.
+
+catch_clauses -> catch_clause catch_clauses : ['$1'|'$2'].
+catch_clauses -> catch_clause : ['$1'].
+
+catch_clause -> 'catch' expr eol expr_list :
+  #'catch'{
+    line = ?line('$1'), 
+    expr = '$2', 
+    body = '$4'
+  }.
 
 Erlang code.
 

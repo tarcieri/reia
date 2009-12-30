@@ -41,3 +41,5 @@
 -record(clause,      {line, patterns, exprs}).
 -record('case',      {line, expr, clauses}).
 -record('if',        {line, clauses}).
+-record('try',       {line, body, clauses}).
+-record('catch',     {line, expr, body}).
