@@ -36,7 +36,7 @@ transform(#module{line=Line, name=Name, functions=Funcs}) ->
   };
 
 % Functions
-transform(#function{line=Line, name=Name, arguments=Args, block=Block, body=Exprs}) ->
+transform(#function{line=Line, name=Name, args=Args, block=Block, body=Exprs}) ->
   {function, Line, Name, 2, [{clause, Line,
     [{tuple, Line, [transform(Arg) || Arg <- Args]}, transform(Block)],
     [],
@@ -68,7 +68,7 @@ transform(#dstring{line=Line, elements=Elements}) ->
     line=Line,
     receiver=explode_list(Elements, Line),
     name=join,
-    arguments=[],
+    args=[],
     block=#nil{line=Line}
   });
   
@@ -192,7 +192,7 @@ transform(#remote_call{
   line      = Line,
   receiver  = Receiver,
   name      = Name,
-  arguments = Args,
+  args = Args,
   block     = Block
 }) -> ?reia_dispatch(Receiver, Line, Name, Args, Block);
 
@@ -200,14 +200,14 @@ transform(#native_call{
   line      = Line,
   module    = Module,
   function  = Function,
-  arguments = Args
+  args = Args
 }) ->
   {call, Line,
     {remote, Line, {atom, Line, Module}, {atom, Line, Function}},
     [transform(Arg) || Arg <- Args]
   };
 
-% Code blocks (Erlang-style, not to be confused with Ruby-style block arguments)
+% Code blocks (Erlang-style, not to be confused with Ruby-style block args)
 transform(#block{line=Line, exprs=Exprs}) -> 
   {block, Line, [transform(Expr) || Expr <- Exprs]}.
 

@@ -50,7 +50,7 @@ transform_node(#module{functions=Functions} = Node, State) ->
   output(Node#module{functions=lists:map(Fun, Functions)}, State);
 
 % Function declarations create a new scope
-transform_node(#function{line=Line, name=Name, arguments=Args, block=Block, body=Exprs}, State) ->
+transform_node(#function{line=Line, name=Name, args=Args, block=Block, body=Exprs}, State) ->
   {Args2, #state{bindings=Bindings}} = reia_syntax:mapfold_subtrees(
     fun transform_node/2,
     #state{scope=argument},
@@ -69,7 +69,7 @@ transform_node(#function{line=Line, name=Name, arguments=Args, block=Block, body
     Exprs
   ),
 
-  Node = #function{line=Line, name=Name, arguments=Args2, block=Block2, body=Exprs2},
+  Node = #function{line=Line, name=Name, args=Args2, block=Block2, body=Exprs2},
   output(Node, State);
 
 % Walk the LHS of a match expression in match scope

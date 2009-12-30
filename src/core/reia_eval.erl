@@ -58,7 +58,7 @@ stamp() ->
 
 temporary_module(Name, Args, Exprs) ->
   #module{line=1, name=Name, functions=[
-    #function{line=1, name=toplevel, arguments=Args, body=Exprs}
+    #function{line=1, name=toplevel, args=Args, body=Exprs}
   ]}.
 
 % Annotate the return value of the expression to include the bindings

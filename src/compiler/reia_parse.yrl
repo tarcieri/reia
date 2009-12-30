@@ -283,21 +283,21 @@ function -> def function_identifier eol expr_list 'end' :
   #function{
     line=?line('$1'), 
     name=element(3, '$2'), 
-    arguments=[], 
+    args=[], 
     body='$4'
   }.
 function -> def function_identifier '(' ')' eol expr_list 'end' :
   #function{
     line=?line('$1'), 
     name=element(3, '$2'), 
-    arguments=[], 
+    args=[], 
     body='$6'
   }.
 function -> def function_identifier '(' exprs ')' eol expr_list 'end' :
   #function{
     line=?line('$1'), 
     name=element(3, '$2'), 
-    arguments='$4', 
+    args='$4', 
     body='$7'
   }.
 
@@ -372,45 +372,38 @@ bound_var -> '^' identifier : #bound_var{line=?line('$1'), name=element(3, '$2')
 %% Local function calls
 call -> function_identifier '(' ')' : 
   #local_call{
-    line      = ?line('$2'), 
-    name      = ?identifier_name('$1'), 
-    arguments = [], 
-    block     = #nil{line=?line('$2')}
+    line  = ?line('$2'), 
+    name  = ?identifier_name('$1')
   }.
   
 call -> function_identifier '(' exprs ')' :
   #local_call{
     line = ?line('$2'), 
     name = ?identifier_name('$1'), 
-    arguments = '$3', 
-    block = #nil{line=?line('$2')}
+    args = '$3'
   }.
 
 %% Remote function calls
 call -> call_expr '.' function_identifier '(' ')' :
   #remote_call{
-    line      = ?line('$2'),
-    receiver  = '$1',
-    name      = ?identifier_name('$3'),
-    arguments = [],
-    block     = #nil{line=?line('$2')}
+    line     = ?line('$2'),
+    receiver = '$1',
+    name     = ?identifier_name('$3')
   }.
 
 call -> call_expr '.' function_identifier '(' exprs ')' :
   #remote_call{
-    line      = ?line('$2'),
-    receiver  = '$1',
-    name      = ?identifier_name('$3'),
-    arguments = '$5',
-    block     = #nil{line=?line('$2')}
+    line     = ?line('$2'),
+    receiver = '$1',
+    name     = ?identifier_name('$3'),
+    args     = '$5'
   }.
 
 call -> erl '.' identifier '(' ')' :
   #native_call{
     line      = ?line('$2'),
     module    = erlang,
-    function  = ?identifier_name('$3'),
-    arguments = []
+    function  = ?identifier_name('$3')
   }.
 
 call -> erl '.' identifier '(' exprs ')' :
@@ -418,15 +411,14 @@ call -> erl '.' identifier '(' exprs ')' :
     line      = ?line('$2'),
     module    = 'erlang',
     function  = ?identifier_name('$3'),
-    arguments = '$5'
+    args      = '$5'
   }.
 
 call -> erl '.' identifier '.' identifier '(' ')' :
   #native_call{
     line      = ?line('$2'),
     module    = ?identifier_name('$3'),
-    function  = ?identifier_name('$5'),
-    arguments = []
+    function  = ?identifier_name('$5')
   }.
 
 call -> erl '.' identifier '.' identifier '(' exprs ')' :
@@ -434,7 +426,7 @@ call -> erl '.' identifier '.' identifier '(' exprs ')' :
     line      = ?line('$2'),
     module    = ?identifier_name('$3'),
     function  = ?identifier_name('$5'),
-    arguments = '$7'
+    args      = '$7'
   }.
 
 %% Index operation

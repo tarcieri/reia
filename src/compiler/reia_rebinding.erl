@@ -93,7 +93,7 @@ transform_setters(#binary_op{line=Line, type='[]', left=#identifier{}=Left, righ
   TmpVar = #identifier{line=Line, name=list_to_atom("__rebind_op_" ++ integer_to_list(Count))},
   
   % Invoke the []= method on the receiver, which will return the new version
-  SetExpr = #remote_call{line=Line, receiver=Left, name='[]=', arguments=[Right, TmpVar], block=#nil{line=Line}},
+  SetExpr = #remote_call{line=Line, receiver=Left, name='[]=', args=[Right, TmpVar], block=#nil{line=Line}},
   
   % Rebind the receiver to the new version
   RebindExpr = #match{line=Line, left=Left, right=SetExpr},
