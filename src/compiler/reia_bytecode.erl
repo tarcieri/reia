@@ -50,8 +50,9 @@ compile_expressions(Filename, Exprs, Options) ->
   Submodules2 = compile_submodules(Submodules, Filename, Options),
   
   Header = module_header(Module#module.name, Filename, Options),
+  ParentAttr = {attribute, 1, parent, list_to_atom(Filename)},
   SubmoduleAttr = {attribute, 1, submodules, Submodules2},
-  ErlModule = lists:flatten([Header, SubmoduleAttr, Module#module.functions]),
+  ErlModule = lists:flatten([Header, ParentAttr, SubmoduleAttr, Module#module.functions]),
   compile:forms(ErlModule, compile_options(Options)).
   
 compile_submodules(Submodules, Filename, Options) ->
@@ -101,7 +102,6 @@ hipe_available() ->
 module_loader(Module) ->
   Name = Module#module.name,
   {call,1,
-    {remote,1,{atom,1,io},{atom,1,format}}, [
-      {string,1,"Here's where I'd normally load: ~p~n"},
-      {cons,1,{atom,1,Name},{nil,1}}
-  ]}.
+    {remote,1,{atom,1,reia},{atom,1,load_submodule}},
+    [{atom,1,Name},{call,1,{atom,1,module_info},[{atom,1,attributes}]}]
+  }.

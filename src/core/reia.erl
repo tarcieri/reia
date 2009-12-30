@@ -6,7 +6,7 @@
 %
 
 -module(reia).
--export([init/0]).
+-export([init/0, load_submodule/2]).
 
 % Initialize the Reia environment
 init() -> load_core().
@@ -35,3 +35,11 @@ base_directory() ->
     true  -> Dir;
     false -> throw({error, "can't locate the Reia distribution"})
   end.
+  
+% Internal function for loading submodules
+load_submodule(Name, Attributes) ->
+  {value, {parent, [Parent]}} = lists:keysearch(parent, 1, Attributes),
+  ParentAttrs = Parent:module_info(attributes),
+  {value, {submodules, Submodules}} = lists:keysearch(submodules, 1, ParentAttrs),
+  {value, {static, Name, Bin}} = lists:keysearch(Name, 2, Submodules),
+  code:load_binary(Name, "submodule", Bin).
