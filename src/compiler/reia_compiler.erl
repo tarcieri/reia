@@ -47,10 +47,11 @@ compile(Filename, Exprs) ->
 %
 % Accepts a list of compile options, given as 2-tuples.  The compiler
 % recognizes the following option keys in the form {Key, Value}:
-% * scope:         Scope the given expressions are considered to exist in
-% * passes:        Passes which should be applied to the input expressions
-% * toplevel_args: A list of arguments the toplevel method accepts
-% * erlc_args:     A list of options to be passed alogn to erlc
+% * scope:            Scope the given expressions are considered to exist in
+% * passes:           Passes which should be applied to the input expressions
+% * autohipe:         Automatically use the HiPE JIT compiler if available
+% * toplevel_wrapper: Wrap toplevel code in its own module
+% * erlc_args:        A list of options to be passed alogn to erlc
 compile(Filename, Exprs, Options) ->
   Options2 = [{code, Exprs}|Options],
   OptRecord = lists:foldl(fun process_option/2, #compile_options{}, Options2),
