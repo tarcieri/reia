@@ -315,12 +315,27 @@ number -> float   : '$1'.
 number -> integer : '$1'.
 
 %% Lists
-list -> '[' ']' :       #empty{line=?line('$1')}.
-list -> '[' expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
+list -> '[' ']'           : #empty{line=?line('$1')}.
+list -> '[' eol ']'       : #empty{line=?line('$1')}.
+list -> '[' expr tail     : #cons{line=?line('$1'), expr='$2', tail='$3'}.
+list -> '[' eol expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
 
-tail -> ']' : #empty{line=?line('$1')}.
-tail -> ',' '*' expr ']' : '$3'.
-tail -> ',' expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
+tail -> ']'     : #empty{line=?line('$1')}.
+tail -> eol ']' : #empty{line=?line('$1')}.
+
+tail -> ',' '*' expr ']'             : '$3'.
+tail -> ',' '*' expr eol ']'         : '$3'.
+tail -> ',' eol '*' expr ']'         : '$4'.
+tail -> ',' eol '*' expr eol ']'     : '$4'.
+tail -> eol ',' '*' expr ']'         : '$4'.
+tail -> eol ',' '*' expr eol ']'     : '$4'.
+tail -> eol ',' eol '*' expr ']'     : '$5'.
+tail -> eol ',' eol '*' expr eol ']' : '$5'.
+
+tail -> ',' expr tail         : #cons{line=?line('$1'), expr='$2', tail='$3'}.
+tail -> ',' eol expr tail     : #cons{line=?line('$1'), expr='$3', tail='$4'}.
+tail -> eol ',' expr tail     : #cons{line=?line('$1'), expr='$3', tail='$4'}.
+tail -> eol ',' eol expr tail : #cons{line=?line('$1'), expr='$4', tail='$5'}.
 
 %% Binaries
 binary -> '$' '[' ']' : #binary{line=?line('$1'), elements=[]}.
