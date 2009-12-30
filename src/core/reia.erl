@@ -16,10 +16,6 @@
 % Initialize the Reia environment
 init() -> load_core().
 
-% Load the given Reia file
-load([Filename]) when is_atom(Filename) ->
-  % Thunk for loading files from the CLI
-  load(atom_to_list(Filename));
 load(Filename) ->
   Absname = filename:absname(Filename),
   Res = reia_compiler:file(Absname),
@@ -30,11 +26,19 @@ load(Filename) ->
 %
   
 % Internal function for loading code from the 'reia' command line script
+execute_file([Filename]) when is_atom(Filename) ->
+  % Thunk for loading files from the CLI
+  execute_file(atom_to_list(Filename));
 execute_file(Filename) ->
   try
     load(Filename)
   catch _Type:Error ->
-    io:format("~s~n", [Error])
+    case Error of
+      _ when is_list(Error) -> 
+        io:format("~s~n", [Error]);
+      {error, {Line, Message}} ->
+        io:format("~s:~w: ~s~n", [Filename, Line, Message])
+    end
   end.
 
 % Internal function for loading submodules
