@@ -42,20 +42,35 @@ compile(Filename, Exprs, Options) ->
 
 % Output raw Erlang bytecode for inclusion into compiled Reia bytecode
 compile_expressions(Filename, Exprs, Options) ->  
-  {Module, _Submodules} = case Options#compile_options.toplevel_wrapper of
+  {Module, Submodules} = case Options#compile_options.toplevel_wrapper of
     true  -> wrapped_module(Exprs);
     false -> unwrapped_module(Exprs)
   end,
   
-  ErlModule = [
-    {attribute, 1, module, Module#module.name},
-    {attribute, 1, file, {Filename, 1}},
-    {attribute, 1, code, Options#compile_options.code}
-    |Module#module.functions
-  ],
+  Submodules2 = compile_submodules(Submodules, Filename, Options),
   
+  Header = module_header(Module#module.name, Filename, Options),
+  SubmoduleAttr = {attribute, 1, submodules, Submodules2},
+  ErlModule = lists:flatten([Header, SubmoduleAttr, Module#module.functions]),
   compile:forms(ErlModule, compile_options(Options)).
+  
+compile_submodules(Submodules, Filename, Options) ->
+  [compile_submodule(Submodule, Filename, Options) || Submodule <- Submodules].
+  
+compile_submodule(Module, Filename, Options) ->
+  Header = module_header(Module#module.name, Filename, Options),
+  ParentAttr = {attribute, 1, parent, list_to_atom(Filename)},
+  ErlModule = lists:flatten([Header, ParentAttr, Module#module.functions]),
+  {ok, Name, Bin} = compile:forms(ErlModule, compile_options(Options)),
+  {static, Name, Bin}.
 
+module_header(Name, Filename, Options) ->
+  [
+    {attribute, 1, module, Name},
+    {attribute, 1, file, {Filename, 1}},
+    {attribute, 1, code, Options#compile_options.code}  
+  ].
+  
 wrapped_module(_Exprs) ->
   throw({error, "toplevel wrapper not supported yet, sorry!"}).
   
