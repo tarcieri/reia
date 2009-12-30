@@ -19,6 +19,7 @@
 -record(nil,         {line}).
 
 % Function calls
+-record(local_call,  {line, name, arguments, block}).
 -record(remote_call, {line, receiver, name, arguments, block}).
 -record(native_call, {line, module, function, arguments}).
 

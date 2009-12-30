@@ -369,7 +369,24 @@ dict_entries -> bool_expr '=>' expr ',' dict_entries : [{'$1','$3'}|'$5'].
 %% Bound variables
 bound_var -> '^' identifier : #bound_var{line=?line('$1'), name=element(3, '$2')}.
 
-%% Function calls
+%% Local function calls
+call -> function_identifier '(' ')' : 
+  #local_call{
+    line      = ?line('$2'), 
+    name      = ?identifier_name('$1'), 
+    arguments = [], 
+    block     = #nil{line=?line('$2')}
+  }.
+  
+call -> function_identifier '(' exprs ')' :
+  #local_call{
+    line = ?line('$2'), 
+    name = ?identifier_name('$1'), 
+    arguments = '$3', 
+    block = #nil{line=?line('$2')}
+  }.
+
+%% Remote function calls
 call -> call_expr '.' function_identifier '(' ')' :
   #remote_call{
     line      = ?line('$2'),
