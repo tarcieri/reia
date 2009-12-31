@@ -94,6 +94,22 @@ transform_node(#match{} = Node, State) ->
 transform_node(#identifier{name=Name} = Node, #state{scope=argument, bindings=Bindings} = State) ->
   output(Node, State#state{bindings=dict:store(Name, 0, Bindings)});
 
+% Lambdas close over the outer scope, bind arguments, but don't affect the outer scope
+transform_node(#lambda{line=Line, args=Args, body=Body}, State) ->
+  {Args2, #state{bindings=Bindings}} = reia_syntax:mapfold_subtrees(
+    fun transform_node/2,
+    State#state{scope=argument},
+    Args
+  ),
+  
+  {Body2, _} = reia_syntax:mapfold_subtrees(
+    fun transform_node/2,
+    State#state{bindings=Bindings, scope=normal},
+    Body
+  ),
+  
+  output(#lambda{line=Line, args=Args2, body=Body2}, State);
+
 % Variables are (re)bound while in match scope
 transform_node(#identifier{name=Name} = Node, #state{scope=match, bindings=Bindings} = State) ->
   NewBindings = case dict:find(Name, Bindings) of
