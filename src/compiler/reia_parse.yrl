@@ -645,9 +645,9 @@ catch_clauses -> catch_clause : ['$1'].
 
 catch_clause -> 'catch' expr eol expr_list :
   #'catch'{
-    line = ?line('$1'), 
-    expr = '$2', 
-    body = '$4'
+    line    = ?line('$1'), 
+    pattern = '$2', 
+    body    = '$4'
   }.
 
 Erlang code.

@@ -90,7 +90,7 @@ transform_node(#match{} = Node, State) ->
   State4 = State3#state{scope=State#state.scope},
   output(Node2, State4);
 
-% Arguments should initialize new entries in the bindings dict
+% Arguments initialize new entries in the bindings dict
 transform_node(#identifier{name=Name} = Node, #state{scope=argument, bindings=Bindings} = State) ->
   output(Node, State#state{bindings=dict:store(Name, 0, Bindings)});
 
@@ -109,6 +109,22 @@ transform_node(#lambda{line=Line, args=Args, body=Body}, State) ->
   ),
   
   output(#lambda{line=Line, args=Args2, body=Body2}, State);
+
+% Catch clauses match against patterns
+transform_node(#'catch'{line=Line, pattern=Pattern, body=Body}, #state{scope=Scope} = State) ->
+  {[Pattern2], State2} = reia_syntax:mapfold_subtrees(
+    fun transform_node/2,
+    State#state{scope=match},
+    [Pattern]
+  ),
+  
+  {Body2, State3} = reia_syntax:mapfold_subtrees(
+    fun transform_node/2,
+    State2#state{scope=normal},
+    Body
+  ),
+  
+  output(#'catch'{line=Line, pattern=Pattern2, body=Body2}, State3#state{scope=Scope});
 
 % Variables are (re)bound while in match scope
 transform_node(#identifier{name=Name} = Node, #state{scope=match, bindings=Bindings} = State) ->
