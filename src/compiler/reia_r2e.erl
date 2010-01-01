@@ -109,6 +109,15 @@ transform(#range{line=Line, from=From, to=To}) ->
     transform(To)
   ]};
   
+% Lambdas
+transform(#lambda{line=Line, args=Args, body=Exprs}) ->
+  {'fun', Line, {clauses, [
+    {clause, Line,
+      [transform(Arg) || Arg <- Args], [], 
+      [transform(Expr) || Expr <- Exprs]
+    }
+  ]}};
+
 % Module references
 transform(#module_name{line=Line, name=Name}) ->
   {tuple, Line, [{atom, Line, reia_module}, {atom, Line, Name}]};
