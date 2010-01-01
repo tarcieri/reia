@@ -61,11 +61,14 @@ transform_node(Node) ->
 
 % Transform shorthand operations that rebind a variable
 rebind_op(Line, Type, Left, Right) ->
-  #match{
+  Node = #match{
     line=Line,
     left=Left,
     right=#binary_op{line=Line, type=Type, left=Left, right=Right}
-  }.
+  },
+  
+  % In case this node contains additional setters that need processing
+  transform_node(Node).
   
 %
 % Transform expressions that behave differently in match scope
