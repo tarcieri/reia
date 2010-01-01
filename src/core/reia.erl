@@ -32,12 +32,14 @@ execute_file([Filename]) when is_atom(Filename) ->
 execute_file(Filename) ->
   try
     load(Filename)
-  catch _Type:Error ->
+  catch Class:Error ->
     case Error of
       _ when is_list(Error) -> 
         io:format("~s~n", [Error]);
       {error, {Line, Message}} ->
-        io:format("~s:~w: ~s~n", [Filename, Line, Message])
+        io:format("~s:~w: ~s~n", [Filename, Line, Message]);
+      _ ->
+        print_error(Class, Error)
     end
   end.
 
@@ -76,3 +78,13 @@ base_directory() ->
     true  -> Dir;
     false -> throw({error, "can't locate the Reia distribution"})
   end.
+  
+% Display errors and stack traces for unhandled Erlang exceptions
+print_error(Class, Reason) ->
+  PF = fun(Term, I) ->
+    io_lib:format("~." ++ integer_to_list(I) ++ "P", [Term, 50])
+  end,
+  StackTrace = erlang:get_stacktrace(),
+  StackFun = fun(M, _F, _A) -> (M =:= erl_eval) or (M =:= ?MODULE) end,
+  Error = lib:format_exception(1, Class, Reason, StackTrace, StackFun, PF),
+  io:format("~s~n", [Error]).
