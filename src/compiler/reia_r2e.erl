@@ -127,10 +127,38 @@ transform(#clause{line=Line, patterns=Patterns, exprs=Exprs}) ->
   Exprs2 = [transform(Expr) || Expr <- Exprs],
   [{clause, Line, [transform(Pattern)], [], Exprs2} || Pattern <- Patterns];
 
-% Case statements
+% Case expressions
 transform(#'case'{line=Line, expr=Expr, clauses=Clauses}) ->
   Clauses2 = lists:flatten([transform(Clause) || Clause <- Clauses]),
   {'case', Line, transform(Expr), Clauses2};
+        
+% Try expressions
+transform(#'try'{line=Line, body=Exprs, clauses=Clauses}) ->
+  {'try', Line, 
+    [transform(Expr) || Expr <- Exprs],
+    [],
+    [transform(Clause) || Clause <- Clauses],
+    []
+  };
+
+% Catch clauses
+% FIXME: Carried over from the old implementation, and I'm WTFing
+% Not really sure of the rationale of defining them like this
+% Oh well, rest assured exception handling will change greatly
+transform(#'catch'{line=Line, pattern=Pattern, body=Exprs}) ->
+  {clause, Line, 
+    [{tuple, Line, [{var, Line, '__type'}, {var, Line, '__reason'}, {var, Line, '__lint'}]}], 
+    [],
+    [
+      {match, Line, transform(Pattern), {tuple, Line, [
+        {atom, Line, exception},
+        {tuple, Line, [
+          {var, Line, '__type'},
+          {var, Line, '__reason'}
+        ]}
+      ]}}|[transform(Expr) || Expr <- Exprs]
+    ]
+  };
 
 % Matches
 transform(#match{line=Line, left=Left, right=Right}) ->
