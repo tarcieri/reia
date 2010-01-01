@@ -458,7 +458,7 @@ number -> integer : '$1'.
 list -> '[' ']'           : #empty{line=?line('$1')}.
 list -> '[' eol ']'       : #empty{line=?line('$1')}.
 list -> '[' expr tail     : #cons{line=?line('$1'), expr='$2', tail='$3'}.
-list -> '[' eol expr tail : #cons{line=?line('$1'), expr='$2', tail='$3'}.
+list -> '[' eol expr tail : #cons{line=?line('$1'), expr='$3', tail='$4'}.
 
 tail -> ',' expr tail         : #cons{line=?line('$1'), expr='$2', tail='$3'}.
 tail -> ',' eol expr tail     : #cons{line=?line('$1'), expr='$3', tail='$4'}.
