@@ -188,11 +188,22 @@ transform(#binary_op{line=Line, type=Type, left=Left, right=Right}) ->
   {op, Line, Type, transform(Left), transform(Right)};
 
 % Function calls
+transform(#local_call{
+  line  = Line,
+  name  = Name,
+  args  = Args,
+  block = Block
+}) ->
+  {call, Line, {atom, Line, Name}, [
+    {tuple, Line, [transform(Arg) || Arg <- Args]}, 
+    transform(Block)
+  ]};
+
 transform(#remote_call{
   line      = Line,
   receiver  = Receiver,
   name      = Name,
-  args = Args,
+  args      = Args,
   block     = Block
 }) -> ?reia_dispatch(Receiver, Line, Name, Args, Block);
 
@@ -200,7 +211,7 @@ transform(#native_call{
   line      = Line,
   module    = Module,
   function  = Function,
-  args = Args
+  args      = Args
 }) ->
   {call, Line,
     {remote, Line, {atom, Line, Module}, {atom, Line, Function}},
