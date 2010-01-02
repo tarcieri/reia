@@ -121,6 +121,15 @@ transform(#lambda{line=Line, args=Args, body=Exprs}) ->
 % Module references
 transform(#module_name{line=Line, name=Name}) ->
   {tuple, Line, [{atom, Line, reia_module}, {atom, Line, Name}]};
+  
+%% List comprehensions
+transform(#lc{line=Line, expr=Expr, generators=Generators}) ->
+  {lc, Line, transform(Expr), [transform(Generator) || Generator <- Generators]};
+
+%% List comprehension generators
+transform(#generate{line=Line, pattern=Pattern, source=Source}) ->
+  List = ?reia_dispatch(Source, Line, to_list, [], transform(#nil{line=Line})),
+  {generate, Line, transform(Pattern), List};
 
 % Clauses
 transform(#clause{line=Line, patterns=Patterns, exprs=Exprs}) ->
