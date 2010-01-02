@@ -140,7 +140,7 @@ transform(#clause{line=Line, patterns=Patterns, exprs=Exprs}) ->
 transform(#'case'{line=Line, expr=Expr, clauses=Clauses}) ->
   Clauses2 = lists:flatten([transform(Clause) || Clause <- Clauses]),
   {'case', Line, transform(Expr), Clauses2};
-        
+
 % Try expressions
 transform(#'try'{line=Line, body=Exprs, clauses=Clauses}) ->
   {'try', Line, 
@@ -268,7 +268,7 @@ transform(#native_call{
 transform(#block{line=Line, exprs=Exprs}) -> 
   {block, Line, [transform(Expr) || Expr <- Exprs]}.
 
-%% Group clauses of functions with the same name and arity
+% Group clauses of functions with the same name and arity
 group_clauses(Functions) ->
   group_clauses(Functions, dict:new()).
 group_clauses([], Functions) ->
@@ -285,16 +285,16 @@ group_clauses([Function|Rest], Functions) ->
       group_clauses(Rest, dict:store({Name, Arity}, {Line, [Clause]}, Functions))
   end.
 
-%% Transform the elements of Dicts
+% Transform the elements of Dicts
 dict_elements([], Line) ->
   {nil, Line};
 dict_elements([{Key,Value}|Rest], Line) ->
   {cons, Line, {tuple, Line, [transform(Key), transform(Value)]}, dict_elements(Rest, Line)}.
-  
+ 
 %% Transform an element of a binary
 binary_element(Element) -> Element.
 
-%% Explode a list of expressions into cons nodes
+% Explode a list of expressions into cons nodes
 explode_list([], Line) ->
   #empty{line=Line};
 explode_list([Expr|Tail], Line) ->

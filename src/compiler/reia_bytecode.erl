@@ -31,7 +31,6 @@ compile(Filename, Exprs) ->
   compile(Filename, Exprs, #compile_options{}).
 
 compile(Filename, Exprs, Options) ->
-  io:format("Output Code: ~p~n", [Exprs]),
   case compile_expressions(Filename, Exprs, Options) of
     {ok, _Module, Bin} ->
       Module = #reia_module{filename=Filename, base_module=Bin},
@@ -43,7 +42,7 @@ compile(Filename, Exprs, Options) ->
 % Output raw Erlang bytecode for inclusion into compiled Reia bytecode
 compile_expressions(Filename, Exprs, Options) ->  
   {Module, Submodules} = case Options#compile_options.toplevel_wrapper of
-    true  -> wrapped_module(Exprs);
+    true  -> wrapped_module(list_to_atom(Filename), Exprs);
     false -> unwrapped_module(Exprs)
   end,
   
@@ -53,6 +52,7 @@ compile_expressions(Filename, Exprs, Options) ->
   ParentAttr = {attribute, 1, parent, list_to_atom(Filename)},
   SubmoduleAttr = {attribute, 1, submodules, Submodules2},
   ErlModule = lists:flatten([Header, ParentAttr, SubmoduleAttr, Module#module.functions]),
+  
   compile:forms(ErlModule, compile_options(Options)).
   
 compile_submodules(Submodules, Filename, Options) ->
@@ -72,8 +72,13 @@ module_header(Name, Filename, Options) ->
     {attribute, 1, code, Options#compile_options.code}  
   ].
   
-wrapped_module(_Exprs) ->
-  throw({error, "toplevel wrapper not supported yet, sorry!"}).
+wrapped_module(Name, Exprs) ->
+  {ok, Exprs2, Submodules} = reia_modules:replace(Exprs, fun module_loader/1),
+  Function = {function, 1, toplevel, 0, [
+    {clause, 1, [], [], Exprs2}
+  ]},
+  Module = #module{line=1, name=Name, functions=[Function]},
+  {Module, Submodules}.
   
 unwrapped_module(Exprs) ->
   case Exprs of
