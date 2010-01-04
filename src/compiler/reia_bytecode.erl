@@ -6,13 +6,18 @@
 %
 
 -module(reia_bytecode).
--export([compile/2, compile/3, load/1, load/2]).
+-export([compile/2, compile/3, load_file/1, load/1, load/2]).
 -include("reia_nodes.hrl").
 -include("reia_compile_options.hrl").
 
 % Ideally this record is opaque to everything except this module
 % No other modules should operate directly on raw Reia bytecode
 -record(reia_module, {version=0, filename, base_module}).
+
+% Load the given file, executing its toplevel function
+load_file(Filename) -> 
+  {ok, Bin} = file:read_file(Filename),
+  load(Bin).
 
 % Load the given compiled Reia module, executing its toplevel function
 load(Bin) -> load(Bin, []).
