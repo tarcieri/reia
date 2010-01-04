@@ -18,8 +18,10 @@ init() -> load_core().
 
 load(Filename) ->
   Absname = filename:absname(Filename),
-  Res = reia_compiler:file(Absname),
-  io:format("Result: ~p~n", [Res]).
+  RebPath = filename:rootname(Absname) ++ ".reb",
+  {ok, Bin} = reia_compiler:file(Absname),
+  file:write_file(RebPath, Bin),
+  io:format("Result: ~p~n", [Bin]).
 
 %
 % Internal functions

@@ -99,4 +99,4 @@ end
 
 # Cleaning
 CLEAN.include %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
-CLEAN.include "ebin/*"
+CLEAN.include %w(ebin/* **/*.reb)
