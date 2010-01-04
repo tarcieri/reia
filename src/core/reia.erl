@@ -64,7 +64,7 @@ load_core() ->
   
 % Load a Reia module from the given path
 load_module(Path) ->
-  Module = lists:sublist(Path, length(Path) - 5), % Strip the .beam extension
+  Module = filename:rootname(Path, ".beam"),
   case code:load_abs(Module) of
     {module, _} -> ok;
     {error, Error} ->
