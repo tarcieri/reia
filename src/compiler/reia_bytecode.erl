@@ -26,7 +26,7 @@ load(Bin) -> load(Bin, []).
 % the given arguments (in order to pass along a default binding)
 load(Bin, Args) ->
 	#reia_module{filename = Filename, base_module = Module} = binary_to_term(Bin),
-	Name = list_to_atom(Filename),
+	Name = list_to_atom(filename:rootname(Filename)),
 	code:load_binary(Name, Filename, Module),
 	Result = apply(Name, toplevel, Args),
 	{ok, Name, Result}.
@@ -47,7 +47,7 @@ compile(Filename, Exprs, Options) ->
 % Output raw Erlang bytecode for inclusion into compiled Reia bytecode
 compile_expressions(Filename, Exprs, Options) ->  
   {Module, Submodules} = case Options#compile_options.toplevel_wrapper of
-    true  -> wrapped_module(list_to_atom(Filename), Exprs);
+    true  -> wrapped_module(Filename, Exprs);
     false -> unwrapped_module(Exprs)
   end,
   
@@ -77,7 +77,8 @@ module_header(Name, Filename, Options) ->
     {attribute, 1, code, Options#compile_options.code}  
   ].
   
-wrapped_module(Name, Exprs) ->
+wrapped_module(Filename, Exprs) ->
+  Name = list_to_atom(filename:rootname(Filename)),
   {ok, Exprs2, Submodules} = reia_modules:replace(Exprs, fun module_loader/1),
   Function = {function, 1, toplevel, 0, [
     {clause, 1, [], [], Exprs2}
