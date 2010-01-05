@@ -48,6 +48,9 @@ Nonterminals
   module_decl
   functions
   function
+  pargs
+  pargs_tail
+  block_capture
   boolean
   call
   number
@@ -300,23 +303,37 @@ function -> def function_identifier eol expr_list 'end' :
   #function{
     line=?line('$1'), 
     name=element(3, '$2'), 
-    args=[], 
     body='$4'
   }.
-function -> def function_identifier '(' ')' eol expr_list 'end' :
+function -> def function_identifier pargs eol expr_list 'end' :
   #function{
     line=?line('$1'), 
     name=element(3, '$2'), 
-    args=[], 
-    body='$6'
+    args='$3'#pargs.args,
+    block='$3'#pargs.block,
+    body='$5'
   }.
-function -> def function_identifier '(' exprs ')' eol expr_list 'end' :
-  #function{
-    line=?line('$1'), 
-    name=element(3, '$2'), 
-    args='$4', 
-    body='$7'
-  }.
+  
+%% Parenthesized arguments
+pargs -> '(' ')'                 : #pargs{}.
+pargs -> '(' eol ')'             : #pargs{}.
+pargs -> '(' expr pargs_tail     : ?pargs_add('$2', '$3').
+pargs -> '(' eol expr pargs_tail : ?pargs_add('$3', '$4').
+
+pargs_tail -> ',' expr pargs_tail         : ?pargs_add('$2', '$3').
+pargs_tail -> ',' eol expr pargs_tail     : ?pargs_add('$3', '$4').
+pargs_tail -> eol ',' expr pargs_tail     : ?pargs_add('$3', '$4').
+pargs_tail -> eol ',' eol expr pargs_tail : ?pargs_add('$4', '$5').
+
+pargs_tail -> ')'     : #pargs{}.
+pargs_tail -> eol ')' : #pargs{}.
+pargs_tail -> ',' block_capture ')'     : '$2'.
+pargs_tail -> eol ',' block_capture ')' : '$3'.
+
+block_capture -> '&' expr         : #pargs{block='$2'}.
+block_capture -> '&' expr eol     : #pargs{block='$2'}.
+block_capture -> eol '&' expr     : #pargs{block='$3'}.
+block_capture -> eol '&' expr eol : #pargs{block='$3'}.
 
 %% Local function calls
 call -> function_identifier '(' ')' : 
@@ -654,9 +671,11 @@ Erlang code.
 
 -export([string/1]).
 -include("reia_nodes.hrl").
+-record(pargs, {args=[], block={identifier,1,'_'}}).
 -define(line(Node), element(2, Node)).
 -define(op(Node), element(1, Node)).
 -define(identifier_name(Id), element(3, Id)).
+-define(pargs_add(Arg, Pargs), Pargs#pargs{args=[Arg|Pargs#pargs.args]}).
 
 %% Parse a given string with nicely formatted errors
 string(String) ->

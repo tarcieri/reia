@@ -2,7 +2,7 @@
 -record(module,      {line, name, functions}).
 
 % Functions
--record(function,    {line, name, args, block={nil, 1}, body}).
+-record(function,    {line, name, args=[], block={identifier,1,'_'}, body}).
 
 % Terminals
 -record(integer,     {line, value}).
