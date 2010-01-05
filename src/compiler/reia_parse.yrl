@@ -2,7 +2,7 @@
 % reia_parse: Yecc grammar for the Reia language
 % Copyright (C)2008-09 Tony Arcieri
 % 
-% Redistribution is permitted under the MIT license.  See LICENSE for details.
+% Redistribution is permitted under the MIT license.  See LICENSE for delist_tails.
 %
 
 Nonterminals
@@ -52,7 +52,7 @@ Nonterminals
   call
   number
   list
-  tail
+  list_tail
   splat
   list_comprehension
   lc_exprs
@@ -456,21 +456,21 @@ number -> float   : '$1'.
 number -> integer : '$1'.
 
 %% Lists
-list -> '[' ']'           : #empty{line=?line('$1')}.
-list -> '[' eol ']'       : #empty{line=?line('$1')}.
-list -> '[' expr tail     : #cons{line=?line('$1'), expr='$2', tail='$3'}.
-list -> '[' eol expr tail : #cons{line=?line('$1'), expr='$3', tail='$4'}.
+list -> '[' ']'                : #empty{line=?line('$1')}.
+list -> '[' eol ']'            : #empty{line=?line('$1')}.
+list -> '[' expr list_tail     : #cons{line=?line('$1'), expr='$2', tail='$3'}.
+list -> '[' eol expr list_tail : #cons{line=?line('$1'), expr='$3', tail='$4'}.
 
-tail -> ',' expr tail         : #cons{line=?line('$1'), expr='$2', tail='$3'}.
-tail -> ',' eol expr tail     : #cons{line=?line('$1'), expr='$3', tail='$4'}.
-tail -> eol ',' expr tail     : #cons{line=?line('$1'), expr='$3', tail='$4'}.
-tail -> eol ',' eol expr tail : #cons{line=?line('$1'), expr='$4', tail='$5'}.
+list_tail -> ',' expr list_tail         : #cons{line=?line('$1'), expr='$2', tail='$3'}.
+list_tail -> ',' eol expr list_tail     : #cons{line=?line('$1'), expr='$3', tail='$4'}.
+list_tail -> eol ',' expr list_tail     : #cons{line=?line('$1'), expr='$3', tail='$4'}.
+list_tail -> eol ',' eol expr list_tail : #cons{line=?line('$1'), expr='$4', tail='$5'}.
 
-tail -> ']'     : #empty{line=?line('$1')}.
-tail -> eol ']' : #empty{line=?line('$1')}.
+list_tail -> ']'     : #empty{line=?line('$1')}.
+list_tail -> eol ']' : #empty{line=?line('$1')}.
 
-tail -> ',' splat ']'     : '$2'.
-tail -> eol ',' splat ']' : '$3'.
+list_tail -> ',' splat ']'     : '$2'.
+list_tail -> eol ',' splat ']' : '$3'.
 
 splat -> '*' expr         : '$2'.
 splat -> '*' expr eol     : '$2'.
