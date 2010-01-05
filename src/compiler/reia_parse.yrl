@@ -53,6 +53,7 @@ Nonterminals
   number
   list
   tail
+  splat
   list_comprehension
   lc_exprs
   lc_expr
@@ -468,14 +469,13 @@ tail -> eol ',' eol expr tail : #cons{line=?line('$1'), expr='$4', tail='$5'}.
 tail -> ']'     : #empty{line=?line('$1')}.
 tail -> eol ']' : #empty{line=?line('$1')}.
 
-tail -> ',' '*' expr ']'             : '$3'.
-tail -> ',' '*' expr eol ']'         : '$3'.
-tail -> ',' eol '*' expr ']'         : '$4'.
-tail -> ',' eol '*' expr eol ']'     : '$4'.
-tail -> eol ',' '*' expr ']'         : '$4'.
-tail -> eol ',' '*' expr eol ']'     : '$4'.
-tail -> eol ',' eol '*' expr ']'     : '$5'.
-tail -> eol ',' eol '*' expr eol ']' : '$5'.
+tail -> ',' splat ']'     : '$2'.
+tail -> eol ',' splat ']' : '$3'.
+
+splat -> '*' expr         : '$2'.
+splat -> '*' expr eol     : '$2'.
+splat -> eol '*' expr     : '$3'.
+splat -> eol '*' expr eol : '$3'.
 
 %% List comprehensions
 list_comprehension -> '[' expr for lc_exprs ']' : 
