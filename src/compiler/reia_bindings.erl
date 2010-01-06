@@ -155,11 +155,11 @@ transform_node(#generate{line=Line, pattern=Pattern, source=Source}, State) ->
   output(#generate{line=Line, pattern=Pattern2, source=Source2}, State3);
 
 % Arguments initialize new entries in the bindings dict
-transform_node(#identifier{name=Name} = Node, #state{scope=argument, bindings=Bindings} = State) ->
+transform_node(#var{name=Name} = Node, #state{scope=argument, bindings=Bindings} = State) ->
   output(Node, State#state{bindings=dict:store(Name, 0, Bindings)});
       
 % Variables are (re)bound while in match scope
-transform_node(#identifier{name=Name} = Node, #state{scope=match, bindings=Bindings} = State) ->
+transform_node(#var{name=Name} = Node, #state{scope=match, bindings=Bindings} = State) ->
   NewBindings = case dict:find(Name, Bindings) of
     {ok, Version} -> dict:store(Name, Version + 1, Bindings);
     error         -> dict:store(Name, 0, Bindings)

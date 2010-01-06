@@ -50,7 +50,7 @@ transform(#atom{} = Expr)    -> Expr;
 transform(#true{line=Line})  -> {atom, Line, true};
 transform(#false{line=Line}) -> {atom, Line, false};
 transform(#nil{line=Line})   -> {atom, Line, nil};
-transform(#identifier{line=Line, name=Name}) -> {var, Line, Name};
+transform(#var{line=Line, name=Name}) -> {var, Line, Name};
 
 % Strings
 transform(#string{line=Line, characters=Chars}) ->

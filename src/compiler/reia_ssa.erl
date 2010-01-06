@@ -16,10 +16,10 @@ transform(Exprs, Options) ->
   {ok, BAExprs} = reia_bindings:transform(Exprs, Options#compile_options.scope),
   reia_syntax:map_subtrees(fun transform_node/1, BAExprs).
 
-transform_node(#bindings{node=#identifier{line=Line, name=Name}=Node, entries=Bindings}) ->
+transform_node(#bindings{node=#var{line=Line, name=Name}=Node, entries=Bindings}) ->
   case dict:find(Name, Bindings) of
     {ok, Version} ->
-      #identifier{line=Line, name=ssa_name(Name, Version)};
+      #var{line=Line, name=ssa_name(Name, Version)};
     error ->
       case Name of
         '_' -> 
@@ -29,7 +29,7 @@ transform_node(#bindings{node=#identifier{line=Line, name=Name}=Node, entries=Bi
       end
   end;
 transform_node(#bindings{node=#bound_var{line=Line, name=Name}}=Bindings) ->
-  transform_node(Bindings#bindings{node=#identifier{line=Line, name=Name}});
+  transform_node(Bindings#bindings{node=#var{line=Line, name=Name}});
 transform_node(#bindings{node=Node}) ->
   reia_syntax:map_subtrees(fun transform_node/1, Node);
 transform_node(Node) ->

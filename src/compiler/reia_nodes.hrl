@@ -2,12 +2,12 @@
 -record(module,      {line, name, functions}).
 
 % Functions
--record(function,    {line, name, args=[], block={identifier,1,'_'}, body}).
+-record(function,    {line, name, args=[], block={var,1,'_'}, body}).
 
 % Terminals
 -record(integer,     {line, value}).
 -record(float,       {line, value}).
--record(identifier,  {line, name}).
+-record(var,         {line, name}).
 -record(bound_var,   {line, name}).
 -record(string,      {line, characters}).
 -record(dstring,     {line, elements}).

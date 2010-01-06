@@ -9,7 +9,7 @@
 -export([new_binding/0, string/1, string/2, exprs/1, exprs/2]).
 -include("../compiler/reia_nodes.hrl").
 -include("../compiler/reia_bindings.hrl").
--define(return_value_var(Line), #identifier{line=Line, name='__reia_eval_return_value'}).
+-define(return_value_var(Line), #var{line=Line, name='__reia_eval_return_value'}).
 
 % Create a new set of local variable bindings
 new_binding() -> [].
@@ -93,5 +93,5 @@ bindings_list([Name|Rest], Line) ->
 binding_node(Name, Line) ->
   #tuple{line=Line, elements=[
     #atom{line=Line, name=Name},
-    #identifier{line=Line, name=Name}
+    #var{line=Line, name=Name}
   ]}.

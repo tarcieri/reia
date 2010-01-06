@@ -217,8 +217,6 @@ max_expr -> binary       : '$1'.
 max_expr -> lambda       : '$1'.
 max_expr -> tuple        : '$1'.
 max_expr -> dict         : '$1'.
-max_expr -> identifier   : '$1'.
-max_expr -> bound_var    : '$1'.
 max_expr -> atom         : '$1'.
 max_expr -> boolean      : '$1'.
 max_expr -> regexp       : '$1'.
@@ -227,6 +225,8 @@ max_expr -> if_expr      : '$1'.
 max_expr -> try_expr     : '$1'.
 max_expr -> module_name  : '$1'.
 max_expr -> module_decl  : '$1'.
+max_expr -> bound_var    : '$1'.
+max_expr -> identifier   : #var{line=?line('$1'), name=?identifier_name('$1')}.
 max_expr -> string       : interpolate_string('$1').
 max_expr -> list_comprehension : '$1'.
 max_expr -> '(' expr ')' : '$2'.

@@ -24,7 +24,7 @@ transform(#'case'{line=Line, clauses=Clauses} = Node) ->
     false ->
       Catchall = #clause{
         line=Line, 
-        patterns=[#identifier{line=Line, name='_'}], 
+        patterns=[#var{line=Line, name='_'}], 
         exprs=[#nil{line=Line}]
       },
       Node#'case'{clauses=Clauses ++ [Catchall]} 
@@ -73,7 +73,7 @@ catchall_pattern(#match{left=Left, right=Right}) ->
     true -> true;
     false -> catchall_pattern(Right)
   end;
-catchall_pattern(#identifier{}) ->
+catchall_pattern(#var{}) ->
   true;
 catchall_pattern(_) ->
   false.
@@ -85,5 +85,5 @@ cast_boolean(Condition) ->
   #'case'{line=Line, expr=Condition, clauses=[
     #clause{line=Line, patterns=[#false{line=Line}], exprs=[#false{line=Line}]},
     #clause{line=Line, patterns=[#nil{line=Line}],   exprs=[#false{line=Line}]},
-    #clause{line=Line, patterns=[#identifier{line=Line, name='_'}], exprs=[#true{line=Line}]}
+    #clause{line=Line, patterns=[#var{line=Line, name='_'}], exprs=[#true{line=Line}]}
   ]}.
