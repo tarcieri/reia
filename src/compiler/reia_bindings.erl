@@ -71,6 +71,16 @@ transform_node(#function{line=Line, name=Name, args=Args, block=Block, body=Expr
 
   Node = #function{line=Line, name=Name, args=Args2, block=Block2, body=Exprs2},
   output(Node, State);
+  
+% Calls may actually invoke a lambda/funref bound in local scope
+transform_node(#local_call{line=Line, name=Name, args=Args, block=Block} = Call, #state{bindings=Bindings} = State) ->
+  Node = case dict:find(Name, Bindings) of
+    {ok, _} ->
+      #var_call{line=Line, receiver=#var{line=Line, name=Name}, args=Args, block=Block};
+    error ->
+      Call
+  end,
+  output(Node, State);
 
 % Walk the LHS of a match expression in match scope
 transform_node(#match{} = Node, State) ->

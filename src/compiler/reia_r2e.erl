@@ -263,6 +263,15 @@ transform(#native_call{
     {remote, Line, {atom, Line, Module}, {atom, Line, Function}},
     [transform(Arg) || Arg <- Args]
   };
+  
+transform(#var_call{
+  line = Line,
+  receiver = Receiver,
+  args = Args,
+  block = _Block
+}) ->
+  % FIXME: this will need more complex dispatch logic for non-lambda cases
+  {call, Line, transform(Receiver), [transform(Arg) || Arg <- Args]};
 
 % Code blocks (Erlang-style, not to be confused with Ruby-style block args)
 transform(#block{line=Line, exprs=Exprs}) -> 
