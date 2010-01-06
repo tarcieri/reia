@@ -671,7 +671,7 @@ Erlang code.
 
 -export([string/1]).
 -include("reia_nodes.hrl").
--record(pargs, {args=[], block={identifier,1,'_'}}).
+-record(pargs, {args=[], block={var,1,'_'}}).
 -define(line(Node), element(2, Node)).
 -define(op(Node), element(1, Node)).
 -define(identifier_name(Id), element(3, Id)).
