@@ -54,7 +54,7 @@ compile_expressions(Filename, Exprs, Options) ->
   Submodules2 = compile_submodules(Submodules, Filename, Options),
   
   Header = module_header(Module#module.name, Filename, Options),
-  ParentAttr = {attribute, 1, parent, list_to_atom(Filename)},
+  ParentAttr = {attribute, 1, parent, list_to_atom(filename:rootname(Filename))},
   SubmoduleAttr = {attribute, 1, submodules, Submodules2},
   ErlModule = lists:flatten([Header, ParentAttr, SubmoduleAttr, Module#module.functions]),
   
@@ -65,7 +65,7 @@ compile_submodules(Submodules, Filename, Options) ->
   
 compile_submodule(Module, Filename, Options) ->
   Header = module_header(Module#module.name, Filename, Options),
-  ParentAttr = {attribute, 1, parent, list_to_atom(Filename)},
+  ParentAttr = {attribute, 1, parent, list_to_atom(filename:rootname(Filename))},
   ErlModule = lists:flatten([Header, ParentAttr, Module#module.functions]),
   io:format("Submodule: ~p~n", [ErlModule]),
   {ok, Name, Bin} = compile:forms(ErlModule, compile_options(Options)),
