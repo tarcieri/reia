@@ -76,7 +76,9 @@ transform_node(#function{line=Line, name=Name, args=Args, block=Block, body=Expr
 transform_node(#local_call{line=Line, name=Name, args=Args, block=Block} = Call, #state{bindings=Bindings} = State) ->
   Node = case dict:find(Name, Bindings) of
     {ok, _} ->
-      #var_call{line=Line, receiver=#var{line=Line, name=Name}, args=Args, block=Block};
+      Receiver = #var{line=Line, name=Name},
+      {[Receiver2], _} = reia_syntax:mapfold_subtrees(fun transform_node/2, State, [Receiver]),
+      #var_call{line=Line, receiver=Receiver2, args=Args, block=Block};
     error ->
       Call
   end,
