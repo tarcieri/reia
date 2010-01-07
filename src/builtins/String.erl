@@ -18,5 +18,9 @@ call(String, to_list, _Args, _Block) ->
 call(String, to_s, _Args, _Block) ->
   String;
   
+call(String, to_module, Args, Block) ->
+  List = call(String, to_list, Args, Block),
+  #reia_module{name=list_to_atom(List)};
+  
 call(#reia_string{elements=Elements}, inspect, _Args, _Block) ->
   #reia_string{elements=[$", Elements, $"]}.
