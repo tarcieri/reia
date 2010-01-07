@@ -19,7 +19,7 @@ module AtomTest
   
   # inspects properly
   def inspect_test
-    TestHelper.expect(Atom, "inspect properly") do
+    TestHelper.expect(Atom, "inspects properly") do
       (":'foo bar'", :'foo bar'.inspect())
     end
   end
