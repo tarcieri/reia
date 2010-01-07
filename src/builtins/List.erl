@@ -50,7 +50,10 @@ call(List, map, {}, Block) ->
   lists:map(Block, List);
   
 call(List, flatten, {}, _Block) ->
-  lists:flatten(List).
+  lists:flatten(List);
+  
+call(List, to_list, {}, _Block) ->
+  List.
 
 replace(List, Index, Value) ->
   replace(List, 0, Index, Value).
