@@ -37,7 +37,7 @@
 -record(bin_element, {line, expression, size=default, type_list=default}).
 -record(range,       {line, from, to}).
 -record(dict,        {line, elements}).
--record(lambda,      {line, args, body}).
+-record(lambda,      {line, args=[], body}).
 -record(block,       {line, exprs}).
 -record(lc,          {line, expr, generators}).
 -record(generate,    {line, pattern, source}).
