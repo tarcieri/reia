@@ -18,6 +18,11 @@ call(String, to_list, _Args, _Block) ->
 call(String, to_s, _Args, _Block) ->
   String;
   
+call(String, capitalize, Args, Block) ->
+  [FirstLetter|Rest] = call(String, to_list, Args, Block),
+  NewList = string:to_upper([FirstLetter]) ++ Rest,
+  'List':call(NewList, to_string, [], nil);
+  
 call(String, to_module, Args, Block) ->
   List = call(String, to_list, Args, Block),
   #reia_module{name=list_to_atom(List)};
