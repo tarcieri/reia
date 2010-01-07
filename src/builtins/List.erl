@@ -47,7 +47,10 @@ call(List, join, {#reia_string{elements=Separator}}, _Block) ->
   #reia_string{elements=Elements};
   
 call(List, map, {}, Block) ->
-  lists:map(Block, List).
+  lists:map(Block, List);
+  
+call(List, flatten, {}, _Block) ->
+  lists:flatten(List).
 
 replace(List, Index, Value) ->
   replace(List, 0, Index, Value).
