@@ -17,6 +17,9 @@ call(String, to_list, _Args, _Block) ->
   
 call(String, to_s, _Args, _Block) ->
   String;
+
+call(String, print, Args, Block) ->
+  io:format(call(String, to_list, Args, Block));
   
 call(String, capitalize, Args, Block) ->
   [FirstLetter|Rest] = call(String, to_list, Args, Block),
