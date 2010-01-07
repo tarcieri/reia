@@ -118,6 +118,29 @@ transform_node(#lambda{line=Line, args=Args, body=Body}, State) ->
   
   output(#lambda{line=Line, args=Args2, body=Body2}, State);
 
+% Case clauses match against patterns
+% FIXME: This pass is woefully inadequate.  Each of the patterns in the clause
+% need to be handled separately, and the "unsafe" variables amongst all the
+% clauses passed over and bound to their latest versions, or nil.  This is a
+% "good enough to get by" solution for now
+transform_node(#clause{line=Line, patterns=Patterns, exprs=Body}, #state{scope=Scope} = State) ->
+  {Patterns2, State2} = lists:mapfoldl(fun(Pattern, St) ->
+    {[Pattern2], St2} = reia_syntax:mapfold_subtrees(
+      fun transform_node/2,
+      St#state{scope=match},
+      [Pattern]
+    ),
+    {Pattern2, St2}
+  end, State, Patterns),
+
+  {Body2, State3} = reia_syntax:mapfold_subtrees(
+    fun transform_node/2,
+    State2#state{scope=normal},
+    Body
+  ),
+
+  output(#clause{line=Line, patterns=Patterns2, exprs=Body2}, State3#state{scope=Scope});
+      
 % Catch clauses match against patterns
 transform_node(#'catch'{line=Line, pattern=Pattern, body=Body}, #state{scope=Scope} = State) ->
   {[Pattern2], State2} = reia_syntax:mapfold_subtrees(
