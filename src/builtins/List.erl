@@ -11,9 +11,15 @@
 -include("../core/reia_invoke.hrl").
 
 call(List, '[]', {Index}, _Block) ->
+  Length = length(List),
+  Index2 = if
+    Index < 0 -> length(List) + Index + 1;
+    true      -> Index + 1
+  end,
   if
-    Index < 0 -> lists:nth(length(List) + Index + 1, List);
-    true      -> lists:nth(Index + 1, List)
+    Index2 < 1      -> nil;
+    Index2 > Length -> nil;
+    true            -> lists:nth(Index2, List)
   end;
   
 call(List, '[]=', {Index, Value}, _Block) ->
