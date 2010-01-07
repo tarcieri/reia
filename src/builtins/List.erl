@@ -60,7 +60,13 @@ call(List, map, {}, Block) ->
   
 call(List, flatten, {}, _Block) ->
   lists:flatten(List);
-  
+
+call(List, to_tuple, {}, _Block) ->
+  list_to_tuple(List);
+
+call(List, to_dict, {}, _Block) ->
+  dict:from_list(List);
+      
 call(List, to_list, {}, _Block) ->
   List.
 

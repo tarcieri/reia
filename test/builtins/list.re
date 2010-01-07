@@ -17,13 +17,10 @@ module ListTest
       size_test(), 
       nth_test(), 
       reverse_test(), 
-      push_test(), 
-      pop_test(), 
-      unshift_test(), 
       join_test(), 
       #parenless_sugar_test(), # FIXME this should work eventually...
       to_tuple_test(), 
-      to_hash_test()
+      to_dict_test()
     ]
   end
   
@@ -49,31 +46,8 @@ module ListTest
       ([3,2,1].to_s(), [1,2,3].reverse().to_s())
     end
   end
-    
-  def push_test
-    TestHelper.expect(List, "appends elements with push") do
-      ([1,2,3,4].to_s(), [1,2,3].push(4).to_s())
-    end
-  end
-    
-  def pop_test
-    TestHelper.expect(List, "removes last element with pop") do 
-      (3, [1,2,3].pop())
-    end
-  end
-    
-  def unshift_test
-    TestHelper.expect(List, "prepends elements with unshift") do
-      ([1,2,3,4].to_s(), [2,3,4].unshift(1).to_s())
-    end
-  end
-    
-  def shift_test
-    TestHelper.expect(List, "removes first element with shift") do
-      (1, [1,2,3].shift())
-    end
-  end
-    
+
+  # joins together into a string    
   def join_test
     TestHelper.expect(List, "joins into a string") do
       ("1,2,3", [1,2,3].join(','))
@@ -92,9 +66,9 @@ module ListTest
     end
   end
   
-  def to_hash_test
-    TestHelper.expect(List, "converts to a hash") do
-      ([(:foo, "bar"), (:baz, "baz")].to_hash(), {:foo => "bar", :baz => "baz"})
+  def to_dict_test
+    TestHelper.expect(List, "converts to a dict") do
+      ([(:foo, "bar"), (:bar, "bar")].to_dict(), {:foo => "bar", :bar => "bar"})
     end
   end
 end
