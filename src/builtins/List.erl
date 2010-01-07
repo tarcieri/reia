@@ -44,7 +44,10 @@ call(List, join, {#reia_string{elements=Separator}}, _Block) ->
     [] -> [];
     _  -> join_list([], List, Separator)
   end,
-  #reia_string{elements=Elements}.
+  #reia_string{elements=Elements};
+  
+call(List, map, {}, Block) ->
+  lists:map(Block, List).
 
 replace(List, Index, Value) ->
   replace(List, 0, Index, Value).
