@@ -46,6 +46,9 @@ call(List, join, {#reia_string{elements=Separator}}, _Block) ->
   end,
   #reia_string{elements=Elements};
   
+call(List, each, {}, Block) ->
+  lists:foreach(Block, List);
+  
 call(List, map, {}, Block) ->
   lists:map(Block, List);
   
