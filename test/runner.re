@@ -36,7 +36,12 @@ end
 
 errors = [error for error = (:error, _, _) in results]
 errors.each do |(:error, test, ex)|
-  Main.puts("#{test} ERROR: #{ex}\n")
+  case ex
+  when (:exception,(:throw, msg))
+    Main.puts("#{test} ERROR: #{msg.to_string()}")
+  when _
+    Main.puts("#{test} ERROR: #{ex}\n")
+  end
 end
 
 Main.puts("#{results.size()} assertions, #{failures.size()} failures, #{errors.size()} errors")
