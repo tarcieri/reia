@@ -67,7 +67,7 @@ compile_submodule(Module, Filename, Options) ->
   Header = module_header(Module#module.name, Filename, Options),
   ParentAttr = {attribute, 1, parent, list_to_atom(filename:rootname(Filename))},
   ErlModule = lists:flatten([Header, ParentAttr, Module#module.functions]),
-  io:format("Submodule: ~p~n", [ErlModule]),
+
   {ok, Name, Bin} = compile:forms(ErlModule, compile_options(Options)),
   {static, Name, Bin}.
 
