@@ -21,6 +21,9 @@ call(String, to_s, _Args, _Block) ->
 call(String, print, Args, Block) ->
   io:format(call(String, to_list, Args, Block));
   
+call(String, length, _Args, _Block) ->
+  length(binary_to_list(call(String, to_binary, {}, nil)));
+
 call(String, capitalize, Args, Block) ->
   [FirstLetter|Rest] = call(String, to_list, Args, Block),
   NewList = string:to_upper([FirstLetter]) ++ Rest,
