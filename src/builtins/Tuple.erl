@@ -24,6 +24,9 @@ call(Tuple, '[]=', {Index, Value}, _Block) ->
 call(Tuple, size, _Args, _Block) ->
   tuple_size(Tuple);
 
+call(Tuple, to_list, _Args, _Block) ->
+  tuple_to_list(Tuple);
+    
 call(Tuple, to_s, _Args, _Block) ->
   stringify(Tuple, to_s);
   
