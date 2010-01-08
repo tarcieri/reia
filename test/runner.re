@@ -8,7 +8,7 @@
 Main.load("test/test_helper.re")
 
 tests = [
-  ("builtins", ["list", "tuple", "string", "regex", "numeric", "dict", "atom"]),
+  ("builtins", ["list", "tuple", "string", "regexp", "numeric", "dict", "atom"]),
   ("core",     ["blocks", "branching", "funrefs"])
 ]
 

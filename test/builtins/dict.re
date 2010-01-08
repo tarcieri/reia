@@ -29,7 +29,7 @@ module DictTest
   
   def size_test
     TestHelper.expect(Dict, "calculates size") do
-      ({:foo => "bar", :zoo => "horse"}.size(), 2)
+      (2, {:foo => "bar", :zoo => "horse"}.size())
     end
   end
   
