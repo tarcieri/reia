@@ -319,6 +319,7 @@ pargs -> '(' ')'                 : #pargs{}.
 pargs -> '(' eol ')'             : #pargs{}.
 pargs -> '(' expr pargs_tail     : ?pargs_add('$2', '$3').
 pargs -> '(' eol expr pargs_tail : ?pargs_add('$3', '$4').
+pargs -> '(' block_capture ')'   : '$2'.
 
 pargs_tail -> ',' expr pargs_tail         : ?pargs_add('$2', '$3').
 pargs_tail -> ',' eol expr pargs_tail     : ?pargs_add('$3', '$4').

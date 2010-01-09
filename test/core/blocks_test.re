@@ -14,18 +14,18 @@ end
 module BlocksTest
   def run
     [
-#      standalone_test(), 
+      standalone_test()
 #      argument_test(),
       #lambda_as_block_test()
     ]
   end
   
   # accepts blocks when the only argument
-#  def standalone_test
-#    TestHelper.expect("Blocks", "are accepted as the only function argument") do
-#      (42, just_a_block_alone { |n| n * 2 })
-#    end
-#  end
+  def standalone_test
+    TestHelper.expect("Blocks", "are accepted as the only function argument") do
+      (42, just_a_block_alone { |n| n * 2 })
+    end
+  end
   
   # accepts blocks with other arguments
 #  def argument_test
@@ -44,10 +44,9 @@ module BlocksTest
 #    end
 #  end
  
-# FIXME: naked block captures not supported!  
-#  def just_a_block_alone(&block)
-#    block(20) + 2
-#  end
+  def just_a_block_alone(&block)
+    block(20) + 2
+  end
  
 # FIXME: this doesn't even compile atm  
 #  def block_with_args(arg1, arg2, &block)
