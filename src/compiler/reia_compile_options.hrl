@@ -8,7 +8,7 @@
   scope = toplevel,
   
   % Reia compiler passes to run
-  passes = [conditionals, rebinding, ssa, r2e],
+  passes = [comparisons, conditionals, rebinding, ssa, r2e],
   
   % Automatically enable HiPE (i.e. JIT) support if available
   autohipe = false,

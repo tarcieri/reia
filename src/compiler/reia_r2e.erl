@@ -220,9 +220,6 @@ transform(#binary_op{line=Line, type='===', left=Left, right=Right}) ->
       [],
       [{atom, Line, false}]}],
   []};
-
-transform(#binary_op{line=Line, type='!=', left=Left, right=Right}) ->
-  {op, Line, '/=', transform(Left), transform(Right)};
   
 transform(#binary_op{line=Line, type='<=', left=Left, right=Right}) ->
   {op, Line, '=<', transform(Left), transform(Right)};
