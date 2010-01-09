@@ -676,18 +676,22 @@ Erlang code.
 
 %% Parse a given string with nicely formatted errors
 string(String) ->
-  case reia_scan:string(String) of
-    {ok, Tokens, _} -> 
-      case reia_parse:parse(Tokens) of
-        {ok, Exprs} ->
-          {ok, Exprs};
-        {error, {_, _, [Message, []]}} ->
-          {error, {eof, lists:flatten([Message, "end of file"])}};
-        {error, {Line, _, [Message, Token]}} ->
-          {error, {Line, lists:flatten([Message, Token])}}
-      end;
-    {error, {Line, _, {Message, Token}}, _} ->
-      {error, {Line, lists:flatten(io_lib:format("~p ~p", [Message, Token]))}}
+  try
+    case reia_scan:string(String) of
+      {ok, Tokens, _} -> 
+        case reia_parse:parse(Tokens) of
+          {ok, Exprs} ->
+            {ok, Exprs};
+          {error, {_, _, [Message, []]}} ->
+            {error, {eof, lists:flatten([Message, "end of file"])}};
+          {error, {Line, _, [Message, Token]}} ->
+            {error, {Line, lists:flatten([Message, Token])}}
+        end;
+      {error, {Line, _, {Message, Token}}, _} ->
+        {error, {Line, lists:flatten(io_lib:format("~p ~p", [Message, Token]))}}
+    end
+  catch {error, {_Line, _Message}} = Error ->
+    Error
   end.
   
 %% Interpolate strings, parsing the contents of #{...} tags
