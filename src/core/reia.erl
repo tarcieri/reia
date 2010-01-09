@@ -22,19 +22,24 @@ load(Filename) ->
   BinPath = filename:rootname(SourcePath) ++ ".reb",
   
   case file:read_file_info(SourcePath) of
-    {ok, _SourceInfo} ->
-      %SourceMtime = element(6, SourceInfo),
-      
+    {ok, SourceInfo} ->      
       case file:read_file_info(BinPath) of
         % If the binary already exists, load it
-        {ok, _BinInfo} ->
-          reia_bytecode:load_file(BinPath);
+        {ok, BinInfo} ->
+          SourceMtime = element(6, SourceInfo),
+          BinMtime = element(6, BinInfo),
+          
+          % Ensure changes haven't been made to the sources
+          if
+            BinMtime > SourceMtime ->
+              reia_bytecode:load_file(BinPath);
+            true ->
+              compile_source(SourcePath, BinPath)
+          end;
           
         % Otherwise compile the source code
         {error, _} ->
-          {ok, Bin} = reia_compiler:file(SourcePath),
-          file:write_file(BinPath, Bin),
-          reia_bytecode:load_file(BinPath)
+          compile_source(SourcePath, BinPath)
       end;
     {error, _} = Error ->
       Error
@@ -43,6 +48,12 @@ load(Filename) ->
 %
 % Internal functions
 %
+
+% Compile and load the given Reia source code
+compile_source(SourcePath, BinPath) ->
+  {ok, Bin} = reia_compiler:file(SourcePath),
+  file:write_file(BinPath, Bin),
+  reia_bytecode:load_file(BinPath).
   
 % Internal function for loading code from the 'reia' command line script
 execute_file([Filename]) when is_atom(Filename) ->
