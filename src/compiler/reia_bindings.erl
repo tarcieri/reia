@@ -74,13 +74,16 @@ transform_node(#function{line=Line, name=Name, args=Args, block=Block, body=Expr
   
 % Calls may actually invoke a lambda/funref bound in local scope
 transform_node(#local_call{line=Line, name=Name, args=Args, block=Block} = Call, #state{bindings=Bindings} = State) ->
+  {Args2, _}       = reia_syntax:mapfold_subtrees(fun transform_node/2, State, Args),
+  {[Block2], _}    = reia_syntax:mapfold_subtrees(fun transform_node/2, State, [Block]),
+  
   Node = case dict:find(Name, Bindings) of
     {ok, _} ->
       Receiver = #var{line=Line, name=Name},
       {[Receiver2], _} = reia_syntax:mapfold_subtrees(fun transform_node/2, State, [Receiver]),
-      #var_call{line=Line, receiver=Receiver2, args=Args, block=Block};
+      #var_call{line=Line, receiver=Receiver2, args=Args2, block=Block2};
     error ->
-      Call
+      Call#local_call{args=Args2, block=Block2}
   end,
   output(Node, State);
 
