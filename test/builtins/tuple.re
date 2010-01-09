@@ -11,6 +11,7 @@ module TupleTest
       size_test(), 
       nth_test(),
       replace_test(),
+      complex_replace_test(),
       to_list_test(), 
       inspect_test()
     ]
@@ -40,6 +41,16 @@ module TupleTest
       tuple[2] = 69
     
       ((1,42,69), tuple)
+    end
+  end
+  
+  # replaces elements in complex pattern matching expressions
+  def complex_replace_test
+    TestHelper.expect(Tuple, "replaces elements in complex pattern matching expressions ") do
+      tuple = (1,2,3)
+      (tuple[1], [tuple[0], tuple[2]]) = (9, [8, 10])
+    
+      ((8,9,10), tuple)
     end
   end
       
