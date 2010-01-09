@@ -15,7 +15,9 @@ module ListTest
   def run
     [
       size_test(), 
-      nth_test(), 
+      nth_test(),
+      replace_test(),
+      complex_replace_test(),
       reverse_test(), 
       join_test(), 
       #parenless_sugar_test(), # FIXME this should work eventually...
@@ -39,7 +41,28 @@ module ListTest
       (true, list[0] == 1 and list[1] == 2 and list[4] == 5 and list[-1] == 5 and list[-3] == 3 and list[-10] == nil)
     end
   end
-      
+  
+  # replaces elements in pattern matching expressions
+  def replace_test
+    TestHelper.expect(List, "replaces elements in pattern matching expressions ") do
+      list = [1,2,3]
+      list[1] = 42
+      list[2] = 69
+    
+      ([1,42,69], list)
+    end
+  end
+  
+  # replaces elements in complex pattern matching expressions
+  def complex_replace_test
+    TestHelper.expect(List, "replaces elements in complex pattern matching expressions ") do
+      list = [1,2,3,4]
+      (list[1], [list[0], list[2]]) = (9, [8, 10])
+    
+      ([8,9,10,4], list)
+    end
+  end
+
   # reverses the order of a list
   def reverse_test
     TestHelper.expect(List, "reverses the order of a list") do

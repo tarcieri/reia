@@ -47,10 +47,10 @@ module TupleTest
   # replaces elements in complex pattern matching expressions
   def complex_replace_test
     TestHelper.expect(Tuple, "replaces elements in complex pattern matching expressions ") do
-      tuple = (1,2,3)
+      tuple = (1,2,3,4)
       (tuple[1], [tuple[0], tuple[2]]) = (9, [8, 10])
     
-      ((8,9,10), tuple)
+      ((8,9,10,4), tuple)
     end
   end
       
