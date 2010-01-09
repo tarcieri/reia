@@ -16,13 +16,13 @@
 -record(atom,        {line, name}).
 -record(true,        {line}).
 -record(false,       {line}).
--record(nil,         {line}).
+-record(nil,         {line=1}).
 
 % Function calls
--record(local_call,  {line, name, args=[], block={nil, 1}}).
--record(remote_call, {line, receiver, name, args=[], block={nil, 1}}).
+-record(local_call,  {line, name, args=[], block=#nil{}}).
+-record(remote_call, {line, receiver, name, args=[], block=#nil{}}).
 -record(native_call, {line, module, function, args=[]}).
--record(var_call,    {line, receiver, args=[], block={nil, 1}}).
+-record(var_call,    {line, receiver, args=[], block=#nil{}}).
 
 % Operators
 -record(unary_op,    {line, type, expr}).

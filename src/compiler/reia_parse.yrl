@@ -287,7 +287,29 @@ module_decl -> module module_name eol functions 'end' :
     name=element(3, '$2'), 
     functions='$4'
   }.
-  
+
+%% Parenthesized arguments
+pargs -> '(' ')'                 : #pargs{}.
+pargs -> '(' eol ')'             : #pargs{}.
+pargs -> '(' expr pargs_tail     : ?pargs_add('$2', '$3').
+pargs -> '(' eol expr pargs_tail : ?pargs_add('$3', '$4').
+pargs -> '(' block_capture ')'   : '$2'.
+
+pargs_tail -> ',' expr pargs_tail         : ?pargs_add('$2', '$3').
+pargs_tail -> ',' eol expr pargs_tail     : ?pargs_add('$3', '$4').
+pargs_tail -> eol ',' expr pargs_tail     : ?pargs_add('$3', '$4').
+pargs_tail -> eol ',' eol expr pargs_tail : ?pargs_add('$4', '$5').
+
+pargs_tail -> ')'     : #pargs{}.
+pargs_tail -> eol ')' : #pargs{}.
+pargs_tail -> ',' block_capture ')'     : '$2'.
+pargs_tail -> eol ',' block_capture ')' : '$3'.
+
+block_capture -> '&' expr         : #pargs{block='$2'}.
+block_capture -> '&' expr eol     : #pargs{block='$2'}.
+block_capture -> eol '&' expr     : #pargs{block='$3'}.
+block_capture -> eol '&' expr eol : #pargs{block='$3'}.
+    
 %% Functions
 functions -> function : ['$1'].
 functions -> function eol : ['$1'].
@@ -313,40 +335,14 @@ function -> def function_identifier pargs eol expr_list 'end' :
     block='$3'#pargs.block,
     body='$5'
   }.
-  
-%% Parenthesized arguments
-pargs -> '(' ')'                 : #pargs{}.
-pargs -> '(' eol ')'             : #pargs{}.
-pargs -> '(' expr pargs_tail     : ?pargs_add('$2', '$3').
-pargs -> '(' eol expr pargs_tail : ?pargs_add('$3', '$4').
-pargs -> '(' block_capture ')'   : '$2'.
-
-pargs_tail -> ',' expr pargs_tail         : ?pargs_add('$2', '$3').
-pargs_tail -> ',' eol expr pargs_tail     : ?pargs_add('$3', '$4').
-pargs_tail -> eol ',' expr pargs_tail     : ?pargs_add('$3', '$4').
-pargs_tail -> eol ',' eol expr pargs_tail : ?pargs_add('$4', '$5').
-
-pargs_tail -> ')'     : #pargs{}.
-pargs_tail -> eol ')' : #pargs{}.
-pargs_tail -> ',' block_capture ')'     : '$2'.
-pargs_tail -> eol ',' block_capture ')' : '$3'.
-
-block_capture -> '&' expr         : #pargs{block='$2'}.
-block_capture -> '&' expr eol     : #pargs{block='$2'}.
-block_capture -> eol '&' expr     : #pargs{block='$3'}.
-block_capture -> eol '&' expr eol : #pargs{block='$3'}.
 
 %% Local function calls
-call -> function_identifier '(' ')' : 
+call -> function_identifier pargs : 
   #local_call{
-    line  = ?line('$2'), 
-    name  = ?identifier_name('$1')
-  }.
-call -> function_identifier '(' exprs ')' :
-  #local_call{
-    line = ?line('$2'), 
-    name = ?identifier_name('$1'), 
-    args = '$3'
+    line  = ?line('$1'), 
+    name  = ?identifier_name('$1'),
+    args  = '$2'#pargs.args,
+    block = ?pargs_default_block({nil, ?line('$1')}, '$2')
   }.
   
 %% Local function calls with blocks
@@ -356,19 +352,18 @@ call -> function_identifier block :
     name  = ?identifier_name('$1'), 
     block = '$2'
   }.
-call -> function_identifier '(' ')' block : 
-  #local_call{
-    line  = ?line('$2'), 
-    name  = ?identifier_name('$1'), 
-    block = '$4'
-  }.
-call -> function_identifier '(' exprs ')' block : 
-  #local_call{
-    line  = ?line('$2'), 
-    name  = ?identifier_name('$1'), 
-    args  = '$3', 
-    block = '$5'
-  }.
+call -> function_identifier pargs block :
+  case '$2'#pargs.block of
+    {var,1,'_'} -> % this is the macro default, meaning the user didn't pass a &block
+      #local_call{
+        line  = ?line('$1'), 
+        name  = ?identifier_name('$1'), 
+        args  = '$2'#pargs.args, 
+        block = '$3'
+      };
+    _ ->
+      throw({error, {?line('$1'), "both block arg and actual block given"}})
+  end.
 
 %% Remote function calls
 call -> call_expr '.' function_identifier '(' ')' :
@@ -677,6 +672,7 @@ Erlang code.
 -define(op(Node), element(1, Node)).
 -define(identifier_name(Id), element(3, Id)).
 -define(pargs_add(Arg, Pargs), Pargs#pargs{args=[Arg|Pargs#pargs.args]}).
+-define(pargs_default_block(Block, Pargs), case Pargs#pargs.block of {var,1,'_'} -> Block; _ -> Pargs#pargs.block end).
 
 %% Parse a given string with nicely formatted errors
 string(String) ->

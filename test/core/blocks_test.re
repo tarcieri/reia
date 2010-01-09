@@ -9,8 +9,8 @@ module BlocksTest
   def run
     [
       standalone_test(),
-      argument_test()
-      #lambda_as_block_test()
+      argument_test(),
+      lambda_as_block_test()
     ]
   end
   
@@ -28,13 +28,13 @@ module BlocksTest
     end
   end
     
-  # allows lambdas to be passed as blocks
-#  def lambda_as_block_test
-#    TestHelper.expect("Blocks", "can utilize lambdas") do
-#      lambda = fun(n) { n + 2 }
-#      (42, block_with_args(18, 22, &lambda))
-#    end
-#  end
+  # allows funs to be passed as blocks
+  def lambda_as_block_test
+    TestHelper.expect("Blocks", "can be passed as a fun") do
+      lambda = fun(n) { n + 2 }
+      (42, block_with_args(18, 22, &lambda))
+    end
+  end
  
   def just_a_block_alone(&block)
     block(20) + 2
