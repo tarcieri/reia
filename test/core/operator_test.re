@@ -1,11 +1,11 @@
 #
-# RebindingTest: Tests for Reia's shortcut rebinding operators
+# OperatorTest: Tests for Reia's various operators
 # Copyright (C)2010 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-module RebindingTest
+module OperatorTest
   def run
     [
       plusequals_test(),
@@ -17,7 +17,7 @@ module RebindingTest
   
   # implements +=
   def plusequals_test
-    TestHelper.expect("Rebinding", "implements +=") do
+    TestHelper.expect("Operator", "+= is implemented") do
       n = 41
       n += 1
       (42, n)
@@ -26,7 +26,7 @@ module RebindingTest
   
   # implements -=
   def minusequals_test
-    TestHelper.expect("Rebinding", "implements -=") do
+    TestHelper.expect("Operator", "-= is implemented") do
       n = 43
       n -= 1
       (42, n)
@@ -35,7 +35,7 @@ module RebindingTest
   
   # implements *=
   def timesequals_test
-    TestHelper.expect("Rebinding", "implements *=") do
+    TestHelper.expect("Operator", "*= is implemented") do
       n = 21
       n *= 2
       (42, n)
@@ -44,7 +44,7 @@ module RebindingTest
   
   # implements /=
   def divequals_test
-    TestHelper.expect("Rebinding", "implements .=") do
+    TestHelper.expect("Operator", ".= is implemented") do
       n = 84
       n /= 2
       (42, n)

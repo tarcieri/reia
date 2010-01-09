@@ -10,7 +10,7 @@ Main.load("test/test_helper.re")
 
 tests = [
   ("builtins", ["list", "tuple", "string", "regexp", "numeric", "dict", "atom"]),
-  ("core",     ["blocks", "branching", "funrefs", "rebinding"])
+  ("core",     ["blocks", "branching", "funrefs", "operator"])
 ]
 
 results = tests.map do |(group, modules)|
