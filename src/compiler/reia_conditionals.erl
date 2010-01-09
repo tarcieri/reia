@@ -18,7 +18,7 @@ transform(#'if'{clauses=Clauses}) ->
   
 % Case statements
 transform(#'case'{line=Line, clauses=Clauses} = Node) ->
-  Node = case lists:any(fun is_catchall_clause/1, Clauses) of
+  Node2 = case lists:any(fun is_catchall_clause/1, Clauses) of
     true ->
       Node;
     false ->
@@ -29,7 +29,7 @@ transform(#'case'{line=Line, clauses=Clauses} = Node) ->
       },
       Node#'case'{clauses=Clauses ++ [Catchall]} 
   end,
-  reia_syntax:map_subtrees(fun transform/1, Node);
+  reia_syntax:map_subtrees(fun transform/1, Node2);
     
 % Unary not
 transform(#unary_op{type='not', expr=Expr}=Node) ->
