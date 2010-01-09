@@ -342,7 +342,7 @@ call -> function_identifier pargs :
     line  = ?line('$1'), 
     name  = ?identifier_name('$1'),
     args  = '$2'#pargs.args,
-    block = ?pargs_default_block({nil, ?line('$1')}, '$2')
+    block = ?pargs_default_block(#nil{}, '$2')
   }.
   
 %% Local function calls with blocks
@@ -354,7 +354,7 @@ call -> function_identifier block :
   }.
 call -> function_identifier pargs block :
   case '$2'#pargs.block of
-    {var,1,'_'} -> % this is the macro default, meaning the user didn't pass a &block
+    #var{line=1, name='_'} -> % user didn't pass a &block
       #local_call{
         line  = ?line('$1'), 
         name  = ?identifier_name('$1'), 
@@ -672,7 +672,7 @@ Erlang code.
 -define(op(Node), element(1, Node)).
 -define(identifier_name(Id), element(3, Id)).
 -define(pargs_add(Arg, Pargs), Pargs#pargs{args=[Arg|Pargs#pargs.args]}).
--define(pargs_default_block(Block, Pargs), case Pargs#pargs.block of {var,1,'_'} -> Block; _ -> Pargs#pargs.block end).
+-define(pargs_default_block(Block, Pargs), case (Pargs)#pargs.block of {var,1,'_'} -> Block; _ -> (Pargs)#pargs.block end).
 
 %% Parse a given string with nicely formatted errors
 string(String) ->
