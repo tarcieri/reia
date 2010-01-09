@@ -9,7 +9,8 @@ module TupleTest
   def run
     [
       size_test(), 
-      nth_test(), 
+      nth_test(),
+      replace_test(),
       to_list_test(), 
       inspect_test()
     ]
@@ -29,6 +30,15 @@ module TupleTest
       tuple = (1,2,3,4,5)
       (true, tuple[0] == 1 and tuple[1] == 2 and tuple[4] == 5 and tuple[-2] == 4)
     end
+  end
+  
+  # replaces elements in pattern matching expressions
+  def replace_test
+    tuple = (1,2,3)
+    tuple[1] = 42
+    tuple[2] = 69
+    
+    ((1,42,69), tuple)
   end
       
   # converts to a list
