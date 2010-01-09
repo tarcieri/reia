@@ -8,16 +8,6 @@
 -module(reia_comparisons).
 -export([transform/2]).
 -include("reia_nodes.hrl").
--define(string_match(Line, Name), #tuple{line=Line, elements=[
-  #atom{line=Line, name='reia_string'}, 
-  #var{line=Line, name=Name}
-]}).
--define(string_to_binary(Line, Name), #native_call{
-  line=Line, 
-  module=erlang, 
-  function=iolist_to_binary, 
-  args=[#var{line=Line, name=Name}]
-}).
 
 transform(Exprs, _Options) ->
   reia_syntax:map_subtrees(fun transform/1, Exprs).
@@ -26,14 +16,14 @@ transform(Exprs, _Options) ->
 transform(#binary_op{line=Line, type='==', left=Left, right=Right}) ->
   #'case'{line=Line, expr=#tuple{line=Line, elements=[Left, Right]}, clauses=[
     #clause{line=Line, patterns=[#tuple{line=Line, elements=[
-        ?string_match(Line, '__left'), 
-        ?string_match(Line, '__right')
+        string_match(Line, '__left'), 
+        string_match(Line, '__right')
       ]}], exprs=[
         #binary_op{
           line  = Line,
           type  = '==',
-          left  = ?string_to_binary(Line, '__left'),
-          right = ?string_to_binary(Line, '__right')
+          left  = string_to_binary(Line, '__left'),
+          right = string_to_binary(Line, '__right')
         }
     ]},
     #clause{line=Line, patterns=[#tuple{line=Line, elements=[
@@ -57,3 +47,19 @@ transform(#binary_op{line=Line, type='!=', left=Left, right=Right}) ->
 % Walk unrecognized nodes without transforming them
 transform(Node) ->
   reia_syntax:map_subtrees(fun transform/1, Node).
+    
+% Generate an expression which matches against Reia's strings
+string_match(Line, Name) ->
+  #tuple{line=Line, elements=[
+    #atom{line=Line, name='reia_string'}, 
+    #var{line=Line, name=Name}
+  ]}.
+  
+% Convert a Reia string to a binary representation for comparison
+string_to_binary(Line, Name) -> 
+  #native_call{
+    line=Line, 
+    module=erlang, 
+    function=iolist_to_binary, 
+    args=[#var{line=Line, name=Name}]
+  }.
