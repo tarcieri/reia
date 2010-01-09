@@ -8,7 +8,6 @@
 -module(reia).
 -export([init/0, load/1, execute_file/1, load_submodule/2]).
 -include("reia_types.hrl").
--define(mtime(File), element(6, element(2, file:read_file_info(File)))).
 
 %
 % Public functions
