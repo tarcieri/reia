@@ -13,4 +13,8 @@ call(Atom, to_s, _Args, _Block) ->
   ?invoke(atom_to_list(Atom), to_string, {}, nil);
   
 call(Atom, inspect, _Args, _Block) ->
-  ?invoke(":" ++ atom_to_list(Atom), to_string, {}, nil).
+  List = case re:run(atom_to_list(Atom), "^[A-Za-z0-9_]+$") of
+    {match, _} -> ":" ++ atom_to_list(Atom);
+    nomatch    -> lists:flatten([":'", atom_to_list(Atom), "'"])
+  end,
+  ?invoke(List, to_string, {}, nil).
