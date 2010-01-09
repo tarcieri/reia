@@ -34,11 +34,13 @@ module TupleTest
   
   # replaces elements in pattern matching expressions
   def replace_test
-    tuple = (1,2,3)
-    tuple[1] = 42
-    tuple[2] = 69
+    TestHelper.expect(Tuple, "replaces elements in pattern matching expressions ") do
+      tuple = (1,2,3)
+      tuple[1] = 42
+      tuple[2] = 69
     
-    ((1,42,69), tuple)
+      ((1,42,69), tuple)
+    end
   end
       
   # converts to a list
