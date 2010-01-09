@@ -8,6 +8,7 @@
 -module(reia).
 -export([init/0, load/1, execute_file/1, load_submodule/2]).
 -include("reia_types.hrl").
+-define(mtime(File), element(6, element(2, file:read_file_info(File)))).
 
 %
 % Public functions
@@ -17,11 +18,27 @@
 init() -> load_core().
 
 load(Filename) ->
-  Absname = filename:absname(Filename),
-  RebPath = filename:rootname(Absname) ++ ".reb",
-  {ok, Bin} = reia_compiler:file(Absname),
-  file:write_file(RebPath, Bin),
-  reia_bytecode:load_file(RebPath).
+  SourcePath = filename:absname(Filename),
+  BinPath = filename:rootname(SourcePath) ++ ".reb",
+  
+  case file:read_file_info(SourcePath) of
+    {ok, _SourceInfo} ->
+      %SourceMtime = element(6, SourceInfo),
+      
+      case file:read_file_info(BinPath) of
+        % If the binary already exists, load it
+        {ok, _BinInfo} ->
+          reia_bytecode:load_file(BinPath);
+          
+        % Otherwise compile the source code
+        {error, _} ->
+          {ok, Bin} = reia_compiler:file(SourcePath),
+          file:write_file(BinPath, Bin),
+          reia_bytecode:load_file(BinPath)
+      end;
+    {error, _} = Error ->
+      Error
+  end.  
 
 %
 % Internal functions
