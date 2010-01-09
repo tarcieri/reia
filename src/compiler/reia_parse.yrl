@@ -117,25 +117,25 @@ inline_if_expr -> match_expr 'if' match_expr :
 inline_if_expr -> match_expr 'unless' match_expr :
   #'if'{line=?line('$2'), clauses=[
     #clause{
-      line=?line('$2'), 
-      patterns=[#unary_op{line=?line('$1'), type='not', expr='$3'}],
-      exprs=['$1']
+      line     = ?line('$2'), 
+      patterns = [#unary_op{line=?line('$1'), type='not', expr='$3'}],
+      exprs    = ['$1']
     }
   ]}.
 inline_if_expr -> match_expr : '$1'.
 
 match_expr -> ternary_expr '=' match_expr :
   #match{
-    line=?line('$2'), 
-    left='$1', 
-    right='$3'
+    line  = ?line('$2'), 
+    left  = '$1', 
+    right = '$3'
   }.
 match_expr -> ternary_expr rebind_op match_expr :
   #binary_op{
-    line=?line('$1'), 
-    type=?op('$2'), 
-    left='$1', 
-    right='$3'
+    line  = ?line('$1'), 
+    type  = ?op('$2'), 
+    left  = '$1', 
+    right = '$3'
   }.
 match_expr -> ternary_expr : '$1'.
 
@@ -149,62 +149,62 @@ ternary_expr -> bool_expr : '$1'.
 
 bool_expr -> bool_expr bool_op comp_expr : 
   #binary_op{
-    line=?line('$1'), 
-    type=?op('$2'), 
-    left='$1', 
-    right='$3'
+    line  = ?line('$1'), 
+    type  = ?op('$2'), 
+    left  = '$1', 
+    right = '$3'
   }.
 bool_expr -> comp_expr : '$1'.
 
 comp_expr -> range_expr comp_op range_expr : 
   #binary_op{
-    line=?line('$1'), 
-    type=?op('$2'), 
-    left='$1', 
-    right='$3'
+    line  = ?line('$1'), 
+    type  = ?op('$2'), 
+    left  = '$1', 
+    right = '$3'
   }.
 comp_expr -> range_expr : '$1'.
 
 range_expr -> range_expr '..' add_expr :
   #range{
-    line=?line('$1'), 
-    from='$1', 
-    to='$3'
+    line = ?line('$1'), 
+    from = '$1', 
+    to   = '$3'
   }.
 range_expr -> add_expr : '$1'.
 
 add_expr -> add_expr add_op mult_expr :
   #binary_op{
-    line=?line('$1'),
-    type=?op('$2'),
-    left='$1',
-    right='$3'
+    line  = ?line('$1'),
+    type  = ?op('$2'),
+    left  = '$1',
+    right = '$3'
   }.
 add_expr -> mult_expr : '$1'.
 
 mult_expr -> mult_expr mult_op pow_expr :
   #binary_op{
-    line=?line('$1'),
-    type=?op('$2'),
-    left='$1',
-    right='$3'
+    line  = ?line('$1'),
+    type  = ?op('$2'),
+    left  = '$1',
+    right = '$3'
   }.
 mult_expr -> pow_expr : '$1'.
 
 pow_expr -> pow_expr pow_op unary_expr :
   #binary_op{
-    line=?line('$1'), 
-    type=?op('$2'), 
-    left='$1', 
-    right='$3'
+    line  = ?line('$1'), 
+    type  = ?op('$2'), 
+    left  = '$1', 
+    right = '$3'
   }.
 pow_expr -> unary_expr : '$1'.
 
 unary_expr -> unary_op unary_expr :
   #unary_op{
-    line=?line('$1'),
-    type=?op('$1'),
-    expr='$2'
+    line = ?line('$1'),
+    type = ?op('$1'),
+    expr = '$2'
   }.
 unary_expr -> call_expr : '$1'.
 
@@ -283,9 +283,9 @@ unary_op -> '~'   : '$1'.
 %% Module declaration
 module_decl -> module module_name eol functions 'end' : 
   #module{
-    line=?line('$1'), 
-    name=element(3, '$2'), 
-    functions='$4'
+    line      = ?line('$1'), 
+    name      = element(3, '$2'), 
+    functions = '$4'
   }.
 
 %% Parenthesized arguments
@@ -323,17 +323,17 @@ function_identifier -> punctuated_identifier : '$1'.
 %% Function definitions
 function -> def function_identifier eol expr_list 'end' : 
   #function{
-    line=?line('$1'), 
-    name=element(3, '$2'), 
-    body='$4'
+    line = ?line('$1'), 
+    name = element(3, '$2'), 
+    body = '$4'
   }.
 function -> def function_identifier pargs eol expr_list 'end' :
   #function{
-    line=?line('$1'), 
-    name=element(3, '$2'), 
-    args='$3'#pargs.args,
-    block='$3'#pargs.block,
-    body='$5'
+    line  = ?line('$1'), 
+    name  = element(3, '$2'), 
+    args  = '$3'#pargs.args,
+    block = '$3'#pargs.block,
+    body  = '$5'
   }.
 
 %% Local function calls
