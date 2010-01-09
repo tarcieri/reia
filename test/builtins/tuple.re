@@ -29,7 +29,7 @@ module TupleTest
   def nth_test
     TestHelper.expect(Tuple, "retrieves the nth element correctly") do    
       tuple = (1,2,3,4,5)
-      (true, tuple[0] == 1 and tuple[1] == 2 and tuple[4] == 5 and tuple[-2] == 4)
+      (true, tuple[0] == 1 and tuple[1] == 2 and tuple[4] == 5 and tuple[-2] == 4 and tuple[10] == nil)
     end
   end
   

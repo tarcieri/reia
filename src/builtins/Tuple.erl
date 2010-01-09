@@ -10,9 +10,15 @@
 -include("../core/reia_invoke.hrl").
 
 call(Tuple, '[]', {Index}, _Block) ->
+  Length = tuple_size(Tuple),
+  Index2 = if
+    Index < 0 -> Length + Index + 1;
+    true      -> Index + 1
+  end,
   if
-    Index < 0 -> element(tuple_size(Tuple) + Index + 1, Tuple);
-    true      -> element(Index + 1, Tuple)
+    Index2 < 1      -> nil;
+    Index2 > Length -> nil;
+    true            -> element(Index2, Tuple)
   end;
   
 call(Tuple, '[]=', {Index, Value}, _Block) ->
