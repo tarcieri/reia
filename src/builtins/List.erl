@@ -13,7 +13,7 @@
 call(List, '[]', {Index}, _Block) ->
   Length = length(List),
   Index2 = if
-    Index < 0 -> length(List) + Index + 1;
+    Index < 0 -> Length + Index + 1;
     true      -> Index + 1
   end,
   if
