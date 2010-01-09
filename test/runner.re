@@ -16,7 +16,7 @@ tests = [
 results = tests.map do |(group, modules)|
   modules.map do |name|
     try
-      Main.load("test/#{group}/#{name}.re")
+      Main.load("test/#{group}/#{name}_test.re")
 
       mod = "#{name.capitalize()}Test".to_module()
       mod.run()
