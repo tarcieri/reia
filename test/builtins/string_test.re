@@ -29,11 +29,11 @@ module StringTest
     end
   end
     
-  def sub_test
-    TestHelper.expect(String, "substitutes properly") do
-      ("bazbar", "foobar".sub(/foo/, "baz"))
-    end
-  end
+  #def sub_test
+  #  TestHelper.expect(String, "substitutes properly") do
+  #    ("bazbar", "foobar".sub(/foo/, "baz"))
+  #  end
+  #end
     
   def interpolation_test
     (foo, bar) = (1, 2)
@@ -42,11 +42,11 @@ module StringTest
     end
   end
     
-  def split_test
-    TestHelper.expect(String, "splits properly") do
-      (["foo", "bar", "baz"], "foo    bar baz".split(/\s+/))
-    end
-  end
+  #def split_test
+  #  TestHelper.expect(String, "splits properly") do
+  #    (["foo", "bar", "baz"], "foo    bar baz".split(/\s+/))
+  #  end
+  #end
   
   def to_module_test
     TestHelper.expect(Str, "converts to a module") do

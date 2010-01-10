@@ -44,13 +44,12 @@ module OperatorTest
   end
   
   # implements /
-  # FIXME: won't parse???
-  #def div_test
-  #  TestHelper.expect("Operator", "/ is implemented") do
-  #    n = 84
-  #    (42, n / 2)
-  #  end
-  #end
+  def div_test
+    TestHelper.expect("Operator", "/ is implemented") do
+      n = 84
+      (42, n / 2)
+    end
+  end
   
   # implements +=
   def plusequals_test

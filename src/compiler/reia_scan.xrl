@@ -27,7 +27,8 @@ Rules.
 {SingleQuoted} : build_string(string, TokenChars, TokenLine, TokenLen).
 
 %% Regular expressions
-{Regexp} : build_string(regexp, TokenChars, TokenLine, TokenLen).
+% FIXME disabled until a solution can be found to the ambiguities with / and /=
+%{Regexp} : build_string(regexp, TokenChars, TokenLine, TokenLen).
 
 %% Atoms
 \:({UpperCase}|{LowerCase}|_)({UpperCase}|{Digit}|{LowerCase}|_)* : build_atom(TokenChars, TokenLine, TokenLen).
