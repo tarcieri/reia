@@ -57,9 +57,11 @@ if_to_case([], Output) ->
   Output;
 if_to_case([Clause|Clauses], Output) ->
   #clause{line=Line, patterns=[Condition], exprs=Exprs} = Clause,
+  Exprs2  = reia_syntax:map_subtrees(fun transform/1, Exprs),
+  [Output2] = reia_syntax:map_subtrees(fun transform/1, [Output]), 
   Node = #'case'{line=Line, expr=cast_boolean(Condition), clauses=[
-    #clause{line=Line, patterns=[#false{line=Line}], exprs=[Output]},
-    #clause{line=Line, patterns=[#true {line=Line}], exprs=Exprs}
+    #clause{line=Line, patterns=[#false{line=Line}], exprs=[Output2]},
+    #clause{line=Line, patterns=[#true {line=Line}], exprs=Exprs2}
   ]},
   if_to_case(Clauses, Node).
       
