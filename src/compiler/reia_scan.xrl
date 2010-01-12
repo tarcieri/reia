@@ -13,7 +13,7 @@ LowerCase = [a-z]
 Whitespace = [\s]
 DoubleQuoted = "(\\\^.|\\.|[^\"])*"
 SingleQuoted = '(\\\^.|\\.|[^\'])*'
-Regexp = /(\\\^.|\\.|[^/])*/
+Regexp = \%r\/(\\\^.|\\.|[^/])*\/
 Comment = #.*
 
 Rules.
@@ -27,8 +27,7 @@ Rules.
 {SingleQuoted} : build_string(string, TokenChars, TokenLine, TokenLen).
 
 %% Regular expressions
-% FIXME disabled until a solution can be found to the ambiguities with / and /=
-%{Regexp} : build_string(regexp, TokenChars, TokenLine, TokenLen).
+{Regexp} : build_string(regexp, TokenChars, TokenLine, TokenLen).
 
 %% Atoms
 \:({UpperCase}|{LowerCase}|_)({UpperCase}|{Digit}|{LowerCase}|_)* : build_atom(TokenChars, TokenLine, TokenLen).
