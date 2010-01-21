@@ -130,7 +130,7 @@ match_expr -> ternary_expr '=' match_expr :
     left  = '$1', 
     right = '$3'
   }.
-match_expr -> ternary_expr rebind_op match_expr :
+match_expr -> ternary_expr rebind_op ternary_expr:
   #binary_op{
     line  = ?line('$1'), 
     type  = ?op('$2'), 
