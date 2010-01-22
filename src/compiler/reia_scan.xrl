@@ -23,11 +23,11 @@ Rules.
 -?{Digit}+           : build_integer(TokenChars, TokenLine).
 
 %% Strings
-{DoubleQuoted} : build_string(string, TokenChars, TokenLine, TokenLen).
-{SingleQuoted} : build_string(string, TokenChars, TokenLine, TokenLen).
+{DoubleQuoted} : build_string(TokenChars, TokenLine, TokenLen).
+{SingleQuoted} : build_string(TokenChars, TokenLine, TokenLen).
 
 %% Regular expressions
-{Regexp} : build_string(regexp, TokenChars, TokenLine, TokenLen).
+{Regexp} : build_regexp(TokenChars, TokenLine, TokenLen).
 
 %% Atoms
 \:({UpperCase}|{LowerCase}|_)({UpperCase}|{Digit}|{LowerCase}|_)* : build_atom(TokenChars, TokenLine, TokenLen).
@@ -113,9 +113,13 @@ build_float([$-|Chars], Line) ->
 build_float(Chars, Line) ->
   {token, #float{line = Line, value =  list_to_float(Chars)}}.
   
-build_string(Type, Chars, Line, Len) ->
+build_string(Chars, Line, Len) ->
   String = unescape_string(lists:sublist(Chars, 2, Len - 2)), 
-  {token, {Type, Line, String}}.
+  {token, {string, Line, String}}.
+
+build_regexp(Chars, Line, Len) ->
+  String = unescape_string(lists:sublist(Chars, 4, Len - 4)),
+  {token, {regexp, Line, String}}.
   
 unescape_string(String) -> unescape_string(String, []).
 

@@ -13,8 +13,8 @@ module RegexpTest
       #sub(),
       #gsub(),
       #match_one(), 
-      #to_string(), 
-      #inspect()
+      to_string(), 
+      inspect()
     ]
   end
 
@@ -56,13 +56,13 @@ module RegexpTest
   # converts to a string
   def to_string
     TestHelper.expect(Regexp, "converts to a string") do
-      ("/.,abc/", %r/.,abc/.inspect())
+      ("%r/.,abc/", %r/.,abc/.inspect())
     end
   end
   
   def inspect
     TestHelper.expect(Regexp, "inspect returns valid regexp syntax") do
-      ("/.,abc/", %r/.,abc/.inspect())
+      ("%r/.,abc/", %r/.,abc/.inspect())
     end
   end
 end

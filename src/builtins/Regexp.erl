@@ -11,6 +11,6 @@
 -include("../core/reia_invoke.hrl").
 
 call(#reia_regexp{pattern=Pattern}, to_s, _Args, _Block) ->
-  ?invoke("/" ++ binary_to_list(Pattern) ++ "/", to_string, {}, nil);
+  ?invoke("%r/" ++ binary_to_list(Pattern) ++ "/", to_string, {}, nil);
 call(Regexp, inspect, Args, Block) ->
   call(Regexp, to_s, Args, Block).
