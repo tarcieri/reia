@@ -74,13 +74,13 @@ Nonterminals
   .
   
 Terminals
-  '(' ')' '[' ']' '{' '}' def eol
+  '(' ')' '[' ']' '{' '}' '<[' ']>' def eol
   float integer string atom regexp true false nil 
   module module_name identifier punctuated_identifier erl 
   'case' 'when' 'end' 'if' 'unless' 'elseif' 'else' fun do
   'and' 'or' 'not' 'try' 'catch' for in
   '+' '-' '*' '/' '%' '**' ',' '.' '..' 
-  '=' '=>' '$' ':' '?' '!' '~' '&' '|' '^' '<<' '>>'
+  '=' '=>' ':' '?' '!' '~' '&' '|' '^' '<<' '>>'
   '===' '==' '!=' '>' '<' '>=' '<='
   '+=' '-=' '*=' '/=' '**=' '&=' '|=' '^=' '<<=' '>>='
   .
@@ -510,13 +510,8 @@ lc_expr -> expr 'in' expr :
   }.
 
 %% Binaries
-binary -> '$' '[' ']' : #binary{line=?line('$1'), elements=[]}.
-binary -> '$' '[' bin_elements ']' : #binary{line=?line('$1'), elements='$3'}.
-binary -> '$' string :
-  #binary{
-    line=?line('$1'),
-    elements=[#bin_element{line=?line('$1'), expression='$2'}]
-  }.
+binary -> '<[' ']>' : #binary{line=?line('$1'), elements=[]}.
+binary -> '<[' bin_elements ']>' : #binary{line=?line('$1'), elements='$2'}.
 
 bin_elements -> bin_element : ['$1'].
 bin_elements -> bin_element ',' bin_elements : ['$1'|'$3'].

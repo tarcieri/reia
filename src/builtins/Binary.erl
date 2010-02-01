@@ -18,11 +18,5 @@ call(Binary, to_s, _Args, _Block) ->
   
 call(Binary, inspect, _Args, _Block) ->
   List = binary_to_list(Binary),
-  List2 = case io_lib:char_list(List) of
-    true  -> 
-      "$\"" ++ List ++ "\"";
-    false ->
-      Elements = ?invoke(?invoke(List, join, {#reia_string{elements=[","]}}, nil), to_list, {}, nil),
-      "$[" ++ Elements ++ "]"
-  end,
-  ?invoke(List2, to_string, {}, nil).
+  Elements = ?invoke(?invoke(List, join, {#reia_string{elements=[","]}}, nil), to_list, {}, nil),
+  ?invoke("<[" ++ Elements ++ "]>", to_string, {}, nil).
