@@ -27,7 +27,7 @@ call(#reia_module{} = Receiver, Method, Arguments, Block) ->
 call(Receiver, Method, Arguments, Block) when is_tuple(Receiver) ->
   'Tuple':call(Receiver, Method, Arguments, Block);
 call(Receiver, Method, Arguments, Block) when is_binary(Receiver) ->
-  'Binary':call(Receiver, Method, Arguments, Block);
+  'Binary':call({Receiver, Method, Arguments, Block}, nil);
 call(true, Method, Arguments, Block) ->
   'Boolean':call(true, Method, Arguments, Block);
 call(false, Method, Arguments, Block) ->
