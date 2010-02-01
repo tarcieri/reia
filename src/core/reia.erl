@@ -6,7 +6,7 @@
 %
 
 -module(reia).
--export([init/0, load/1, execute_file/1, load_submodule/2]).
+-export([init/0, load/1, compile/2, execute_file/1, load_submodule/2]).
 -include("reia_types.hrl").
 
 %
@@ -31,15 +31,16 @@ load(Filename) ->
           % Ensure changes haven't been made to the sources
           if
             BinMtime > SourceMtime ->
-              reia_bytecode:load_file(BinPath);
+              void;
             true ->
-              compile_source(SourcePath, BinPath)
+              compile(SourcePath, BinPath)
           end;
           
         % Otherwise compile the source code
         {error, _} ->
-          compile_source(SourcePath, BinPath)
-      end;
+          compile(SourcePath, BinPath)
+      end,
+      reia_bytecode:load_file(BinPath);
     {error, _} = Error ->
       Error
   end.  
@@ -49,10 +50,9 @@ load(Filename) ->
 %
 
 % Compile and load the given Reia source code
-compile_source(SourcePath, BinPath) ->
+compile(SourcePath, BinPath) ->
   {ok, Bin} = reia_compiler:file(SourcePath),
-  file:write_file(BinPath, Bin),
-  reia_bytecode:load_file(BinPath).
+  file:write_file(BinPath, Bin).
   
 % Internal function for loading code from the 'reia' command line script
 execute_file([Filename]) when is_atom(Filename) ->
