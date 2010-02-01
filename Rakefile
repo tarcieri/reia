@@ -56,12 +56,14 @@ task :check_previous_install do
 end
 
 # Generate an output path for the given input file
-def output_file(input_file, dir = 'ebin/')
-  dir + File.basename(input_file).sub(/\.\w+$/, '.beam')
+def output_file(input_file, dir = 'ebin/', ext = '.beam')
+  dir + File.basename(input_file).sub(/\.\w+$/, ext)
 end
 
 GENERATED_SRC = %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
 ERL_SRC = (GENERATED_SRC + FileList.new('src/{compiler,core,builtins}/**/*.erl')).uniq
+ERL_DEST = ERL_SRC.map { |input| output_file(input) }
+
 QUIET_SRC = %w(src/compiler/reia_parse.erl)
 
 ERL_SRC.each do |input|
@@ -72,9 +74,19 @@ ERL_SRC.each do |input|
   end
 end
 
+REIA_SRC  = FileList.new('src/builtins/**/*.re')
+REIA_DEST = REIA_SRC.map { |input| output_file(input, 'ebin/', '.reb') }
+
+REIA_SRC.each do |input|
+  output = output_file(input, 'ebin/', '.reb')
+  file output => input do
+    sh "bin/reiac -o #{output} #{input}"
+  end
+end
+
 # Build rules
 task :build   => %w(scanner parser reia)
-task :reia    => ERL_SRC.map { |input_file| output_file(input_file) }
+task :reia    => ERL_DEST + REIA_DEST
 task :scanner => %w(src/leex/leex.beam src/compiler/reia_scan.erl)
 task :parser  => %w(src/compiler/reia_parse.erl)
 

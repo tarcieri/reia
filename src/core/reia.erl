@@ -6,7 +6,7 @@
 %
 
 -module(reia).
--export([init/0, load/1, compile/2, execute_file/1, load_submodule/2]).
+-export([init/0, load/1, compile/1, compile/2, execute_file/1, load_submodule/2]).
 -include("reia_types.hrl").
 
 %
@@ -49,6 +49,10 @@ load(Filename) ->
 % Internal functions
 %
 
+% Thunk for reiac
+compile([SourcePath, BinPath]) ->
+  compile(SourcePath, BinPath).
+
 % Compile and load the given Reia source code
 compile(SourcePath, BinPath) ->
   {ok, Bin} = reia_compiler:file(SourcePath),
@@ -87,6 +91,10 @@ load_submodule(Name, Attributes) ->
 % This prevents naming conflicts on case insensitive filesystems between Reia
 % and Erlang modules (e.g. string and String)
 load_core() ->
+  load_core_beam(), load_core_reb(), ok.
+
+% Load compiled BEAM files
+load_core_beam() ->
   Modules = filelib:wildcard(base_directory() ++ "/ebin/*.beam"),
   [load_module(Module) || Module <- Modules],
   ok.
@@ -100,6 +108,11 @@ load_module(Path) ->
       throw({error, {"couldn't load " ++ Path, Error}})
   end.
   
+% Load core REB files
+load_core_reb() ->
+  Files = filelib:wildcard(base_directory() ++ "/ebin/*.reb"),
+  [reia_bytecode:load_file(File) || File <- Files].
+    
 % Base directory of the Reia distribution
 base_directory() ->
   {ok, Dir} = file:get_cwd(),

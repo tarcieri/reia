@@ -1,0 +1,30 @@
+#!/bin/sh
+
+USAGE="Usage: `basename $0` [-o output.reb] input.re"
+
+if [ $# -eq 0 ]; then
+	echo $USAGE >&2
+	exit 1
+fi
+
+
+while getopts o: OPT; do
+  case "$OPT" in
+  	o)	OUTPUT_FILE=$OPTARG
+  		;;
+  	\?)	# getopts issues an error message
+  		echo $USAGE >&2
+  		exit 1
+  		;;
+  esac
+done
+
+for PARAMS; do
+  INPUT_FILE=$PARAMS
+done
+
+if [ "$OUTPUT_FILE" == "" ]; then
+  OUTPUT_FILE=`echo $INPUT_FILE | sed s/re$/reb/`
+fi
+
+erl -pz ebin -pz ../ebin -noshell +K true -s reia compile "$INPUT_FILE" "$OUTPUT_FILE" -s init stop -extra $*
