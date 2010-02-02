@@ -29,11 +29,11 @@ call(Receiver, Method, Arguments, Block) when is_tuple(Receiver) ->
 call(Receiver, Method, Arguments, Block) when is_binary(Receiver) ->
   'Binary':call({Receiver, Method, Arguments, Block}, nil);
 call(true, Method, Arguments, Block) ->
-  'Boolean':call(true, Method, Arguments, Block);
+  'Boolean':call({true, Method, Arguments, Block}, nil);
 call(false, Method, Arguments, Block) ->
-  'Boolean':call(false, Method, Arguments, Block);
+  'Boolean':call({false, Method, Arguments, Block}, nil);
 call(nil, Method, Arguments, Block) ->
-  'Boolean':call(nil, Method, Arguments, Block);
+  'Boolean':call({nil, Method, Arguments, Block}, nil);
 call(Receiver, Method, Arguments, Block) when is_atom(Receiver) ->
   'Atom':call({Receiver, Method, Arguments, Block}, nil);
 call(Receiver, Method, Arguments, Block) when is_function(Receiver) ->
