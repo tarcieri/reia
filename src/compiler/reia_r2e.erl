@@ -182,6 +182,12 @@ transform(#unary_op{line=Line, type='~', expr=Expr}) ->
     
 transform(#unary_op{line=Line, type=Type, expr=Expr}) ->
   {op, Line, Type, transform(Expr)};
+  
+transform(#binary_op{line=Line, type='==', left=Left, right=Right}) ->
+  {call, Line,
+    {remote, Line, {atom, Line, reia_comparisons}, {atom, Line, compare}},
+    [transform(Left), transform(Right)]
+  };
 
 transform(#binary_op{line=Line, type='&', left=Left, right=Right}) ->
   {op, Line, 'band', transform(Left), transform(Right)};
