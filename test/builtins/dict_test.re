@@ -8,8 +8,8 @@
 module DictTest
   def run
     [
-      retrieve_test()
-      #compare_test(), 
+      retrieve_test(),
+      compare_test()
       #size_test(),
       #keys_test()
     ]
@@ -23,7 +23,7 @@ module DictTest
   
   def compare_test
     TestHelper.expect(Dict, "compares dicts correctly") do
-      ({:foo => 'foo', :bar => 'bar'}, {:bar => 'bar', :foo => 'bar'})
+      ({:foo => 'foo', :bar => 'bar'}, {:bar => 'bar', :foo => 'foo'})
     end
   end
   
