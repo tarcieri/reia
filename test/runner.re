@@ -9,7 +9,7 @@ started_at = erl.now()
 Main.load("test/test_helper.re")
 
 tests = [
-  ("builtins", ["binary", "list", "tuple", "string", "regexp", "numeric", "dict", "atom"]),
+  ("builtins", ["binary", "boolean", "list", "tuple", "string", "regexp", "numeric", "dict", "atom"]),
   ("core",     ["blocks", "branching", "funrefs", "operator"])
 ]
 

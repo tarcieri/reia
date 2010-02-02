@@ -18,7 +18,6 @@ module BinaryTest
   end
   
   # casts to a string
-  # converts to a string
   def to_s_test
     TestHelper.expect(Binary, "casts to a string") do
       ("foobar", <["foobar"]>.to_s())
