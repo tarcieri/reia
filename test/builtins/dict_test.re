@@ -25,7 +25,7 @@ module DictTest
   end
   
   def set_test
-    TestHelper.expect(Dit, "sets values of bound variables by key") do
+    TestHelper.expect(Dict, "sets values of bound variables by key") do
       dict = {}
       dict[:foo] = 'bar'
       ('bar', dict[:foo])
@@ -40,7 +40,7 @@ module DictTest
   
   def to_s_test
     TestHelper.expect(Dict, "casts to a string") do
-      ("{foo=>bar}",  {:foo => "bar"}.to_s())
+      ("{:foo=>\"bar\"}",  {:foo => "bar"}.to_s())
     end
   end
   
