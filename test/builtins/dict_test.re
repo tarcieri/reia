@@ -12,9 +12,9 @@ module DictTest
       set_test(),
       compare_test(),
       to_s_test(),
-      inspect_test()
-      #size_test(),
-      #keys_test()
+      inspect_test(),
+      size_test(),
+      keys_test()
     ]
   end
     
