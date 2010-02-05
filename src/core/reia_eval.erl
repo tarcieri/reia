@@ -45,13 +45,16 @@ exprs(Exprs, Bindings) ->
   Args = list_to_tuple([Val || {_, Val} <- Bindings]),
   {ok, Name, {Value, NewBindings}} = reia_bytecode:load(Module, [Args, nil]),
 
-	% FIXME: In the future it's possible eval will create things which persist
-	% beyond initial evaluation (e.g. lambdas, processes).  Once these features
-	% are added a different solution will be needed than a simple code:purge.
+	% FIXME: This code:purge is just failing and modules are just accumulating
+	% the code server whenever eval is used.  A "reaper" process is needed to
+	% periodically try to purge these modules until it succeeds.
   code:purge(Name),
+  
   {value, Value, NewBindings}.
 
 % Generate a timestamp to be used in a Reia module name
+% FIXME: atoms are never garbage collected, so a pool of these should be kept
+% and new ones created only when the pool is empty.
 stamp() ->
   Timestamp = [integer_to_list(N) || N <- tuple_to_list(now())],
   string:join(Timestamp, "_").
