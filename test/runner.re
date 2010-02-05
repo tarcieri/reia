@@ -9,8 +9,11 @@ started_at = erl.now()
 Main.load("test/test_helper.re")
 
 tests = [
-  ("builtins", ["binary", "boolean", "list", "tuple", "string", "regexp", "numeric", "dict", "atom"]),
-  ("core",     ["blocks", "branching", "funrefs", "operator"])
+  ("builtins", [
+    "binary", "boolean", "list", "tuple", "string", 
+    "regexp", "numeric", "dict", "atom", "fun"
+  ]),
+  ("core", ["blocks", "branching", "funrefs", "operator"])
 ]
 
 results = tests.map do |(group, modules)|
