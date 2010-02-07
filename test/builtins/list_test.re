@@ -20,6 +20,7 @@ module ListTest
       complex_replace_test(),
       reverse_test(), 
       join_test(),
+      each_test(),
       map_test(),
       flatten_test(),
       #parenless_sugar_test(), # FIXME this should work eventually...
@@ -79,6 +80,14 @@ module ListTest
   def join_test
     TestHelper.expect(List, "joins into a string") do
       ("1,2,3", [1,2,3].join(','))
+    end
+  end
+  
+  # iterates each element
+  def each_test
+    TestHelper.expect(List, "iterates each element") do
+      # FIXME: this doesn't actually test the block produces a side effect
+      ([1,2,3], [1,2,3].each { |n| n })
     end
   end
   
