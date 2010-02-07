@@ -19,7 +19,9 @@ module ListTest
       replace_test(),
       complex_replace_test(),
       reverse_test(), 
-      join_test(), 
+      join_test(),
+      map_test(),
+      flatten_test(),
       #parenless_sugar_test(), # FIXME this should work eventually...
       to_tuple_test(), 
       to_dict_test(),
@@ -77,6 +79,20 @@ module ListTest
   def join_test
     TestHelper.expect(List, "joins into a string") do
       ("1,2,3", [1,2,3].join(','))
+    end
+  end
+  
+  # maps to a block
+  def map_test
+    TestHelper.expect(List, "maps to a block") do
+      ([40,41,42], [1,2,3].map { |n| n + 39 })
+    end
+  end
+  
+  # flattens from a deep list
+  def flatten_test
+    TestHelper.expect(List, "flattens from a deep list") do
+      ([1,2,3,4,5,6], [1,[[2,3],4,5],6].flatten())
     end
   end
   
