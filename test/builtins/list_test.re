@@ -24,6 +24,7 @@ module ListTest
       map_test(),
       flatten_test(),
       #parenless_sugar_test(), # FIXME this should work eventually...
+      to_list_test(),
       to_tuple_test(), 
       to_dict_test(),
       to_string_test(),
@@ -110,13 +111,22 @@ module ListTest
 #      (5, ListTestHelper.some_list[2])
 #    end
 #  end
+  
+  # converts to a list
+  def to_list_test
+    TestHelper.expect(List, "converts to a list") do
+      ([1,2,3], [1,2,3].to_list())
+    end
+  end
     
+  # converts to a tuple  
   def to_tuple_test
     TestHelper.expect(List, "converts to a tuple") do
-      ((1,2,3).to_s(), [1,2,3].to_tuple().to_s())
+      ((1,2,3), [1,2,3].to_tuple())
     end
   end
   
+  # converts to a dict
   def to_dict_test
     TestHelper.expect(List, "converts to a dict") do
       ([(:foo, "bar"), (:bar, "bar")].to_dict(), {:foo => "bar", :bar => "bar"})
