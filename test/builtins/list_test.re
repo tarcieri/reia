@@ -22,7 +22,10 @@ module ListTest
       join_test(), 
       #parenless_sugar_test(), # FIXME this should work eventually...
       to_tuple_test(), 
-      to_dict_test()
+      to_dict_test(),
+      to_string_test(),
+      to_s_test(),
+      inspect_test()
     ]
   end
   
@@ -92,6 +95,27 @@ module ListTest
   def to_dict_test
     TestHelper.expect(List, "converts to a dict") do
       ([(:foo, "bar"), (:bar, "bar")].to_dict(), {:foo => "bar", :bar => "bar"})
+    end
+  end
+  
+  # converts to a string
+  def to_string_test
+    TestHelper.expect(List, "converts to a string") do
+      ("surprise", [115,117,114,112,114,105,115,101].to_string())
+    end
+  end
+  
+  # casts to a string
+  def to_s_test
+    TestHelper.expect(Binary, "casts to a string") do
+      ("[115,117,114,112,114,105,115,101]", [115,117,114,112,114,105,115,101].to_s())
+    end
+  end
+  
+  # inspects properly
+  def inspect_test
+    TestHelper.expect(Binary, "inspects properly") do
+      ("[115,117,114,112,114,105,115,101]", [115,117,114,112,114,105,115,101].inspect())
     end
   end
 end
