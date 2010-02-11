@@ -198,17 +198,13 @@ transform_node(#generate{line=Line, pattern=Pattern, source=Source}, State) ->
   
   output(#generate{line=Line, pattern=Pattern2, source=Source2}, State3);
 
-% Arguments initialize new entries in the bindings dict
+% Arguments bind variables
 transform_node(#var{name=Name} = Node, #state{scope=argument, bindings=Bindings} = State) ->
-  output(Node, State#state{bindings=dict:store(Name, 0, Bindings)});
+  output(Node, State#state{bindings=bind_variable(Name, Bindings)});
       
 % Variables are (re)bound while in match scope
 transform_node(#var{name=Name} = Node, #state{scope=match, bindings=Bindings} = State) ->
-  NewBindings = case dict:find(Name, Bindings) of
-    {ok, Version} -> dict:store(Name, Version + 1, Bindings);
-    error         -> dict:store(Name, 0, Bindings)
-  end,
-  output(Node, State#state{bindings=NewBindings});
+  output(Node, State#state{bindings=bind_variable(Name, Bindings)});
 
 transform_node(Node, State) when is_integer(Node) or is_float(Node) or is_atom(Node) ->
   {Node, State};
@@ -263,3 +259,15 @@ update_binding(OldBinding, NewBinding) ->
         dict:store(Var, Version, NewestVars)
     end    
   end, OldBinding, dict:to_list(NewBinding)).
+  
+% Destructively rebind a given variable
+bind_variable(Name, Bindings) ->
+  case Name of
+    '_' ->
+      Bindings;
+    _ ->
+      case dict:find(Name, Bindings) of
+        {ok, Version} -> dict:store(Name, Version + 1, Bindings);
+        error         -> dict:store(Name, 0, Bindings)
+      end
+  end.
