@@ -121,11 +121,17 @@ transform_node(#lambda{line=Line, args=Args, body=Body}, State) ->
   
   output(#lambda{line=Line, args=Args2, body=Body2}, State);
 
+% Case statements bind variables in clauses
+transform_node(#'case'{line=Line, expr=Expr, clauses=Clauses}, State) ->
+  {[Expr2], State2} = reia_syntax:mapfold_subtrees(
+    fun transform_node/2,
+    State,
+    [Expr]
+  ),
+  {Clauses2, State3} = process_clauses(Clauses, State2),
+  output(#'case'{line=Line, expr=Expr2, clauses=Clauses2}, State3);
+
 % Case clauses match against patterns
-% FIXME: This pass is woefully inadequate.  Each of the patterns in the clause
-% need to be handled separately, and the "unsafe" variables amongst all the
-% clauses passed over and bound to their latest versions, or nil.  This is a
-% "good enough to get by" solution for now
 transform_node(#clause{line=Line, patterns=Patterns, exprs=Body}, #state{scope=Scope} = State) ->
   {Patterns2, State2} = lists:mapfoldl(fun(Pattern, St) ->
     {[Pattern2], St2} = reia_syntax:mapfold_subtrees(
@@ -218,3 +224,42 @@ revert_node(#bindings{node=Node}) ->
   reia_syntax:map_subtrees(fun revert_node/1, Node);
 revert_node(Node) ->
   reia_syntax:map_subtrees(fun revert_node/1, Node).
+    
+process_clauses(Clauses, State) ->
+  % Proceed with the normal SSA transformation on each clause
+  ClauseBindings = lists:map(fun(Clause) ->
+    {[Clause2], St2} = reia_syntax:mapfold_subtrees(
+      fun transform_node/2,
+      State,
+      [Clause]
+    ),
+    {Clause2, St2}
+  end, Clauses),
+
+  % Extract a nested list of bound variables and SSA versions for each clause
+  ClauseVars = [Bindings || {_, #state{bindings=Bindings}} <- ClauseBindings],
+
+  % Build a dict of the highest version numbers of any variables referenced 
+  % in any clause
+  OutputVars = lists:foldl(fun update_binding/2, dict:new(), ClauseVars),
+  
+  % Store the output variables in the binding object  
+  Clauses2 = [Clause#bindings{output=OutputVars} || {Clause, _} <- ClauseBindings],
+  
+  {Clauses2, State#state{bindings=OutputVars}}.
+    
+% Update the OldBinding dictionary with the newest version numbers from 
+% NewBinding, producing a new dictionary
+update_binding(OldBinding, NewBinding) ->
+  lists:foldl(fun({Var, Version}, NewestVars) ->
+    case dict:find(Var, NewestVars) of
+      {ok, NewestVersion} ->
+        if Version > NewestVersion ->
+          dict:store(Var, Version, NewestVars);
+        true ->
+          NewestVars
+        end;
+      error ->
+        dict:store(Var, Version, NewestVars)
+    end    
+  end, OldBinding, dict:to_list(NewBinding)).
