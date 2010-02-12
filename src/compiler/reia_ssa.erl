@@ -25,7 +25,7 @@ transform_node(#bindings{
   Patterns2 = reia_syntax:map_subtrees(fun transform_node/1, Patterns),
   Exprs = reia_syntax:map_subtrees(fun transform_node/1, BindingExprs),
   
-  UnsafeVariables = enumerate_unsafe_variables([], dict:to_list(FinalBinding), OutputBinding),
+  UnsafeVariables = enumerate_unsafe_variables(FinalBinding, OutputBinding),
   Exprs2 = case UnsafeVariables of
     [] -> Exprs;
     _  -> annotate_return_value(Exprs, UnsafeVariables)
@@ -61,6 +61,9 @@ ssa_name(Name, Version) ->
   list_to_atom(Name2).
   
 % Enumerate all variables which are unsafe at the end of a given clause
+enumerate_unsafe_variables(FinalBinding, OutputBinding) ->
+  enumerate_unsafe_variables([], dict:to_list(FinalBinding), OutputBinding). 
+  
 enumerate_unsafe_variables(Unsafe, [], _) ->
   Unsafe;
 enumerate_unsafe_variables(Unsafe, [{Name, Version}|Rest], Output) ->
