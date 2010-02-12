@@ -7,7 +7,7 @@
 
 module BinaryTest
   def run
-    [to_string_test(), to_s_test(), inspect_test()]
+    [to_string_test(), to_s_test(), inspect_test(), size_test()]
   end
 
   # converts to a string
@@ -28,6 +28,13 @@ module BinaryTest
   def inspect_test
     TestHelper.expect(Binary, "inspects properly") do
       ("<[1,2,3]>", <[1,2,3]>.inspect())
+    end
+  end
+  
+  # calculates size correctly
+  def size_test
+    TestHelper.expect(Binary, "calculates size correctly") do
+      (6, <["foobar"]>.size())
     end
   end
 end

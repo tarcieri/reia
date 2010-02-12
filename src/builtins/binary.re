@@ -18,4 +18,8 @@ module Binary
   def call(self, :inspect, args, block)
     "<[#{erl.binary_to_list(self).join(',')}]>"
   end
+  
+  def call(self, :size, args, block)
+    erl.byte_size(self)
+  end
 end
