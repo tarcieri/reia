@@ -224,12 +224,12 @@ revert_node(Node) ->
 process_clauses(Clauses, State) ->
   % Proceed with the normal SSA transformation on each clause
   ClauseBindings = lists:map(fun(Clause) ->
-    {[Clause2], St2} = reia_syntax:mapfold_subtrees(
+    {[Clause2], St} = reia_syntax:mapfold_subtrees(
       fun transform_node/2,
       State,
       [Clause]
     ),
-    {Clause2, St2}
+    {Clause2, St}
   end, Clauses),
 
   % Extract a nested list of bound variables and SSA versions for each clause
@@ -240,7 +240,7 @@ process_clauses(Clauses, State) ->
   OutputVars = lists:foldl(fun update_binding/2, dict:new(), ClauseVars),
   
   % Store the output variables in the binding object  
-  Clauses2 = [Clause#bindings{output=OutputVars} || {Clause, _} <- ClauseBindings],
+  Clauses2 = [Clause#bindings{final=St#state.bindings, output=OutputVars} || {Clause, St} <- ClauseBindings],
   
   {Clauses2, State#state{bindings=OutputVars}}.
     
