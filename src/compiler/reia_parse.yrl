@@ -699,6 +699,7 @@ interpolate_string([], Line, CharAcc, ExprAcc) ->
     _  -> lists:reverse([#string{line=Line, characters=lists:reverse(CharAcc)}|ExprAcc])
   end,
   case Result of
+    [] -> #string{line=Line, characters=""};
     [#string{} = Res] -> Res;
     _ -> #dstring{line=Line, elements=Result}
   end;
