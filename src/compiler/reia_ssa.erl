@@ -62,7 +62,14 @@ ssa_name(Name, Version) ->
   
 % Enumerate all variables which are unsafe at the end of a given clause
 enumerate_unsafe_variables(FinalBinding, OutputBinding) ->
-  enumerate_unsafe_variables([], dict:to_list(FinalBinding), OutputBinding). 
+  Unsafe = enumerate_unsafe_variables([], dict:to_list(FinalBinding), OutputBinding),
+  Unbound = lists:filter(fun({Name, _Version}) ->
+    case dict:find(Name, FinalBinding) of
+      {ok, _} -> false;
+      _       -> true
+    end
+  end, dict:to_list(OutputBinding)),
+  Unsafe ++ [{Name, nil, Version} || {Name, Version} <- Unbound].
   
 enumerate_unsafe_variables(Unsafe, [], _) ->
   Unsafe;
@@ -150,5 +157,10 @@ bind_expression(Name, Input, Output) ->
   #match{
     line  = 1,
     left  = #var{line=1, name=ssa_name(Name, Output)},
-    right = #var{line=1, name=ssa_name(Name, Input)}
+    right = case Input of
+      nil ->
+        #nil{};
+      _ ->
+        #var{line=1, name=ssa_name(Name, Input)}
+    end
   }.
