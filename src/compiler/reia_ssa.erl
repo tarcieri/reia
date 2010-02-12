@@ -31,9 +31,7 @@ transform_node(#bindings{
     _  -> annotate_return_value(Exprs, UnsafeVariables)
   end,
   
-  Node = #clause{line=Line, patterns=Patterns2, exprs=Exprs2},
-  io:format("Output: ~p~n", [Node]),
-  Node;
+  #clause{line=Line, patterns=Patterns2, exprs=Exprs2};
 
 transform_node(#bindings{
   node=#var{line=Line, name=Name}=Node, 
@@ -77,11 +75,11 @@ enumerate_unsafe_variables(Unsafe, [{Name, Version}|Rest], Output) ->
 % Annotate the return value, binding all unsafe variables to their newest versions
 annotate_return_value(Exprs, UnsafeVariables) ->
   [LastExpr|Rest] = lists:reverse(Exprs),
-  io:format("Unsafe: ~p~n", [UnsafeVariables]),
   OutputVariables = dict:from_list([{Name, {InputVer, OutputVer}} || {Name, InputVer, OutputVer} <- UnsafeVariables]),
-  {LastExpr2, _BoundVariables} = update_final_expression(LastExpr, OutputVariables),
+  {LastExpr2, BoundVariables} = update_final_expression(LastExpr, OutputVariables),
+  FinalVariables = bind_unsafe_variables(filter_safe_variables(UnsafeVariables, BoundVariables)),
   
-  lists:reverse([LastExpr2|Rest]).
+  lists:reverse([LastExpr2|FinalVariables] ++ Rest).
 
 % Update the version numbers of any variables bound in the final expression
 update_final_expression(Expr, OutputVariables) ->
@@ -91,7 +89,8 @@ update_final_expression(Expr, OutputVariables) ->
     [Expr]
   ),
   {Expr2, sets:from_list(BoundVariables)}.
-
+  
+% Look for outdated version references in the final expression and update them
 transform_final(#var{line=Line, name=SSAName}=Node, {OutputVariables, Bound}=State) ->
   case decode_ssa(SSAName) of
     {NameString, Version} ->
@@ -132,3 +131,21 @@ decode_ssa(Version, [$_|Name]) ->
   end;
 decode_ssa(Version, [Char|Rest]) ->
   decode_ssa([Char|Version], Rest).
+  
+% Filter out variables that are safely bound in the last expression
+filter_safe_variables(UnsafeVariables, BoundVariables) ->
+  lists:filter(
+    fun({Name, _, _}) -> not sets:is_element(Name, BoundVariables) end, 
+    UnsafeVariables
+  ).
+
+% Bind all unsafe variables which aren't bound by the last clause
+bind_unsafe_variables(UnsafeVariables) ->
+  [bind_expression(Name, Input, Output) || {Name, Input, Output} <- UnsafeVariables].
+  
+bind_expression(Name, Input, Output) ->
+  #match{
+    line  = 1,
+    left  = #var{line=1, name=ssa_name(Name, Output)},
+    right = #var{line=1, name=ssa_name(Name, Input)}
+  }.
