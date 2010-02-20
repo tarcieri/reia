@@ -25,7 +25,7 @@ call(#reia_range{} = Receiver, Method, Arguments, Block) ->
 call(#reia_module{} = Receiver, Method, Arguments, Block) ->
   'Module':call({Receiver, Method, Arguments, Block}, nil);
 call(Receiver, Method, Arguments, Block) when is_tuple(Receiver) ->
-  'Tuple':call(Receiver, Method, Arguments, Block);
+  'Tuple':call({Receiver, Method, Arguments, Block}, nil);
 call(Receiver, Method, Arguments, Block) when is_binary(Receiver) ->
   'Binary':call({Receiver, Method, Arguments, Block}, nil);
 call(true, Method, Arguments, Block) ->
