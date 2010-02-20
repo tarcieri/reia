@@ -27,7 +27,7 @@ call(String, length, _Args, _Block) ->
 call(String, capitalize, Args, Block) ->
   [FirstLetter|Rest] = call(String, to_list, Args, Block),
   NewList = string:to_upper([FirstLetter]) ++ Rest,
-  'List':call(NewList, to_string, [], nil);
+  'List':call({NewList, to_string, [], nil}, nil);
   
 call(String, to_module, Args, Block) ->
   List = call(String, to_list, Args, Block),

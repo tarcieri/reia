@@ -31,7 +31,7 @@ exprs(Exprs) -> exprs(Exprs, new_binding()).
 
 % Evaluate the given set of expressions with the given bindings
 exprs(Exprs, Bindings) ->
-	% io:format("Input Code: ~p~n", [Exprs]),
+	io:format("Input Code: ~p~n", [Exprs]),
 	Exprs2 = annotate_return_value(Exprs, Bindings),
   Filename = "reia_eval#" ++ stamp(),
   Name = list_to_atom(Filename),
