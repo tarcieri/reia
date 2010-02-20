@@ -11,7 +11,7 @@
 
 % Dispatch incoming calls
 call(Receiver, Method, Arguments, Block) when is_integer(Receiver) or is_float(Receiver) ->
-  'Numeric':call(Receiver, Method, Arguments, Block);
+  'Numeric':call({Receiver, Method, Arguments, Block}, nil);
 call(Receiver, Method, Arguments, Block) when is_list(Receiver) ->
   'List':call({Receiver, Method, Arguments, Block}, nil);
 call({dict,_,_,_,_,_,_,_,_} = Receiver, Method, Arguments, Block) ->
