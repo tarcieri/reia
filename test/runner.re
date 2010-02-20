@@ -11,7 +11,7 @@ Main.load("test/test_helper.re")
 tests = [
   ("builtins", [
     "binary", "boolean", "list", "tuple", "string", 
-    "regexp", "numeric", "dict", "atom", "fun"
+    "range", "regexp", "numeric", "dict", "atom", "fun"
   ]),
   ("core", ["blocks", "branching", "funrefs", "operator"])
 ]
