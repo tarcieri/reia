@@ -39,6 +39,6 @@ call(Receiver, Method, Arguments, Block) when is_atom(Receiver) ->
 call(Receiver, Method, Arguments, Block) when is_function(Receiver) ->
   'Fun':call({Receiver, Method, Arguments, Block}, nil);
 call(Receiver, Method, Arguments, Block) when is_pid(Receiver) ->
-  'Pid':call(Receiver, Method, Arguments, Block);
+  'Pid':call({Receiver, Method, Arguments, Block}, nil);
 call(Receiver, _, _, _) ->
   throw({error, unknown_receiver, Receiver}).
