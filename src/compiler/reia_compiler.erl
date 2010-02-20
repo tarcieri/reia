@@ -1,135 +1,81 @@
 %
-% reia_compiler: Compiles Reia abstract syntax to Erlang abstract forms
-% Copyright (C)2008 Tony Arcieri
-% 
+% reia_compiler: Translates Reia into Erlang, then into Erlang bytecode
+% Copyright (C)2009 Tony Arcieri
+%
 % Redistribution is permitted under the MIT license.  See LICENSE for details.
 %
 
 -module(reia_compiler).
--export([
-  default_passes/0, 
-  compile/1, 
-  compile/2,
-  ivars/1,
-  calls/1,
-  branches/1,
-  ssa/1,
-  methods/1,
-  r2e/1, 
-  dynamic/2, 
-  static/1,
-  nonce/0
-]).
+-export([file/1, file/2, string/2, string/3, compile/2, compile/3]).
+-include("reia_compile_options.hrl").
+-define(parse_error(File, Line, Error), throw(lists:flatten(io_lib:format("~s:~w: ~s", [File, Line, Error])))).
 
-default_passes() ->
-  [calls, branches, ivars, ssa, methods, r2e, dynamic].
-
-compile(Expressions) ->
-  compile(Expressions, default_passes()).
-
-compile(Expressions, Passes) ->
-  {NewExpressions, FinalPass} = walk_passes(Expressions, Passes),
-  case FinalPass of
-    static -> static(NewExpressions);
-    dynamic -> dynamic(Expressions, NewExpressions);
-    void -> NewExpressions
+% Compile the given file
+file(Filename) ->
+  file(Filename, []).
+  
+% Compile the given file with the given options.  See compile/3 below.
+file(Filename, Options) ->
+  {ok, Bin} = file:read_file(Filename),
+  string(Filename, binary_to_list(Bin), Options).
+  
+% Compile the given string, treating it as if it came from the given file
+string(Filename, String) ->
+  string(Filename, String, []).
+  
+% Compile the given string with the given options.  See compile/3 below.
+string(Filename, String, Options) ->
+  case reia_scan:string(String) of
+    {ok, Tokens, _} -> 
+      case reia_parse:parse(Tokens) of
+        {ok, Exprs} ->
+          compile(Filename, Exprs, Options);
+        {error, {_, _, [Error, []]}} ->
+          ?parse_error(Filename, eof, lists:flatten([Error, "end of file"]));
+        {error, {Line, _, [Error, Token]}} ->
+          ?parse_error(Filename, Line, lists:flatten([Error, Token]))
+      end;
+    {error, {Line, _, {Error, Token}}, _} ->
+      ?parse_error(Filename, Line, lists:flatten([Error, Token]))
   end.
-  
-walk_passes(Expressions, [static]) ->
-  {Expressions, static};
-walk_passes(Expressions, [dynamic]) ->
-  {Expressions, dynamic};
-walk_passes(Expressions, [Pass]) ->
-  {pass(Pass, Expressions), void};
-walk_passes(Expressions, [Pass|Passes]) ->
-  walk_passes(pass(Pass, Expressions), Passes).
-  
-pass({ssa, Binding}, Expressions) ->
-  ssa(Expressions, Binding);
-pass(Pass, Expressions) ->
-  ?MODULE:Pass(Expressions).
 
-%% Copy-on-update support for calls to builtins
-calls(Expressions) ->
-  reia_calls:ast(Expressions).
-  
-%% Convert if statements to case statements and add default return values
-branches(Expressions) ->
-  reia_branches:ast(Expressions).
+% Compile the given expressions, which came from the given source filename
+compile(Filename, Exprs) ->
+  compile(Filename, Exprs, []).
 
-%% Convert Reia instance variables into internal dict representation
-ivars(Expressions) ->
-  reia_ivars:ast(Expressions).
+% Compile the given expressions, which came from the given source filename
+%
+% Accepts a list of compile options, given as 2-tuples.  The compiler
+% recognizes the following option keys in the form {Key, Value}:
+% * scope:            Scope the given expressions are considered to exist in
+% * passes:           Passes which should be applied to the input expressions
+% * autohipe:         Automatically use the HiPE JIT compiler if available
+% * toplevel_wrapper: Wrap toplevel code in its own module
+% * erlc_args:        A list of options to be passed alogn to erlc
+compile(Filename, Exprs, Options) ->
+  Options2 = [{code, Exprs}|Options],
+  OptRecord = lists:foldl(fun process_option/2, #compile_options{}, Options2),
+  run_passes(Filename, Exprs, OptRecord).
 
-%% Convert Reia forms into SSA form
-ssa(Expressions) ->
-  reia_ssa:ast(Expressions).
-  
-ssa(Expressions, Binding) ->
-  Variables = [Name || {Name, _} <- Binding],
-  reia_ssa:ast(Expressions, Variables).
-  
-%% Handle state passing to local methods
-methods(Expressions) ->
-  reia_methods:ast(Expressions).
+% Build a compile_options record from the specified options list
+% Since records suck so much, we have to manually specify all of the possible
+% patterns and their behaviors.  Can't DRY it out.  Records suck :(
+process_option({code, Code}, Options) ->
+  Options#compile_options{code = Code};
+process_option({scope, Scope}, Options) ->
+  Options#compile_options{scope = Scope};
+process_option({passes, Passes}, Options) ->
+  Options#compile_options{passes = Passes};
+process_option({autohipe, AutoHiPE}, Options) ->
+  Options#compile_options{autohipe = AutoHiPE};
+process_option({toplevel_wrapper, ToplevelWrapper}, Options) ->
+  Options#compile_options{toplevel_wrapper = ToplevelWrapper};
+process_option({erlc_options, Opts}, Options) ->
+  Options#compile_options{erlc_options = Opts}.
 
-%% Convert Reia forms to Erlang forms
-r2e(Expressions) ->
-  r2e(Expressions, []).
-    
-r2e([], Output) -> lists:reverse(Output);
-r2e([Expression|Rest], Output) ->
-  case reia_r2e:forms(Expression) of
-    Expressions when is_list(Expressions) ->
-      r2e(Rest, lists:reverse(Expressions) ++ Output);
-    NewExpression ->
-      r2e(Rest, [NewExpression|Output])
-  end.
-  
-%% Dynamic evaluation (supporting multiple module declarations)
-dynamic(OrigExpressions, ErlExpressions) ->
-  [dynamic_expression(Expression, OrigExpressions) || Expression <- ErlExpressions].
-  
-%% Pass dynamic module declarations to reia_module:build/1
-dynamic_expression({module, Line, _Constant, _Functions} = Module, _OrigExpressions) ->
-  %% Convert the module to an Erlang forms representation to pass as a call to reia_module
-  Arg = erl_syntax:revert(erl_syntax:abstract(Module)),
-  {call, Line, {remote, Line, {atom, Line, reia_module}, {atom, Line, build}}, [Arg]};
-  
-%% Pass dynamic class declarations to reia_class:build/1
-dynamic_expression({class, Line, Name, _Ancestor, _Functions} = Class, OrigExpressions) ->
-  %% Convert the class to an Erlang forms representation to pass as a call to reia_class
-  CompiledForms = erl_syntax:revert(erl_syntax:abstract(Class)),
-  
-  %% Convert the original class to an Erlang forms representation
-  OrigClass = find_original_class(Name, OrigExpressions),
-  OrigForms = erl_syntax:revert(erl_syntax:abstract(OrigClass)),
-  
-  {call, Line, {remote, Line, {atom, Line, reia_class}, {atom, Line, build}}, [CompiledForms, OrigForms]};
-    
-%% Leave other toplevel expressions alone
-dynamic_expression(Expression, _OrigExpressions) ->
-  Expression.
-  
-find_original_class(Name, Expressions) ->
-  [Class] = lists:filter(fun(Expr) ->
-    case Expr of
-      {class, _, {constant, _, Name}, _}    -> true;
-      {class, _, {constant, _, Name}, _, _} -> true;
-      _                                     -> false
-    end
-  end, Expressions),
-  Class.
-  
-%% Static module declarations
-static([{module, Line, Name, Functions}]) ->
-  [{attribute, Line, module, Name}|Functions];
-static([{class, _Line, _Name, _Ancestor, _Functions} = Class]) ->
-  Module = reia_class:ast(Class),
-  static([Module]);
-static(_) ->
-  throw({error, "Statically compiled modules must contain one and only one module or class declaration"}).
-
-%% Generate a single-use variable name
-nonce() ->
-  lists:flatten([io_lib:format("~.16b",[N]) || <<N>> <= erlang:md5(term_to_binary(make_ref()))]).
+run_passes(Filename, Exprs, Options) ->
+  Passes = Options#compile_options.passes,
+  Modules = [list_to_atom("reia_" ++ atom_to_list(Pass)) || Pass <- Passes],
+  Fun = fun(Pass, Code) -> Pass:transform(Code, Options) end,
+  Exprs2 = lists:foldl(Fun, Exprs, Modules),
+  reia_bytecode:compile(Filename, Exprs2, Options).

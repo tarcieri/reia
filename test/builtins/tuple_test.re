@@ -9,7 +9,9 @@ module TupleTest
   def run
     [
       size_test(), 
-      nth_test(), 
+      nth_test(),
+      replace_test(),
+      complex_replace_test(),
       to_list_test(), 
       inspect_test()
     ]
@@ -27,7 +29,28 @@ module TupleTest
   def nth_test
     TestHelper.expect(Tuple, "retrieves the nth element correctly") do    
       tuple = (1,2,3,4,5)
-      (true, tuple[0] == 1 and tuple[1] == 2 and tuple[4] == 5 and tuple[-2] == 4)
+      (true, tuple[0] == 1 and tuple[1] == 2 and tuple[4] == 5 and tuple[-2] == 4 and tuple[10] == nil)
+    end
+  end
+  
+  # replaces elements in pattern matching expressions
+  def replace_test
+    TestHelper.expect(Tuple, "replaces elements in pattern matching expressions ") do
+      tuple = (1,2,3)
+      tuple[1] = 42
+      tuple[2] = 69
+    
+      ((1,42,69), tuple)
+    end
+  end
+  
+  # replaces elements in complex pattern matching expressions
+  def complex_replace_test
+    TestHelper.expect(Tuple, "replaces elements in complex pattern matching expressions ") do
+      tuple = (1,2,3,4)
+      (tuple[1], [tuple[0], tuple[2]]) = (9, [8, 10])
+    
+      ((8,9,10,4), tuple)
     end
   end
       

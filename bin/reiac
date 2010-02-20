@@ -1,47 +1,30 @@
-#!/usr/bin/env escript
+#!/bin/sh
 
-main([]) ->
-  usage();
-main(["-h"]) ->
-  usage();
-main(["--help"]) ->
-  usage();
-main([File]) ->
-  init(),
-  result(reiac:file(File));
-main(Options) ->
-  init(),
-  case Options of
-    ["-o", Outfile, Infile] ->
-      result(reiac:file(Infile, Outfile));
-    [_File|_T] ->
-      multi(Options);
-    _ ->
-      usage()
-  end.
+USAGE="Usage: `basename $0` [-o output.reb] input.re"
 
-multi(Files) ->
-  [result(reiac:file(File)) || File <- Files].
+if [ $# -eq 0 ]; then
+	echo $USAGE >&2
+	exit 1
+fi
 
-init() ->
-  code:add_pathz("./ebin"),
-  code:add_pathz("./artifacts/beam"),
-  code:add_pathz("../artifacts/beam"),
-  code:add_pathz("../ebin"),
-  code:add_pathz("./src/smart_exceptions"),
-  code:add_pathz("../src/smart_exceptions").
-  
-usage() ->
-  io:format("Usage: reiac [options] file.ra~n"),
-  io:format("Options:~n"),
-  io:format("    -o filename    location of output file~n"),
-  halt(1).
-  
-result(Result) ->
-  case Result of
-    {ok, _} ->
-      void;
-    {error, Err} ->
-      io:format("Error: ~s~n", [Err]),
-      halt(1)
-  end.
+
+while getopts o: OPT; do
+  case "$OPT" in
+  	o)	OUTPUT_FILE=$OPTARG
+  		;;
+  	\?)	# getopts issues an error message
+  		echo $USAGE >&2
+  		exit 1
+  		;;
+  esac
+done
+
+for PARAMS; do
+  INPUT_FILE=$PARAMS
+done
+
+if [ "$OUTPUT_FILE" == "" ]; then
+  OUTPUT_FILE=`echo $INPUT_FILE | sed s/re$/reb/`
+fi
+
+erl -pz ebin -pz ../ebin -noshell +K true -s reia compile "$INPUT_FILE" "$OUTPUT_FILE" -s init stop -extra $*

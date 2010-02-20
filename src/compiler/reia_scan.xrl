@@ -1,6 +1,6 @@
 %
 % reia_scan: Leex scanner for the Reia language
-% Copyright (C)2008 Tony Arcieri
+% Copyright (C)2008-09 Tony Arcieri
 % 
 % Redistribution is permitted under the MIT license.  See LICENSE for details.
 %
@@ -13,29 +13,29 @@ LowerCase = [a-z]
 Whitespace = [\s]
 DoubleQuoted = "(\\\^.|\\.|[^\"])*"
 SingleQuoted = '(\\\^.|\\.|[^\'])*'
-Regexp = /(\\\^.|\\.|[^/])*/
+Regexp = \%r\/(\\\^.|\\.|[^/])*\/
 Comment = #.*
 
 Rules.
 
 %% Numbers
 -?{Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
--?{Digit}+ : build_integer(TokenChars, TokenLine).
+-?{Digit}+           : build_integer(TokenChars, TokenLine).
 
 %% Strings
-{DoubleQuoted} : build_string(string, TokenChars, TokenLine, TokenLen).
-{SingleQuoted} : build_string(string, TokenChars, TokenLine, TokenLen).
+{DoubleQuoted} : build_string(TokenChars, TokenLine, TokenLen).
+{SingleQuoted} : build_string(TokenChars, TokenLine, TokenLen).
 
 %% Regular expressions
-{Regexp} : build_string(regexp, TokenChars, TokenLine, TokenLen).
+{Regexp} : build_regexp(TokenChars, TokenLine, TokenLen).
 
 %% Atoms
 \:({UpperCase}|{LowerCase}|_)({UpperCase}|{Digit}|{LowerCase}|_)* : build_atom(TokenChars, TokenLine, TokenLen).
 \:{DoubleQuoted} : build_quoted_atom(TokenChars, TokenLine, TokenLen).
 \:{SingleQuoted} : build_quoted_atom(TokenChars, TokenLine, TokenLen).
 
-%% Identifiers and constants
-{UpperCase}({UpperCase}|{LowerCase}|{Digit}|_)* : build_constant(TokenChars, TokenLine).
+%% Module and Variable Names
+{UpperCase}({UpperCase}|{LowerCase}|{Digit}|_)* : build_module_name(TokenChars, TokenLine).
 ({LowerCase}|_)({UpperCase}|{LowerCase}|{Digit}|_)* : build_identifier(TokenChars, TokenLine).
 ({LowerCase}|_)({UpperCase}|{LowerCase}|{Digit}|_)*[?!] : build_punctuated_identifier(TokenChars, TokenLine).
 
@@ -64,6 +64,7 @@ Rules.
 \*\*  : {token,{'**',TokenLine}}.
 \.    : {token,{'.',TokenLine}}.
 ,     : {token,{',',TokenLine}}.
+:     : {token,{':',TokenLine}}.
 ::    : {token,{'::',TokenLine}}.
 ;     : {token,{'eol',TokenLine}}.
 @     : {token,{'@',TokenLine}}.
@@ -73,31 +74,54 @@ Rules.
 !=    : {token,{'!=',TokenLine}}.
 <     : {token,{'<',TokenLine}}.
 >     : {token,{'>',TokenLine}}.
+<\[   : {token,{'<[',TokenLine}}.
+\]>   : {token,{']>',TokenLine}}.
 =>    : {token,{'=>',TokenLine}}.
 <=    : {token,{'<=',TokenLine}}.
 >=    : {token,{'>=',TokenLine}}.
+\+=   : {token,{'+=',TokenLine}}.
+-=    : {token,{'-=',TokenLine}}.
+\*=   : {token,{'*=',TokenLine}}.
+/=    : {token,{'/=',TokenLine}}.
+\*\*= : {token,{'**=',TokenLine}}.
 \.\.  : {token,{'..',TokenLine}}.
 \|    : {token,{'|',TokenLine}}.
 \|\|  : {token,{'or',TokenLine}}.
-&&    : {token,{'and',TokenLine}}.
+\|\|= : {token,{'||=',TokenLine}}.
 &     : {token,{'&',TokenLine}}.
+&&    : {token,{'and',TokenLine}}.
+\^    : {token,{'^',TokenLine}}.
+~     : {token,{'~',TokenLine}}.
+\?    : {token,{'?',TokenLine}}.
 !     : {token,{'!',TokenLine}}.
+\$    : {token,{'$',TokenLine}}.
+&=    : {token,{'&=',TokenLine}}.
+\|=   : {token,{'|=',TokenLine}}.
+\^=   : {token,{'^=',TokenLine}}.
+<<=   : {token,{'<<=',TokenLine}}.
+>>=   : {token,{'>>=',TokenLine}}.
 
 Erlang code.  
 
+-include("reia_nodes.hrl").
+
 build_integer([$-|Chars], Line) ->
-  {token, {integer, Line, -list_to_integer(Chars)}};
+  {token, #integer{line = Line, value = -list_to_integer(Chars)}};
 build_integer(Chars, Line) ->
-  {token, {integer, Line, list_to_integer(Chars)}}.
+  {token, #integer{line = Line, value =  list_to_integer(Chars)}}.
 
 build_float([$-|Chars], Line) ->
-  {token, {float, Line, -list_to_float(Chars)}};
+  {token, #float{line = Line, value = -list_to_float(Chars)}};
 build_float(Chars, Line) ->
-  {token, {float, Line, list_to_float(Chars)}}.
+  {token, #float{line = Line, value =  list_to_float(Chars)}}.
   
-build_string(Type, Chars, Line, Len) ->
+build_string(Chars, Line, Len) ->
   String = unescape_string(lists:sublist(Chars, 2, Len - 2)), 
-  {token, {Type, Line, String}}.
+  {token, {string, Line, String}}.
+
+build_regexp(Chars, Line, Len) ->
+  String = unescape_string(lists:sublist(Chars, 4, Len - 4)),
+  {token, {regexp, Line, String}}.
   
 unescape_string(String) -> unescape_string(String, []).
 
@@ -132,9 +156,9 @@ build_quoted_atom(Chars, Line, Len) ->
   String = lists:sublist(Chars, 2, Len - 2),
   build_atom(String, Line, Len - 2).
   
-build_constant(Chars, Line) ->
+build_module_name(Chars, Line) ->
   Atom = list_to_atom(Chars),
-  {token, {constant, Line, Atom}}.
+  {token, {module_name, Line, Atom}}.
   
 build_identifier(Chars, Line) ->  
     Atom = list_to_atom(Chars),
@@ -173,4 +197,5 @@ reserved_word('in')      -> true;
 reserved_word('try')     -> true;
 reserved_word('catch')   -> true;
 reserved_word('throw')   -> true;
+reserved_word('erl')     -> true;
 reserved_word(_)         -> false.

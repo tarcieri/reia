@@ -1,7 +1,23 @@
 h1. Reia
 
-Welcome to Reia (pronounced RAY-uh), a Ruby/Python-like scripting language for
-the Erlang virtual machine (BEAM).
+Welcome to Reia (pronounced RAY-uh), a Ruby-like scripting language for the 
+Erlang virtual machine (BEAM).
+
+h2. Rewrite
+
+This branch contains a rewrite of the original implementation.  The goals of
+this rewrite are a better overall implementation, core types with identical
+semantics to Erlang's core types, and simplifying the implementation so it is
+easier to test and debug.
+
+This branch is presently missing many of the features presently available in
+the "master" branch.  These features are being readded as part of the new
+implementation, however some of them (such as the concurrent object model) have
+been delayed until the core implementation can be properly tested and debugged.
+
+For more information, see the roadmap:
+
+"http://wiki.reia-lang.org/wiki/Roadmap":http://wiki.reia-lang.org/wiki/Roadmap
 
 h2. New branch underway!
 
@@ -25,46 +41,18 @@ Erlang is available here:
 
 To compile Reia, type:
 
- make
+ rake
 
 under the Reia source tree to build Reia.
-
-h2. Installation
-
-If Reia has compiled successfully, type:
-
- make install
- 
-to install Reia systemwide.  This will install the "reia" and "ire" scripts in
-/usr/local/bin.  Be sure to add this to your path (or move the scripts 
-elsewhere) if you'd like to be able to use Reia systemwide.
-
-h2. Usage
-
-Reia provides three ways to execute programs:
-
-* The Reia interpreter, located in bin/reia (or just "reia" if you've installed 
-  Reia systemwide).  This runs Reia programs from the command line.
-  
-* The interactive Reia interpreter, located in bin/ire (or just "ire" if you've
-  installed Reia systemwide).  This provides an interactive environment (a 
-  read-eval-print loop) for running Reia programs, or just exploring the 
-  language.
-  
-* The Reia static compiler, located in bin/reiac (not installed systemwide).  
-  This compiles Reia to .beam files which may be used in conjunction with 
-  Erlang code.  The static Reia compiler is intended for compiling the 
-  self-hosted parts of Reia and is not intended for general-purpose use.
 
 h2. Implementation
 
 Here's some thoroughly interesting implementation trivia about Reia:
 
 * Leex-based scanner
-* Yecc-based grammar
-* Compiler transforms Reia abstract forms to Erlang abstract forms or BEAM 
-  bytecode
-* Partly self-hosted: Reia's builtin types are mostly written in Reia
+* Yecc-based grammar (a Neotoma-based branch is also available)
+* Successive parse transforms convert Reia parse trees into the Erlang abstract
+  format, then into BEAM/HiPE bytecode
 
 h2. Links
 
@@ -79,4 +67,4 @@ h2. About the Author
 
 Reia was created by Tony Arcieri, a programmer from Boulder, Colorado, USA.
 Tony has a background in network services and distributed peer-to-peer systems.  
-His  favorite programming languages are Ruby and Erlang.
+His favorite programming languages are Ruby and Erlang.

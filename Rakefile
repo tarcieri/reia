@@ -1,26 +1,36 @@
-task :default => [:check_erl_version, :check_previous_install, :build, :test]
-task :build => [:scanner, :parser, :reia, :ebin, :clean]
+require 'rake/clean'
 
-PREFIX="/usr/local"
+task :default => %w(check_erl_version check_previous_install build test)
 
+# Returns the installed Erlang version
 def erlang_version
   version = `erl -version 2>&1`.strip.match(/\d\.\d\.\d$/)
   unless version
-   puts "Error retrieving Erlang version.  Do you have it installed?" 
+   STDERR.puts "Error retrieving Erlang version.  Do you have it installed?" 
    exit 1
   end
   
   version[0]
 end
 
+# Evaluate the given Erlang statement
+def erl_eval(cmd, *pa)
+  pa_str = pa.empty? ? "" : "-pa #{pa.join(' ')}"
+  sh "erl -noshell #{pa_str} -eval '#{cmd}' -s init stop"
+end
+
+# Retrieve the directory Erlang libraries are stored in
 def erl_lib_dir
   `erl -noshell -eval "io:format(code:lib_dir())" -s init stop`
 end
 
+
+# Directory to install Reia into
 def reia_install_dir
   File.join(erl_lib_dir, 'reia', '')
 end
 
+# Ensure the version of Erlang installed is recent enough
 task :check_erl_version do
   print "Checking Erlang version... "
   version = erlang_version
@@ -36,6 +46,7 @@ task :check_erl_version do
   end
 end
 
+# Ensure Reia was not previously installed
 task :check_previous_install do
   if File.exists?(reia_install_dir)
     puts "*** WARNING: Previous installation of Reia detected"
@@ -44,110 +55,60 @@ task :check_previous_install do
   end
 end
 
-def output_file(input_file)
-  'ebin/' + File.basename(input_file).sub(/\.\w+$/, '.beam')
+# Generate an output path for the given input file
+def output_file(input_file, dir = 'ebin/', ext = '.beam')
+  dir + File.basename(input_file).sub(/\.\w+$/, ext)
 end
 
-# Reia
-ERL_SRC = FileList.new('src/{compiler,builtins,core}/**/*.erl')
+GENERATED_SRC = %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
+ERL_SRC = (GENERATED_SRC + FileList.new('src/{compiler,core,builtins}/**/*.erl')).uniq
+ERL_DEST = ERL_SRC.map { |input| output_file(input) }
+
+QUIET_SRC = %w(src/compiler/reia_parse.erl)
+
 ERL_SRC.each do |input|
   file output_file(input) => input do
-    sh "bin/erlc +debug_info -o artifacts/beam #{input}"
+    opts = ""
+    opts << "+debug_info" unless QUIET_SRC.include? input
+    sh "erlc #{opts} -o ebin #{input}"
   end
 end
 
-REIA_SRC = FileList.new('src/**/*.re')
+REIA_SRC  = FileList.new('src/builtins/**/*.re')
+REIA_DEST = REIA_SRC.map { |input| output_file(input, 'ebin/', '.reb') }
+
 REIA_SRC.each do |input|
-  output = output_file(input)
+  output = output_file(input, 'ebin/', '.reb')
   file output => input do
-    sh "bin/reiac -o artifacts/beam/#{File.basename(output, ".re")} #{input}"
+    sh "bin/reiac -o #{output} #{input}"
   end
 end
 
-PARSER_SRC = FileList.new('src/**/*.{xrl,yrl}')
+# Build rules
+task :build   => %w(scanner parser reia)
+task :reia    => ERL_DEST + REIA_DEST
+task :scanner => %w(src/leex/leex.beam src/compiler/reia_scan.erl)
+task :parser  => %w(src/compiler/reia_parse.erl)
 
-task :reia => (ERL_SRC + REIA_SRC + PARSER_SRC).map { |input_file| output_file(input_file) }
-
-=begin
-# Smart exceptions
-SMEX_SRC = FileList['src/smart_exceptions/*.erl']
-SMEX_SRC.each do |input|
-  file output_file(input) => input do
-    sh "erlc -W0 -o ebin #{input}"
-  end
-end
-
-task :smart_exceptions => SMEX_SRC.map { |input_file| output_file(input_file) }
-=end
-
-# Leex (lexer generator for Erlang)
-task :scanner => ["src/leex/leex.beam", "ebin/reia_scan.beam"]
-
+# Scanner
 file "src/leex/leex.beam" => "src/leex/leex.erl" do
   sh "erlc -W0 -o src/leex src/leex/leex.erl"
 end
 
-# Compile reia_scan using leex
-file "ebin/reia_scan.beam" => %w[src/leex/leex.beam src/compiler/reia_scan.xrl] do
-  sh "bin/leex src/compiler/reia_scan.xrl"
-  mv "src/compiler/reia_scan.erl", "artifacts/erl/reia_scan.erl"
-  sh "erlc +debug_info +nowarn_unused_vars -o artifacts/beam artifacts/erl/reia_scan.erl"
+file "src/compiler/reia_scan.erl" => %w(src/leex/leex.beam src/compiler/reia_scan.xrl) do
+  erl_eval 'leex:file("src/compiler/reia_scan.xrl")', 'src/leex'
 end
 
-task :parser => "ebin/reia_parse.beam"
-
-# Compile reia_parse using yecc
-file "ebin/reia_parse.beam" => "src/compiler/reia_parse.yrl" do
-  sh "bin/yecc src/compiler/reia_parse.yrl"
-  mv "src/compiler/reia_parse.erl", "artifacts/erl/reia_parse.erl"
-  sh "erlc +debug_info -o ebin artifacts/erl/reia_parse.erl"
+# Parser
+file "src/compiler/reia_parse.erl" => %w(src/compiler/reia_parse.yrl) do
+  erl_eval 'yecc:file("src/compiler/reia_parse.yrl", [verbose])'
 end
 
-# Copy all output BEAM files into the ebin directory
-task :ebin do
-  FileList["artifacts/beam/*.beam"].each { |file| cp file, "ebin" }
-end
-
+# Test suite
 task :test => :build do
   sh "bin/reia test/runner.re"
 end
 
-task :install do
-  reia_dir = reia_install_dir
-  
-  rm_r reia_dir if File.exist?(reia_dir)
-  mkdir reia_dir
-  
-  %w[LICENSE README.textile ebin src lib].each { |f| cp_r f, reia_dir }
-  
-  mkdir PREFIX + "/bin" unless File.exist?(PREFIX + "/bin")
-  
-  File.open(PREFIX + "/bin/reia", "w", 0755) do |f| f << "
-#!/bin/sh
-PROGRAM=$1
-shift
-erl -noshell +K true -s reia erl_load $PROGRAM -s init stop -extra $*"
-  end
-
-  File.open(PREFIX + "/bin/ire", "w", 0755) do |f| f << "#!/bin/sh
-erl +K true -noshell -noinput -s ire init -extra $*"
-  end
-end
-
-task :uninstall do
-  if File.directory?(reia_install_dir)
-    rm_r reia_install_dir
-    %w[reia ire].each { |p| rm PREFIX + "/bin/#{p}" }
-  end
-end
-
-task :clean do
-  FileList['artifacts/**/*.{erl,beam}'].each { |f| rm_f f }
-end
-
-task :distclean => :clean do
-  FileList['ebin/**/*.beam'].each { |f| rm_f f }
-end
-
-task :ci => %w[distclean test]
-task :cruise => :ci
+# Cleaning
+CLEAN.include %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
+CLEAN.include %w(ebin/* **/*.reb)
