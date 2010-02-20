@@ -1,6 +1,6 @@
 %
 % reia_dispatch: Dispatch logic for all Reia method invocations
-% Copyright (C)2008 Tony Arcieri
+% Copyright (C)2008-10 Tony Arcieri
 %
 % Redistribution is permitted under the MIT license.  See LICENSE for details.
 %
@@ -21,7 +21,7 @@ call(#reia_string{} = Receiver, Method, Arguments, Block) ->
 call(#reia_regexp{} = Receiver, Method, Arguments, Block) ->
   'Regexp':call(Receiver, Method, Arguments, Block);
 call(#reia_range{} = Receiver, Method, Arguments, Block) ->
-  'Range':call(Receiver, Method, Arguments, Block);
+  'Range':call({Receiver, Method, Arguments, Block}, nil);
 call(#reia_module{} = Receiver, Method, Arguments, Block) ->
   'Module':call(Receiver, Method, Arguments, Block);
 call(Receiver, Method, Arguments, Block) when is_tuple(Receiver) ->
