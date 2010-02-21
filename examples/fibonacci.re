@@ -29,7 +29,7 @@ module Fibonacci
     
   # Generate a list of Fibonacci numbers
   def list(n)
-    [optimized(i) | i in 0..(n - 1)]
+    [optimized(i) for i in (0..(n - 1)).to_list()]
   end
     
   # Optimally generate a list of Fibonacci numbers
@@ -40,12 +40,12 @@ module Fibonacci
     result.reverse()
   end
   def optimized_list(n, next, result)
-    optimized_list(n - 1, next + result[0], result.unshift(next))
+    optimized_list(n - 1, next + result[0], [next, *result])
   end
 end
     
 n = 42
-puts("Fibonacci number #{n}: #{Fibonacci.optimized(n)}")
+Main.puts("Fibonacci number #{n}: #{Fibonacci.optimized(n)}")
 
 n = 10
-puts("First #{n} Fibonacci numbers: #{Fibonacci.optimized_list(n)}")
+Main.puts("First #{n} Fibonacci numbers: #{Fibonacci.optimized_list(n)}")
