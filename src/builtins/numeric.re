@@ -22,6 +22,6 @@ module Numeric
   
   def call(self, :times, args, block)
     erl.lists.foreach(block, erl.lists.seq(0, self - 1))
-    nil
+    self
   end
 end
