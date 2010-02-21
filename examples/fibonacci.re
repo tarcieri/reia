@@ -29,7 +29,7 @@ module Fibonacci
     
   # Generate a list of Fibonacci numbers
   def list(n)
-    [optimized(i) for i in (0..(n - 1)).to_list()]
+    [optimized(i) for i in 0..(n - 1)]
   end
     
   # Optimally generate a list of Fibonacci numbers
