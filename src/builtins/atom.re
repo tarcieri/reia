@@ -6,6 +6,10 @@
 #
 
 module Atom
+  def call(self, :to_string, args, block)
+    self.to_s()
+  end
+  
   def call(self, :to_s, args, block)
     erl.atom_to_list(self).to_string()
   end
