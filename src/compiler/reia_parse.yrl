@@ -1,6 +1,6 @@
 %
 % reia_parse: Yecc grammar for the Reia language
-% Copyright (C)2008-09 Tony Arcieri
+% Copyright (C)2008-10 Tony Arcieri
 % 
 % Redistribution is permitted under the MIT license.  See LICENSE for delist_tails.
 %
@@ -46,6 +46,7 @@ Nonterminals
   pow_op
   unary_op
   module_decl
+  class_decl
   functions
   function
   pargs
@@ -76,7 +77,7 @@ Nonterminals
 Terminals
   '(' ')' '[' ']' '{' '}' '<[' ']>' def eol
   float integer string atom regexp true false nil 
-  module module_name identifier punctuated_identifier erl 
+  module class module_name identifier punctuated_identifier erl 
   'case' 'when' 'end' 'if' 'unless' 'elseif' 'else' fun do
   'and' 'or' 'not' 'try' 'catch' for in
   '+' '-' '*' '/' '%' '**' ',' '.' '..' 
@@ -225,6 +226,7 @@ max_expr -> if_expr      : '$1'.
 max_expr -> try_expr     : '$1'.
 max_expr -> module_name  : '$1'.
 max_expr -> module_decl  : '$1'.
+max_expr -> class_decl   : '$1'.
 max_expr -> bound_var    : '$1'.
 max_expr -> identifier   : #var{line=?line('$1'), name=?identifier_name('$1')}.
 max_expr -> string       : interpolate_string('$1').
@@ -281,11 +283,31 @@ unary_op -> '!'   : '$1'.
 unary_op -> '~'   : '$1'.
 
 %% Module declaration
+module_decl -> module module_name eol 'end' : 
+  #module{
+    line      = ?line('$1'), 
+    name      = element(3, '$2'), 
+    functions = []
+  }.
 module_decl -> module module_name eol functions 'end' : 
   #module{
     line      = ?line('$1'), 
     name      = element(3, '$2'), 
     functions = '$4'
+  }.
+  
+%% Class declaration
+class_decl -> class module_name eol 'end' : 
+  #class{
+    line    = ?line('$1'), 
+    name    = element(3, '$2'), 
+    methods = []
+  }.
+class_decl -> class module_name eol functions 'end' : 
+  #class{
+    line    = ?line('$1'), 
+    name    = element(3, '$2'), 
+    methods = '$4'
   }.
 
 %% Parenthesized arguments

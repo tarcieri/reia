@@ -34,6 +34,16 @@ transform(#module{line=Line, name=Name, functions=Funcs}) ->
     name = Name,
     functions = group_clauses([transform(Func) || Func <- Funcs])
   };
+  
+% Classes
+transform(#class{line=Line, name=Name, methods=Funcs}) ->
+  % Modules need some postprocessing, so we leave them in a similar form but
+  % with their subtrees converted
+  #module{
+    line = Line,
+    name = Name,
+    functions = group_clauses([transform(Func) || Func <- Funcs])
+  };
 
 % Functions
 transform(#function{line=Line, name=Name, args=Args, block=Block, body=Exprs}) ->

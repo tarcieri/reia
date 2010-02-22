@@ -1,5 +1,6 @@
-% Modules
+% Modules and Classes
 -record(module,      {line, name, functions}).
+-record(class,       {line, name, methods}).
 
 % Functions
 -record(function,    {line, name, args=[], block={var,1,'_'}, body}).
