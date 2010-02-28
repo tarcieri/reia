@@ -298,8 +298,7 @@ group_clauses([], Functions) ->
     {function, Line, Name, Arity, lists:reverse(Clauses)} ||
     {{Name, Arity},{Line, Clauses}} <- dict:to_list(Functions)
   ];
-group_clauses([Function|Rest], Functions) ->
-  {function, Line, Name, Arity, [Clause]} = Function,
+group_clauses([{function, Line, Name, Arity, [Clause]}|Rest], Functions) ->
   case dict:find({Name, Arity}, Functions) of
     {ok, {Line2, Clauses}} ->
       group_clauses(Rest, dict:store({Name, Arity}, {Line2, [Clause|Clauses]}, Functions));
