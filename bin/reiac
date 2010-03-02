@@ -23,7 +23,7 @@ for PARAMS; do
   INPUT_FILE=$PARAMS
 done
 
-if [ "$OUTPUT_FILE" == "" ]; then
+if [ "$OUTPUT_FILE" = "" ]; then
   OUTPUT_FILE=`echo $INPUT_FILE | sed s/re$/reb/`
 fi
 
