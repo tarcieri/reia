@@ -18,5 +18,16 @@ transform(#class{} = Node) ->
 transform(Node) ->
   reia_syntax:map_subtrees(fun transform/1, Node).
     
-transform_class(#class{line=Line, name=Name, methods=Funcs}) ->
-  #class{line=Line, name=Name, methods=Funcs}.
+transform_class(#class{line=Line, name=Name, methods=Methods}) ->
+	_MethodTable = build_method_table(Methods),
+  #class{line=Line, name=Name, methods=Methods}.
+
+% Create a dict of methods by name
+build_method_table(Methods) ->
+	build_method_table(dict:new(), Methods).
+	
+build_method_table(Dict, []) ->
+	Dict;
+build_method_table(Dict, [Func|Rest]) ->
+	Dict2 = dict:store(Func#function.name, Func, Dict),
+	build_method_table(Dict2, Rest).
