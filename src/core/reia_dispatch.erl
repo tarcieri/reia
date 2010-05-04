@@ -14,6 +14,8 @@ call(Receiver, Method, Arguments, Block) when is_integer(Receiver) or is_float(R
   'Numeric':call({Receiver, Method, Arguments, Block}, nil);
 call(Receiver, Method, Arguments, Block) when is_list(Receiver) ->
   'List':call({Receiver, Method, Arguments, Block}, nil);
+call(#reia_object{class = Class} = Receiver, Method, Arguments, Block) ->
+	Class:call(Receiver, Method, Arguments, Block);
 call({dict,_,_,_,_,_,_,_,_} = Receiver, Method, Arguments, Block) ->
   'Dict':call({Receiver, Method, Arguments, Block}, nil);
 call(#reia_string{} = Receiver, Method, Arguments, Block) ->
