@@ -5,3 +5,4 @@
 -record(reia_string, {elements = []}).
 -record(reia_regexp, {pattern}).
 -record(reia_range,  {from, to}).
+-record(reia_object, {class, ivars}).
