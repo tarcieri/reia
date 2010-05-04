@@ -8,6 +8,7 @@
 -module(reia_classes).
 -export([transform/2]).
 -include("reia_nodes.hrl").
+-define(self(Line), (#var{line=Line, name='__reia_self'})).
 
 transform(Exprs, _Options) ->
   reia_syntax:map_subtrees(fun transform/1, Exprs).
@@ -22,8 +23,7 @@ transform_class(#class{line=Line, name=Name, methods=Methods}) ->
 	MethodTable = build_method_table(Methods),
 	Initialize = transform_initialize_method(Name, dict:find(initialize, MethodTable)),
 	MethodTable2 = dict:store(initialize, Initialize, MethodTable),
-	
-	Methods2 = [Method || {_, Method} <- dict:to_list(MethodTable2)],
+	Methods2 = [callify_method(Method) || {_, Method} <- dict:to_list(MethodTable2)],
 	
   #class{line=Line, name=Name, methods=Methods2}.
 
@@ -38,7 +38,7 @@ build_method_table(Dict, [Func|Rest]) ->
 	build_method_table(Dict2, Rest).
 	
 % Transform the initialize method to return a new object instance
-transform_initialize_method(Name, error) -> 
+transform_initialize_method(Name, error) ->
 	% Use default initialize method if one isn't defined
 	transform_initialize_method(Name, #function{
 		line=1, 
@@ -65,3 +65,19 @@ transform_initialize_method(Name, #function{body = Body} = Method) ->
 	},
 	
 	Method#function{body = Body ++ [Result]}.
+	
+% Change the method into a clause of the call function
+callify_method(Method) ->
+	Line = Method#function.line,
+	
+	Args = [
+	  ?self(Line),
+		#atom{line = Line, name = Method#function.name},
+		#tuple{line = Line, elements = Method#function.args}
+	],
+	
+	Method#function{
+	  line = Line,
+	  name = call,
+	  args = Args
+	}.
