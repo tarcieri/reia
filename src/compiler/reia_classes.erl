@@ -23,7 +23,8 @@ transform_class(#class{line=Line, name=Name, methods=Methods}) ->
 	MethodTable = build_method_table(Methods),
 	Initialize = transform_initialize_method(Name, dict:find(initialize, MethodTable)),
 	MethodTable2 = dict:store(initialize, Initialize, MethodTable),
-	Methods2 = [callify_method(Method) || {_, Method} <- dict:to_list(MethodTable2)],
+	MethodTable3 = dict:store(inspect, inspect_method(Line, Name), MethodTable2),
+	Methods2 = [callify_method(Method) || {_, Method} <- dict:to_list(MethodTable3)],
 	
   #class{line=Line, name=Name, methods=Methods2}.
 
@@ -81,3 +82,16 @@ callify_method(Method) ->
 	  name = call,
 	  args = Args
 	}.
+	
+inspect_method(Line, Name) ->
+	#function{
+		line = Line, 
+		name = inspect, 
+		body = [#dstring{
+		  line = Line,
+		  elements = [
+		    #string{line = Line, characters = "#<"},
+		    #atom{line = Line, name = Name},
+		    #string{line = Line, characters = ">"}
+		  ]
+	}]}.
