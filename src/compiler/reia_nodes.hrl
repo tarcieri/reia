@@ -1,5 +1,6 @@
-% Modules
+% Modules and Classes
 -record(module,      {line, name, functions}).
+-record(class,       {line, name, methods}).
 
 % Functions
 -record(function,    {line, name, args=[], block={var,1,'_'}, body}).
@@ -19,8 +20,9 @@
 -record(nil,         {line=1}).
 
 % Function calls
--record(local_call,  {line, name, args=[], block=#nil{}}).
--record(remote_call, {line, receiver, name, args=[], block=#nil{}}).
+-record(class_inst,  {line, class, args=[], block=#nil{}}).
+-record(local_call,  {line, name,  args=[], block=#nil{}}).
+-record(remote_call, {line, receiver, name,   args=[], block=#nil{}}).
 -record(native_call, {line, module, function, args=[]}).
 -record(var_call,    {line, receiver, args=[], block=#nil{}}).
 
