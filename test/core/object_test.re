@@ -16,6 +16,7 @@ module ObjectTest
   def instantiation_test
     TestHelper.expect("Classes", "instantiate new objects") do
       Roflcopter()
+      (true, true)
     end
-  end
+  end  
 end
