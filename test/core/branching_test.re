@@ -8,19 +8,35 @@
 module BranchingTest
   def run
     [
-      basic_if_test(),
+      basic_if_true_test(),
+      basic_if_false_test(),
       basic_if_nomatch_test(),
       basic_unless_test(),
       basic_unless_nomatch_test()
     ]
   end
   
-  def basic_if_test
+  def basic_if_true_test
     TestHelper.expect("The 'if' statement", "takes true branches") do
-      result = if true
-        1
+      val = false
+      
+      if true
+        val = true
       end
-      (1, result)
+      
+      (true, val)
+    end
+  end
+  
+  def basic_if_false_test    
+    TestHelper.expect("The 'if' statement", "doesn't take false branches") do
+      val = true
+      
+      if false
+        val = false
+      end
+      
+      (true, val)
     end
   end
   
