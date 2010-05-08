@@ -53,6 +53,7 @@ Nonterminals
   pargs_tail
   block_capture
   boolean
+  class_inst
   call
   number
   list
@@ -209,8 +210,9 @@ unary_expr -> unary_op unary_expr :
   }.
 unary_expr -> call_expr : '$1'.
 
-call_expr -> call : '$1'.
-call_expr -> max_expr : '$1'.
+call_expr -> class_inst : '$1'.
+call_expr -> call       : '$1'.
+call_expr -> max_expr   : '$1'.
 
 max_expr -> number       : '$1'.
 max_expr -> list         : '$1'.
@@ -300,13 +302,13 @@ module_decl -> module module_name eol functions 'end' :
 class_decl -> class module_name eol 'end' : 
   #class{
     line    = ?line('$1'), 
-    name    = element(3, '$2'), 
+    name    = ?identifier_name('$2'), 
     methods = []
   }.
 class_decl -> class module_name eol functions 'end' : 
   #class{
     line    = ?line('$1'), 
-    name    = element(3, '$2'), 
+    name    = ?identifier_name('$2'), 
     methods = '$4'
   }.
 
@@ -356,6 +358,15 @@ function -> def function_identifier pargs eol expr_list 'end' :
     args  = '$3'#pargs.args,
     block = '$3'#pargs.block,
     body  = '$5'
+  }.
+
+%% Class instantiations
+class_inst -> module_name pargs :
+  #class_inst{
+    line  = ?line('$1'),
+    class = ?identifier_name('$1'),
+    args  = '$2'#pargs.args,
+    block = '$2'#pargs.block
   }.
 
 %% Local function calls
