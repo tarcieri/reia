@@ -366,7 +366,7 @@ class_inst -> module_name pargs :
     line  = ?line('$1'),
     class = ?identifier_name('$1'),
     args  = '$2'#pargs.args,
-    block = '$2'#pargs.block
+    block = ?pargs_default_block(#nil{}, '$2')
   }.
 
 %% Local function calls

@@ -53,13 +53,15 @@ transform(#function{line=Line, name=Name, args=Args, block=Block, body=Exprs}) -
     [transform(Expr) || Expr <- Exprs]
   }]};
 
-% Simple Terminals
+% Simple literals
 transform(#integer{} = Expr) -> Expr;
 transform(#float{} = Expr)   -> Expr;
 transform(#atom{} = Expr)    -> Expr;
 transform(#true{line=Line})  -> {atom, Line, true};
 transform(#false{line=Line}) -> {atom, Line, false};
 transform(#nil{line=Line})   -> {atom, Line, nil};
+
+% Variables
 transform(#var{line=Line, name=Name}) -> {var, Line, Name};
 
 % Strings
@@ -183,7 +185,7 @@ transform(#'catch'{line=Line, pattern=Pattern, body=Exprs}) ->
 transform(#match{line=Line, left=Left, right=Right}) ->
   {match, Line, transform(Left), transform(Right)};
     
-% Operators
+% Unary operators
 transform(#unary_op{line=Line, type='!', expr=Expr}) ->
   {op, Line, 'not', transform(Expr)};
 
@@ -192,7 +194,8 @@ transform(#unary_op{line=Line, type='~', expr=Expr}) ->
     
 transform(#unary_op{line=Line, type=Type, expr=Expr}) ->
   {op, Line, Type, transform(Expr)};
-  
+
+% Binary operators
 transform(#binary_op{line=Line, type='==', left=Left, right=Right}) ->
   {call, Line,
     {remote, Line, {atom, Line, reia_comparisons}, {atom, Line, compare}},
@@ -245,6 +248,24 @@ transform(#binary_op{line=Line, type='[]', left=Left, right=Right}) ->
   
 transform(#binary_op{line=Line, type=Type, left=Left, right=Right}) ->
   {op, Line, Type, transform(Left), transform(Right)};
+
+% Class instantiations
+transform(#class_inst{
+	line  = Line, 
+	class = Class, 
+	args  = Args,
+	block = Block
+}) ->
+  {call, Line,
+    {remote, Line, {atom, Line, Class}, {atom, Line, call}}, [
+			{tuple, Line, [
+				{atom, Line, nil},
+				{atom, Line, initialize},
+				{tuple, Line, [transform(Arg) || Arg <- Args]}
+			]},
+			transform(Block)
+		]
+  };
 
 % Function calls
 transform(#local_call{
