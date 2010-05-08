@@ -5,11 +5,17 @@
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-class ExampleClass
+class Roflcopter
 end
 
 module ObjectTest
   def run
-    []
+    [instantiation_test()]
+  end
+  
+  def instantiation_test
+    TestHelper.expect("Classes", "instantiate new objects") do
+      Roflcopter()
+    end
   end
 end
