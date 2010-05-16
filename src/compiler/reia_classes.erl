@@ -19,8 +19,13 @@ transform(#class{} = Node) ->
 transform(Node) ->
   reia_syntax:map_subtrees(fun transform/1, Node).
     
-transform_class(#class{line=Line, name=Name, methods=Methods}) ->
-	MethodTable = build_method_table(Methods),
+transform_class(#class{line=Line, name=Name, superclass=Ancestor, methods=Methods}) ->
+	Superclass = case Name of
+		'Object' -> undefined;
+		_        -> Ancestor
+	end,
+	
+	MethodTable = build_method_table(Methods, Superclass),
 	Initialize = transform_initialize_method(Name, dict:find(initialize, MethodTable)),
 	MethodTable2 = dict:store(initialize, Initialize, MethodTable),
 	MethodTable3 = dict:store(inspect, inspect_method(Line, Name), MethodTable2),
@@ -29,13 +34,13 @@ transform_class(#class{line=Line, name=Name, methods=Methods}) ->
   #class{line=Line, name=Name, methods=Methods2}.
 
 % Create a dict of methods by name
-build_method_table(Methods) ->
-	build_method_table(dict:new(), Methods).
+build_method_table(Methods, Superclass) ->
+	build_method_table(dict:new(), Methods, Superclass).
 	
-build_method_table(Dict, []) ->
+build_method_table(Dict, [], _Superclass) ->
 	Dict;
-build_method_table(Dict, [Func|Rest]) ->
-	Dict2 = dict:store(Func#function.name, Func, Dict),
+build_method_table(Dict, [Func|Rest], Superclass) ->
+	Dict2 = dict:store(Func#function.name, transform_method(Func, Superclass), Dict),
 	build_method_table(Dict2, Rest).
 	
 % Transform the initialize method to return a new object instance
@@ -83,6 +88,12 @@ callify_method(Method) ->
 	  args = Args
 	}.
 	
+% Transform OO features into functional ones
+transform_method(Method, _Superclass) ->
+	Method.
+	
+% Generate the "inspect" method
+% FIXME: this should be inherited from 'Object'
 inspect_method(Line, Name) ->
 	#function{
 		line = Line, 

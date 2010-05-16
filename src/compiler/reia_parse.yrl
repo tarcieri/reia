@@ -284,7 +284,7 @@ unary_op -> 'not' : '$1'.
 unary_op -> '!'   : '$1'.
 unary_op -> '~'   : '$1'.
 
-%% Module declaration
+%% Module declarations
 module_decl -> module module_name eol 'end' : 
   #module{
     line      = ?line('$1'), 
@@ -298,7 +298,7 @@ module_decl -> module module_name eol functions 'end' :
     functions = '$4'
   }.
   
-%% Class declaration
+%% Class declarations
 class_decl -> class module_name eol 'end' : 
   #class{
     line    = ?line('$1'), 
@@ -310,6 +310,20 @@ class_decl -> class module_name eol functions 'end' :
     line    = ?line('$1'), 
     name    = ?identifier_name('$2'), 
     methods = '$4'
+  }.
+class_decl -> class module_name '<' module_name eol 'end':
+  #class{
+    line       = ?line('$1'), 
+    name       = ?identifier_name('$2'), 
+    superclass = ?identifier_name('$4'),
+    methods    = []
+  }.
+class_decl -> class module_name '<' module_name eol functions 'end' : 
+  #class{
+    line       = ?line('$1'), 
+    name       = ?identifier_name('$2'),
+    superclass = ?identifier_name('$4'),
+    methods    = '$6'
   }.
 
 %% Parenthesized arguments
