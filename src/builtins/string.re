@@ -48,4 +48,21 @@ module String
     [first, *rest] = self.to_list()
     [erl.string.to_upper([first]), *rest].to_string()
   end
+  
+  def call(self, :sub, (pattern, replacement), block)
+    case pattern
+    when (:reia_regexp, regex)
+      list = self.to_list()
+      case erl.re.run(self.to_binary(), regex)
+      when (:match, [(start, length)])
+        head = erl.lists.sublist(list, 1, start).to_string()
+        tail = erl.lists.sublist(list, start + length + 1, erl.length(list)).to_string()
+        "#{head}#{replacement}#{tail}"
+      when :nomatch
+        self
+      end
+    when (:reia_string, elements)
+      self
+    end
+  end
 end
