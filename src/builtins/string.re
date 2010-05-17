@@ -52,16 +52,22 @@ module String
   def call(self, :sub, (pattern, replacement), block)
     case pattern
     when (:reia_regexp, regex)
-      list = self.to_list()
-      case erl.re.run(self.to_binary(), regex)
-      when (:match, [(start, length)])
-        head = erl.lists.sublist(list, 1, start).to_string()
-        tail = erl.lists.sublist(list, start + length + 1, erl.length(list)).to_string()
-        "#{head}#{replacement}#{tail}"
-      when :nomatch
-        self
-      end
-    when (:reia_string, elements)
+      nil # FIXME: urgh, this shouldn't be necessary
+    when (:reia_string, _)
+      # FIXME: this shouldn't use a regex, but I'm lazy
+      regex = pattern.to_binary()
+    #when _ # FIXME: this should really be else clause :/
+      # FIXME: throw grammar not implemented :(
+      #throw "invalid type for pattern"
+    end
+    
+    list = self.to_list()
+    case erl.re.run(self.to_binary(), regex)
+    when (:match, [(start, length)])
+      head = erl.lists.sublist(list, 1, start).to_string()
+      tail = erl.lists.sublist(list, start + length + 1, erl.length(list)).to_string()
+      "#{head}#{replacement}#{tail}"
+    when :nomatch
       self
     end
   end

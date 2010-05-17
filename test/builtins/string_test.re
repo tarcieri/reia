@@ -11,7 +11,7 @@ module StringTest
       length_test(),
       to_s_test(),
       inspect_test(), 
-      #sub_test(),
+      sub_test(),
       interpolation_test(),
       #split_test(), -- requires Erlang R12B-5, which isn't generally available :/
       to_module_test(),
@@ -40,11 +40,13 @@ module StringTest
     end
   end
     
-  #def sub_test
-  #  TestHelper.expect(String, "substitutes properly") do
-  #    ("bazbar", "foobar".sub(/foo/, "baz"))
-  #  end
-  #end
+  def sub_test
+    TestHelper.expect(String, "substitutes properly") do
+      res1 = "foobar".sub('bar', 'baz')
+      res2 = "foobar".sub(%r/bar/, 'baz')
+      (('foobaz', 'foobaz'), (res1, res2))
+    end
+  end
     
   def interpolation_test
     (foo, bar) = (1, 2)
