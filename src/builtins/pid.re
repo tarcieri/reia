@@ -7,7 +7,7 @@
 
 module Pid
   def call(self, :to_s, args, block)
-    "#Pid#{erl.pid_to_list(self).to_string()}"
+    "#<Pid:#{erl.pid_to_list(self).to_string().sub('<', '')}"
   end
   
   def call(self, :inspect, args, block)
