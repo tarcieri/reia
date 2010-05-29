@@ -26,10 +26,16 @@ transform_class(#class{line=Line, name=Name, superclass=Ancestor, methods=Method
 	end,
 	
 	MethodTable = build_method_table(Methods, Superclass),
+	
 	Initialize = transform_initialize_method(Name, dict:find(initialize, MethodTable)),
+	MethodMissing = transform_method_missing(Ancestor, dict:find(method_missing, MethodTable)),
+	
+	% Maybe I should fold over some funs here, or something? Ungh...
 	MethodTable2 = dict:store(initialize, Initialize, MethodTable),
-	MethodTable3 = dict:store(inspect, inspect_method(Line, Name), MethodTable2),
-	Methods2 = [callify_method(Method) || {_, Method} <- dict:to_list(MethodTable3)],
+	MethodTable3 = dict:store(method_missing, MethodMissing, MethodTable2),
+	MethodTable4 = dict:store(inspect, inspect_method(Line, Name), MethodTable3),
+	
+	Methods2 = [callify_method(Method) || {_, Method} <- dict:to_list(MethodTable4)],
 	
   #class{line=Line, name=Name, methods=Methods2}.
 
@@ -71,6 +77,17 @@ transform_initialize_method(Name, #function{body = Body} = Method) ->
 	},
 	
 	Method#function{body = Body ++ [Result]}.
+	
+% Transform the method_missing method or create it if it wasn't defined
+transform_method_missing(Ancestor, error) ->
+	% Use default (call super) if the method doesn't exist
+	transform_method_missing(Ancestor, #function{
+		line=1, 
+		name=method_missing,
+		body=[] % FIXME: yeah this should try to call the superclass
+	});
+transform_method_missing(_Ancestor, Method) ->
+	Method.
 	
 % Change the method into a clause of the call function
 callify_method(Method) ->
