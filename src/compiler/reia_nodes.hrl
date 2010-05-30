@@ -9,6 +9,7 @@
 -record(integer,     {line, value}).
 -record(float,       {line, value}).
 -record(var,         {line, name}).
+-record(ivar,        {line, name}).
 -record(bound_var,   {line, name}).
 -record(string,      {line, characters}).
 -record(dstring,     {line, elements}).

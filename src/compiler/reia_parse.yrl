@@ -37,6 +37,7 @@ Nonterminals
   catch_clauses
   catch_clause
   function_identifier
+  ivar
   bound_var
   rebind_op
   bool_op
@@ -81,7 +82,7 @@ Terminals
   module class module_name identifier punctuated_identifier erl 
   'case' 'when' 'end' 'if' 'unless' 'elseif' 'else' fun do
   'and' 'or' 'not' 'try' 'catch' for in
-  '+' '-' '*' '/' '%' '**' ',' '.' '..' 
+  '+' '-' '*' '/' '%' '**' ',' '.' '..' '@'
   '=' '=>' ':' '?' '!' '~' '&' '|' '^' '<<' '>>'
   '===' '==' '!=' '>' '<' '>=' '<='
   '+=' '-=' '*=' '/=' '**=' '&=' '|=' '^=' '<<=' '>>='
@@ -229,6 +230,7 @@ max_expr -> try_expr     : '$1'.
 max_expr -> module_name  : '$1'.
 max_expr -> module_decl  : '$1'.
 max_expr -> class_decl   : '$1'.
+max_expr -> ivar         : '$1'.
 max_expr -> bound_var    : '$1'.
 max_expr -> identifier   : #var{line=?line('$1'), name=?identifier_name('$1')}.
 max_expr -> string       : interpolate_string('$1').
@@ -629,8 +631,11 @@ dict -> '{' dict_entries '}' :   #dict{line=?line('$1'), elements='$2'}.
 dict_entries -> bool_expr '=>' expr : [{'$1','$3'}]. % FIXME: change add_expr to 1 below match
 dict_entries -> bool_expr '=>' expr ',' dict_entries : [{'$1','$3'}|'$5'].
 
+%% Instance variables
+ivar -> '@' identifier : #ivar{line=?line('$1'), name=?identifier_name('$2')}.
+
 %% Bound variables
-bound_var -> '^' identifier : #bound_var{line=?line('$1'), name=element(3, '$2')}.
+bound_var -> '^' identifier : #bound_var{line=?line('$1'), name=?identifier_name('$2')}.
 
 %% Index operation
 call -> call_expr '[' expr ']' :
