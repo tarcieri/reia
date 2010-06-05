@@ -27,8 +27,8 @@ transform_class(#class{line=Line, name=Name, superclass=Ancestor, methods=Method
 	
 	MethodTable = build_method_table(Methods, Superclass),
 	
-	Initialize = transform_initialize_method(Name, dict:find(initialize, MethodTable)),
-	MethodMissing = transform_method_missing(Ancestor, dict:find(method_missing, MethodTable)),
+	Initialize = transform_initialize_method(Name, MethodTable),
+	MethodMissing = transform_method_missing(Ancestor, MethodTable),
 	
 	% Maybe I should fold over some funs here, or something? Ungh...
 	MethodTable2 = dict:store(initialize, Initialize, MethodTable),
@@ -47,19 +47,21 @@ build_method_table(Dict, [], _Superclass) ->
 	Dict;
 build_method_table(Dict, [Func|Rest], Superclass) ->
 	Dict2 = dict:store(Func#function.name, transform_method(Func, Superclass), Dict),
-	build_method_table(Dict2, Rest).
+	build_method_table(Dict2, Rest, Superclass).
 	
 % Transform the initialize method to return a new object instance
-transform_initialize_method(Name, error) ->
-	% Use default initialize method if one isn't defined
-	transform_initialize_method(Name, #function{
-		line=1, 
-		name=initialize,
-		body=[]
-	});
-transform_initialize_method(Name, #function{body = Body} = Method) ->
-	Line = 1,
+transform_initialize_method(Name, MethodTable) ->
+	Initialize = case dict:find(initialize, MethodTable) of
+		{ok, Function} -> Function;
+		error -> % Use default initialize method if one isn't defined
+			#function{
+				line=1, 
+				name=initialize,
+				body=[]
+			}
+	end,
 	
+	Line = Initialize#function.line,
   Ivars = #native_call{
 		line     = Line, 
 		module   = dict, 
@@ -76,18 +78,22 @@ transform_initialize_method(Name, #function{body = Body} = Method) ->
 		]
 	},
 	
-	Method#function{body = Body ++ [Result]}.
+	Initialize#function{body = Initialize#function.body ++ [Result]}.
 	
 % Transform the method_missing method or create it if it wasn't defined
-transform_method_missing(Ancestor, error) ->
-	% Use default (call super) if the method doesn't exist
-	transform_method_missing(Ancestor, #function{
-		line=1, 
-		name=method_missing,
-		body=[#nil{}] % FIXME: yeah this should try to call the superclass
-	});
-transform_method_missing(_Ancestor, Method) ->
-	Method.
+transform_method_missing(_Ancestor, MethodTable) ->
+	MethodMissing = case dict:find(method_missing, MethodTable) of
+		{ok, Function} -> Function;
+		error -> % Use default (call super) if the method doesn't exist
+			#function{
+				line=1, 
+				name=method_missing,
+				body=[#nil{}] % FIXME: yeah this should try to call the superclass
+			}
+	end,
+	
+	% FIXME: This should really do something
+	MethodMissing.
 	
 % Change the method into a clause of the call function
 callify_method(Method) ->
