@@ -84,7 +84,7 @@ transform_method_missing(Ancestor, error) ->
 	transform_method_missing(Ancestor, #function{
 		line=1, 
 		name=method_missing,
-		body=[] % FIXME: yeah this should try to call the superclass
+		body=[#nil{}] % FIXME: yeah this should try to call the superclass
 	});
 transform_method_missing(_Ancestor, Method) ->
 	Method.
