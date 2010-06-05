@@ -14,7 +14,10 @@ transform(Exprs, _Options) ->
   reia_syntax:map_subtrees(fun transform/1, Exprs).
 
 transform(#class{} = Node) ->
-  reia_syntax:map_subtrees(fun transform/1, transform_class(Node));
+  io:format("Input class: ~p~n", [Node]),
+  Res = reia_syntax:map_subtrees(fun transform/1, transform_class(Node)),
+	io:format("Output class: ~p~n", [Res]),
+	Res;
       
 transform(Node) ->
   reia_syntax:map_subtrees(fun transform/1, Node).
@@ -51,7 +54,7 @@ build_method_table(Dict, [Func|Rest], Superclass) ->
 	
 % Transform the initialize method to return a new object instance
 transform_initialize_method(Name, MethodTable) ->
-	Initialize = case dict:find(initialize, MethodTable) of
+	Method= case dict:find(initialize, MethodTable) of
 		{ok, Function} -> Function;
 		error -> % Use default initialize method if one isn't defined
 			#function{
@@ -60,15 +63,10 @@ transform_initialize_method(Name, MethodTable) ->
 				body=[]
 			}
 	end,
-	
-	Line = Initialize#function.line,
-  Ivars = #native_call{
-		line     = Line, 
-		module   = dict, 
-		function = new, 
-		args=[]
-	},
-	
+
+	{Initialize, Ivars} = reia_ivars:initialize(Method),
+
+	Line = Initialize#function.line,	
 	Result = #tuple{
 		line     = Line, 
 		elements = [

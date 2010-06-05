@@ -6,17 +6,31 @@
 #
 
 class Roflcopter
+  def initialize(value)
+    @lollerskate = value
+  end
+  
+  def lollerskate
+    @lollerskate
+  end
 end
 
 module ObjectTest
   def run
-    [instantiation_test()]
+    [instantiation_test(), method_test()]
   end
   
   def instantiation_test
     TestHelper.expect("Classes", "instantiate new objects") do
-      Roflcopter()
-      (true, true)
+      Roflcopter(42)
+      (true, true) # FIXME: this should be a real assertion
     end
-  end  
+  end
+  
+  def method_test
+    TestHelper.expect("Methods", "can be invoked on objects") do
+      obj = Roflcopter(42)
+      (42, obj.lollerskate())
+    end
+  end
 end
