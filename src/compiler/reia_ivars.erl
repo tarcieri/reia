@@ -29,13 +29,7 @@ mutable_method(Method) ->
 	Method2 = Method#function{body = [BindIvars|Body]},
 	{Method2, ?ivars(Line)}.
 
-mutable_method_ivars(#ivar{line=Line, name=Name}) ->
-	#binary_op{
-		line  = Line,
-		type  = '[]',
-		left  = ?ivars(Line),
-		right = #atom{line=Line, name=Name}
-	};
+mutable_method_ivars(#ivar{} = Ivar) -> remap_ivar(Ivar);
 		
 mutable_method_ivars(Expr) ->
 	reia_syntax:map_subtrees(fun mutable_method_ivars/1, Expr).
@@ -45,5 +39,26 @@ immutable_method(Method) ->
 	Body = reia_syntax:map_subtrees(fun immutable_method_ivars/1, Method#function.body),
 	Method#function{body=Body}.
 	
+immutable_method_ivars(#match{} = Expr) ->
+	[Left]  = reia_syntax:map_subtrees(fun immutable_match_context/1, [Expr#match.left]),
+	[Right] = reia_syntax:map_subtrees(fun immutable_method_ivars/1,  [Expr#match.right]),
+	Expr#match{left=Left, right=Right}; 
+
+immutable_method_ivars(#ivar{} = Ivar) -> remap_ivar(Ivar);
+			
 immutable_method_ivars(Expr) ->
-	reia_syntax:map_subtrees(fun mutable_method_ivars/1, Expr).
+	reia_syntax:map_subtrees(fun immutable_method_ivars/1, Expr).
+		
+immutable_match_context(#ivar{line=Line}) ->
+	throw({error, {Line, "illegal usage of an instance variable in match context"}});
+	
+immutable_match_context(Expr) ->
+	reia_syntax:map_subtrees(fun immutable_match_context/1, Expr).
+		
+remap_ivar(#ivar{line=Line, name=Name}) ->
+	#binary_op{
+		line  = Line,
+		type  = '[]',
+		left  = ?ivars(Line),
+		right = #atom{line=Line, name=Name}
+	}.
