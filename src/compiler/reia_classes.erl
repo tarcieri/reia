@@ -14,10 +14,7 @@ transform(Exprs, _Options) ->
   reia_syntax:map_subtrees(fun transform/1, Exprs).
 
 transform(#class{} = Expr) ->
-  io:format("Input class: ~p~n", [Expr]),
-  Res = reia_syntax:map_subtrees(fun transform/1, transform_class(Expr)),
-	io:format("Output class: ~p~n", [Res]),
-	Res;
+	reia_syntax:map_subtrees(fun transform/1, transform_class(Expr));
       
 transform(Expr) ->
   reia_syntax:map_subtrees(fun transform/1, Expr).

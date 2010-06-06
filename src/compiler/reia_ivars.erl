@@ -8,6 +8,7 @@
 -module(reia_ivars).
 -export([mutable_method/1, immutable_method/1]).
 -include("reia_nodes.hrl").
+-define(self(Line),  (#var{line=Line, name='__reia_self'})).
 -define(ivars(Line), (#var{line=Line, name='__reia_ivars'})).
 
 % Transform for methods that are allowed to alter instance variables
@@ -20,8 +21,7 @@ mutable_method(Method) ->
 	Ivars = #native_call{
 		line     = Line, 
 		module   = dict, 
-		function = new, 
-		args=[]
+		function = new
 	},
 	
 	BindIvars = #match{line=Line, left=?ivars(Line), right=Ivars},
@@ -36,8 +36,18 @@ mutable_method_ivars(Expr) ->
 	
 % Methods which are not allowed to make changes to instance variables
 immutable_method(Method) ->
+	Line = Method#function.line,
+	
+	Ivars = #native_call{
+		line     = Line,
+		module   = erlang,
+		function = element,
+		args     = [#integer{line=Line, value=3}, ?self(Line)]
+	},
+	
+	BindIvars = #match{line=Line, left=?ivars(Line), right=Ivars},
 	Body = reia_syntax:map_subtrees(fun immutable_method_ivars/1, Method#function.body),
-	Method#function{body=Body}.
+	Method#function{body=[BindIvars|Body]}.
 	
 immutable_method_ivars(#match{} = Expr) ->
 	[Left]  = reia_syntax:map_subtrees(fun immutable_match_context/1, [Expr#match.left]),
