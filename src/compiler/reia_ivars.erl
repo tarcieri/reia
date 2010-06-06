@@ -6,14 +6,17 @@
 %
 
 -module(reia_ivars).
--export([initialize/1]).
+-export([mutable_method/1, immutable_method/1]).
 -include("reia_nodes.hrl").
 -define(ivars(Line), (#var{line=Line, name='__reia_ivars'})).
 
-initialize(Method) ->
+% Transform for methods that are allowed to alter instance variables
+mutable_method(Method) ->
 	Line = Method#function.line,
 	
 	% Generate instance variable dictionary
+	% FIXME: this really shouldn't be in a generic "mutable_method" transform.
+	% This should get factored elsewhere when the object model is actually working.
 	Ivars = #native_call{
 		line     = Line, 
 		module   = dict, 
@@ -22,11 +25,11 @@ initialize(Method) ->
 	},
 	
 	BindIvars = #match{line=Line, left=?ivars(Line), right=Ivars},
-	Body = reia_syntax:map_subtrees(fun initialize_ivars/1, Method#function.body),
-	Initialize = Method#function{body = [BindIvars|Body]},
-	{Initialize, ?ivars(Line)}.
+	Body = reia_syntax:map_subtrees(fun mutable_method_ivars/1, Method#function.body),
+	Method2 = Method#function{body = [BindIvars|Body]},
+	{Method2, ?ivars(Line)}.
 
-initialize_ivars(#ivar{line=Line, name=Name}) ->
+mutable_method_ivars(#ivar{line=Line, name=Name}) ->
 	#binary_op{
 		line  = Line,
 		type  = '[]',
@@ -34,6 +37,13 @@ initialize_ivars(#ivar{line=Line, name=Name}) ->
 		right = #atom{line=Line, name=Name}
 	};
 		
-initialize_ivars(Expr) ->
-	reia_syntax:map_subtrees(fun initialize_ivars/1, Expr).
+mutable_method_ivars(Expr) ->
+	reia_syntax:map_subtrees(fun mutable_method_ivars/1, Expr).
 	
+% Methods which are not allowed to make changes to instance variables
+immutable_method(Method) ->
+	Body = reia_syntax:map_subtrees(fun immutable_method_ivars/1, Method#function.body),
+	Method#function{body=Body}.
+	
+immutable_method_ivars(Expr) ->
+	reia_syntax:map_subtrees(fun mutable_method_ivars/1, Expr).

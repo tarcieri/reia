@@ -54,7 +54,7 @@ build_method_table(Dict, [Func|Rest], Superclass) ->
 	
 % Transform the initialize method to return a new object instance
 transform_initialize_method(Name, MethodTable) ->
-	Method= case dict:find(initialize, MethodTable) of
+	Method = case dict:find(initialize, MethodTable) of
 		{ok, Function} -> Function;
 		error -> % Use default initialize method if one isn't defined
 			#function{
@@ -64,7 +64,7 @@ transform_initialize_method(Name, MethodTable) ->
 			}
 	end,
 
-	{Initialize, Ivars} = reia_ivars:initialize(Method),
+	{Initialize, Ivars} = reia_ivars:mutable_method(Method),
 
 	Line = Initialize#function.line,	
 	Result = #tuple{
