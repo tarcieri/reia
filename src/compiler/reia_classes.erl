@@ -13,14 +13,14 @@
 transform(Exprs, _Options) ->
   reia_syntax:map_subtrees(fun transform/1, Exprs).
 
-transform(#class{} = Node) ->
-  io:format("Input class: ~p~n", [Node]),
-  Res = reia_syntax:map_subtrees(fun transform/1, transform_class(Node)),
+transform(#class{} = Expr) ->
+  io:format("Input class: ~p~n", [Expr]),
+  Res = reia_syntax:map_subtrees(fun transform/1, transform_class(Expr)),
 	io:format("Output class: ~p~n", [Res]),
 	Res;
       
-transform(Node) ->
-  reia_syntax:map_subtrees(fun transform/1, Node).
+transform(Expr) ->
+  reia_syntax:map_subtrees(fun transform/1, Expr).
     
 transform_class(#class{line=Line, name=Name, superclass=Ancestor, methods=Methods}) ->
 	Superclass = case Name of

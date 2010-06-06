@@ -25,7 +25,15 @@ initialize(Method) ->
 	Body = reia_syntax:map_subtrees(fun initialize_ivars/1, Method#function.body),
 	Initialize = Method#function{body = [BindIvars|Body]},
 	{Initialize, ?ivars(Line)}.
-	
+
+initialize_ivars(#ivar{line=Line, name=Name}) ->
+	#binary_op{
+		line  = Line,
+		type  = '[]',
+		left  = ?ivars(Line),
+		right = #atom{line=Line, name=Name}
+	};
+		
 initialize_ivars(Expr) ->
-	Expr.
+	reia_syntax:map_subtrees(fun initialize_ivars/1, Expr).
 	
