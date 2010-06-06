@@ -33,14 +33,14 @@ transform_class(#class{line=Line, name=Name, superclass=Ancestor, methods=Method
 	Initialize = transform_initialize_method(Name, MethodTable),
 	MethodMissing = transform_method_missing(Ancestor, MethodTable),
 	
-	% Maybe I should fold over some funs here, or something? Ungh...
-	MethodTable2 = dict:store(initialize, Initialize, MethodTable),
+	MethodTable2 = dict:erase(initialize, MethodTable),
 	MethodTable3 = dict:store(method_missing, MethodMissing, MethodTable2),
 	MethodTable4 = dict:store(inspect, inspect_method(Line, Name), MethodTable3),
 	
-	Methods2 = [callify_method(Method) || {_, Method} <- dict:to_list(MethodTable4)],
-	
-  #class{line=Line, name=Name, methods=Methods2}.
+	Methods2 = [prepare_method(Method) || {_, Method} <- dict:to_list(MethodTable4)],
+	Methods3 = [callify_method(Initialize)|Methods2],
+		
+  #class{line=Line, name=Name, methods=Methods3}.
 
 % Create a dict of methods by name
 build_method_table(Methods, Superclass) ->
@@ -92,6 +92,10 @@ transform_method_missing(_Ancestor, MethodTable) ->
 	
 	% FIXME: This should really do something
 	MethodMissing.
+
+% Prepare the finalized form of a method
+prepare_method(Method) ->
+	callify_method(reia_ivars:immutable_method(Method)).
 	
 % Change the method into a clause of the call function
 callify_method(Method) ->
