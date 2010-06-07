@@ -1,6 +1,6 @@
 %
 % reia: Interface between Erlang and Reia environments
-% Copyright (C)2008-09 Tony Arcieri
+% Copyright (C)2008-10 Tony Arcieri
 %
 % Redistribution is permitted under the MIT license. See LICENSE for details.
 %
@@ -14,7 +14,7 @@
 %
 
 % Initialize the Reia environment
-init() -> load_core().
+init() -> load_core(), load_stdlib().
 
 load(Filename) ->
   SourcePath = filename:absname(Filename),
@@ -112,6 +112,10 @@ load_module(Path) ->
 load_core_reb() ->
   Files = filelib:wildcard(base_directory() ++ "/ebin/*.reb"),
   [reia_bytecode:load_file(File) || File <- Files].
+
+load_stdlib() ->
+	Files = filelib:wildcard(base_directory() ++ "/lib/*.re"),
+	[reia:load(File) || File <- Files].
     
 % Base directory of the Reia distribution
 base_directory() ->
