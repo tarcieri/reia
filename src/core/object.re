@@ -15,7 +15,9 @@ class Object
   end
     
   def to_s
-    inspect()
+    # FIXME: bleh, need to fix function calls within objects
+    #inspect()
+    nil
   end
     
   def inspect
@@ -23,6 +25,8 @@ class Object
   end
     
   def method_missing(method, args)
-    throw (:error, (method, "undefined"))
+    # FIXME: throw unimplemented :(
+    #throw (:error, (method, "undefined"))
+    nil
   end
 end
