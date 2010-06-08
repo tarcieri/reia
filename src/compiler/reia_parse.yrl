@@ -359,6 +359,7 @@ functions -> function eol functions : ['$1'|'$3'].
 %% Function identifiers
 function_identifier -> identifier : '$1'.
 function_identifier -> punctuated_identifier : '$1'.
+function_identifier -> class : {identifier, ?line('$1'), 'class'}.
 
 %% Function definitions
 function -> def function_identifier eol expr_list 'end' : 
