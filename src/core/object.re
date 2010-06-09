@@ -7,7 +7,6 @@
 
 class Object
   def initialize
-    nil
   end
     
   def class
@@ -17,7 +16,6 @@ class Object
   def to_s
     # FIXME: bleh, need to fix function calls within objects
     #inspect()
-    nil
   end
     
   def inspect

@@ -46,6 +46,9 @@ transform(#class{line=Line, name=Name, methods=Funcs}) ->
   };
 
 % Functions
+transform(#function{body=[]} = Function) ->
+	% Functions with empty bodies implicitly return nil
+	transform(Function#function{body=[#nil{}]});
 transform(#function{line=Line, name=Name, args=Args, block=Block, body=Exprs}) ->
   {function, Line, Name, 2, [{clause, Line,
     [{tuple, Line, [transform(Arg) || Arg <- Args]}, transform(Block)],

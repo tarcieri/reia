@@ -1,10 +1,3 @@
-% Modules and Classes
--record(module,      {line, name, functions}).
--record(class,       {line, name, superclass='Object', methods}).
-
-% Functions
--record(function,    {line, name, args=[], block={var,1,'_'}, body}).
-
 % Terminals
 -record(integer,     {line, value}).
 -record(float,       {line, value}).
@@ -19,6 +12,13 @@
 -record(true,        {line}).
 -record(false,       {line}).
 -record(nil,         {line=1}).
+
+% Modules and Classes
+-record(module,      {line, name, functions}).
+-record(class,       {line, name, superclass='Object', methods}).
+
+% Functions
+-record(function,    {line, name, args=[], block=#var{line=1,name='_'}, body}).
 
 % Function calls
 -record(class_inst,  {line, class, args=[], block=#nil{}}).
