@@ -14,8 +14,7 @@ class Object
   end
     
   def to_s
-    # FIXME: bleh, need to fix function calls within objects
-    #inspect()
+    inspect()
   end
     
   def inspect
