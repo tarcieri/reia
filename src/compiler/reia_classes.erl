@@ -92,7 +92,9 @@ transform_method_missing(_Ancestor, MethodTable) ->
 
 % Prepare the finalized form of a method
 prepare_method(Method) ->
-	callify_method(reia_ivars:immutable_method(Method)).
+	Method2 = reia_ivars:immutable_method(Method),
+	Method3 = transform_local_calls(Method2),
+	callify_method(Method3).
 	
 % Change the method into a clause of the call function
 callify_method(Method) ->
@@ -128,3 +130,22 @@ inspect_method(Line, Name) ->
 		    #string{line = Line, characters = ">"}
 		  ]
 	}]}.
+	
+% Transform local calls to the OO "call" signature
+transform_local_calls(#local_call{line=Line, name=Name, args=Args, block=Block}) ->
+  Expr = #native_call{
+		line     = Line,
+		module   = reia_dispatch,
+		function = call,
+		args     = [
+		  ?self(Line),
+		  #atom{line=Line, name=Name},
+		  #tuple{line=Line, elements=Args},
+		  Block
+		]
+	},
+
+	reia_syntax:map_subtrees(fun transform_local_calls/1, Expr);
+      
+transform_local_calls(Expr) ->
+  reia_syntax:map_subtrees(fun transform_local_calls/1, Expr).

@@ -13,6 +13,10 @@ class Roflcopter
   def lollerskate
     @lollerskate
   end
+  
+  def loldongs
+    lollerskate()
+  end
 end
 
 module ObjectTest
