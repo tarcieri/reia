@@ -18,7 +18,7 @@ class Object
   end
     
   def inspect
-    "#<#{class()}>"
+    "#<#{class()} #{erl.element(3, self)}>"
   end
     
   def method_missing(method, args)

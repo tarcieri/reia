@@ -123,6 +123,13 @@ inspect_method(Line, Name) ->
 		  elements = [
 		    #string{line = Line, characters = "#<"},
 		    #atom{line = Line, name = Name},
+		    #string{line = Line, characters = " "},
+		    #native_call{
+		      line     = Line,
+		      module   = erlang,
+		      function = element,
+		      args     = [#integer{line=Line, value=3}, ?self(Line)]
+				},
 		    #string{line = Line, characters = ">"}
 		  ]
 	}]}.
