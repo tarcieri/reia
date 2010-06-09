@@ -20,7 +20,6 @@ class TCPSocket
     when error
       # FIXME: throw unimplemented :(
       #throw error
-      nil
     end
   end
   
