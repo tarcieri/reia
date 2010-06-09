@@ -45,8 +45,8 @@ build_method_table(Methods, Superclass) ->
 	
 build_method_table(Dict, [], _Superclass) ->
 	Dict;
-build_method_table(Dict, [Func|Rest], Superclass) ->
-	Dict2 = dict:store(Func#function.name, transform_method(Func, Superclass), Dict),
+build_method_table(Dict, [Method|Rest], Superclass) ->
+	Dict2 = dict:store(Method#function.name, Method, Dict),
 	build_method_table(Dict2, Rest, Superclass).
 	
 % Transform the initialize method to return a new object instance
@@ -93,7 +93,7 @@ transform_method_missing(_Ancestor, MethodTable) ->
 % Prepare the finalized form of a method
 prepare_method(Method) ->
 	Method2 = reia_ivars:immutable_method(Method),
-	Method3 = transform_local_calls(Method2),
+	Method3 = transform_method(Method2),
 	callify_method(Method3).
 	
 % Change the method into a clause of the call function
@@ -112,10 +112,6 @@ callify_method(Method) ->
 	  args = Args
 	}.
 	
-% Transform OO features into functional ones
-transform_method(Method, _Superclass) ->
-	Method.
-	
 % Generate the "inspect" method
 % FIXME: this should be inherited from 'Object'
 inspect_method(Line, Name) ->
@@ -132,7 +128,7 @@ inspect_method(Line, Name) ->
 	}]}.
 	
 % Transform local calls to the OO "call" signature
-transform_local_calls(#local_call{line=Line, name=Name, args=Args, block=Block}) ->
+transform_method(#local_call{line=Line, name=Name, args=Args, block=Block}) ->
   Expr = #native_call{
 		line     = Line,
 		module   = reia_dispatch,
@@ -145,7 +141,11 @@ transform_local_calls(#local_call{line=Line, name=Name, args=Args, block=Block})
 		]
 	},
 
-	reia_syntax:map_subtrees(fun transform_local_calls/1, Expr);
-      
-transform_local_calls(Expr) ->
-  reia_syntax:map_subtrees(fun transform_local_calls/1, Expr).
+	reia_syntax:map_subtrees(fun transform_method/1, Expr);
+		
+% Transform references to self
+transform_method(#self{line=Line}) ->
+	?self(Line);
+	
+transform_method(Expr) ->
+  reia_syntax:map_subtrees(fun transform_method/1, Expr).

@@ -79,7 +79,7 @@ Nonterminals
   
 Terminals
   '(' ')' '[' ']' '{' '}' '<[' ']>' def eol
-  float integer string atom regexp true false nil 
+  float integer string atom regexp true false nil self
   module class module_name identifier punctuated_identifier erl 
   'case' 'when' 'end' 'if' 'unless' 'elseif' 'else' fun do
   'and' 'or' 'not' 'try' 'catch' for in
@@ -225,6 +225,7 @@ max_expr -> dict         : '$1'.
 max_expr -> atom         : '$1'.
 max_expr -> boolean      : '$1'.
 max_expr -> regexp       : '$1'.
+max_expr -> self         : '$1'.
 max_expr -> case_expr    : '$1'.
 max_expr -> if_expr      : '$1'.
 max_expr -> try_expr     : '$1'.

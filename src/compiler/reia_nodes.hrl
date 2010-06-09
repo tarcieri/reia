@@ -12,6 +12,7 @@
 -record(true,        {line}).
 -record(false,       {line}).
 -record(nil,         {line=1}).
+-record(self,        {line}).
 
 % Modules and Classes
 -record(module,      {line, name, functions}).

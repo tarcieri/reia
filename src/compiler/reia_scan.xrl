@@ -177,6 +177,7 @@ reserved_word('false')   -> true;
 reserved_word('module')  -> true;
 reserved_word('class')   -> true;
 reserved_word('def')     -> true;
+reserved_word('self')    -> true;
 reserved_word('fun')     -> true;
 reserved_word('do')      -> true;
 reserved_word('begin')   -> true;

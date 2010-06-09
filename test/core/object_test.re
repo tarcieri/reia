@@ -14,8 +14,12 @@ class Roflcopter
     @lollerskate
   end
   
-  def loldongs
+  def invoker
     lollerskate()
+  end
+  
+  def self_invoker
+    self.lollerskate()
   end
 end
 
@@ -24,7 +28,8 @@ module ObjectTest
     [
       instantiation_test(),
       method_test(),
-      invocation_test()
+      invocation_test(),
+      self_invocation_test()
     ]
   end
   
@@ -45,7 +50,14 @@ module ObjectTest
   def invocation_test
     TestHelper.expect("Objects", "can invoke their own methods") do
       obj = Roflcopter(42)
-      (42, obj.loldongs())
+      (42, obj.invoker())
+    end
+  end
+  
+  def self_invocation_test
+    TestHelper.expect("Objects", "can invoke methods on self") do
+      obj = Roflcopter(42)
+      (42, obj.self_invoker())
     end
   end
 end
