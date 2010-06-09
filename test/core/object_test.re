@@ -21,7 +21,11 @@ end
 
 module ObjectTest
   def run
-    [instantiation_test(), method_test()]
+    [
+      instantiation_test(),
+      method_test(),
+      invocation_test()
+    ]
   end
   
   def instantiation_test
@@ -35,6 +39,13 @@ module ObjectTest
     TestHelper.expect("Methods", "can be invoked on objects") do
       obj = Roflcopter(42)
       (42, obj.lollerskate())
+    end
+  end
+  
+  def invocation_test
+    TestHelper.expect("Objects", "can invoke their own methods") do
+      obj = Roflcopter(42)
+      (42, obj.loldongs())
     end
   end
 end
