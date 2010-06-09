@@ -50,7 +50,7 @@ Nonterminals
   class_decl
   functions
   function
-  function_body
+  body
   pargs
   pargs_tail
   block_capture
@@ -363,13 +363,13 @@ function_identifier -> punctuated_identifier : '$1'.
 function_identifier -> class : {identifier, ?line('$1'), 'class'}.
 
 %% Function definitions
-function -> def function_identifier eol function_body 'end' : 
+function -> def function_identifier eol body 'end' : 
   #function{
     line = ?line('$1'), 
     name = element(3, '$2'), 
     body = '$4'
   }.
-function -> def function_identifier pargs eol function_body 'end' :
+function -> def function_identifier pargs eol body 'end' :
   #function{
     line  = ?line('$1'), 
     name  = element(3, '$2'), 
@@ -378,8 +378,8 @@ function -> def function_identifier pargs eol function_body 'end' :
     body  = '$5'
   }.
 
-function_body -> '$empty'  : [#nil{}].
-function_body -> expr_list : '$1'.
+body -> '$empty'  : [#nil{}].
+body -> expr_list : '$1'.
 
 %% Class instantiations
 class_inst -> module_name pargs :
@@ -655,7 +655,7 @@ call -> call_expr '[' expr ']' :
 clauses -> clause clauses : ['$1'|'$2'].
 clauses -> clause : ['$1'].
 
-clause -> when inline_exprs eol expr_list : 
+clause -> when inline_exprs eol body : 
   #clause{
     line=?line('$1'), 
     patterns='$2', 
