@@ -12,7 +12,7 @@
 
 transform(Exprs, _Options) ->
   reia_syntax:map_subtrees(fun transform/1, Exprs).
-
+	
 transform(#class{} = Expr) ->
 	reia_syntax:map_subtrees(fun transform/1, transform_class(Expr));
       
@@ -76,20 +76,36 @@ transform_initialize_method(Name, MethodTable) ->
 	Initialize#function{body = Initialize#function.body ++ [Result]}.
 	
 % Transform the method_missing method or create it if it wasn't defined
-transform_method_missing(_Ancestor, MethodTable) ->
-	MethodMissing = case dict:find(method_missing, MethodTable) of
+transform_method_missing(Ancestor, MethodTable) ->
+	case dict:find(method_missing, MethodTable) of
 		{ok, Function} -> Function;
 		error -> % Use default (call super) if the method doesn't exist
 			#function{
-				line=1, 
-				name=method_missing,
-				body=[#nil{}] % FIXME: yeah this should try to call the superclass
+				line  = 1, 
+				name  = method_missing,
+				args  = [#var{line=1, name=method}, #var{line=1, name=args}],
+				block = #var{line=1, name=block},
+				body  = [
+				  #native_call{
+				    line     = 1,
+				    module   = Ancestor,
+				    function = call,
+				    args     = [
+							#tuple{
+								line = 1,
+								elements = [
+									?self(1),
+									#var{line=1, name=method},
+									#var{line=1, name=args}
+								]
+							},
+							#var{line=1, name=block}
+						]
+					}
+				]
 			}
-	end,
+	end.
 	
-	% FIXME: This should really do something
-	MethodMissing.
-
 % Prepare the finalized form of a method
 prepare_method(Method) ->
 	Method2 = reia_ivars:immutable_method(Method),
