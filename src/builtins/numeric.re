@@ -6,22 +6,22 @@
 #
 
 module Numeric
-  def call(self, :to_s, args, block)
-    list = if erl.is_integer(self)
-      erl.integer_to_list(self)
-    elseif erl.is_float(self)
-      erl.io_lib.format("~f".to_list(), [self])
+  def call(fake_self, :to_s, args, block)
+    list = if erl.is_integer(fake_self)
+      erl.integer_to_list(fake_self)
+    elseif erl.is_float(fake_self)
+      erl.io_lib.format("~f".to_list(), [fake_self])
     end
     
     list.to_string()
   end
   
-  def call(self, :inspect, args, block)
-    self.to_s()
+  def call(fake_self, :inspect, args, block)
+    fake_self.to_s()
   end
   
-  def call(self, :times, args, block)
-    erl.lists.foreach(block, erl.lists.seq(0, self - 1))
-    self
+  def call(fake_self, :times, args, block)
+    erl.lists.foreach(block, erl.lists.seq(0, fake_self - 1))
+    fake_self
   end
 end

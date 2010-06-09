@@ -6,11 +6,11 @@
 #
 
 module Pid
-  def call(self, :to_s, args, block)
-    "#<Pid:#{erl.pid_to_list(self).to_string().sub('<', '')}"
+  def call(fake_self, :to_s, args, block)
+    "#<Pid:#{erl.pid_to_list(fake_self).to_string().sub('<', '')}"
   end
   
-  def call(self, :inspect, args, block)
-    self.to_s()
+  def call(fake_self, :inspect, args, block)
+    fake_self.to_s()
   end
 end

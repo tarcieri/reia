@@ -6,8 +6,8 @@
 #
 
 module Module
-  def call(self, :to_s, args, block)
-    (:reia_module, name) = self
+  def call(fake_self, :to_s, args, block)
+    (:reia_module, name) = fake_self
     case erl.code.ensure_loaded(name)
     when (:module, name)
       name.to_string()
@@ -18,12 +18,12 @@ module Module
     end
   end
   
-  def call(self, :inspect, args, block)
-    self.to_s()
+  def call(fake_self, :inspect, args, block)
+    fake_self.to_s()
   end
 
-  def call(self, method, args, block)
-    (:reia_module, name) = self
+  def call(fake_self, method, args, block)
+    (:reia_module, name) = fake_self
     erl.apply(name, method, [args, block])
   end
 end

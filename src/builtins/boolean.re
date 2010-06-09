@@ -6,11 +6,11 @@
 #
   
 module Boolean
-  def call(self, :to_s, args, block)
-    erl.atom_to_list(self).to_string()
+  def call(fake_self, :to_s, args, block)
+    erl.atom_to_list(fake_self).to_string()
   end
   
-  def call(self, :inspect, args, block)
-    erl.atom_to_list(self).to_string()
+  def call(fake_self, :inspect, args, block)
+    erl.atom_to_list(fake_self).to_string()
   end
 end

@@ -6,13 +6,13 @@
 #
 
 module Fun
-  def call(self, :inspect, args, block)
-    (:name,   name) = erl.fun_info(self, :name)
-    (:module, mod)  = erl.fun_info(self, :module)
+  def call(fake_self, :inspect, args, block)
+    (:name,   name) = erl.fun_info(fake_self, :name)
+    (:module, mod)  = erl.fun_info(fake_self, :module)
     "#<Fun #{name}:#{mod}>"
   end
   
-  def call(self, :to_s, args, block)
-    call(self, :inspect, args, block)
+  def call(fake_self, :to_s, args, block)
+    call(fake_self, :inspect, args, block)
   end
 end

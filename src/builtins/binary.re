@@ -6,20 +6,20 @@
 #
 
 module Binary
-  def call(self, :to_string, args, block)
+  def call(fake_self, :to_string, args, block)
     # Define a new string via the internal representation
-    (:reia_string, self)
+    (:reia_string, fake_self)
   end
   
-  def call(self, :to_s, args, block)
-    self.to_string()
+  def call(fake_self, :to_s, args, block)
+    fake_self.to_string()
   end
   
-  def call(self, :inspect, args, block)
-    "<[#{erl.binary_to_list(self).join(',')}]>"
+  def call(fake_self, :inspect, args, block)
+    "<[#{erl.binary_to_list(fake_self).join(',')}]>"
   end
   
-  def call(self, :size, args, block)
-    erl.byte_size(self)
+  def call(fake_self, :size, args, block)
+    erl.byte_size(fake_self)
   end
 end

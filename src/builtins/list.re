@@ -6,29 +6,29 @@
 #
 
 module List
-  def call(self, :'[]', (index,), block)
-    length = erl.length(self)
+  def call(fake_self, :'[]', (index,), block)
+    length = erl.length(fake_self)
     
     index += length if index < 0
     index += 1
     
-    erl.lists.nth(index, self) if index >= 1 and index <= length
+    erl.lists.nth(index, fake_self) if index >= 1 and index <= length
   end
   
-  def call(self, :'[]=', (index, value), block)
+  def call(fake_self, :'[]=', (index, value), block)
     if index < 0
-      replace(self, erl.length(self) + index, value)
+      replace(fake_self, erl.length(fake_self) + index, value)
     else
-      replace(self, index, value)
+      replace(fake_self, index, value)
     end
   end
   
-  def call(self, :size, args, block)
-    erl.length(self)
+  def call(fake_self, :size, args, block)
+    erl.length(fake_self)
   end
 
-  def call(self, :to_string, args, block)
-    elements = self.flatten().map do |element|
+  def call(fake_self, :to_string, args, block)
+    elements = fake_self.flatten().map do |element|
       case element
       when (:reia_string, parts)
         parts
@@ -40,59 +40,59 @@ module List
     (:reia_string, elements)
   end
   
-  def call(self, :to_s, args, block)
-    "[#{self.map { |e| e.inspect() }.join(',')}]"
+  def call(fake_self, :to_s, args, block)
+    "[#{fake_self.map { |e| e.inspect() }.join(',')}]"
   end
 
-  def call(self, :inspect, args, block)
-    call(self, :to_s, args, block)
+  def call(fake_self, :inspect, args, block)
+    call(fake_self, :to_s, args, block)
   end
   
-  def call(self, :reverse, args, block)
-    erl.lists.reverse(self)
+  def call(fake_self, :reverse, args, block)
+    erl.lists.reverse(fake_self)
   end
   
-  def call(self, :join, (separator,), block)
-    elements = case self
+  def call(fake_self, :join, (separator,), block)
+    elements = case fake_self
     when []
       []
     when _
-      join_list([], self, separator.to_list())
+      join_list([], fake_self, separator.to_list())
     end
         
     elements.to_string()
   end
-  def call(self, :join, (), block)
-    call(self, :join, ("",), block)
+  def call(fake_self, :join, (), block)
+    call(fake_self, :join, ("",), block)
   end
   
-  def call(self, :each, args, block)
-    erl.lists.foreach(block, self)
-    self
+  def call(fake_self, :each, args, block)
+    erl.lists.foreach(block, fake_self)
+    fake_self
   end
 
-  def call(self, :map, args, block)
-    erl.lists.map(block, self)
+  def call(fake_self, :map, args, block)
+    erl.lists.map(block, fake_self)
   end
   
-  def call(self, :flatten, args, block)
-    erl.lists.flatten(self)
+  def call(fake_self, :flatten, args, block)
+    erl.lists.flatten(fake_self)
   end
 
-  def call(self, :to_tuple, args, block)
-    erl.list_to_tuple(self)
+  def call(fake_self, :to_tuple, args, block)
+    erl.list_to_tuple(fake_self)
   end
 
-  def call(self, :to_dict, args, block)
-    erl.dict.from_list(self)
+  def call(fake_self, :to_dict, args, block)
+    erl.dict.from_list(fake_self)
   end
       
-  def call(self, :to_list, args, block)
-    self
+  def call(fake_self, :to_list, args, block)
+    fake_self
   end
 
-  def replace(self, index, value)
-    replace(self, 0, index, value)
+  def replace(fake_self, index, value)
+    replace(fake_self, 0, index, value)
   end
   
   # FIXME: throw syntax not implemented
