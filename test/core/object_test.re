@@ -29,7 +29,8 @@ module ObjectTest
       instantiation_test(),
       method_test(),
       invocation_test(),
-      self_invocation_test()
+      self_invocation_test(),
+      superclass_invocation_test()
     ]
   end
   
@@ -58,6 +59,14 @@ module ObjectTest
     TestHelper.expect("Objects", "can invoke methods on self") do
       obj = Roflcopter(42)
       (42, obj.self_invoker())
+    end
+  end
+  
+  def superclass_invocation_test
+    TestHelper.expect("Objects", "invoke superclass methods when a method is not defined on their class") do
+      obj = Roflcopter(42)
+      obj.to_s()
+      (true, true) # FIXME: needs a real assertion here
     end
   end
 end

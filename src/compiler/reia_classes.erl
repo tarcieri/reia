@@ -35,8 +35,8 @@ transform_class(#class{line=Line, name=Name, superclass=Ancestor, methods=Method
 	MethodTable4 = dict:store(inspect, inspect_method(Line, Name), MethodTable3),
 	
 	Methods2 = [prepare_method(Method) || {_, Method} <- dict:to_list(MethodTable4)],
-	Methods3 = [callify_method(Initialize)|Methods2],
-		
+	Methods3 = [callify_method(Initialize)|Methods2] ++ [method_missing_thunk()],
+	
   #class{line=Line, name=Name, methods=Methods3}.
 
 % Create a dict of methods by name
@@ -105,6 +105,34 @@ transform_method_missing(Ancestor, MethodTable) ->
 				]
 			}
 	end.
+	
+% Create a catchall thunk which calls method_missing
+method_missing_thunk() ->
+	#function{
+		line = 1,
+		name = call,
+		args = [
+			#var{line=1, name=self},
+			#var{line=1, name=method},
+			#var{line=1, name=args}
+		],
+		block = #var{line=1, name=block},
+		body = [
+		  #local_call{
+		    line=1,
+		    name=call,
+		    args=[
+		      #var{line=1, name=self},
+		      #atom{line=1, name=method_missing},
+		      #tuple{line=1, elements=[
+						#var{line=1, name=method}, 
+						#var{line=1, name=args}
+					]}
+				],
+		    block=#var{line=1, name=block}
+			}
+		]
+	}.
 	
 % Prepare the finalized form of a method
 prepare_method(Method) ->
