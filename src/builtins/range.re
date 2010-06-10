@@ -5,18 +5,18 @@
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-module Range
-  def call(fake_self, :to_list, args, block)
-    (:reia_range, from, to) = fake_self
+class Range
+  def to_list
+    (:reia_range, from, to) = self
     erl.lists.seq(from, to)
   end
   
-  def call(fake_self, :to_s, args, block)
-    (:reia_range, from, to) = fake_self
+  def to_s
+    (:reia_range, from, to) = self
     "#{from}..#{to}"
   end
 
-  def call(fake_self, :inspect, args, block)
-    fake_self.to_s()
+  def inspect
+    to_s()
   end
 end
