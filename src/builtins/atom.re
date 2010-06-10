@@ -6,12 +6,12 @@
 #
 
 class Atom
-  def to_s
+  def to_string
     erl.atom_to_list(self).to_string()
   end
   
-  def to_string
-    to_s()
+  def to_s
+    to_string()
   end
   
   def inspect
