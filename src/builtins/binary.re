@@ -5,21 +5,21 @@
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-module Binary
-  def call(fake_self, :to_string, args, block)
+class Binary
+  def to_string
     # Define a new string via the internal representation
-    (:reia_string, fake_self)
+    (:reia_string, self)
   end
   
-  def call(fake_self, :to_s, args, block)
-    fake_self.to_string()
+  def to_s
+    to_string()
   end
   
-  def call(fake_self, :inspect, args, block)
-    "<[#{erl.binary_to_list(fake_self).join(',')}]>"
+  def inspect
+    "<[#{erl.binary_to_list(self).join(',')}]>"
   end
   
-  def call(fake_self, :size, args, block)
-    erl.byte_size(fake_self)
+  def size
+    erl.byte_size(self)
   end
 end
