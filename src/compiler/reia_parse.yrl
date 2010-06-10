@@ -361,7 +361,8 @@ functions -> function eol functions : ['$1'|'$3'].
 %% Function identifiers
 function_identifier -> identifier : '$1'.
 function_identifier -> punctuated_identifier : '$1'.
-function_identifier -> class : {identifier, ?line('$1'), 'class'}.
+function_identifier -> class : {identifier, ?line('$1'), class}.
+function_identifier -> self  : {identifier, ?line('$1'), self}.
 
 %% Function definitions
 function -> def function_identifier eol body 'end' : 
@@ -487,26 +488,26 @@ block_args -> max_expr : ['$1'].
 block_args -> max_expr ',' block_args : ['$1'|'$3'].
 
 %% Native Erlang function calls
-call -> erl '.' identifier '(' ')' :
+call -> erl '.' function_identifier '(' ')' :
   #native_call{
     line      = ?line('$2'),
     module    = erlang,
     function  = ?identifier_name('$3')
   }.
-call -> erl '.' identifier '(' exprs ')' :
+call -> erl '.' function_identifier '(' exprs ')' :
   #native_call{
     line      = ?line('$2'),
     module    = 'erlang',
     function  = ?identifier_name('$3'),
     args      = '$5'
   }.
-call -> erl '.' identifier '.' identifier '(' ')' :
+call -> erl '.' function_identifier '.' function_identifier '(' ')' :
   #native_call{
     line      = ?line('$2'),
     module    = ?identifier_name('$3'),
     function  = ?identifier_name('$5')
   }.
-call -> erl '.' identifier '.' identifier '(' exprs ')' :
+call -> erl '.' function_identifier '.' function_identifier '(' exprs ')' :
   #native_call{
     line      = ?line('$2'),
     module    = ?identifier_name('$3'),
