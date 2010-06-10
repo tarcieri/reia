@@ -38,16 +38,21 @@ mutable_method_ivars(Expr) ->
 immutable_method(Method) ->
 	Line = Method#function.line,
 	
-	Ivars = #native_call{
-		line     = Line,
-		module   = erlang,
-		function = element,
-		args     = [#integer{line=Line, value=3}, ?self(Line)]
-	},
+	IvarPattern = #tuple{line=Line, elements=[
+		#atom{line=Line, name=reia_object},
+		#var{line=Line, name='_'},
+		?ivars(Line)
+	]},
 	
-	BindIvars = #match{line=Line, left=?ivars(Line), right=Ivars},
+	Ivars = #'case'{line=Line, expr=?self(Line), clauses=[
+		#clause{line=Line, patterns=[IvarPattern], exprs=[#nil{}]},
+		#clause{line=Line, patterns=[#var{line=Line, name='_'}], exprs=[
+		  #match{line=Line, left=?ivars(Line), right=#nil{}}
+		]}
+	]},
+	
 	Body = reia_syntax:map_subtrees(fun immutable_method_ivars/1, Method#function.body),
-	Method#function{body=[BindIvars|Body]}.
+	Method#function{body=[Ivars|Body]}.
 	
 immutable_method_ivars(#match{} = Expr) ->
 	[Left]  = reia_syntax:map_subtrees(fun immutable_match_context/1, [Expr#match.left]),
