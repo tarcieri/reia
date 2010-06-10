@@ -37,7 +37,7 @@ call(false, Method, Arguments, Block) ->
 call(nil, Method, Arguments, Block) ->
   'Boolean':call({nil, Method, Arguments, Block}, nil);
 call(Receiver, Method, Arguments, Block) when is_atom(Receiver) ->
-  'Atom':call({Receiver, Method, Arguments, Block}, nil);
+  'Atom':call({Receiver, Method, Arguments}, Block);
 call(Receiver, Method, Arguments, Block) when is_function(Receiver) ->
   'Fun':call({Receiver, Method, Arguments}, Block);
 call(Receiver, Method, Arguments, Block) when is_pid(Receiver) ->
