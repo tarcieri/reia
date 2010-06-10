@@ -5,12 +5,12 @@
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-module Pid
-  def call(fake_self, :to_s, args, block)
-    "#<Pid:#{erl.pid_to_list(fake_self).to_string().sub('<', '')}"
+class Pid
+  def to_s
+    "#<Pid:#{erl.pid_to_list(self).to_string().sub('<', '')}"
   end
   
-  def call(fake_self, :inspect, args, block)
-    fake_self.to_s()
+  def inspect
+    to_s()
   end
 end
