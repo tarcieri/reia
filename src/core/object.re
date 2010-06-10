@@ -10,7 +10,7 @@ class Object
   end
     
   def class
-    Object
+    (:reia_module, erl.element(2, self))
   end
     
   def to_s
@@ -18,7 +18,14 @@ class Object
   end
     
   def inspect
-    "#<#{class()} #{erl.element(3, self)}>"
+    # Super secret ninja extract ivars from self
+    ivars = erl.element(3, self)
+    
+    ivar_str = ivars.to_list().map do |(var, val)| 
+      "@#{var}=#{val.inspect()}"
+    end.join(" ")
+    
+    "#<#{class()} #{ivar_str}>"
   end
     
   def method_missing(method, args)
