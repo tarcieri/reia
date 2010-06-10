@@ -21,7 +21,7 @@ call({dict,_,_,_,_,_,_,_,_} = Receiver, Method, Arguments, Block) ->
 call(#reia_string{} = Receiver, Method, Arguments, Block) ->
   'String':call({Receiver, Method, Arguments, Block}, nil);
 call(#reia_regexp{} = Receiver, Method, Arguments, Block) ->
-  'Regexp':call({Receiver, Method, Arguments, Block}, nil);
+  'Regexp':call({Receiver, Method, Arguments}, Block);
 call(#reia_range{} = Receiver, Method, Arguments, Block) ->
   'Range':call({Receiver, Method, Arguments}, Block);
 call(#reia_module{} = Receiver, Method, Arguments, Block) ->
