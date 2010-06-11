@@ -5,36 +5,36 @@
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-module Dict
-  def call(fake_self, :'[]', (key,), block)
-    case erl.dict.find(key, fake_self)
+class Dict
+  def [](key)
+    case erl.dict.find(key, self)
     when (:ok, value)
       value
     end
   end
   
-  def call(fake_self, :'[]=', (key, value), block)
-    erl.dict.store(key, value, fake_self)
+  def []=(key, value)
+    erl.dict.store(key, value, self)
   end
   
-  def call(fake_self, :to_list, args, block)
-    erl.dict.to_list(fake_self)
+  def to_list
+    erl.dict.to_list(self)
   end
   
-  def call(fake_self, :to_s, args, block)
-    call(fake_self, :inspect, args, block)
-  end
-  
-  def call(fake_self, :inspect, args, block)
-    members = ["#{k.inspect()}=>#{v.inspect()}" for (k, v) in call(fake_self, :to_list, nil, nil)]
+  def to_s
+    members = ["#{k.inspect()}=>#{v.inspect()}" for (k, v) in to_list()]
     "{#{members.join(',')}}"
   end
   
-  def call(fake_self, :size, args, block)
-    erl.dict.size(fake_self)
+  def inspect
+    to_s()
   end
   
-  def call(fake_self, :keys, args, block)
-    erl.dict.fetch_keys(fake_self)
+  def size
+    erl.dict.size(self)
+  end
+  
+  def keys
+    erl.dict.fetch_keys(self)
   end
 end
