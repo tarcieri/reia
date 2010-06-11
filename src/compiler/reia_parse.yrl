@@ -37,6 +37,7 @@ Nonterminals
   catch_clauses
   catch_clause
   function_identifier
+  function_definition
   ivar
   bound_var
   rebind_op
@@ -364,20 +365,25 @@ function_identifier -> punctuated_identifier : '$1'.
 function_identifier -> class : {identifier, ?line('$1'), class}.
 function_identifier -> self  : {identifier, ?line('$1'), self}.
 
-%% Function definitions
-function -> def function_identifier eol body 'end' : 
+%% Function definition
+function_definition -> def function_identifier : ?identifier_name('$2').
+function_definition -> def '[' ']' : '[]'.
+function_definition -> def '[' ']' '=' : '[]='.
+
+%% Function declarations
+function -> function_definition eol body 'end' : 
   #function{
-    line = ?line('$1'), 
-    name = element(3, '$2'), 
-    body = '$4'
+    line = ?line('$2'), 
+    name = '$1', 
+    body = '$3'
   }.
-function -> def function_identifier pargs eol body 'end' :
+function -> function_definition pargs eol body 'end' :
   #function{
-    line  = ?line('$1'), 
-    name  = element(3, '$2'), 
-    args  = '$3'#pargs.args,
-    block = '$3'#pargs.block,
-    body  = '$5'
+    line  = ?line('$3'), 
+    name  = '$1', 
+    args  = '$2'#pargs.args,
+    block = '$2'#pargs.block,
+    body  = '$4'
   }.
 
 body -> '$empty'  : [#nil{}].
