@@ -36,6 +36,9 @@ class TCPSocket
     end
   end
   
+  # Shortcut for read(0)
+  def read(); read(0); end
+  
   # Write the given data to the socket
   def write(data)
     case erl.gen_tcp.send(@socket, data)
