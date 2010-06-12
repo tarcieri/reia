@@ -19,68 +19,60 @@ module OperatorTest
     ]
   end
 
-  # implements +
   def plus_test
-    TestHelper.expect("Operator", "+ is implemented") do
+    TestHelper.expect("Operator", "+ adds") do
       n = 41
       (42, n + 1)
     end
   end
   
-  # implements -
   def minus_test
-    TestHelper.expect("Operator", "- is implemented") do
+    TestHelper.expect("Operator", "- subtracts") do
       n = 43
       (42, n - 1)
     end
   end
   
-  # implements *
   def times_test
-    TestHelper.expect("Operator", "* is implemented") do
+    TestHelper.expect("Operator", "* multiplies") do
       n = 21
       (42, n * 2)
     end
   end
   
-  # implements /
   def div_test
-    TestHelper.expect("Operator", "/ is implemented") do
+    TestHelper.expect("Operator", "/ divides") do
       n = 84
       (42, n / 2)
     end
   end
   
-  # implements +=
   def plusequals_test
-    TestHelper.expect("Operator", "+= is implemented") do
+    TestHelper.expect("Operator", "+= adds in place") do
       n = 41
       n += 1
       (42, n)
     end
   end
   
-  # implements -=
   def minusequals_test
-    TestHelper.expect("Operator", "-= is implemented") do
+    TestHelper.expect("Operator", "-= subtracts in place") do
       n = 43
       n -= 1
       (42, n)
     end
   end
   
-  # implements *=
   def timesequals_test
-    TestHelper.expect("Operator", "*= is implemented") do
+    TestHelper.expect("Operator", "*= multiplies in place") do
       n = 21
       n *= 2
       (42, n)
     end
   end
   
-  # implements /=
   def divequals_test
-    TestHelper.expect("Operator", ".= is implemented") do
+    TestHelper.expect("Operator", "/= divides in place") do
       n = 84
       n /= 2
       (42, n)
