@@ -12,6 +12,7 @@ module OperatorTest
       minus_test(),
       times_test(),
       div_test(),
+      exponent_test(),
       plusequals_test(),
       minusequals_test(),
       timesequals_test(),
@@ -44,6 +45,13 @@ module OperatorTest
     TestHelper.expect("Operator", "/ divides") do
       n = 84
       (42, n / 2)
+    end
+  end
+  
+  def exponent_test
+    TestHelper.expect("Operator", "** exponentizes") do
+      n = 8
+      (64, n ** 2)
     end
   end
   
