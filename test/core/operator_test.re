@@ -13,6 +13,7 @@ module OperatorTest
       times_test(),
       div_test(),
       exponent_test(),
+      bitwiseand_test(),
       plusequals_test(),
       minusequals_test(),
       timesequals_test(),
@@ -55,6 +56,13 @@ module OperatorTest
       (64, n ** 2)
     end
   end
+  
+  def bitwiseand_test
+    TestHelper.expect("Operator", "& bitwise ands") do
+      n = 42
+      (8, n & 13)
+    end
+  end  
   
   def plusequals_test
     TestHelper.expect("Operator", "+= adds in place") do
