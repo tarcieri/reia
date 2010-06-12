@@ -6,6 +6,8 @@
 #
 
 class List
+  def class; List; end
+  
   def [](index)
     length = erl.length(self)
     

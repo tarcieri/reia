@@ -6,6 +6,8 @@
 #
 
 class Pid
+  def class; Pid; end
+  
   def to_s
     "#<Pid:#{erl.pid_to_list(self).to_string().sub('<', '')}"
   end

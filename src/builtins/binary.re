@@ -6,6 +6,8 @@
 #
 
 class Binary
+  def class; Binary; end
+  
   def to_string
     # Define a new string via the internal representation
     (:reia_string, self)

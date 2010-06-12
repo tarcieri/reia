@@ -6,6 +6,8 @@
 #
 
 class Exception
+  def class; Exception; end
+  
   def initialize(message)
     @message = message
   end

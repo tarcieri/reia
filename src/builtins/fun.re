@@ -6,6 +6,8 @@
 #
 
 class Fun
+  def class; Fun; end
+  
   def to_s
     (:name,   name) = erl.fun_info(self, :name)
     (:module, mod)  = erl.fun_info(self, :module)

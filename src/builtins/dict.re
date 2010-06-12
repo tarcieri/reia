@@ -6,6 +6,8 @@
 #
 
 class Dict
+  def class; Dict; end
+  
   def [](key)
     case erl.dict.find(key, self)
     when (:ok, value)

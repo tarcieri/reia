@@ -6,6 +6,8 @@
 #
 
 class Atom
+  def class; Atom; end
+  
   def to_string
     erl.atom_to_list(self).to_string()
   end

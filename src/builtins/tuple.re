@@ -6,6 +6,8 @@
 #
 
 class Tuple
+  def class; Tuple; end
+  
   def [](index)
     length = erl.tuple_size(self)
     

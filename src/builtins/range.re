@@ -6,6 +6,8 @@
 #
 
 class Range
+  def class; Range; end
+  
   def to_list
     (:reia_range, from, to) = self
     erl.lists.seq(from, to)

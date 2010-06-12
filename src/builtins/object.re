@@ -6,6 +6,8 @@
 #
 
 class Object
+  def class; Object; end
+  
   def initialize
   end
     

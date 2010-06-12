@@ -6,6 +6,8 @@
 #
 
 module Module
+  def class; Module; end
+  
   def call(fake_self, :to_s, args, block)
     (:reia_module, name) = fake_self
     case erl.code.ensure_loaded(name)

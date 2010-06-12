@@ -6,6 +6,8 @@
 #
 
 class String
+  def class; String; end
+  
   def to_string
     self
   end

@@ -6,6 +6,8 @@
 #
 
 class Numeric
+  def class; Numeric; end
+  
   def to_s
     list = if erl.is_integer(self)
       erl.integer_to_list(self)

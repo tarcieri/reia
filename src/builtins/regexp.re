@@ -6,6 +6,8 @@
 #
 
 class Regexp
+  def class; Regexp; end
+  
   def to_s
     (:reia_regexp, pattern) = self
     "%r/#{pattern}/"

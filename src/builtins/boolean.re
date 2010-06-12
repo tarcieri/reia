@@ -6,6 +6,8 @@
 #
   
 class Boolean
+  def class; Boolean; end
+  
   def to_s
     erl.atom_to_list(self).to_string()
   end
