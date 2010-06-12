@@ -12,6 +12,10 @@ class Atom
     erl.atom_to_list(self).to_string()
   end
   
+  def to_module
+    (:reia_module, self)
+  end
+  
   def to_s
     to_string()
   end

@@ -31,7 +31,7 @@ class String
   end
   
   def to_module
-    (:reia_module, to_atom())
+    to_atom().to_module()
   end
     
   def inspect
@@ -81,6 +81,11 @@ class String
   def parse_reia
     erl.reia.parse(self.to_list())
   end
+  
+  def parse(format)
+    "#{format.to_s().capitalize()}Parser".to_module().parse(self)
+  end
+  
   def parse
     parse_reia()
   end
