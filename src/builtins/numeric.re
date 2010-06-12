@@ -26,4 +26,23 @@ class Numeric
     erl.lists.foreach(block, erl.lists.seq(0, self - 1))
     self
   end
+  
+  def to_integer
+    if erl.is_float(self)
+      erl.round(self)
+    else
+      self
+    end
+  end
+  
+  def to_float
+    if erl.is_integer(self)
+      self * 1.0
+    else
+      self
+    end
+  end
+  
+  def to_i; to_integer(); end
+  def to_f; to_float(); end
 end
