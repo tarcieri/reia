@@ -79,7 +79,7 @@ class String
   end
   
   def parse_reia
-    erl.reia.parse(self.to_list())
+    ReiaParser.parse(self)
   end
   
   def parse(format)
