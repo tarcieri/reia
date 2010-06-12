@@ -8,11 +8,10 @@
 class Pid
   def class; Pid; end
   
-  def to_s
+  def to_string
     "#<Pid:#{erl.pid_to_list(self).to_string().sub('<', '')}"
   end
   
-  def inspect
-    to_s()
-  end
+  def to_s; to_string(); end
+  def inspect; to_s(); end
 end
