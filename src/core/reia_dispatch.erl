@@ -42,5 +42,7 @@ call(Receiver, Method, Arguments, Block) when is_function(Receiver) ->
   'Fun':call({Receiver, Method, Arguments}, Block);
 call(Receiver, Method, Arguments, Block) when is_pid(Receiver) ->
   'Pid':call({Receiver, Method, Arguments}, Block);
+call(Receiver, Method, Arguments, Block) when is_port(Receiver) ->
+  'Port':call({Receiver, Method, Arguments}, Block);
 call(Receiver, _, _, _) ->
   throw({error, unknown_receiver, Receiver}).
