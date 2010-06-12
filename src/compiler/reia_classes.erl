@@ -20,66 +20,71 @@ transform(Expr) ->
   reia_syntax:map_subtrees(fun transform/1, Expr).
     
 transform_class(#class{line=Line, name=Name, superclass=Ancestor, methods=Methods}) ->
-	Superclass = case Name of
-		'Object' -> undefined;
-		_        -> Ancestor
-	end,
+	MethodTable = build_method_table(Methods),
 	
-	MethodTable = build_method_table(Methods, Superclass),
+	Initializers = transform_initialize_methods(Name, MethodTable),
+	CallifiedInitializers = [callify_method(Initialize) || Initialize <- Initializers],
+	MethodMissings = transform_method_missings(Ancestor, MethodTable),
 	
-	Initialize = transform_initialize_method(Name, MethodTable),
-	MethodMissing = transform_method_missing(Ancestor, MethodTable),
+	MethodTable2 = orddict:erase(initialize, MethodTable),
+	MethodTable3 = orddict:store(method_missing, MethodMissings, MethodTable2),
 	
-	MethodTable2 = dict:erase(initialize, MethodTable),
-	MethodTable3 = dict:store(method_missing, MethodMissing, MethodTable2),
+	Methods2 = [Meths || {_, Meths} <- orddict:to_list(MethodTable3)],
+	Methods3 = [prepare_method(Method) || Method <- lists:flatten(Methods2)],
+	Methods4 = CallifiedInitializers ++ Methods3 ++ [method_missing_thunk()],
 	
-	Methods2 = [prepare_method(Method) || {_, Method} <- dict:to_list(MethodTable3)],
-	Methods3 = [callify_method(Initialize)|Methods2] ++ [method_missing_thunk()],
-	
-  #class{line=Line, name=Name, methods=Methods3}.
+  #class{line=Line, name=Name, methods=Methods4}.
 
-% Create a dict of methods by name
-build_method_table(Methods, Superclass) ->
-	build_method_table(dict:new(), Methods, Superclass).
+% Create a orddict of methods by name
+build_method_table(Methods) ->
+	build_method_table(orddict:new(), Methods).
 	
-build_method_table(Dict, [], _Superclass) ->
+build_method_table(Dict, []) ->
 	Dict;
-build_method_table(Dict, [Method|Rest], Superclass) ->
-	Dict2 = dict:store(Method#function.name, Method, Dict),
-	build_method_table(Dict2, Rest, Superclass).
-	
+build_method_table(Dict, [Method|Rest]) ->
+	Name = Method#function.name,
+	Dict2 = case orddict:find(Name, Dict) of
+		{ok, List} ->
+			orddict:store(Name, lists:reverse([Method|List]), Dict);
+		error ->
+			orddict:store(Name, [Method], Dict)
+	end,
+	build_method_table(Dict2, Rest).
+		
 % Transform the initialize method to return a new object instance
-transform_initialize_method(Name, MethodTable) ->
-	Method = case dict:find(initialize, MethodTable) of
-		{ok, Function} -> Function;
+transform_initialize_methods(Name, MethodTable) ->
+	Methods = case orddict:find(initialize, MethodTable) of
+		{ok, Res} -> Res;
 		error -> % Use default initialize method if one isn't defined
-			#function{
+			[#function{
 				line=1, 
 				name=initialize,
 				body=[]
-			}
+			}]
 	end,
 
-	{Initialize, Ivars} = reia_ivars:mutable_method(Method),
+  lists:map(fun(Method) ->
+		{Initialize, Ivars} = reia_ivars:mutable_method(Method),
 
-	Line = Initialize#function.line,	
-	Result = #tuple{
-		line     = Line, 
-		elements = [
-		  #atom{line=Line, name=reia_object},
-			#atom{line=Line, name=Name},
-			Ivars
-		]
-	},
+		Line = Initialize#function.line,	
+		Result = #tuple{
+			line     = Line, 
+			elements = [
+			  #atom{line=Line, name=reia_object},
+				#atom{line=Line, name=Name},
+				Ivars
+			]
+		},
 	
-	Initialize#function{body = Initialize#function.body ++ [Result]}.
+		Initialize#function{body = Initialize#function.body ++ [Result]}
+	end, Methods).
 	
 % Transform the method_missing method or create it if it wasn't defined
-transform_method_missing(Ancestor, MethodTable) ->
-	case dict:find(method_missing, MethodTable) of
-		{ok, Function} -> Function;
+transform_method_missings(Ancestor, MethodTable) ->
+	case orddict:find(method_missing, MethodTable) of
+		{ok, Methods} -> Methods;
 		error -> % Use default (call super) if the method doesn't exist
-			#function{
+			[#function{
 				line  = 1, 
 				name  = method_missing,
 				args  = [#var{line=1, name=method}, #var{line=1, name=args}],
@@ -102,7 +107,7 @@ transform_method_missing(Ancestor, MethodTable) ->
 						]
 					}
 				]
-			}
+			}]
 	end.
 	
 % Create a catchall thunk which calls method_missing
