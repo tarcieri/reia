@@ -15,6 +15,7 @@ module OperatorTest
       exponent_test(),
       bitwise_and_test(),
       bitwise_or_test(),
+      bitwise_xor_test(),
       plus_equals_test(),
       minus_equals_test(),
       times_equals_test(),
@@ -62,6 +63,12 @@ module OperatorTest
   def bitwise_or_test
     TestHelper.expect("Operator", "| bitwise ors") do
       (42, 40 | 2)
+    end
+  end
+  
+  def bitwise_xor_test
+    TestHelper.expect("Operator", "| bitwise ors") do
+      (42, 2 ^ 40)
     end
   end
   
