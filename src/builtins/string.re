@@ -77,4 +77,11 @@ class String
       self
     end
   end
+  
+  def parse(:reia)
+    erl.reia.parse(self.to_list())
+  end
+  def parse
+    parse(:reia)
+  end
 end

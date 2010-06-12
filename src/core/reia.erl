@@ -6,7 +6,14 @@
 %
 
 -module(reia).
--export([init/0, load/1, compile/1, compile/2, execute_file/1, load_submodule/2]).
+-export([
+	init/0, 
+	load/1,
+	parse/1,
+	compile/1, compile/2, 
+	execute_file/1, 
+	load_submodule/2
+]).
 -include("reia_types.hrl").
 
 %
@@ -43,7 +50,11 @@ load(Filename) ->
       reia_bytecode:load_file(BinPath);
     {error, _} = Error ->
       Error
-  end.  
+  end.
+
+% Parse the given string of Reia source code
+parse(String) ->
+	reia_compiler:parse(String).  
 
 %
 % Internal functions
