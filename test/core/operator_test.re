@@ -13,58 +13,59 @@ module OperatorTest
       times_test(),
       div_test(),
       exponent_test(),
-      bitwiseand_test(),
-      plusequals_test(),
-      minusequals_test(),
-      timesequals_test(),
-      divequals_test(),
-      exponentequals_test()
+      bitwise_and_test(),
+      bitwise_or_test(),
+      plus_equals_test(),
+      minus_equals_test(),
+      times_equals_test(),
+      div_equals_test(),
+      exponent_equals_test()
     ]
   end
 
   def plus_test
     TestHelper.expect("Operator", "+ adds") do
-      n = 41
-      (42, n + 1)
+      (42, 41 + 1)
     end
   end
   
   def minus_test
     TestHelper.expect("Operator", "- subtracts") do
-      n = 43
-      (42, n - 1)
+      (42, 43 - 1)
     end
   end
   
   def times_test
     TestHelper.expect("Operator", "* multiplies") do
-      n = 21
-      (42, n * 2)
+      (42, 21 * 2)
     end
   end
   
   def div_test
     TestHelper.expect("Operator", "/ divides") do
-      n = 84
-      (42, n / 2)
+      (42, 84 / 2)
     end
   end
   
   def exponent_test
     TestHelper.expect("Operator", "** exponentizes") do
-      n = 8
-      (64, n ** 2)
+      (42, (2 ** 5.39231749).to_i())
     end
   end
   
-  def bitwiseand_test
+  def bitwise_and_test
     TestHelper.expect("Operator", "& bitwise ands") do
-      n = 42
-      (8, n & 13)
+      (42, 43 & 46)
     end
   end  
   
-  def plusequals_test
+  def bitwise_or_test
+    TestHelper.expect("Operator", "| bitwise ors") do
+      (42, 40 | 2)
+    end
+  end
+  
+  def plus_equals_test
     TestHelper.expect("Operator", "+= adds in place") do
       n = 41
       n += 1
@@ -72,7 +73,7 @@ module OperatorTest
     end
   end
   
-  def minusequals_test
+  def minus_equals_test
     TestHelper.expect("Operator", "-= subtracts in place") do
       n = 43
       n -= 1
@@ -80,7 +81,7 @@ module OperatorTest
     end
   end
   
-  def timesequals_test
+  def times_equals_test
     TestHelper.expect("Operator", "*= multiplies in place") do
       n = 21
       n *= 2
@@ -88,7 +89,7 @@ module OperatorTest
     end
   end
   
-  def divequals_test
+  def div_equals_test
     TestHelper.expect("Operator", "/= divides in place") do
       n = 84
       n /= 2
@@ -96,11 +97,11 @@ module OperatorTest
     end
   end
   
-  def exponentequals_test
+  def exponent_equals_test
     TestHelper.expect("Operator", "**= exponentizes in place") do
-      n = 8
-      n **= 2
-      (64, n)
+      n = 2
+      n **= 5.39231749
+      (42, n.to_i())
     end
   end
 end
