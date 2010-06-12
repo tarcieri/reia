@@ -1,14 +1,16 @@
-h1. Reia
+Reia
+====
 
 Welcome to Reia (pronounced RAY-uh), a Ruby-like scripting language for the 
 Erlang virtual machine (BEAM).
 
-h2. Compiling Reia
+Compiling Reia
+--------------
 
 Reia requires Erlang version R12B-3 (5.6.3) or later. The latest version of 
 Erlang is available here:
 
-"http://www.erlang.org/download.html":http://www.erlang.org/download.html
+[http://www.erlang.org/download.html](http://www.erlang.org/download.html)
 
 You'll also need Ruby and Rake installed.  To compile Reia, type:
 
@@ -17,7 +19,8 @@ You'll also need Ruby and Rake installed.  To compile Reia, type:
 After compilation is complete, you'll see the test suite run and if everything
 went well it should hopefully pass.
 
-h2. Implementation
+Implementation
+--------------
 
 Here's some thoroughly interesting implementation trivia about Reia:
 
@@ -28,11 +31,11 @@ Here's some thoroughly interesting implementation trivia about Reia:
 
 h2. Links
 
-* Home Page: "http://reia-lang.org":http://reia-lang.org
-* Reia Wiki: "http://wiki.reia-lang.org/":http://wiki.reia-lang.org/
-* Mailing List: "http://groups.google.com/group/reia":http://groups.google.com/group/reia
-* Author's Blog: "http://unlimitednovelty.com/":http://unlimitednovelty.com/
-* Author's Twitter: "http://twitter.com/bascule":http://twitter.com/bascule
+* Home Page: [http://reia-lang.org](http://reia-lang.org)
+* Reia Wiki: [http://wiki.reia-lang.org/]:(http://wiki.reia-lang.org/)
+* Mailing List: [http://groups.google.com/group/reia]:(http://groups.google.com/group/reia)
+* Author's Blog: [http://unlimitednovelty.com/]:(http://unlimitednovelty.com/)
+* Author's Twitter: [http://twitter.com/bascule]:(http://twitter.com/bascule)
 * IRC: irc.freenode.net #reia
 
 h2. About the Author
