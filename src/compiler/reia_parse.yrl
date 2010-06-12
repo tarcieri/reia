@@ -465,6 +465,20 @@ call -> call_expr '.' function_identifier '(' exprs ')' block :
     args     = '$5', 
     block    = '$7'
   }.
+
+%% Remote function calls with indexes
+call -> call_expr '.' function_identifier '[' expr ']' :
+	#binary_op{
+    line = ?line('$1'),
+    type = '[]',
+    left = #remote_call{
+		    line     = ?line('$2'),
+		    receiver = '$1',
+		    name     = ?identifier_name('$3'),
+		    args     = []
+		  },
+    right = '$5'
+  }.
   
 %% Blocks
 block -> '{' expr_list '}' : 
