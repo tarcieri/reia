@@ -5,30 +5,30 @@
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-module List
-  def call(fake_self, :'[]', (index,), block)
-    length = erl.length(fake_self)
+class List
+  def [](index)
+    length = erl.length(self)
     
     index += length if index < 0
     index += 1
     
-    erl.lists.nth(index, fake_self) if index >= 1 and index <= length
+    erl.lists.nth(index, self) if index >= 1 and index <= length
   end
   
-  def call(fake_self, :'[]=', (index, value), block)
+  def []=(index, value)
     if index < 0
-      replace(fake_self, erl.length(fake_self) + index, value)
+      replace(erl.length(self) + index, value)
     else
-      replace(fake_self, index, value)
+      replace(index, value)
     end
   end
   
-  def call(fake_self, :size, args, block)
-    erl.length(fake_self)
+  def size
+    erl.length(self)
   end
 
-  def call(fake_self, :to_string, args, block)
-    elements = fake_self.flatten().map do |element|
+  def to_string
+    elements = flatten().map do |element|
       case element
       when (:reia_string, parts)
         parts
@@ -40,59 +40,59 @@ module List
     (:reia_string, elements)
   end
   
-  def call(fake_self, :to_s, args, block)
-    "[#{fake_self.map { |e| e.inspect() }.join(',')}]"
+  def to_s
+    "[#{map { |e| e.inspect() }.join(',')}]"
   end
 
-  def call(fake_self, :inspect, args, block)
-    call(fake_self, :to_s, args, block)
+  def inspect
+    to_s()
   end
   
-  def call(fake_self, :reverse, args, block)
-    erl.lists.reverse(fake_self)
+  def reverse
+    erl.lists.reverse(self)
   end
   
-  def call(fake_self, :join, (separator,), block)
-    elements = case fake_self
+  def join(separator)
+    elements = case self
     when []
       []
     when _
-      join_list([], fake_self, separator.to_list())
+      join_list([], self, separator.to_list())
     end
         
     elements.to_string()
   end
-  def call(fake_self, :join, (), block)
-    call(fake_self, :join, ("",), block)
+  def join
+    join("")
   end
   
-  def call(fake_self, :each, args, block)
-    erl.lists.foreach(block, fake_self)
-    fake_self
+  def each(&block)
+    erl.lists.foreach(block, self)
+    self
   end
 
-  def call(fake_self, :map, args, block)
-    erl.lists.map(block, fake_self)
+  def map(&block)
+    erl.lists.map(block, self)
   end
   
-  def call(fake_self, :flatten, args, block)
-    erl.lists.flatten(fake_self)
+  def flatten
+    erl.lists.flatten(self)
   end
 
-  def call(fake_self, :to_tuple, args, block)
-    erl.list_to_tuple(fake_self)
+  def to_tuple
+    erl.list_to_tuple(self)
   end
 
-  def call(fake_self, :to_dict, args, block)
-    erl.dict.from_list(fake_self)
+  def to_dict
+    erl.dict.from_list(self)
   end
       
-  def call(fake_self, :to_list, args, block)
-    fake_self
+  def to_list
+    self
   end
 
-  def replace(fake_self, index, value)
-    replace(fake_self, 0, index, value)
+  def replace(index, value)
+    replace(self, 0, index, value)
   end
   
   # FIXME: throw syntax not implemented
