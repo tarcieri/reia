@@ -29,7 +29,8 @@ Here's some thoroughly interesting implementation trivia about Reia:
 * Successive parse transforms convert Reia parse trees into the Erlang abstract
   format, then into BEAM/HiPE bytecode
 
-h2. Links
+Links
+-----
 
 * Home Page: [http://reia-lang.org](http://reia-lang.org)
 * Reia Wiki: [http://wiki.reia-lang.org/](http://wiki.reia-lang.org/)
@@ -38,8 +39,9 @@ h2. Links
 * Author's Twitter: [http://twitter.com/bascule](http://twitter.com/bascule)
 * IRC: irc.freenode.net #reia
 
-h2. About the Author
+About the Author
+----------------
 
 Reia was created by Tony Arcieri, a programmer from Denver, Colorado, USA.
-Tony has a background in network services and distributed peer-to-peer systems.  
-His favorite programming languages are Ruby and Erlang.
+Tony has a background in network services and distributed peer-to-peer 
+systems. His favorite programming languages are Ruby and Erlang.
