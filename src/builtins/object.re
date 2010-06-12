@@ -23,11 +23,15 @@ class Object
     # Super secret ninja extract ivars from self
     ivars = erl.element(3, self)
     
-    ivar_str = ivars.to_list().map do |(var, val)| 
-      "@#{var}=#{val.inspect()}"
-    end.join(" ")
+    if ivars.empty?()
+      "#<#{class()}>"
+    else    
+      ivar_str = ivars.to_list().map do |(var, val)| 
+        "@#{var}=#{val.inspect()}"
+      end.join(" ")
     
-    "#<#{class()} #{ivar_str}>"
+      "#<#{class()} #{ivar_str}>"
+    end
   end
     
   def method_missing(method, args)
