@@ -16,7 +16,8 @@ module OperatorTest
       plusequals_test(),
       minusequals_test(),
       timesequals_test(),
-      divequals_test()
+      divequals_test(),
+      exponentequals_test()
     ]
   end
 
@@ -84,6 +85,14 @@ module OperatorTest
       n = 84
       n /= 2
       (42, n)
+    end
+  end
+  
+  def exponentequals_test
+    TestHelper.expect("Operator", "**= exponentizes in place") do
+      n = 8
+      n **= 2
+      (64, n)
     end
   end
 end
