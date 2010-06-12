@@ -12,9 +12,9 @@ class Exception
     (@file, @line, @message) = (file, line, message)
   end
     
-  def message
-    @message
-  end
+  def file; @file; end
+  def line; @line; end
+  def message; @message; end
 end
 
 class StandardError < Exception; end
