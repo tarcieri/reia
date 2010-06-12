@@ -35,6 +35,6 @@ class Object
   def method_missing(method, args)
     # FIXME: throw unimplemented :(
     #throw (:error, (method, "undefined"))
-    (:undefined_method, method, args)
+    (:error, class(), :undefined_method, method, args)
   end
 end
