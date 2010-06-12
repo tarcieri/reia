@@ -5,9 +5,7 @@
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-class Object
-  def class; Object; end
-  
+class Object  
   def initialize
   end
     
