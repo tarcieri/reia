@@ -16,15 +16,17 @@ class Object
   def to_s
     inspect()
   end
-    
-  def inspect
+  
+  def instance_variables
     # Super secret ninja extract ivars from self
-    ivars = erl.element(3, self)
+    erl.element(3, self)
+  end
     
-    if ivars.empty?()
+  def inspect    
+    if instance_variables().empty?()
       "#<#{class()}>"
     else    
-      ivar_str = ivars.to_list().map do |(var, val)| 
+      ivar_str = instance_variables().to_list().map do |(var, val)|
         "@#{var}=#{val.inspect()}"
       end.join(" ")
     
