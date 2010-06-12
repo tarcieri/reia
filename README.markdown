@@ -32,10 +32,10 @@ Here's some thoroughly interesting implementation trivia about Reia:
 h2. Links
 
 * Home Page: [http://reia-lang.org](http://reia-lang.org)
-* Reia Wiki: [http://wiki.reia-lang.org/]:(http://wiki.reia-lang.org/)
-* Mailing List: [http://groups.google.com/group/reia]:(http://groups.google.com/group/reia)
-* Author's Blog: [http://unlimitednovelty.com/]:(http://unlimitednovelty.com/)
-* Author's Twitter: [http://twitter.com/bascule]:(http://twitter.com/bascule)
+* Reia Wiki: [http://wiki.reia-lang.org/](http://wiki.reia-lang.org/)
+* Mailing List: [http://groups.google.com/group/reia](http://groups.google.com/group/reia)
+* Author's Blog: [http://unlimitednovelty.com/](http://unlimitednovelty.com/)
+* Author's Twitter: [http://twitter.com/bascule](http://twitter.com/bascule)
 * IRC: irc.freenode.net #reia
 
 h2. About the Author
