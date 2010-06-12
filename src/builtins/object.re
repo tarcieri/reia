@@ -5,7 +5,7 @@
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-class Object  
+class Object
   def initialize
   end
     
@@ -35,6 +35,6 @@ class Object
   def method_missing(method, args)
     # FIXME: throw unimplemented :(
     #throw (:error, (method, "undefined"))
-    :undefined_method
+    (:undefined_method, method, args)
   end
 end
