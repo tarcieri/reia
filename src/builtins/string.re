@@ -78,10 +78,10 @@ class String
     end
   end
   
-  def parse(:reia)
+  def parse_reia
     erl.reia.parse(self.to_list())
   end
   def parse
-    parse(:reia)
+    parse_reia()
   end
 end
