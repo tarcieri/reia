@@ -110,6 +110,16 @@ class List
   def to_s
     "[#{map { |e| e.inspect() }.join(',')}]"
   end
+  
+  # Is the list empty?
+  def empty?
+    case self
+    when []
+      true
+    when _
+      false
+    end
+  end
 
   # FIXME: implement private
   #########

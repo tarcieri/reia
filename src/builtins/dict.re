@@ -39,4 +39,8 @@ class Dict
   def keys
     erl.dict.fetch_keys(self)
   end
+  
+  def empty?
+    to_list().empty?()
+  end
 end
