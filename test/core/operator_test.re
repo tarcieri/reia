@@ -11,7 +11,7 @@ module OperatorTest
       plus_test(),
       minus_test(),
       times_test(),
-      #div_test(),
+      div_test(),
       plusequals_test(),
       minusequals_test(),
       timesequals_test(),
