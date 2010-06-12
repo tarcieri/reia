@@ -29,6 +29,7 @@ class TCPSocket
     case erl.gen_tcp.recv(@socket, length)
     when (:ok, packet)
       packet
+    when (:error, :closed)
     when (:error, reason)
       # FIXME: throw unimplemented :(
       #throw reason
@@ -41,7 +42,7 @@ class TCPSocket
   
   # Write the given data to the socket
   def write(data)
-    case erl.gen_tcp.send(@socket, data)
+    case erl.gen_tcp.send(@socket, data.to_binary())
     when :ok
       true
     when (:error, reason)
