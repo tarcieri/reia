@@ -10,11 +10,12 @@ Erlang is available here:
 
 "http://www.erlang.org/download.html":http://www.erlang.org/download.html
 
-To compile Reia, type:
+You'll also need Ruby and Rake installed.  To compile Reia, type:
 
  rake
 
-under the Reia source tree to build Reia.
+After compilation is complete, you'll see the test suite run and if everything
+went well it should hopefully pass.
 
 h2. Implementation
 
@@ -36,6 +37,6 @@ h2. Links
 
 h2. About the Author
 
-Reia was created by Tony Arcieri, a programmer from Boulder, Colorado, USA.
+Reia was created by Tony Arcieri, a programmer from Denver, Colorado, USA.
 Tony has a background in network services and distributed peer-to-peer systems.  
 His favorite programming languages are Ruby and Erlang.
