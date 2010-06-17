@@ -57,7 +57,4 @@ parse(String) ->
 
 % Evaluate the given string of Reia source code
 eval(String, Binding) ->
-	case parse(String) of
-		{ok, Exprs} -> reia_eval:exprs(Exprs, Binding);
-		{error, _} = Err -> throw({error, Err})
-	end.
+	reia_eval:exprs(parse(String), Binding).
