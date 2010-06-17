@@ -9,7 +9,8 @@
 -export([
 	init/0, 
 	load/1,
-	parse/1
+	parse/1,
+	eval/2
 ]).
 -include("reia_types.hrl").
 
@@ -20,6 +21,7 @@
 % Initialize the Reia environment
 init() -> reia_internal:load_core(), reia_internal:load_stdlib().
 
+% Load the given Reia source code file
 load(Filename) ->
   SourcePath = filename:absname(Filename),
   BinPath = filename:rootname(SourcePath) ++ ".reb",
@@ -52,3 +54,10 @@ load(Filename) ->
 % Parse the given string of Reia source code
 parse(String) ->
 	reia_compiler:parse(String).
+
+% Evaluate the given string of Reia source code
+eval(String, Binding) ->
+	case parse(String) of
+		{ok, Exprs} -> reia_eval:exprs(Exprs, Binding);
+		{error, _} = Err -> throw({error, Err})
+	end.
