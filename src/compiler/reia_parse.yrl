@@ -722,8 +722,17 @@ else_clause    -> else expr_list :
   #clause{line=?line('$1'), patterns=[#true{line=?line('$1')}], exprs='$2'}.
   
 %% Throw expressions
-throw_expr -> throw '(' expr ')' : #throw{line=?line('$1'), message='$2'}.
-throw_expr -> throw '(' module_name ',' call_expr ')' : #throw{line=?line('$1'), type='$2', message='$4'}.
+throw_expr -> throw '(' expr ')' : 
+	#throw{
+		line    = ?line('$1'), 
+		message = '$2'
+	}.
+throw_expr -> throw '(' module_name ',' call_expr ')' : 
+	#throw{
+		line    = ?line('$1'),
+		type    = '$2',
+		message = '$4'
+	}.
 
 %% Try expressions
 try_expr -> 'try' expr_list catch_clauses 'end' :
