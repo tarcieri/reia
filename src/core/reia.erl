@@ -19,7 +19,7 @@
 %
 
 % Initialize the Reia environment
-init() -> reia_internal:load_core(), reia_internal:load_stdlib().
+init() -> reia_internal:load_core(), reia_internal:load_stdlib(), ok.
 
 % Load the given Reia source code file
 load(Filename) ->
