@@ -114,6 +114,6 @@ hipe_available() ->
 module_loader(Module) ->
   Name = Module#module.name,
   {call,1,
-    {remote,1,{atom,1,reia},{atom,1,load_submodule}},
+    {remote,1,{atom,1,reia_internal},{atom,1,load_submodule}},
     [{atom,1,Name},{call,1,{atom,1,module_info},[{atom,1,attributes}]}]
   }.
