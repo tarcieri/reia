@@ -33,6 +33,7 @@ Nonterminals
   elseif_clauses
   elseif_clause
   else_clause
+	throw_expr
   try_expr
   catch_clauses
   catch_clause
@@ -82,7 +83,7 @@ Terminals
   '(' ')' '[' ']' '{' '}' '<[' ']>' def eol
   float integer string atom regexp true false nil self
   module class module_name identifier punctuated_identifier erl 
-  'case' 'when' 'end' 'if' 'unless' 'elseif' 'else' fun do
+  'case' 'when' 'end' 'if' 'unless' 'elseif' 'else' fun do throw
   'and' 'or' 'not' 'try' 'catch' for in
   '+' '-' '*' '/' '%' '**' ',' '.' '..' '@'
   '=' '=>' ':' '?' '!' '~' '&' '|' '^' '<<' '>>'
@@ -229,6 +230,7 @@ max_expr -> regexp       : '$1'.
 max_expr -> self         : '$1'.
 max_expr -> case_expr    : '$1'.
 max_expr -> if_expr      : '$1'.
+max_expr -> throw_expr   : '$1'.
 max_expr -> try_expr     : '$1'.
 max_expr -> module_name  : '$1'.
 max_expr -> module_decl  : '$1'.
@@ -719,6 +721,10 @@ elseif_clause  -> elseif expr eol expr_list :
 else_clause    -> else expr_list : 
   #clause{line=?line('$1'), patterns=[#true{line=?line('$1')}], exprs='$2'}.
   
+%% Throw expressions
+throw_expr -> throw '(' expr ')' : #throw{line=?line('$1'), message='$2'}.
+throw_expr -> throw '(' module_name ',' call_expr ')' : #throw{line=?line('$1'), type='$2', message='$4'}.
+
 %% Try expressions
 try_expr -> 'try' expr_list catch_clauses 'end' :
   #'try'{

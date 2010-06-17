@@ -48,5 +48,6 @@
 -record(clause,      {line, patterns, exprs}).
 -record('case',      {line, expr, clauses}).
 -record('if',        {line, clauses}).
+-record(throw,       {line, type='RuntimeError', message}).
 -record('try',       {line, body, clauses}).
 -record('catch',     {line, pattern, body}).
