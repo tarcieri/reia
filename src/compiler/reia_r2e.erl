@@ -27,7 +27,7 @@
 		#atom{line=Line, name=Class},
 		#tuple{line=Line, elements=Args},
 		Block
-	]))rak.
+	])).
 
 % Lists of expressions
 transform(Exprs, _Options) ->
@@ -164,6 +164,15 @@ transform(#'case'{line=Line, expr=Expr, clauses=Clauses}) ->
   Clauses2 = lists:flatten([transform(Clause) || Clause <- Clauses]),
   {'case', Line, transform(Expr), Clauses2};
 
+% Throw expressions
+transform(#throw{line=Line, type=Class, message=Message}) ->
+	Exception = ?inst(Line, Class, [
+		#nil{line=Line},
+		#integer{line=Line, value=Line},
+		Message
+	], #nil{line=Line}),
+	{call, Line, {atom,Line,throw}, [Exception]};
+
 % Try expressions
 transform(#'try'{line=Line, body=Exprs, clauses=Clauses}) ->
   {'try', Line, 
@@ -266,14 +275,7 @@ transform(#class_inst{
 	class = Class, 
 	args  = Args,
 	block = Block
-}) ->
-  {call, Line,
-    {remote, Line, {atom, Line, reia}, {atom, Line, inst}}, [
-			{atom, Line, Class},
-			{tuple, Line, [transform(Arg) || Arg <- Args]},
-			transform(Block)
-		]
-	};
+}) -> ?inst(Line, Class, Args, Block);
 
 % Function calls
 transform(#local_call{
