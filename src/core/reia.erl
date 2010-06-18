@@ -63,6 +63,7 @@ eval(String, Binding) ->
 % Create a new instance of the given class
 inst(Class, Arguments) -> inst(Class, Arguments, nil).
 inst(Class, Arguments, Block) ->
-	% FIXME: this implementation is hax!  Passing nil?  WTF!
-	% This should really call a proper constructor.
-	Class:call({nil, initialize, Arguments}, Block).
+	% FIXME: initial object construction should thunk to the metaclass, not be
+	% spelled out explicitly here.
+	Object = #reia_object{class=Class, ivars=dict:new()},
+	Class:call({Object, initialize, Arguments}, Block).
