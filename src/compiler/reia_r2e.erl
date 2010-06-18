@@ -260,15 +260,12 @@ transform(#class_inst{
 	block = Block
 }) ->
   {call, Line,
-    {remote, Line, {atom, Line, Class}, {atom, Line, call}}, [
-			{tuple, Line, [
-				{atom, Line, nil},
-				{atom, Line, initialize},
-				{tuple, Line, [transform(Arg) || Arg <- Args]}
-			]},
+    {remote, Line, {atom, Line, reia}, {atom, Line, inst}}, [
+			{atom, Line, Class},
+			{tuple, Line, [transform(Arg) || Arg <- Args]},
 			transform(Block)
 		]
-  };
+	};
 
 % Function calls
 transform(#local_call{

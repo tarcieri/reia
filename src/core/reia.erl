@@ -10,7 +10,8 @@
 	init/0, 
 	load/1,
 	parse/1,
-	eval/2
+	eval/2,
+	inst/2, inst/3
 ]).
 -include("reia_types.hrl").
 
@@ -58,3 +59,10 @@ parse(String) ->
 % Evaluate the given string of Reia source code
 eval(String, Binding) ->
 	reia_eval:exprs(parse(String), Binding).
+	
+% Create a new instance of the given class
+inst(Class, Arguments) -> inst(Class, Arguments, nil).
+inst(Class, Arguments, Block) ->
+	% FIXME: this implementation is hax!  Passing nil?  WTF!
+	% This should really call a proper constructor.
+	Class:call({nil, initialize, Arguments}, Block).
