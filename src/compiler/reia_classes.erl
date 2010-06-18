@@ -8,7 +8,7 @@
 -module(reia_classes).
 -export([transform/2]).
 -include("reia_nodes.hrl").
--define(self(Line), (#var{line=Line, name='__reia_self'})).
+-include("reia_mop.hrl").
 
 transform(Exprs, _Options) ->
   reia_syntax:map_subtrees(fun transform/1, Exprs).
@@ -52,7 +52,7 @@ build_method_table(Dict, [Method|Rest]) ->
 	build_method_table(Dict2, Rest).
 		
 % Transform the initialize method to return a new object instance
-transform_initialize_methods(Name, MethodTable) ->
+transform_initialize_methods(_Name, MethodTable) ->
 	Methods = case orddict:find(initialize, MethodTable) of
 		{ok, Res} -> Res;
 		error -> % Use default initialize method if one isn't defined
@@ -64,18 +64,20 @@ transform_initialize_methods(Name, MethodTable) ->
 	end,
 
   lists:map(fun(Method) ->
-		{Initialize, Ivars} = reia_ivars:mutable_method(Method),
+		Initialize = reia_ivars:mutable_method(Method),
 
 		Line = Initialize#function.line,	
-		Result = #tuple{
-			line     = Line, 
-			elements = [
-			  #atom{line=Line, name=reia_object},
-				#atom{line=Line, name=Name},
-				Ivars
-			]
+		Result = #native_call{
+		  line     = Line,
+		  module   = erlang,
+		  function = setelement,
+		  args = [
+				#integer{line=Line, value=3},
+				?self(Line),
+				?ivars(Line)
+			] 
 		},
-	
+			
 		Initialize#function{body = Initialize#function.body ++ [Result]}
 	end, Methods).
 	

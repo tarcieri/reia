@@ -8,26 +8,23 @@
 -module(reia_ivars).
 -export([mutable_method/1, immutable_method/1]).
 -include("reia_nodes.hrl").
--define(self(Line),  (#var{line=Line, name='__reia_self'})).
--define(ivars(Line), (#var{line=Line, name='__reia_ivars'})).
+-include("reia_mop.hrl").
 
 % Transform for methods that are allowed to alter instance variables
 mutable_method(Method) ->
 	Line = Method#function.line,
 	
-	% Generate instance variable dictionary
-	% FIXME: this really shouldn't be in a generic "mutable_method" transform.
-	% This should get factored elsewhere when the object model is actually working.
+	% Extract instance variable dictionary
 	Ivars = #native_call{
 		line     = Line, 
-		module   = dict, 
-		function = new
+		module   = erlang, 
+		function = element,
+		args     = [#integer{line=Line, value=3}, ?self(Line)]
 	},
 	
 	BindIvars = #match{line=Line, left=?ivars(Line), right=Ivars},
 	Body = reia_syntax:map_subtrees(fun mutable_method_ivars/1, Method#function.body),
-	Method2 = Method#function{body = [BindIvars|Body]},
-	{Method2, ?ivars(Line)}.
+	Method#function{body = [BindIvars|Body]}.
 
 mutable_method_ivars(#ivar{} = Ivar) -> remap_ivar(Ivar);
 		
