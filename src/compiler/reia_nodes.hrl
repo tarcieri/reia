@@ -1,3 +1,10 @@
+%
+% reia_nodes: Nodes of the Reia parse tree
+% Copyright (C)2009-10 Tony Arcieri
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
+
 % Terminals
 -record(integer,     {line, value}).
 -record(float,       {line, value}).
