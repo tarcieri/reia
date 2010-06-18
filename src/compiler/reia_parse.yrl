@@ -725,13 +725,13 @@ else_clause    -> else expr_list :
 throw_expr -> throw '(' expr ')' : 
 	#throw{
 		line    = ?line('$1'), 
-		message = '$2'
+		message = '$3'
 	}.
 throw_expr -> throw '(' module_name ',' call_expr ')' : 
 	#throw{
 		line    = ?line('$1'),
-		type    = '$2',
-		message = '$4'
+		type    = '$3',
+		message = '$5'
 	}.
 
 %% Try expressions
