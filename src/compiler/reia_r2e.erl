@@ -15,7 +15,7 @@
 		{remote, Line, {atom, Line, Module}, {atom, Line, Function}},
 		[transform(Arg) || Arg <- Args]
 	}.
--define(reia_dispatch(Receiver, Line, Method, Args, Block),
+-define(dispatch(Receiver, Line, Method, Args, Block),
   ?call(Line, reia_dispatch, call, [
 		Receiver,
 		#atom{line=Line, name=Method},
@@ -151,7 +151,7 @@ transform(#lc{line=Line, expr=Expr, generators=Generators}) ->
 
 %% List comprehension generators
 transform(#generate{line=Line, pattern=Pattern, source=Source}) ->
-  List = ?reia_dispatch(Source, Line, to_list, [], transform(#nil{line=Line})),
+  List = ?dispatch(Source, Line, to_list, [], transform(#nil{line=Line})),
   {generate, Line, transform(Pattern), List};
 
 % Clauses
@@ -255,7 +255,7 @@ transform(#binary_op{line=Line, type='<=', left=Left, right=Right}) ->
   {op, Line, '=<', transform(Left), transform(Right)};
   
 transform(#binary_op{line=Line, type='[]', left=Left, right=Right}) ->
-  ?reia_dispatch(Left, Line, '[]', [Right], transform(#nil{line=Line}));
+  ?dispatch(Left, Line, '[]', [Right], transform(#nil{line=Line}));
   
 transform(#binary_op{line=Line, type=Type, left=Left, right=Right}) ->
   {op, Line, Type, transform(Left), transform(Right)};
@@ -293,7 +293,7 @@ transform(#remote_call{
   name      = Name,
   args      = Args,
   block     = Block
-}) -> ?reia_dispatch(Receiver, Line, Name, Args, Block);
+}) -> ?dispatch(Receiver, Line, Name, Args, Block);
 
 transform(#native_call{
   line      = Line,
