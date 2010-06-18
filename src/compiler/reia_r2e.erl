@@ -9,17 +9,25 @@
 -export([transform/2]).
 -include("reia_nodes.hrl").
 -include("../core/reia_types.hrl").
--define(reia_dispatch(Receiver, Line, Method, Args, Block),
+
+-define(call(Line, Module, Function, Args),
   {call, Line,
-    {remote, Line, {atom, Line, reia_dispatch}, {atom, Line, call}},
-    [
-      transform(Receiver),
-      {atom, Line, Method},
-      {tuple, Line, [transform(Arg) || Arg <- Args]},
-      transform(Block)
-    ]
-  }
-).
+		{remote, Line, {atom, Line, Module}, {atom, Line, Function}},
+		[transform(Arg) || Arg <- Args]
+	}.
+-define(reia_dispatch(Receiver, Line, Method, Args, Block),
+  ?call(Line, reia_dispatch, call, [
+		Receiver,
+		#atom{line=Line, name=Method},
+		#tuple{line=Line, elements=Args},
+		Block
+	])).
+-define(inst(Line, Class, Args, Block),
+	?call(Line, reia, inst, [
+		#atom{line=Line, name=Class},
+		#tuple{line=Line, elements=Args},
+		Block
+	]))rak.
 
 % Lists of expressions
 transform(Exprs, _Options) ->
