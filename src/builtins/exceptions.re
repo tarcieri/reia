@@ -5,9 +5,7 @@
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-class Exception
-  def class; Exception; end
-  
+class Exception  
   def initialize(file, line, message)
     (@file, @line, @message) = (file, line, message)
   end
@@ -20,6 +18,7 @@ end
 class StandardError < Exception; end
 class NativeError   < Excpetion; end
 
+class NameError     < StandardError; end
 class NoMethodError < StandardError; end
 class ArgumentError < StandardError; end
 class RuntimeError  < StandardError; end

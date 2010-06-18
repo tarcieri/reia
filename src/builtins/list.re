@@ -130,10 +130,9 @@ class List
     replace(self, 0, index, value)
   end
   
-  # FIXME: throw syntax not implemented
-  #def replace([], _, _, _)
-  #  throw 'bad argument'
-  #end
+  def replace([], _, _, _)
+    throw(ArgumentError, "no such element to replace")
+  end
   def replace([head, *tail], n, index, value)
     if n == index
       [value, *tail]

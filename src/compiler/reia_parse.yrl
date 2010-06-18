@@ -730,7 +730,7 @@ throw_expr -> throw '(' expr ')' :
 throw_expr -> throw '(' module_name ',' call_expr ')' : 
 	#throw{
 		line    = ?line('$1'),
-		type    = '$3',
+		type    = '$3'#module_name.name,
 		message = '$5'
 	}.
 

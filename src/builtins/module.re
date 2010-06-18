@@ -14,8 +14,7 @@ module Module
     when (:module, name)
       name.to_string()
     when _
-      # FIXME: no throw keyword :(
-      #throw (:error, (name, "not loaded"))
+      throw(NameError, "undefined module #{name}")
       :error
     end
   end

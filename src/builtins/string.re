@@ -62,9 +62,8 @@ class String
     when (:reia_string, _)
       # FIXME: this shouldn't use a regex, but I'm lazy
       regex = pattern.to_binary()
-    #when _ # FIXME: this should really be else clause :/
-      # FIXME: throw grammar not implemented :(
-      #throw "invalid type for pattern"
+    when _ # FIXME: this should really be else clause :/
+      throw(ArgumentError, "invalid pattern: #{pattern}")
     end
     
     list = to_list()
