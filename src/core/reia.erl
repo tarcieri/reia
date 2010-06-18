@@ -15,10 +15,6 @@
 ]).
 -include("reia_types.hrl").
 
-%
-% Public functions
-%
-
 % Initialize the Reia environment
 init() -> reia_internal:load_core(), reia_internal:load_stdlib(), ok.
 
