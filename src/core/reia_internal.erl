@@ -7,12 +7,12 @@
 
 -module(reia_internal).
 -export([
-	compile/1, compile/2, 
-	execute_file/1, 
-	load_submodule/2,
-	load_core/0,
-	load_stdlib/0,
-	print_error/2
+  compile/1, compile/2, 
+  execute_file/1, 
+  load_submodule/2,
+  load_core/0,
+  load_stdlib/0,
+  print_error/2
 ]).
 -include("reia_types.hrl").
 
@@ -34,6 +34,9 @@ execute_file(Filename) ->
     reia:load(Filename)
   catch Class:Error ->
     case Error of
+      #reia_object{} ->
+        #reia_string{elements=Elements} = reia:invoke(Error, to_s, {}),
+        io:format("~s~n", [iolist_to_binary(Elements)]);
       _ when is_list(Error) -> 
         io:format("~s~n", [Error]);
       {error, {Line, Message}} ->
@@ -81,8 +84,8 @@ load_core_reb() ->
   [reia_bytecode:load_file(File) || File <- Files].
 
 load_stdlib() ->
-	Files = filelib:wildcard(base_directory() ++ "/lib/*.re"),
-	[reia:load(File) || File <- Files].
+  Files = filelib:wildcard(base_directory() ++ "/lib/*.re"),
+  [reia:load(File) || File <- Files].
     
 % Base directory of the Reia distribution
 base_directory() ->
