@@ -11,7 +11,8 @@
 	load/1,
 	parse/1,
 	eval/2,
-	inst/2, inst/3
+	inst/2, inst/3,
+	invoke/3, invoke/4
 ]).
 -include("reia_types.hrl").
 
@@ -63,3 +64,9 @@ inst(Class, Arguments, Block) ->
 	% spelled out explicitly here.
 	Object = #reia_object{class=Class, ivars=dict:new()},
 	Class:call({Object, initialize, Arguments}, Block).
+	
+% Invoke the given method on the given object
+invoke(Receiver, Method, Arguments) -> invoke(Receiver, Method, Arguments, nil).
+invoke(Receiver, Method, Arguments, Block) ->
+	Class = Receiver#reia_object.class,
+	Class:call({Receiver, Method, Arguments}, Block).
