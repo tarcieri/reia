@@ -42,7 +42,7 @@ errors = [error for error = (:error, _, _) in results]
 errors.each do |(:error, test, ex)|
   case ex
   when (:exception,(:throw, msg))
-    Main.puts("#{test} ERROR: #{msg.to_string()}")
+    Main.puts("#{test} ERROR: #{msg.to_s()}")
   when _
     Main.puts("#{test} ERROR: #{ex}\n")
   end
@@ -56,4 +56,4 @@ finished_seconds = (finished_at[0] * 1000000 + finished_at[1] + finished_at[2] *
 duration = finished_seconds - started_seconds
 Main.puts("Finished in #{duration} seconds\n")
 Main.puts("#{results.size()} assertions, #{failures.size()} failures, #{errors.size()} errors")
-#System.halt(1) if failures.size() > 0 or errors.size() > 0
+System.halt(1) if failures.size() > 0 or errors.size() > 0
