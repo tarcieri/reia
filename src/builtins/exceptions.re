@@ -6,11 +6,10 @@
 #
 
 class Exception  
-  def initialize(file, line, message)
-    (@file, @line, @message) = (file, line, message)
+  def initialize(line, message)
+    (@line, @message) = (line, message)
   end
-    
-  def file; @file; end
+  
   def line; @line; end
   def message; @message; end
   
@@ -27,7 +26,8 @@ class Exception
   
   def backtrace
     # FIXME: this uses a process-local side effect
-    # Would probably be best (albeit slow) to capture this AOT
+    # Would probably be better (albeit slower) to capture this AOT, lest
+    # another exception gets thrown in the meantime and we lose the backtrace
     erl.get_stacktrace()
   end
 end

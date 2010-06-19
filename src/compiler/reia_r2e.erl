@@ -167,11 +167,10 @@ transform(#'case'{line=Line, expr=Expr, clauses=Clauses}) ->
 % Throw expressions
 transform(#throw{line=Line, type=Class, message=Message}) ->
 	Exception = ?inst(Line, Class, [
-		#nil{line=Line},
 		#integer{line=Line, value=Line},
 		Message
 	], #nil{line=Line}),
-	{call, Line, {atom,Line,throw}, [Exception]};
+	{call, Line, {atom, Line, throw}, [Exception]};
 
 % Try expressions
 transform(#'try'{line=Line, body=Exprs, clauses=Clauses}) ->
