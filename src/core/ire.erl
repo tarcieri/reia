@@ -61,11 +61,13 @@ print(Value) ->
 parse_error({Line, Error}) ->
   io:format("Error: Line ~w: ~s~n", [Line, Error]).
 
+print_error(_Class, #reia_object{} = Object) ->
+	print(Object);
 print_error(Class, Reason) ->
   PF = fun(Term, I) ->
     io_lib:format("~." ++ integer_to_list(I) ++ "P", [Term, 50])
   end,
   StackTrace = erlang:get_stacktrace(),
-  StackFun = fun(M, _F, _A) -> (M =:= erl_eval) or (M =:= ?MODULE) end,
+  StackFun = fun(M, _F, _A) -> (M == erl_eval) or (M == ?MODULE) end,
   Error = lib:format_exception(1, Class, Reason, StackTrace, StackFun, PF),
   io:format("~s~n", [Error]).
