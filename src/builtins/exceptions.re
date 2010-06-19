@@ -13,6 +13,10 @@ class Exception
   def file; @file; end
   def line; @line; end
   def message; @message; end
+  
+  def to_s
+    "#{class()}: #{message()}"
+  end
 end
 
 class StandardError < Exception; end
