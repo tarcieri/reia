@@ -68,5 +68,11 @@ inst(Class, Arguments, Block) ->
 % Invoke the given method on the given object
 invoke(Receiver, Method, Arguments) -> invoke(Receiver, Method, Arguments, nil).
 invoke(Receiver, Method, Arguments, Block) ->
+	Arguments2 = if
+		is_tuple(Arguments) -> Arguments;
+		is_list(Arguments)  -> list_to_tuple(Arguments);
+		true -> throw({error, "invalid type for arguments"})
+	end,
+			
 	Class = Receiver#reia_object.class,
-	Class:call({Receiver, Method, Arguments}, Block).
+	Class:call({Receiver, Method, Arguments2}, Block).
