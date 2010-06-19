@@ -76,16 +76,12 @@ class String
       self
     end
   end
-  
-  def parse_reia
-    ReiaParser.parse(self)
-  end
-  
+    
   def parse(format)
     "#{format.to_s().capitalize()}Parser".to_module().parse(self)
   end
   
   def parse
-    parse_reia()
+    parse(:reia)
   end
 end

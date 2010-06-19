@@ -18,6 +18,7 @@ end
 class StandardError < Exception; end
 class NativeError   < Excpetion; end
 
+class SyntaxError   < StandardError; end
 class NameError     < StandardError; end
 class NoMethodError < StandardError; end
 class ArgumentError < StandardError; end
