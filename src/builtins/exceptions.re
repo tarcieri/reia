@@ -15,7 +15,20 @@ class Exception
   def message; @message; end
   
   def to_s
-    "#{class()}: #{message()}"
+    trace = backtrace().map do |(mod, func, _)|
+      "\tfrom #{mod}: in '#{func}'"
+    end
+    
+    trace[0] = "#{trace[0]} (line #{@line})" if @line
+    trace.join!("\n")
+    
+    "#{class()}: #{message()}\n#{trace}"
+  end
+  
+  def backtrace
+    # FIXME: this uses a process-local side effect
+    # Would probably be best (albeit slow) to capture this AOT
+    erl.get_stacktrace()
   end
 end
 
