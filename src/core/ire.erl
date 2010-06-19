@@ -65,10 +65,4 @@ print_error(_Class, #reia_object{} = Object) ->
 	#reia_string{elements=Elements} = reia:invoke(Object, to_s, {}),
 	io:format("~s~n", [iolist_to_binary(Elements)]);
 print_error(Class, Reason) ->
-  PF = fun(Term, I) ->
-    io_lib:format("~." ++ integer_to_list(I) ++ "P", [Term, 50])
-  end,
-  StackTrace = erlang:get_stacktrace(),
-  StackFun = fun(M, _F, _A) -> (M == erl_eval) or (M == ?MODULE) end,
-  Error = lib:format_exception(1, Class, Reason, StackTrace, StackFun, PF),
-  io:format("~s~n", [Error]).
+	reia_internal:print_error(Class, Reason).

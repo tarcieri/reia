@@ -11,7 +11,8 @@
 	execute_file/1, 
 	load_submodule/2,
 	load_core/0,
-	load_stdlib/0
+	load_stdlib/0,
+	print_error/2
 ]).
 -include("reia_types.hrl").
 
@@ -97,6 +98,6 @@ print_error(Class, Reason) ->
     io_lib:format("~." ++ integer_to_list(I) ++ "P", [Term, 50])
   end,
   StackTrace = erlang:get_stacktrace(),
-  StackFun = fun(M, _F, _A) -> (M =:= erl_eval) or (M =:= ?MODULE) end,
+  StackFun = fun(M, _F, _A) -> (M == erl_eval) or (M == ?MODULE) end,
   Error = lib:format_exception(1, Class, Reason, StackTrace, StackFun, PF),
   io:format("~s~n", [Error]).
