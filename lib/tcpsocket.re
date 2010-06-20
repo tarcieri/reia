@@ -18,8 +18,7 @@ class TCPSocket
     when (:ok, socket)
       @socket = socket
     when error
-      # FIXME: throw unimplemented :(
-      #throw error
+      throw(error.inspect())
     end
   end
   
@@ -31,9 +30,7 @@ class TCPSocket
       packet
     when (:error, :closed)
     when (:error, reason)
-      # FIXME: throw unimplemented :(
-      #throw reason
-      reason
+      throw(reason.inspect())
     end
   end
   
@@ -46,9 +43,7 @@ class TCPSocket
     when :ok
       true
     when (:error, reason)
-      # FIXME: throw unimplemented :(
-      #throw reason
-      reason
+      throw(reason.inspect())
     end
   end
   
@@ -58,9 +53,7 @@ class TCPSocket
     when :ok
       true
     when (:error, reason)
-      # FIXME: throw unimplemented :(
-      #throw reason
-      reason
+      throw(reason.inspect())
     end
   end
 end
