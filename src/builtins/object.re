@@ -21,6 +21,12 @@ class Object
     # Super secret ninja extract ivars from self
     erl.element(3, self)
   end
+  
+  def set_instance_variable(name, value)
+    ivars = instance_variables()
+    ivars[name.to_atom()] = value
+    erl.setelement(3, self, ivars)
+  end
     
   def inspect    
     if instance_variables().empty?()
