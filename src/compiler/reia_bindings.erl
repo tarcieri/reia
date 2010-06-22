@@ -121,7 +121,7 @@ transform_node(#lambda{line=Line, args=Args, body=Body}, State) ->
   
   output(#lambda{line=Line, args=Args2, body=Body2}, State);
 
-% Case statements bind variables in clauses
+% Case expressions bind variables in clauses
 transform_node(#'case'{line=Line, expr=Expr, clauses=Clauses}, State) ->
   {[Expr2], State2} = reia_syntax:mapfold_subtrees(
     fun transform_node/2,
@@ -149,7 +149,17 @@ transform_node(#clause{line=Line, patterns=Patterns, exprs=Body}, #state{scope=S
   ),
 
   output(#clause{line=Line, patterns=Patterns2, exprs=Body2}, State3#state{scope=Scope});
-      
+
+% Try expressions bind variables in clauses
+transform_node(#'try'{line=Line, body=Body, clauses=Clauses}, State) ->
+  {Body2, State2} = reia_syntax:mapfold_subtrees(
+    fun transform_node/2,
+    State,
+    Body
+  ),
+  {Clauses2, State3} = process_clauses(Clauses, State2),
+  output(#'try'{line=Line, body=Body2, clauses=Clauses2}, State3);
+            
 % Catch clauses match against patterns
 transform_node(#'catch'{line=Line, pattern=Pattern, body=Body}, #state{scope=Scope} = State) ->
   {[Pattern2], State2} = reia_syntax:mapfold_subtrees(
