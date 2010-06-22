@@ -43,4 +43,12 @@ class Dict
   def empty?
     to_list().empty?()
   end
+  
+  def merge(dict, &block)
+    if block
+      erl.dict.merge(block, self, dict)
+    else
+      erl.dict.merge(fun(_, _, value) { value }, self, dict)
+    end
+  end
 end
