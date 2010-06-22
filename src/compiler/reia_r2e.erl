@@ -182,22 +182,12 @@ transform(#'try'{line=Line, body=Exprs, clauses=Clauses}) ->
   };
 
 % Catch clauses
-% FIXME: Carried over from the old implementation, and I'm WTFing
-% Not really sure of the rationale of defining them like this
-% Oh well, rest assured exception handling will change greatly
 transform(#'catch'{line=Line, pattern=Pattern, body=Exprs}) ->
+  Underscore = {var, Line, '_'},
   {clause, Line, 
-    [{tuple, Line, [{var, Line, '__type'}, {var, Line, '__reason'}, {var, Line, '__lint'}]}], 
+    [{tuple, Line, [Underscore, Pattern, Underscore]}], 
     [],
-    [
-      {match, Line, transform(Pattern), {tuple, Line, [
-        {atom, Line, exception},
-        {tuple, Line, [
-          {var, Line, '__type'},
-          {var, Line, '__reason'}
-        ]}
-      ]}}|[transform(Expr) || Expr <- Exprs]
-    ]
+    [transform(Expr) || Expr <- Exprs]
   };
 
 % Matches
