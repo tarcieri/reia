@@ -19,8 +19,18 @@ class TCPSocket
   # Example:
   #  sock = TCPSocket("www.google.com", 80)
   #
-  def initialize(host, port)
-    case erl.gen_tcp.connect(host.to_list(), port, [:binary, (:active, false)])
+  def initialize(host, port, options)
+    # FIXME: Needs better dict literal grammar! And keyword args ;(
+    opts = {:mode=>:binary, :active=>:false, :packet=>:raw}
+    opts.merge!(options)
+    
+    option_list = [
+      opts[:mode],
+      (:active, opts[:active]),
+      (:packet, opts[:packet])
+    ]
+    
+    case erl.gen_tcp.connect(host.to_list(), port, option_list)
     when (:ok, socket)
       @socket = socket
     when (:error, :nxdomain)
