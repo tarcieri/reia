@@ -42,6 +42,10 @@ class String
     erl.io.format(to_list())
   end
   
+  def puts
+    "#{self}\n".print()
+  end
+  
   def size
     to_binary().size()
   end
