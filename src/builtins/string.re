@@ -50,6 +50,11 @@ class String
     size()
   end
   
+  def chop
+    [last, *rest] = to_list().reverse()
+    rest.reverse().to_string()
+  end
+  
   def capitalize
     [first, *rest] = to_list()
     [erl.string.to_upper([first]), *rest].to_string()
