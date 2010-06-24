@@ -87,6 +87,11 @@ class List
     erl.dict.from_list(self)
   end
   
+  # Cast to a binary
+  def to_binary
+    erl.list_to_binary(self)
+  end
+  
   # Cast to a list, returning the identity
   def to_list
     self
