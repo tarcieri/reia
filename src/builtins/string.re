@@ -39,7 +39,8 @@ class String
   end
   
   def print
-    erl.io.format(to_list())
+    erl.io.put_chars(to_list())
+    self
   end
   
   def puts
