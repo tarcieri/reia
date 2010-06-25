@@ -33,6 +33,8 @@ Nonterminals
   elseif_clauses
   elseif_clause
   else_clause
+  receive_expr
+  after_clause
 	throw_expr
   try_expr
   catch_clauses
@@ -84,7 +86,7 @@ Terminals
   float integer string atom regexp true false nil self
   module class module_name identifier punctuated_identifier erl 
   'case' 'when' 'end' 'if' 'unless' 'elseif' 'else' fun do throw
-  'and' 'or' 'not' 'try' 'catch' for in
+  'and' 'or' 'not' 'try' 'catch' for in 'receive' 'after'
   '+' '-' '*' '/' '%' '**' ',' '.' '..' '@'
   '=' '=>' ':' '?' '!' '~' '&' '|' '^' '<<' '>>'
   '===' '==' '!=' '>' '<' '>=' '<='
@@ -230,6 +232,7 @@ max_expr -> regexp       : '$1'.
 max_expr -> self         : '$1'.
 max_expr -> case_expr    : '$1'.
 max_expr -> if_expr      : '$1'.
+max_expr -> receive_expr : '$1'.
 max_expr -> throw_expr   : '$1'.
 max_expr -> try_expr     : '$1'.
 max_expr -> module_name  : '$1'.
@@ -720,6 +723,17 @@ elseif_clause  -> elseif expr eol expr_list :
 
 else_clause    -> else expr_list : 
   #clause{line=?line('$1'), patterns=[#true{line=?line('$1')}], exprs='$2'}.
+  
+%% Receive expressions
+receive_expr -> 'receive' eol clauses 'end': 
+  #'receive'{line=?line('$1'), clauses='$3'}.
+receive_expr -> 'receive' eol clauses after_clause 'end': 
+  #'receive'{line=?line('$1'), clauses='$3', timeout='$4'}.
+receive_expr -> 'receive' eol after_clause 'end' : 
+  #'receive'{line=?line('$1'), timeout='$3'}.
+
+after_clause -> 'after' expr eol expr_list : 
+  #'after'{line=?line('$1'), length='$2', exprs='$4'}.
   
 %% Throw expressions
 throw_expr -> throw '(' expr ')' : 
