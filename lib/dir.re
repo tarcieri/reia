@@ -23,7 +23,7 @@ module Dir
   def create(dir)
     case erl.file.make_dir(dir.to_list())
     when :ok
-      :ok
+      dir
     when (:error, reason)
       throw(reason)
     end
@@ -32,7 +32,6 @@ module Dir
   def delete(dir)
     case erl.file.del_dir(dir.to_list())
     when :ok
-      :ok
     when (:error, reason)
       throw(reason)
     end
@@ -41,7 +40,7 @@ module Dir
   def cd(dir)
     case erl.file.set_cwd(dir.to_list())
     when :ok
-      :ok
+      getcwd()
     when (:error, reason)
       throw(reason)
     end
