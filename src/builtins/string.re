@@ -66,18 +66,14 @@ class String
   end
   
   def sub(pattern, replacement)
-    case pattern
-    when (:reia_regexp, regex)
-      nil # FIXME: urgh, this shouldn't be necessary
-    when (:reia_string, _)
-      # FIXME: this shouldn't use a regex, but I'm lazy
-      regex = pattern.to_binary()
-    when _ # FIXME: this should really be else clause :/
-      throw(ArgumentError, "invalid pattern: #{pattern}")
+    case pattern.class()
+    when Regexp, String
+      # FIXME strings are just treated as regexes... that's wrong
+    else throw(ArgumentError, "invalid pattern: #{pattern}")
     end
     
     list = to_list()
-    case erl.re.run(self.to_binary(), regex)
+    case erl.re.run(self.to_binary(), pattern.to_binary())
     when (:match, [(start, length)])
       head = erl.lists.sublist(list, 1, start).to_string()
       tail = erl.lists.sublist(list, start + length + 1, erl.length(list)).to_string()
