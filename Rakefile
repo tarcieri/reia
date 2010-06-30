@@ -61,7 +61,7 @@ def output_file(input_file, dir = 'ebin/', ext = '.beam')
 end
 
 GENERATED_SRC = %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
-ERL_SRC = (GENERATED_SRC + FileList.new('src/{compiler,core,builtins}/**/*.erl')).uniq
+ERL_SRC = (GENERATED_SRC + FileList.new('src/{compiler,core,builtins,json}/**/*.erl')).uniq
 ERL_DEST = ERL_SRC.map { |input| output_file(input) }
 
 QUIET_SRC = %w(src/compiler/reia_parse.erl)

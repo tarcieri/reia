@@ -13,7 +13,8 @@ tests = [
     "binary", "boolean", "list", "tuple", "string", 
     "range", "regexp", "numeric", "dict", "atom", "fun"
   ]),
-  ("core", ["blocks", "branching", "funrefs", "object", "operator"])
+  ("core", ["blocks", "branching", "funrefs", "object", "operator"]),
+  ("lib",  ["json"])
 ]
 
 results = tests.map do |(group, modules)|

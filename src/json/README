@@ -1,0 +1,6 @@
+The reia_json module is adapted from the json_eep parser originally written by
+Chris Anderson and available at:
+
+http://github.com/jchris/erlang-json-eep-parser/
+
+Module names have been changed to prevent potential clashes with json_eep.
