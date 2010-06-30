@@ -23,7 +23,7 @@ module JsonTest
   # parses objects
   def object_test
     TestHelper.expect("JSON", "parses objects") do
-      ({'foo' => [1,2,3], 'bar' => [4,5,6]}, "{\"foo\": [1,2,3], \"bar\": [4,5,6]}".parse(:json))
+      ({'foo' => [1,2,3], 'bar' => [4,5,6]}, '{"foo": [1,2,3], "bar": [4,5,6]}'.parse(:json))
     end
   end
 end

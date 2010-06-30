@@ -681,6 +681,7 @@ call -> call_expr '[' expr ']' :
 %% Clauses
 clauses -> clause clauses : ['$1'|'$2'].
 clauses -> clause : ['$1'].
+clauses -> else_clause : ['$1'#clause{patterns=[#var{line = ?line('$1'), name='_'}]}].
 
 clause -> when inline_exprs eol body : 
   #clause{

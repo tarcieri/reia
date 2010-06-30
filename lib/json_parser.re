@@ -18,8 +18,7 @@ module JsonParser
       [(transform(key), transform(value)) for (key, value) in term[0]].to_dict()
     when Binary
       (:reia_string, term)
-    when _
-      term
+    else term
     end
   end
 end
