@@ -32,8 +32,19 @@ class Exception
   end
 end
 
+#
+# Exception types
+#
+
+# Standard Reia exceptions
 class StandardError < Exception; end
+
+# Errors arising from within the Erlang environment
 class NativeError   < Excpetion; end
+
+#
+# Core language errors
+#
 
 class SyntaxError   < StandardError; end
 class NameError     < StandardError; end
@@ -41,3 +52,10 @@ class NoMethodError < StandardError; end
 class ArgumentError < StandardError; end
 class RuntimeError  < StandardError; end
 class NoMatchError  < StandardError; end
+class LoadError     < StandardError; end
+
+#
+# I/O errors
+#
+
+class FileNotFound < StandardError; end
