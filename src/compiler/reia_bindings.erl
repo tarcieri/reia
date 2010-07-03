@@ -132,9 +132,16 @@ transform_node(#'case'{line=Line, expr=Expr, clauses=Clauses}, State) ->
   output(#'case'{line=Line, expr=Expr2, clauses=Clauses2}, State3);
 
 % Receive expressions bind variables in clauses
-transform_node(#'receive'{line=Line, clauses=Clauses, timeout=Timeout}, State) ->
+transform_node(#'receive'{line=Line, clauses=Clauses, after_clause=After}, State) ->
   {Clauses2, State2} = process_clauses(Clauses, State),
-  output(#'receive'{line=Line, clauses=Clauses2, timeout=Timeout}, State2);
+  
+  % FIXME: after should be processed just like any other clause
+  {[After2], State3} = reia_syntax:mapfold_subtrees(
+    fun transform_node/2,
+    State2,
+    [After]
+  ),
+  output(#'receive'{line=Line, clauses=Clauses2, after_clause=After2}, State3);
 
 % Clauses match against patterns
 transform_node(#clause{line=Line, patterns=Patterns, exprs=Body}, #state{scope=Scope} = State) ->
