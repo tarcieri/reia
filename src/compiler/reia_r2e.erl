@@ -257,6 +257,10 @@ transform(#binary_op{line=Line, type='[]', left=Left, right=Right}) ->
   
 transform(#binary_op{line=Line, type=Type, left=Left, right=Right}) ->
   {op, Line, Type, transform(Left), transform(Right)};
+  
+% Send expressions (i.e. async messaging)
+transform(#send{line=Line, receiver=Receiver, message=Message}) ->
+  {op, Line, '!', transform(Receiver), transform(Message)};
 
 % Class instantiations
 transform(#class_inst{
