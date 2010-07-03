@@ -50,6 +50,7 @@
 -record(dict,        {line, elements}).
 -record(lambda,      {line, args=[], body}).
 -record(block,       {line, exprs}).
+-record(send,        {line, receiver, message}).
 -record(lc,          {line, expr, generators}).
 -record(generate,    {line, pattern, source}).
 -record(clause,      {line, patterns, exprs}).
