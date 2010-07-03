@@ -13,7 +13,10 @@ tests = [
     "binary", "boolean", "list", "tuple", "string", 
     "range", "regexp", "numeric", "dict", "atom", "fun"
   ]),
-  ("core", ["blocks", "branching", "funrefs", "object", "operator"]),
+  ("core", [
+    "blocks", "branching", "funrefs", "object", 
+    "operator", "exception"
+  ]),
   ("lib",  ["json"])
 ]
 
