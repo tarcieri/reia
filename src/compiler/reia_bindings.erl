@@ -131,7 +131,12 @@ transform_node(#'case'{line=Line, expr=Expr, clauses=Clauses}, State) ->
   {Clauses2, State3} = process_clauses(Clauses, State2),
   output(#'case'{line=Line, expr=Expr2, clauses=Clauses2}, State3);
 
-% Case clauses match against patterns
+% Receive expressions bind variables in clauses
+transform_node(#'receive'{line=Line, clauses=Clauses, timeout=Timeout}, State) ->
+  {Clauses2, State2} = process_clauses(Clauses, State),
+  output(#'receive'{line=Line, clauses=Clauses2, timeout=Timeout}, State2);
+
+% Clauses match against patterns
 transform_node(#clause{line=Line, patterns=Patterns, exprs=Body}, #state{scope=Scope} = State) ->
   {Patterns2, State2} = lists:mapfoldl(fun(Pattern, St) ->
     {[Pattern2], St2} = reia_syntax:mapfold_subtrees(
