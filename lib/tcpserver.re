@@ -21,7 +21,7 @@ class TCPServer
   def accept
     case erl.gen_tcp.accept(@sock)
     when (:ok, port)
-      port
+      TCPSocket(port)
     when (:error, error)
       throw("TCPServer error: #{error.inspect()}")
     end
