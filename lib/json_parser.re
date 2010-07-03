@@ -10,6 +10,10 @@ module JsonParser
     transform(erl.reia_json.json_to_term(string.to_list()))
   end
   
+  #########
+  #private#
+  #########
+  
   def transform(term)
     case term.class()
     when List
@@ -18,6 +22,9 @@ module JsonParser
       [(transform(key), transform(value)) for (key, value) in term[0]].to_dict()
     when Binary
       (:reia_string, term)
+    when Atom
+      throw("unexpected atom from JSON parser: #{term}") unless term == :null
+      nil
     else term
     end
   end
