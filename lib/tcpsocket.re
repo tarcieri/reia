@@ -1,6 +1,6 @@
 #
 # TCPSocket: Reia interface for TCP sockets
-# Copyright (C)2008 Tony Arcieri
+# Copyright (C)2008-10 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
