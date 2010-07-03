@@ -56,8 +56,8 @@
 -record(clause,      {line, patterns, exprs}).
 -record('case',      {line, expr, clauses}).
 -record('if',        {line, clauses}).
--record('receive',   {line, clauses, timeout=void}).
--record('after',     {line, length, exprs}).
+-record('receive',   {line, clauses, after_clause=void}).
+-record('after',     {line, timeout, exprs}).
 -record(throw,       {line, type='RuntimeError', message}).
 -record('try',       {line, body, clauses}).
 -record('catch',     {line, pattern, body}).

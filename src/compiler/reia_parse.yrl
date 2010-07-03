@@ -734,12 +734,12 @@ else_clause    -> else expr_list :
 receive_expr -> 'receive' eol clauses 'end': 
   #'receive'{line=?line('$1'), clauses='$3'}.
 receive_expr -> 'receive' eol clauses after_clause 'end': 
-  #'receive'{line=?line('$1'), clauses='$3', timeout='$4'}.
+  #'receive'{line=?line('$1'), clauses='$3', after_clause='$4'}.
 receive_expr -> 'receive' eol after_clause 'end' : 
-  #'receive'{line=?line('$1'), timeout='$3'}.
+  #'receive'{line=?line('$1'), after_clause='$3'}.
 
 after_clause -> 'after' expr eol expr_list : 
-  #'after'{line=?line('$1'), length='$2', exprs='$4'}.
+  #'after'{line=?line('$1'), timeout='$2', exprs='$4'}.
   
 %% Throw expressions
 throw_expr -> throw '(' expr ')' : 

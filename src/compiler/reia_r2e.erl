@@ -261,7 +261,20 @@ transform(#binary_op{line=Line, type=Type, left=Left, right=Right}) ->
 % Send expressions (i.e. async messaging)
 transform(#send{line=Line, receiver=Receiver, message=Message}) ->
   {op, Line, '!', transform(Receiver), transform(Message)};
-
+  
+% Receive expressions
+transform(#'receive'{line=Line, clauses=Clauses, after_clause=After}) ->
+  Clauses2 = lists:flatten([transform(Clause) || Clause <- Clauses]),
+  
+  case After of
+    void -> 
+      {'receive', Line, Clauses2};
+    #'after'{} -> 
+      Timeout = transform(After#'after'.timeout),
+      Exprs   = transform(After#'after'.exprs),
+      {'receive', Line, Clauses2, Timeout, Exprs}
+  end;
+  
 % Class instantiations
 transform(#class_inst{
 	line  = Line, 
