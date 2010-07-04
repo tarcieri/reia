@@ -34,6 +34,7 @@
 -record(remote_call, {line, receiver, name,   args=[], block=#nil{}}).
 -record(native_call, {line, module, function, args=[]}).
 -record(var_call,    {line, receiver, args=[], block=#nil{}}).
+-record(funref,      {line, receiver, name}).
 
 % Operators
 -record(unary_op,    {line, type, expr}).

@@ -23,6 +23,7 @@ Nonterminals
   pow_expr
   unary_expr
   call_expr
+  funref_expr
   max_expr
   block
   block_args
@@ -62,6 +63,7 @@ Nonterminals
   boolean
   class_inst
   call
+  funref
   number
   list
   list_tail
@@ -219,7 +221,10 @@ unary_expr -> unary_op unary_expr :
     type = ?op('$1'),
     expr = '$2'
   }.
-unary_expr -> call_expr : '$1'.
+unary_expr -> funref_expr : '$1'.
+
+funref_expr -> funref   : '$1'.
+funref_expr -> call_expr : '$1'.
 
 call_expr -> class_inst : '$1'.
 call_expr -> call       : '$1'.
@@ -488,6 +493,14 @@ call -> call_expr '.' function_identifier '[' expr ']' :
 		    args     = []
 		  },
     right = '$5'
+  }.
+  
+%% Function references
+funref -> call_expr '.' function_identifier :
+  #funref{
+    line     = ?line('$1'),
+    receiver = '$1',
+    name     = '$3'
   }.
   
 %% Blocks
