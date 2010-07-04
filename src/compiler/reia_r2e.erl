@@ -277,12 +277,11 @@ transform(#'receive'{line=Line, clauses=Clauses, after_clause=After}) ->
   
 % Function references
 transform(#funref{line=Line, receiver=Receiver, name=Name}) ->
-  ?inst(
-    Line, 
-    'Funref', 
-    [transform(Receiver), {atom, Line, Name}], 
-    #nil{}
-  );
+  {tuple, Line, [
+    {atom, Line, reia_funref}, 
+    transform(Receiver),
+    {atom, Line, Name}
+  ]};
 
 % Class instantiations
 transform(#class_inst{
