@@ -275,6 +275,15 @@ transform(#'receive'{line=Line, clauses=Clauses, after_clause=After}) ->
       {'receive', Line, Clauses2, Timeout, Exprs}
   end;
   
+% Function references
+transform(#funref{line=Line, receiver=Receiver, name=Name}) ->
+  ?inst(
+    Line, 
+    'Funref', 
+    [transform(Receiver), {atom, Line, Name}], 
+    #nil{}
+  );
+
 % Class instantiations
 transform(#class_inst{
 	line  = Line, 

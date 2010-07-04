@@ -500,7 +500,7 @@ funref -> call_expr '.' function_identifier :
   #funref{
     line     = ?line('$1'),
     receiver = '$1',
-    name     = '$3'
+    name     = ?identifier_name('$3')
   }.
   
 %% Blocks
