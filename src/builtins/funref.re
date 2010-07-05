@@ -10,7 +10,7 @@ class Funref
   
   def inspect
     (:reia_funref, receiver, name) = self
-    "#<Funref #{receiver}:#{name}>"
+    "#<Funref #{receiver}.#{name}>"
   end
   
   def to_s

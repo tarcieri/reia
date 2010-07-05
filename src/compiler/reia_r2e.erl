@@ -323,13 +323,23 @@ transform(#native_call{
   };
   
 transform(#var_call{
-  line = Line,
+  line     = Line,
   receiver = Receiver,
-  args = Args,
-  block = _Block
+  args     = Args,
+  block    = Block
 }) ->
-  % FIXME: this will need more complex dispatch logic for non-lambda cases
-  {call, Line, transform(Receiver), [transform(Arg) || Arg <- Args]};
+  Receiver2 = transform(Receiver),
+  Args2 = [transform(Arg) || Arg <- Args],
+  {'if', Line,
+    [{clause, Line, [],
+      [[{call, Line, {atom, Line, is_function}, [Receiver2]}]],
+      [{call, Line, Receiver2, Args2}]},
+    {clause, Line, [],
+      [[{atom, Line, true}]],
+      [{call, Line, {remote, Line,
+         {atom, Line, reia_internal},
+         {atom, Line, invoke_callable}},
+           [Receiver2, {tuple, Line, Args2}, transform(Block)]}]}]};
 
 % Code blocks (Erlang-style, not to be confused with Ruby-style block args)
 transform(#block{line=Line, exprs=Exprs}) -> 
