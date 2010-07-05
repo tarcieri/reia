@@ -109,11 +109,6 @@ print_error(Class, Reason) ->
 % Handle calls to non-lambda callable types
 invoke_callable(Callable, Args, Block) ->
   case Callable of
-    #reia_funref{receiver=Receiver, name=Function} ->
-      case Receiver of
-        #reia_module{name=Module} -> 
-          Module:Function(Args, Block);
-        #reia_object{class=Class} = Obj ->
-          Class:call({Obj, Function, Args}, Block) 
-      end
+    #reia_funref{receiver=Receiver, name=Method} ->
+      reia_dispatch:call(Receiver, Method, Args, Block)
   end.
