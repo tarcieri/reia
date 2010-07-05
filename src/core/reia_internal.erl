@@ -12,7 +12,8 @@
   load_submodule/2,
   load_core/0,
   load_stdlib/0,
-  print_error/2
+  print_error/2,
+  invoke_callable/3
 ]).
 -include("reia_types.hrl").
 
@@ -104,3 +105,15 @@ print_error(Class, Reason) ->
   StackFun = fun(M, _F, _A) -> (M == erl_eval) or (M == ?MODULE) end,
   Error = lib:format_exception(1, Class, Reason, StackTrace, StackFun, PF),
   io:format("~s~n", [Error]).
+  
+% Handle calls to non-lambda callable types
+invoke_callable(Callable, Args, Block) ->
+  case Callable of
+    #reia_funref{receiver=Receiver, name=Function} ->
+      case Receiver of
+        #reia_module{name=Module} -> 
+          Module:Function(Args, Block);
+        #reia_object{class=Class} = Obj ->
+          Class:call({Obj, Function, Args}, Block) 
+      end
+  end.
