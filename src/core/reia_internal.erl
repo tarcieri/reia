@@ -96,9 +96,9 @@ base_directory() ->
     true  -> Dir;
     false ->
       % If it's not there, look for it relative to cwd
-      {ok, Dir} = file:get_cwd(),
-      case filelib:is_dir(Dir ++ "/ebin") of
-        true  -> Dir;
+      {ok, Dir2} = file:get_cwd(),
+      case filelib:is_dir(Dir2 ++ "/ebin") of
+        true  -> Dir2;
         false -> throw({error, "can't locate the Reia distribution"})
       end
   end.
