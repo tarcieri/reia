@@ -7,7 +7,7 @@ task :default => %w(check_erl_version check_previous_install build test)
 
 # Returns the installed Erlang version
 def erlang_version
-  version = `erl -version 2>&1`.strip.match(/\d\.\d\.\d$/)
+  version = `erl -version 2>&1`.strip.match(/\d\.\d(\.\d)?$/)
   unless version
    STDERR.puts "Error retrieving Erlang version.  Do you have it installed?" 
    exit 1
