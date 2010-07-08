@@ -39,8 +39,11 @@ handle_info(Info, State) ->
   {noreply, State}.
   
 terminate(Reason, State) ->
-  ?DEBUG("*** CodeServer: Terminating: ~p~n", [Reason]),
-  ok.
+  ?DEBUG("*** CodeServer CRASH: ~p~n", [Reason]),
+  ?DEBUG("    State: ~p~n", [State]),
+  
+  % If the Reia code server crashes, we're horked. Fuck the system. 
+  init:stop(1).
   
 code_change(_OldVsn, State, _Extra) ->
   ?DEBUG("*** CodeServer: Code change~n", []),
