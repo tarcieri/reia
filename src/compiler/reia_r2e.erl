@@ -14,7 +14,7 @@
   {call, Line,
 		{remote, Line, {atom, Line, Module}, {atom, Line, Function}},
 		[transform(Arg) || Arg <- Args]
-	}.
+	}).
 -define(dispatch(Receiver, Line, Method, Args, Block),
   ?call(Line, reia_dispatch, call, [
 		Receiver,
