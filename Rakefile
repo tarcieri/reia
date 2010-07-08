@@ -1,5 +1,8 @@
 require 'rake/clean'
 
+# Path on the local filesystem to install reia/ire scripts to
+BIN_INSTALL_DIR = "/usr/local/bin"
+
 task :default => %w(check_erl_version check_previous_install build test)
 
 # Returns the installed Erlang version
@@ -16,18 +19,7 @@ end
 # Evaluate the given Erlang statement
 def erl_eval(cmd, *pa)
   pa_str = pa.empty? ? "" : "-pa #{pa.join(' ')}"
-  sh "erl -noshell #{pa_str} -eval '#{cmd}' -s init stop"
-end
-
-# Retrieve the directory Erlang libraries are stored in
-def erl_lib_dir
-  `erl -noshell -eval "io:format(code:lib_dir())" -s init stop`
-end
-
-
-# Directory to install Reia into
-def reia_install_dir
-  File.join(erl_lib_dir, 'reia', '')
+  sh "erl -noshell #{pa_str} -eval '#{cmd}' -s erlang halt"
 end
 
 # Ensure the version of Erlang installed is recent enough
@@ -50,8 +42,9 @@ end
 task :check_previous_install do
   if File.exists?(reia_install_dir)
     puts "*** WARNING: Previous installation of Reia detected"
-    puts "*** If you experience problems during the build process please try"
-    puts "*** running 'rake uninstall' before proceeding"
+    puts "*** This will clash with the development copy.  Please run"
+    puts "*** 'rake uninstall' before proceeding."
+    exit 1
   end
 end
 
@@ -112,3 +105,59 @@ end
 # Cleaning
 CLEAN.include %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
 CLEAN.include %w(ebin/* **/*.reb)
+
+#
+# Installing
+#
+
+# Retrieve the directory Erlang libraries are stored in
+def erl_lib_dir
+  $erl_lib_dir ||= `erl -noshell -eval "io:format(code:lib_dir())" -s erlang halt`
+end
+
+
+# Directory to install Reia into
+def reia_install_dir
+  File.join(erl_lib_dir, 'reia', '')
+end
+
+# Munge Reia launcher scripts before installing
+def munge_script(src, dest)
+  str = File.read(src)
+  
+  # Remove EXTRA_PATHS declaration
+  str.gsub!(/^EXTRA_PATHS=.*$/, '')
+  
+  # Remove $EXTRA_PATHS variables
+  str.gsub!(/\$EXTRA_PATHS/, '')
+  
+  File.open(dest, "w", 0755) { |file| file << str }
+end
+
+directory BIN_INSTALL_DIR do
+  mkdir_p BIN_INSTALL_DIR
+end
+
+task :install => [:check_erl_version, :build, BIN_INSTALL_DIR] do
+  reia_dir = reia_install_dir
+  STDERR.puts "*** Installing Reia into: #{reia_dir}"
+  
+  rm_r reia_dir if File.exist?(reia_dir)
+  mkdir reia_dir
+  cp_r "ebin", reia_dir
+  
+  %w[ire reia reiac].each do |script|
+    src = File.expand_path("../bin/#{script}", __FILE__)
+    dst = "#{BIN_INSTALL_DIR}/#{script}"
+    
+    STDERR.puts "Creating #{dst}"
+    munge_script src, dst
+  end
+end
+
+task :uninstall do
+  reia_dir = reia_install_dir
+
+  rm_r reia_dir if File.directory?(reia_dir)
+  %w[ire reia reiac].each { |script| rm_f "#{BIN_INSTALL_DIR}/#{script}" }
+end

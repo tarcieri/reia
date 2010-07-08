@@ -90,10 +90,17 @@ load_stdlib() ->
     
 % Base directory of the Reia distribution
 base_directory() ->
-  {ok, Dir} = file:get_cwd(),
-  case filelib:is_dir(Dir ++ "/ebin") of
+  % Look for the Reia distribution under the Erlang lib directory
+  Dir = code:lib_dir() ++ "/reia",
+  case filelib:is_dir(Dir) of
     true  -> Dir;
-    false -> throw({error, "can't locate the Reia distribution"})
+    false ->
+      % If it's not there, look for it relative to cwd
+      {ok, Dir} = file:get_cwd(),
+      case filelib:is_dir(Dir ++ "/ebin") of
+        true  -> Dir;
+        false -> throw({error, "can't locate the Reia distribution"})
+      end
   end.
   
 % Display errors and stack traces for unhandled Erlang exceptions
