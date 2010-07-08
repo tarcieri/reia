@@ -17,7 +17,16 @@
 -include("reia_types.hrl").
 
 % Initialize the Reia environment
-init() -> reia_internal:load_core(), reia_internal:load_stdlib(), ok.
+init() -> 
+  % Launch the Reia CodeServer
+  'CodeServer':start(),
+  
+  % Load Reia builtins and other core modules
+  reia_internal:load_core(),
+  
+  % Load the Reia standard library
+  reia_internal:load_stdlib(), 
+  ok.
 
 % Load the given Reia source code file
 load(Filename) ->
