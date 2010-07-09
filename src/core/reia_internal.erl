@@ -90,8 +90,14 @@ load_stdlib() ->
     
 % Base directory of the Reia distribution
 base_directory() ->
+  Homevar = try
+    [Home || "REIA_HOME=" ++ Home <- os:getenv()]
+  catch error:undef -> % Hacka support for Erjang
+    []
+  end,
+  
   % Look for a REIA_HOME environment variable, which takes precedence
-  case [Home || "REIA_HOME=" ++ Home <- os:getenv()] of
+  case Homevar of
     [Dir] -> Dir;
     _ ->
       % Look for the Reia distribution under the Erlang lib directory
