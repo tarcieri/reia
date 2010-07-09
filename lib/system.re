@@ -1,16 +1,18 @@
 module System
-  # Return a list of arguments passed in from the command line
+  # Argument list as passed in from the command line
   def args
     erl.init.get_plain_arguments().map { |arg| arg.to_string() }
   end
   
-  # Return a list of environment variables
-  # FIXME: I should be a dict
+  # Environment variables, as a dict
   def env
-    erl.os.getenv().map { |str| str.to_string() }           
+    erl.os.getenv().map do |str| 
+      [var, *rest] = str.to_string().split("=")
+      (var, rest.join("="))
+    end.to_dict()
   end
     
-  # Return the number of CPUs in the current system
+  # Number of CPUs in the current system
   def cpus
     erl.system_info(:logical_processors)
   end
