@@ -6,11 +6,21 @@
 #
 
 class TCPServer
-  def initialize(addr, port)
+  def initialize(addr, port, options)
     (@addr, @port) = (addr, port)
-    @options = [:binary, (:packet, 0), (:active, false), (:reuseaddr, true)]
     
-    case erl.gen_tcp.listen(@port, @options)
+    # FIXME: Needs better dict literal grammar! And keyword args ;(
+    opts = {:mode=>:binary, :active=>:false, :packet=>:raw, :reuseaddr=>:true}
+    opts.merge!(options)
+    
+    option_list = [
+      opts[:mode],
+      (:active, opts[:active]),
+      (:packet, opts[:packet]),
+      (:reuseaddr, opts[:reuseaddr])
+    ]
+        
+    case erl.gen_tcp.listen(@port, option_list)
     when (:ok, sock)
       @sock = sock
     when (:error, reason)
@@ -25,5 +35,9 @@ class TCPServer
     when (:error, error)
       throw("TCPServer error: #{error.inspect()}")
     end
+  end
+  
+  def stop
+    erl.gen_tcp.close(@sock)
   end
 end
