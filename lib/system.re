@@ -3,6 +3,12 @@ module System
   def args
     erl.init.get_plain_arguments().map { |arg| arg.to_string() }
   end
+  
+  # Return a list of environment variables
+  # FIXME: I should be a dict
+  def env
+    erl.os.getenv().map { |str| str.to_string() }           
+  end
     
   # Return the number of CPUs in the current system
   def cpus
