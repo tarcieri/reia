@@ -90,4 +90,8 @@ class String
   def parse
     parse(:reia)
   end
+  
+  def split(pattern)
+    erl.re.split(self.to_binary(), pattern.to_binary()).map { |str| str.to_string() }
+  end
 end
