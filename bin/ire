@@ -1,4 +1,5 @@
 #!/bin/sh
 
+export REIA_HOME=.
 EXTRA_PATHS="-pz ebin -pz ../ebin"
 erl $EXTRA_PATHS -noshell -noinput +K true -s ire init -extra $*

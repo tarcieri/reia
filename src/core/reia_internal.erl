@@ -90,16 +90,16 @@ load_stdlib() ->
     
 % Base directory of the Reia distribution
 base_directory() ->
-  % Look for the Reia distribution under the Erlang lib directory
-  Dir = code:lib_dir() ++ "/reia",
-  case filelib:is_dir(Dir) of
-    true  -> Dir;
-    false ->
-      % If it's not there, look for it relative to cwd
-      {ok, Dir2} = file:get_cwd(),
-      case filelib:is_dir(Dir2 ++ "/ebin") of
-        true  -> Dir2;
-        false -> throw({error, "can't locate the Reia distribution"})
+  % Look for a REIA_HOME environment variable, which takes precedence
+  case [Home || "REIA_HOME=" ++ Home <- os:getenv()] of
+    [Dir] -> Dir;
+    _ ->
+      % Look for the Reia distribution under the Erlang lib directory
+      Dir = code:lib_dir() ++ "/reia",
+      case filelib:is_dir(Dir) of
+        true  -> Dir;
+        false ->
+          throw({error, "can't locate the Reia distribution"})
       end
   end.
   

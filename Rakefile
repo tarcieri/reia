@@ -3,7 +3,7 @@ require 'rake/clean'
 # Path on the local filesystem to install reia/ire scripts to
 BIN_INSTALL_DIR = "/usr/local/bin"
 
-task :default => %w(check_erl_version check_previous_install build test)
+task :default => %w(check_erl_version build test)
 
 # Returns the installed Erlang version
 def erlang_version
@@ -34,16 +34,6 @@ task :check_erl_version do
     puts "Sorry, the version of Erlang you have installed is too old to run Reia"
     puts "Reia requires a minimum Erlang version of R12B-3 (5.6.3)"
     puts "Please see http://wiki.reia-lang.org/wiki/Building#Prerequisites"
-    exit 1
-  end
-end
-
-# Ensure Reia was not previously installed
-task :check_previous_install do
-  if File.exists?(reia_install_dir)
-    puts "*** WARNING: Previous installation of Reia detected"
-    puts "*** This will clash with the development copy.  Please run"
-    puts "*** 'rake uninstall' before proceeding."
     exit 1
   end
 end
@@ -125,11 +115,17 @@ end
 def munge_script(src, dest)
   str = File.read(src)
   
+  # Remove REIA_HOME declaration
+  str.gsub!(/^export REIA_HOME=.*$/, '')
+  
   # Remove EXTRA_PATHS declaration
   str.gsub!(/^EXTRA_PATHS=.*$/, '')
   
   # Remove $EXTRA_PATHS variables
   str.gsub!(/\$EXTRA_PATHS/, '')
+  
+  # Strip all the extraneous newlines
+  str.gsub!(/\n\n+/m, "\n\n")
   
   File.open(dest, "w", 0755) { |file| file << str }
 end
