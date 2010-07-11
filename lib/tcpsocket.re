@@ -39,9 +39,7 @@ class TCPSocket
       throw(error.inspect())
     end
   end
-  def initialize(sysport)
-    @sock = sysport
-  end
+  def initialize(@sock); end
   
   # Read the specified amount of data from the socket.  A read of length zero
   # will read all data available.

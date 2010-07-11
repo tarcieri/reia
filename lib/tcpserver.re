@@ -6,9 +6,7 @@
 #
 
 class TCPServer
-  def initialize(addr, port, options)
-    (@addr, @port) = (addr, port)
-    
+  def initialize(@addr, @port, options)    
     # FIXME: Needs better dict literal grammar! And keyword args ;(
     opts = {:mode=>:binary, :active=>:false, :packet=>:raw, :reuseaddr=>:true}
     opts.merge!(options)
