@@ -9,10 +9,19 @@
 -export([mutable_method/1, immutable_method/1]).
 -include("reia_nodes.hrl").
 -include("reia_object.hrl").
+-define(ivar_placeholder(Line, Name), 
+  #var{line=Line, name=list_to_atom("__ivar_placeholder_" ++ atom_to_list(Name))}
+).
 
 % Transform for methods that are allowed to alter instance variables
 mutable_method(Method) ->
 	Line = Method#function.line,
+	
+	% Transform all ivars in function arguments into placeholder variables
+	{Args, ArgIvars} = lists:mapfoldl(fun(Arg, Ivars) ->
+	  {[Arg2], Ivars2} = reia_syntax:mapfold_subtrees(fun mutable_args_ivars/2, Ivars, [Arg]),
+	  {Arg2, Ivars2}
+	end, [], Method#function.args),
 	
 	% Extract instance variable dictionary
 	Ivars = #native_call{
@@ -23,9 +32,28 @@ mutable_method(Method) ->
 	},
 	
 	BindIvars = #match{line=Line, left=?ivars(Line), right=Ivars},
-	Body = reia_syntax:map_subtrees(fun mutable_method_ivars/1, Method#function.body),
-	Method#function{body = [BindIvars|Body]}.
+	
+	Body = case ArgIvars of
+	  [] -> Method#function.body;
+	  _  ->
+	    Placeholders = [?ivar_placeholder(Line, Name) || #ivar{name=Name} <- ArgIvars],
+	    BindArgs = #match{
+	      line  = Line,
+	      left  = #tuple{line=Line, elements=ArgIvars},
+	      right = #tuple{line=Line, elements=Placeholders}
+	    },
+	    [BindArgs|Method#function.body]
+	end,
+	
+	Body2 = reia_syntax:map_subtrees(fun mutable_method_ivars/1, Body),
+	Method#function{args=Args, body = [BindIvars|Body2]}.
 
+mutable_args_ivars(#ivar{line=Line, name=Name} = Ivar, Ivars) ->
+  {?ivar_placeholder(Line, Name), [Ivar|Ivars]};
+
+mutable_args_ivars(Expr, Ivars) ->
+	reia_syntax:mapfold_subtrees(fun mutable_args_ivars/2, Ivars, Expr).
+  	  
 mutable_method_ivars(#ivar{} = Ivar) -> remap_ivar(Ivar);
 		
 mutable_method_ivars(Expr) ->

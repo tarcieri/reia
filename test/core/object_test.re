@@ -6,12 +6,16 @@
 #
 
 class Roflcopter
-  def initialize(value)
+  def initialize(value, @loldong)
     @lollerskate = value
   end
   
   def lollerskate
     @lollerskate
+  end
+  
+  def loldong
+    @loldong
   end
   
   def invoker
@@ -36,35 +40,35 @@ module ObjectTest
   
   def instantiation_test
     TestHelper.expect("Classes", "instantiate new objects") do
-      Roflcopter(42)
+      Roflcopter(42, 69)
       (true, true) # FIXME: this should be a real assertion
     end
   end
   
   def method_test
     TestHelper.expect("Methods", "can be invoked on objects") do
-      obj = Roflcopter(42)
+      obj = Roflcopter(42, 69)
       (42, obj.lollerskate())
     end
   end
   
   def invocation_test
     TestHelper.expect("Objects", "can invoke their own methods") do
-      obj = Roflcopter(42)
+      obj = Roflcopter(42, 69)
       (42, obj.invoker())
     end
   end
   
   def self_invocation_test
     TestHelper.expect("Objects", "can invoke methods on self") do
-      obj = Roflcopter(42)
+      obj = Roflcopter(42, 69)
       (42, obj.self_invoker())
     end
   end
   
   def superclass_invocation_test
     TestHelper.expect("Objects", "invoke superclass methods when a method is not defined on their class") do
-      obj = Roflcopter(42)
+      obj = Roflcopter(42, 69)
       obj.to_s()
       (true, true) # FIXME: needs a real assertion here
     end
