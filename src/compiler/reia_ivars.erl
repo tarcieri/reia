@@ -8,7 +8,7 @@
 -module(reia_ivars).
 -export([mutable_method/1, immutable_method/1]).
 -include("reia_nodes.hrl").
--include("reia_mop.hrl").
+-include("reia_object.hrl").
 
 % Transform for methods that are allowed to alter instance variables
 mutable_method(Method) ->

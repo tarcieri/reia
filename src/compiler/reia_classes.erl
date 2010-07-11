@@ -8,7 +8,7 @@
 -module(reia_classes).
 -export([transform/2]).
 -include("reia_nodes.hrl").
--include("reia_mop.hrl").
+-include("reia_object.hrl").
 
 transform(Exprs, _Options) ->
   reia_syntax:map_subtrees(fun transform/1, Exprs).

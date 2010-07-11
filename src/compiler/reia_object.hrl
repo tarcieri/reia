@@ -1,5 +1,5 @@
 %
-% reia_mop: Definitions of the Reia metaobject protocol (kinda)
+% reia_object: Macros for accessing secret variables inside objects
 % Copyright (C)2010 Tony Arcieri
 %
 % Redistribution is permitted under the MIT license.  See LICENSE for details.
