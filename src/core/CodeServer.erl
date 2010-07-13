@@ -27,8 +27,20 @@ init([]) ->
   {ok, #state{}}.
 
 handle_call({paths}, {From, _Ref}, State) ->
-  ?DEBUG("*** CodeServer: got :paths request from ~p~n", [From]),
+  ?DEBUG("*** CodeServer: got paths() request from ~p~n", [From]),
   {reply, State#state.paths, State};
+handle_call({unshift_path, Path}, {From, _Ref}, State) ->
+  ?DEBUG("*** CodeServer: got unshift_path(~p) request from ~p~n", [Path, From]),
+  State2 = State#state{paths = [Path|State#state.paths]},
+  {reply, State2#state.paths, State2};
+handle_call({push_path, Path}, {From, _Ref}, State) ->
+  ?DEBUG("*** CodeServer: got push_path(~p) request from ~p~n", [Path, From]),
+  State2 = State#state{paths = State#state.paths ++ [Path]},
+  {reply, State2#state.paths, State2};
+handle_call({set_paths, Paths}, {From, _Ref}, State) ->
+  ?DEBUG("*** CodeServer: got set_paths(~p) request from ~p~n", [Paths, From]),
+  State2 = State#state{paths = Paths},
+  {reply, State2#state.paths, State2};
 handle_call(Request, _From, State) ->
   ?DEBUG("*** CodeServer: Unknown call: ~p~n", [Request]),
   {reply, {error, undef}, State}.
