@@ -6,7 +6,7 @@
 #
 
 module Code
-  def load(path)
-    # STUB!
+  def paths
+    CodeServer.call(:paths)
   end
 end

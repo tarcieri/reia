@@ -7,7 +7,7 @@
 
 -module('CodeServer'). 
 -behaviour(gen_server).
--record(state, {debug=true}).
+-record(state, {debug=true, paths=[]}).
 -define(DEBUG(Msg, Args), if State#state.debug -> io:format(Msg, Args); true -> void end).
 -export([
   % Public API
@@ -25,10 +25,13 @@ call(Request, _Block) ->
   
 init([]) ->
   {ok, #state{}}.
-  
+
+handle_call({paths}, {From, _Ref}, State) ->
+  ?DEBUG("*** CodeServer: got :paths request from ~p~n", [From]),
+  {reply, State#state.paths, State};
 handle_call(Request, _From, State) ->
-  ?DEBUG("*** CodeServer: Handling call: ~p~n", [Request]),
-  {reply, ok, State}.
+  ?DEBUG("*** CodeServer: Unknown call: ~p~n", [Request]),
+  {reply, {error, undef}, State}.
   
 handle_cast(Message, State) ->
   ?DEBUG("*** CodeServer: Handling cast: ~p~n", [Message]),
