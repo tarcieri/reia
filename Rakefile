@@ -130,9 +130,7 @@ def munge_script(src, dest)
   File.open(dest, "w", 0755) { |file| file << str }
 end
 
-directory BIN_INSTALL_DIR do
-  mkdir_p BIN_INSTALL_DIR
-end
+directory BIN_INSTALL_DIR
 
 task :install => [:check_erl_version, :build, BIN_INSTALL_DIR] do
   reia_dir = reia_install_dir
