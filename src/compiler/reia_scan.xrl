@@ -19,8 +19,8 @@ Comment = #.*
 Rules.
 
 %% Numbers
--?{Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
--?{Digit}+           : build_integer(TokenChars, TokenLine).
+{Digit}+\.{Digit}+ : build_float(TokenChars, TokenLine).
+{Digit}+           : build_integer(TokenChars, TokenLine).
 
 %% Strings
 {DoubleQuoted} : build_string(TokenChars, TokenLine, TokenLen).
@@ -52,7 +52,6 @@ Rules.
 \]    : {token,{']',TokenLine}}.
 \{    : {token,{'{',TokenLine}}.
 }     : {token,{'}',TokenLine}}.
-<-    : {token,{'<-',TokenLine}}.
 ->    : {token,{'->',TokenLine}}.
 <<    : {token,{'<<',TokenLine}}.
 >>    : {token,{'>>',TokenLine}}.
@@ -105,13 +104,9 @@ Erlang code.
 
 -include("reia_nodes.hrl").
 
-build_integer([$-|Chars], Line) ->
-  {token, #integer{line = Line, value = -list_to_integer(Chars)}};
 build_integer(Chars, Line) ->
   {token, #integer{line = Line, value =  list_to_integer(Chars)}}.
 
-build_float([$-|Chars], Line) ->
-  {token, #float{line = Line, value = -list_to_float(Chars)}};
 build_float(Chars, Line) ->
   {token, #float{line = Line, value =  list_to_float(Chars)}}.
   
