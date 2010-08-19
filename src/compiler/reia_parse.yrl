@@ -206,7 +206,7 @@ mult_expr -> mult_expr mult_op pow_expr :
   }.
 mult_expr -> pow_expr : '$1'.
 
-pow_expr -> pow_expr pow_op unary_expr :
+pow_expr -> unary_expr pow_op pow_expr :
   #binary_op{
     line  = ?line('$1'), 
     type  = ?op('$2'), 
