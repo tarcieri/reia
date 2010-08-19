@@ -16,4 +16,10 @@ module TestHelper
       (:error, group, description, expected, actual)
     end
   end
+  
+  def duration(started_at, finished_at)
+    started_seconds  = (started_at[0]  * 1000000 + started_at[1]  + started_at[2] * 0.000001)
+    finished_seconds = (finished_at[0] * 1000000 + finished_at[1] + finished_at[2] * 0.000001)
+    finished_seconds - started_seconds
+  end
 end
