@@ -197,23 +197,14 @@ add_expr -> add_expr add_op mult_expr :
   }.
 add_expr -> mult_expr : '$1'.
 
-mult_expr -> mult_expr mult_op pow_expr :
+mult_expr -> mult_expr mult_op unary_expr :
   #binary_op{
     line  = ?line('$1'),
     type  = ?op('$2'),
     left  = '$1',
     right = '$3'
   }.
-mult_expr -> pow_expr : '$1'.
-
-pow_expr -> unary_expr pow_op pow_expr :
-  #binary_op{
-    line  = ?line('$1'), 
-    type  = ?op('$2'), 
-    left  = '$1', 
-    right = '$3'
-  }.
-pow_expr -> unary_expr : '$1'.
+mult_expr -> unary_expr : '$1'.
 
 unary_expr -> unary_op unary_expr :
   #unary_op{
@@ -221,7 +212,16 @@ unary_expr -> unary_op unary_expr :
     type = ?op('$1'),
     expr = '$2'
   }.
-unary_expr -> funref_expr : '$1'.
+unary_expr -> pow_expr : '$1'.
+
+pow_expr -> funref_expr pow_op pow_expr :
+  #binary_op{
+    line  = ?line('$1'), 
+    type  = ?op('$2'), 
+    left  = '$1', 
+    right = '$3'
+  }.
+pow_expr -> funref_expr : '$1'.
 
 funref_expr -> funref   : '$1'.
 funref_expr -> call_expr : '$1'.
