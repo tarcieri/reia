@@ -180,7 +180,7 @@ comp_expr -> range_expr comp_op range_expr :
   }.
 comp_expr -> range_expr : '$1'.
 
-range_expr -> range_expr '..' add_expr :
+range_expr -> add_expr '..' add_expr :
   #range{
     line = ?line('$1'), 
     from = '$1', 
