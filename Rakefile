@@ -92,9 +92,23 @@ task :test => :build do
   sh "bin/reia test/runner.re"
 end
 
+# Benchmarks
+BENCHMARK_SRC = FileList.new('benchmarks/**/*.erl')
+BENCHMARK_DEST = BENCHMARK_SRC.map { |input| output_file(input, 'benchmarks/ebin/') }
+
+BENCHMARK_SRC.each do |input|
+  file output_file(input, 'benchmarks/ebin/') => input do
+    sh "erlc +debug_info -o benchmarks/ebin #{input}"
+  end
+end
+
+task :benchmark => BENCHMARK_DEST do
+  sh "bin/reia benchmarks/runner.re"
+end
+
 # Cleaning
 CLEAN.include %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
-CLEAN.include %w(ebin/* **/*.reb)
+CLEAN.include %w(**/*.beam **/*.reb)
 
 #
 # Installing
