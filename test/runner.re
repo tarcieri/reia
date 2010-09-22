@@ -28,7 +28,7 @@ results = tests.map do |(group, modules)|
       mod = "#{name.capitalize()}Test".to_module()
       mod.run()
     catch ex
-      System.print("E")
+      "E".print()
       (:error, "#{group}/#{name}.re", ex)
     end
   end
