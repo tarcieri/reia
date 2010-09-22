@@ -54,7 +54,7 @@ handle_info(Info, State) ->
   {noreply, State}.
   
 terminate(Reason, State) ->
-  ?DEBUG("*** CodeServer CRASH: ~p~n", [Reason]),
+  ?DEBUG("!!! CodeServer CRASH: ~p~n", [Reason]),
   ?DEBUG("    State: ~p~n", [State]),
   
   % If the Reia code server crashes, we're horked. Fuck the system. 
