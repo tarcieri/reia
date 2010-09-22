@@ -45,7 +45,7 @@ module Fibonacci
 end
     
 n = 42
-Main.puts("Fibonacci number #{n}: #{Fibonacci.optimized(n)}")
+"Fibonacci number #{n}: #{Fibonacci.optimized(n)}".puts()
 
 n = 10
-Main.puts("First #{n} Fibonacci numbers: #{Fibonacci.optimized_list(n)}")
+"First #{n} Fibonacci numbers: #{Fibonacci.optimized_list(n)}".puts()

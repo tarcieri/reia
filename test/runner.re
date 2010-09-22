@@ -6,7 +6,7 @@
 #
 
 started_at = erl.now()
-Main.load("test/test_helper.re")
+System.load("test/test_helper.re")
 
 tests = [
   ("builtins", [
@@ -23,38 +23,38 @@ tests = [
 results = tests.map do |(group, modules)|
   modules.map do |name|
     try
-      Main.load("test/#{group}/#{name}_test.re")
+      System.load("test/#{group}/#{name}_test.re")
 
       mod = "#{name.capitalize()}Test".to_module()
       mod.run()
     catch ex
-      Main.print("E")
+      System.print("E")
       (:error, "#{group}/#{name}.re", ex)
     end
   end
 end.flatten()
 
-Main.puts("\n")
+"\n".puts()
 
 failures = [error for error = (:error, _, _, _, _) in results]
 failures.each do |(:error, group, description, expected, actual)| 
-  Main.puts("'#{group} #{description}' FAILED")
-  Main.puts("expected #{expected.inspect()}, actual #{actual.inspect()}\n")
+  "'#{group} #{description}' FAILED".puts()
+  "expected #{expected.inspect()}, actual #{actual.inspect()}\n".puts()
 end
 
 errors = [error for error = (:error, _, _) in results]
 errors.each do |(:error, test, ex)|
   case ex
   when (:exception,(:throw, msg))
-    Main.puts("#{test} ERROR: #{msg.to_s()}")
+    "#{test} ERROR: #{msg.to_s()}".puts()
   when _
-    Main.puts("#{test} ERROR: #{ex}\n")
+    "#{test} ERROR: #{ex}\n".puts()
   end
 end
 
 finished_at = erl.now()
 duration = TestHelper.duration(started_at, finished_at)
 
-Main.puts("Finished in #{duration} seconds\n")
-Main.puts("#{results.size()} assertions, #{failures.size()} failures, #{errors.size()} errors")
+"Finished in #{duration} seconds\n".puts()
+"#{results.size()} assertions, #{failures.size()} failures, #{errors.size()} errors".puts()
 System.halt(1) if failures.size() > 0 or errors.size() > 0

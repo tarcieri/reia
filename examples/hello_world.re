@@ -2,4 +2,4 @@
 #
 # From the toplevel Reia directory, run: bin/reia examples/hello_world.re 
 
-"Hello, world!\n".print()
+"Hello, world!".puts()

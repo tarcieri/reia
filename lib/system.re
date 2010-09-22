@@ -1,4 +1,28 @@
 module System
+  # Display a string to the user (with appended newline)
+  def puts(value)
+    erl.io.format("~s~n".to_list(), [value.to_s().to_binary()])
+    nil
+  end
+  
+  # Display a string to the user (without any additional characters)
+  def print(value)
+    erl.io.format("~s".to_list(), [value.to_s().to_binary()])
+    nil
+  end
+  
+  # Load a Reia source code file
+  def load(filename)
+    case erl.reia.load(filename.to_s().to_list())
+    when (:ok, _, _)
+      true
+    when (:error, :enoent)
+      throw(FileNotFound, "No such file or directory - #{filename}")
+    when (:error, error)
+      throw(LoadError, error)
+    end
+  end
+  
   # Argument list as passed in from the command line
   def args
     erl.init.get_plain_arguments().map { |arg| arg.to_string() }
