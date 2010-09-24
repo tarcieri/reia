@@ -7,6 +7,7 @@
 
 -module(reia_internal).
 -export([
+  load/2,
   compile/1, compile/2, 
   execute_file/1, 
   load_submodule/2,
@@ -16,6 +17,41 @@
   invoke_callable/3
 ]).
 -include("reia_types.hrl").
+
+% Walk the Reia load path attempting to load the given file
+load([], _Filename) ->
+    {error, enoent};
+load([BasePath|Rest], Filename) ->
+  SourcePath = filename:absname(filename:join([BasePath, Filename])),
+  BinPath = filename:rootname(SourcePath) ++ ".reb",
+  
+  case file:read_file_info(SourcePath) of
+    {ok, SourceInfo} ->      
+      case file:read_file_info(BinPath) of
+        % If the binary already exists, load it
+        {ok, BinInfo} ->
+          SourceMtime = element(6, SourceInfo),
+          BinMtime = element(6, BinInfo),
+          
+          % Ensure changes haven't been made to the sources
+          if
+            BinMtime > SourceMtime ->
+              void;
+            true ->
+              reia_internal:compile(SourcePath, BinPath)
+          end;
+          
+        % Otherwise compile the source code
+        {error, _} ->
+          reia_internal:compile(SourcePath, BinPath)
+      end,
+      reia_bytecode:load_file(BinPath);
+    {error, enoent} ->
+      load(Rest, Filename);
+    {error, _} = Error ->
+      Error
+  end.
+  
 
 % Thunk for reiac
 compile([SourcePath, BinPath]) ->

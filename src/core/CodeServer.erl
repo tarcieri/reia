@@ -8,7 +8,8 @@
 -module('CodeServer'). 
 -behaviour(gen_server).
 -record(state, {debug=true, paths=[]}).
--define(DEBUG(Msg, Args), if State#state.debug -> io:format(Msg, Args); true -> void end).
+-define(DEBUG(Msg, Args), (_={void, Msg, Args})).
+%-define(DEBUG(Msg, Args), if State#state.debug -> io:format(Msg, Args); true -> void end).
 -export([
   % Public API
   start/0, call/2,
@@ -31,15 +32,17 @@ handle_call({paths}, {From, _Ref}, State) ->
   {reply, State#state.paths, State};
 handle_call({unshift_path, Path}, {From, _Ref}, State) ->
   ?DEBUG("*** CodeServer: got unshift_path(~p) request from ~p~n", [Path, From]),
-  State2 = State#state{paths = [Path|State#state.paths]},
+  AbsPath = filename:absname(Path),
+  State2 = State#state{paths = [AbsPath|State#state.paths]},
   {reply, State2#state.paths, State2};
 handle_call({push_path, Path}, {From, _Ref}, State) ->
   ?DEBUG("*** CodeServer: got push_path(~p) request from ~p~n", [Path, From]),
-  State2 = State#state{paths = State#state.paths ++ [Path]},
+  AbsPath = filename:absname(Path),
+  State2 = State#state{paths = State#state.paths ++ [AbsPath]},
   {reply, State2#state.paths, State2};
 handle_call({set_paths, Paths}, {From, _Ref}, State) ->
   ?DEBUG("*** CodeServer: got set_paths(~p) request from ~p~n", [Paths, From]),
-  State2 = State#state{paths = Paths},
+  State2 = State#state{paths = [filename:absname(Path) || Path <- Paths]},
   {reply, State2#state.paths, State2};
 handle_call(Request, _From, State) ->
   ?DEBUG("*** CodeServer: Unknown call: ~p~n", [Request]),

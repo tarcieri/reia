@@ -17,7 +17,7 @@ module System
     when (:ok, _, _)
       true
     when (:error, :enoent)
-      throw(FileNotFound, "No such file or directory - #{filename}")
+      throw(FileNotFound, "No such file to load - #{filename}")
     when (:error, error)
       throw(LoadError, error)
     end

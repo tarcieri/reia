@@ -30,33 +30,8 @@ init() ->
 
 % Load the given Reia source code file
 load(Filename) ->
-  SourcePath = filename:absname(Filename),
-  BinPath = filename:rootname(SourcePath) ++ ".reb",
-  
-  case file:read_file_info(SourcePath) of
-    {ok, SourceInfo} ->      
-      case file:read_file_info(BinPath) of
-        % If the binary already exists, load it
-        {ok, BinInfo} ->
-          SourceMtime = element(6, SourceInfo),
-          BinMtime = element(6, BinInfo),
-          
-          % Ensure changes haven't been made to the sources
-          if
-            BinMtime > SourceMtime ->
-              void;
-            true ->
-              reia_internal:compile(SourcePath, BinPath)
-          end;
-          
-        % Otherwise compile the source code
-        {error, _} ->
-          reia_internal:compile(SourcePath, BinPath)
-      end,
-      reia_bytecode:load_file(BinPath);
-    {error, _} = Error ->
-      Error
-  end.
+  LoadPaths = 'CodeServer':call({paths}, nil),
+  reia_internal:load(LoadPaths ++ [filename:absname("")], Filename).
 
 % Parse the given string of Reia source code
 parse(String) ->
