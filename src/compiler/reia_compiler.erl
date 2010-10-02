@@ -8,12 +8,14 @@
 -module(reia_compiler).
 -export([
   parse/1, parse/2,
-	file/1, file/2, 
-	string/2, string/3, 
-	compile/2, compile/3
+  file/1, file/2, 
+  string/2, string/3, 
+  compile/2, compile/3
 ]).
 -include("reia_compile_options.hrl").
--define(parse_error(File, Line, Error), throw(lists:flatten(io_lib:format("~s:~w: ~s", [File, Line, Error])))).
+-define(parse_error(File, Line, Error), 
+  reia:throw('SyntaxError', lists:flatten(io_lib:format("~s:~w: ~s", [File, Line, Error])))
+).
 
 % Parse the given string of Reia source code
 parse(String) -> parse(String, "").
@@ -48,7 +50,7 @@ string(Filename, String) ->
   
 % Compile the given string with the given options.  See compile/3 below.
 string(Filename, String, Options) ->
-	compile(Filename, parse(String, Filename), Options).
+  compile(Filename, parse(String, Filename), Options).
 
 % Compile the given expressions, which came from the given source filename
 compile(Filename, Exprs) ->
