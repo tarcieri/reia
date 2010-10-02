@@ -7,7 +7,7 @@
 
 class Exception  
   def initialize(line, message)
-    (@line, @message) = (line, message)
+    (@line, @message) = (line, message.to_string())
   end
   
   def line; @line; end
