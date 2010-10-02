@@ -12,7 +12,8 @@
 	parse/1,
 	eval/2,
 	inst/2, inst/3,
-	invoke/3, invoke/4
+	invoke/3, invoke/4,
+	throw/2, throw/3
 ]).
 -include("reia_types.hrl").
 
@@ -60,3 +61,9 @@ invoke(Receiver, Method, Arguments, Block) ->
 			
 	Class = Receiver#reia_object.class,
 	Class:call({Receiver, Method, Arguments2}, Block).
+	
+% Throw a Reia exception
+throw(Class, Message) ->
+    throw(Class, nil, Message).
+throw(Class, Line, Message) ->
+    erlang:throw(inst(Class, {Line, Message})).
