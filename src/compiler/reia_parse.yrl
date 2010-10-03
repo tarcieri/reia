@@ -37,12 +37,12 @@ Nonterminals
   else_clause
   receive_expr
   after_clause
-	throw_expr
+  throw_expr
   try_expr
   catch_clauses
   catch_clause
   function_identifier
-  function_definition
+  def_prefix
   ivar
   bound_var
   rebind_op
@@ -54,8 +54,8 @@ Nonterminals
   unary_op
   module_decl
   class_decl
-  functions
-  function
+  def_exprs
+  def_expr
   body
   pargs
   pargs_tail
@@ -305,13 +305,7 @@ unary_op -> '!'   : '$1'.
 unary_op -> '~'   : '$1'.
 
 %% Module declarations
-module_decl -> module module_name eol 'end' : 
-  #module{
-    line      = ?line('$1'), 
-    name      = element(3, '$2'), 
-    functions = []
-  }.
-module_decl -> module module_name eol functions 'end' : 
+module_decl -> module module_name eol def_exprs 'end' : 
   #module{
     line      = ?line('$1'), 
     name      = element(3, '$2'), 
@@ -319,26 +313,13 @@ module_decl -> module module_name eol functions 'end' :
   }.
   
 %% Class declarations
-class_decl -> class module_name eol 'end' : 
-  #class{
-    line    = ?line('$1'), 
-    name    = ?identifier_name('$2'), 
-    methods = []
-  }.
-class_decl -> class module_name eol functions 'end' : 
+class_decl -> class module_name eol def_exprs 'end' : 
   #class{
     line    = ?line('$1'), 
     name    = ?identifier_name('$2'), 
     methods = '$4'
   }.
-class_decl -> class module_name '<' module_name eol 'end':
-  #class{
-    line       = ?line('$1'), 
-    name       = ?identifier_name('$2'), 
-    superclass = ?identifier_name('$4'),
-    methods    = []
-  }.
-class_decl -> class module_name '<' module_name eol functions 'end' : 
+class_decl -> class module_name '<' module_name eol def_exprs 'end' : 
   #class{
     line       = ?line('$1'), 
     name       = ?identifier_name('$2'),
@@ -367,32 +348,22 @@ block_capture -> '&' expr         : #pargs{block='$2'}.
 block_capture -> '&' expr eol     : #pargs{block='$2'}.
 block_capture -> eol '&' expr     : #pargs{block='$3'}.
 block_capture -> eol '&' expr eol : #pargs{block='$3'}.
-    
-%% Functions
-functions -> function : ['$1'].
-functions -> function eol : ['$1'].
-functions -> eol functions : '$2'.
-functions -> function eol functions : ['$1'|'$3'].
 
-%% Function identifiers
-function_identifier -> identifier : '$1'.
-function_identifier -> punctuated_identifier : '$1'.
-function_identifier -> class : {identifier, ?line('$1'), class}.
-function_identifier -> self  : {identifier, ?line('$1'), self}.
+%% Expression lists with interspersed defs (eol delimited)
+def_exprs -> eol : [].
+def_exprs -> def_expr : ['$1'].
+def_exprs -> def_expr eol : ['$1'].
+def_exprs -> eol def_exprs : '$2'.
+def_exprs -> def_expr eol def_exprs : ['$1'|'$3'].
 
-%% Function definition
-function_definition -> def function_identifier : ?identifier_name('$2').
-function_definition -> def '[' ']' : '[]'.
-function_definition -> def '[' ']' '=' : '[]='.
-
-%% Function declarations
-function -> function_definition eol body 'end' : 
+%% Function definitions
+def_expr -> def_prefix eol body 'end' : 
   #function{
     line = ?line('$2'), 
     name = '$1', 
     body = '$3'
   }.
-function -> function_definition pargs eol body 'end' :
+def_expr -> def_prefix pargs eol body 'end' :
   #function{
     line  = ?line('$3'), 
     name  = '$1', 
@@ -400,6 +371,18 @@ function -> function_definition pargs eol body 'end' :
     block = '$2'#pargs.block,
     body  = '$4'
   }.
+def_expr -> expr.
+
+%% Allowable prefixes for defs
+def_prefix -> def function_identifier : ?identifier_name('$2').
+def_prefix -> def '[' ']' : '[]'.
+def_prefix -> def '[' ']' '=' : '[]='.
+
+%% Function identifiers
+function_identifier -> identifier : '$1'.
+function_identifier -> punctuated_identifier : '$1'.
+function_identifier -> class : {identifier, ?line('$1'), class}.
+function_identifier -> self  : {identifier, ?line('$1'), self}.
 
 body -> '$empty'  : [#nil{}].
 body -> expr_list : '$1'.
@@ -483,15 +466,15 @@ call -> call_expr '.' function_identifier '(' exprs ')' block :
 
 %% Remote function calls with indexes
 call -> call_expr '.' function_identifier '[' expr ']' :
-	#binary_op{
+  #binary_op{
     line = ?line('$1'),
     type = '[]',
     left = #remote_call{
-		    line     = ?line('$2'),
-		    receiver = '$1',
-		    name     = ?identifier_name('$3'),
-		    args     = []
-		  },
+        line     = ?line('$2'),
+        receiver = '$1',
+        name     = ?identifier_name('$3'),
+        args     = []
+      },
     right = '$5'
   }.
   
@@ -756,16 +739,16 @@ after_clause -> 'after' expr eol expr_list :
   
 %% Throw expressions
 throw_expr -> throw '(' expr ')' : 
-	#throw{
-		line    = ?line('$1'), 
-		message = '$3'
-	}.
+  #throw{
+    line    = ?line('$1'), 
+    message = '$3'
+  }.
 throw_expr -> throw '(' module_name ',' call_expr ')' : 
-	#throw{
-		line    = ?line('$1'),
-		type    = '$3'#module_name.name,
-		message = '$5'
-	}.
+  #throw{
+    line    = ?line('$1'),
+    type    = '$3'#module_name.name,
+    message = '$5'
+  }.
 
 %% Try expressions
 try_expr -> 'try' expr_list catch_clauses 'end' :
