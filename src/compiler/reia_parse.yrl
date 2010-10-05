@@ -309,22 +309,22 @@ module_decl -> module module_name eol def_exprs 'end' :
   #module{
     line  = ?line('$1'), 
     name  = element(3, '$2'), 
-    exprs = '$4'
+    exprs = begin validate_function_body('$4'), '$4' end
   }.
   
 %% Class declarations
 class_decl -> class module_name def_exprs 'end' : 
   #class{
     line  = ?line('$1'), 
-    name  = ?identifier_name('$2'), 
-    exprs = '$3'
+    name  = ?identifier_name('$2'),
+    exprs = begin validate_function_body('$3'), '$3' end
   }.
 class_decl -> class module_name '<' module_name def_exprs 'end' : 
   #class{
     line   = ?line('$1'), 
     name   = ?identifier_name('$2'),
     parent = ?identifier_name('$4'),
-    exprs  = '$5'
+    exprs  = begin validate_function_body('$5'), '$5' end
   }.
 
 %% Expression lists with interspersed defs (eol delimited)
@@ -349,7 +349,7 @@ def_expr -> def_prefix args eol body 'end' :
     block = '$2'#args.block,
     body  = '$4'
   }.
-def_expr -> expr.
+def_expr -> expr : '$1'.
 
 %% Allowable prefixes for defs
 def_prefix -> def function_identifier : ?identifier_name('$2').
@@ -798,6 +798,13 @@ string(String) ->
   catch {error, {_Line, _Message}} = Error ->
     Error
   end.
+  
+%% Ensure a given function body contains only function defs
+validate_function_body([]) -> ok;
+validate_function_body([#function{}|Exprs]) ->
+  validate_function_body(Exprs);
+validate_function_body([Expr|_]) ->
+  throw({error, {element(2, Expr), "Arbitrary expressions not allowed in class/module bodies"}}).
   
 %% Interpolate strings, parsing the contents of #{...} tags
 interpolate_string(#string{line=Line, characters=Chars}) ->
