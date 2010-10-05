@@ -32,19 +32,22 @@ class TCPSocket
     
     case erl.gen_tcp.connect(host.to_list(), port, option_list)
     when (:ok, socket)
-      @sock = socket
+      @channel = socket
     when (:error, :nxdomain)
       throw(ResolveError, "cannot resolve '#{host}'")
     when error
       throw(error.inspect())
     end
   end
-  def initialize(@sock); end
+  def initialize(@channel); end
+  
+  # Retrieve the Channel for this socket
+  def channel; @channel; end
   
   # Read the specified amount of data from the socket.  A read of length zero
   # will read all data available.
   def read(length)
-    case erl.gen_tcp.recv(@sock, length)
+    case erl.gen_tcp.recv(@channel, length)
     when (:ok, packet)
       packet
     when (:error, :closed)
@@ -58,7 +61,7 @@ class TCPSocket
   
   # Write the given data to the socket
   def write(data)
-    case erl.gen_tcp.send(@sock, data.to_binary())
+    case erl.gen_tcp.send(@channel, data.to_binary())
     when :ok
       true
     when (:error, reason)
@@ -68,7 +71,7 @@ class TCPSocket
   
   # Close the socket
   def close
-    case erl.gen_tcp.close(@sock)
+    case erl.gen_tcp.close(@channel)
     when :ok
       true
     when (:error, reason)

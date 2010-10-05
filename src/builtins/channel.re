@@ -1,15 +1,15 @@
 #
-# pid.re: Methods of the Port builtin
+# channel.re: Methods of the Channel builtin
 # Copyright (C)2010 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-class Port
-  def class; Port; end
+class Channel
+  def class; Channel; end
   
   def to_string
-    "#<Port:#{erl.port_to_list(self).to_string().sub('#Port<', '')}"
+    "#<Channel:#{erl.port_to_list(self).to_string().sub('#Port<', '')}"
   end
     
   def to_s; to_string(); end  
