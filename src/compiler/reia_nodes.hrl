@@ -22,8 +22,8 @@
 -record(self,        {line}).
 
 % Modules and Classes
--record(module,      {line, name, functions}).
--record(class,       {line, name, superclass='Object', methods}).
+-record(module,      {line, name, exprs}).
+-record(class,       {line, name, parent='Object', exprs}).
 
 % Functions
 -record(function,    {line, name, args=[], block=#var{line=1,name='_'}, body}).

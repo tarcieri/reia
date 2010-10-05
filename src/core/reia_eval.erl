@@ -60,7 +60,7 @@ stamp() ->
   string:join(Timestamp, "_").
 
 temporary_module(Name, Args, Exprs) ->
-  #module{line=1, name=Name, functions=[
+  #module{line=1, name=Name, exprs=[
     #function{line=1, name=toplevel, args=Args, body=Exprs}
   ]}.
 

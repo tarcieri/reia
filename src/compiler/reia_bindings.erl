@@ -37,19 +37,19 @@ revert(BAExprs) ->
 % Node transformations
 %
 
-% Module declarations create a new scope
-transform_node(#module{functions=Functions} = Node, State) ->
-  Fun = fun(Function) ->
-    {[Function2], _State2} = reia_syntax:mapfold_subtrees(
+% Modules have their own scope
+transform_node(#module{exprs=Exprs} = Module, State) ->
+  Fun = fun(Expr) ->
+    {[NewExpr], _State2} = reia_syntax:mapfold_subtrees(
       fun transform_node/2,
       #state{scope=module},
-      [Function]
+      [Expr]
     ),
-    Function2
+    NewExpr
   end,
-  output(Node#module{functions=lists:map(Fun, Functions)}, State);
+  output(Module#module{exprs=lists:map(Fun, Exprs)}, State);
 
-% Function declarations create a new scope
+% Functions have their own scope
 transform_node(#function{line=Line, name=Name, args=Args, block=Block, body=Exprs}, State) ->
   {Args2, #state{bindings=Bindings}} = reia_syntax:mapfold_subtrees(
     fun transform_node/2,

@@ -34,23 +34,23 @@ transform(Exprs, _Options) ->
   [transform(Expr) || Expr <- Exprs].
 
 % Modules
-transform(#module{line=Line, name=Name, functions=Funcs}) ->
+transform(#module{line=Line, name=Name, exprs=Exprs}) ->
   % Modules need some postprocessing, so we leave them in a similar form but
   % with their subtrees converted
   #module{
     line = Line,
     name = Name,
-    functions = group_clauses([transform(Func) || Func <- Funcs])
+    exprs = group_clauses([transform(Expr) || Expr <- Exprs])
   };
   
 % Classes
-transform(#class{line=Line, name=Name, methods=Funcs}) ->
+transform(#class{line=Line, name=Name, exprs=Exprs}) ->
   % Modules need some postprocessing, so we leave them in a similar form but
   % with their subtrees converted
   #module{
-    line = Line,
-    name = Name,
-    functions = group_clauses([transform(Func) || Func <- Funcs])
+    line  = Line,
+    name  = Name,
+    exprs = group_clauses([transform(Expr) || Expr <- Exprs])
   };
 
 % Functions

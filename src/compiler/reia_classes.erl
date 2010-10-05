@@ -19,12 +19,12 @@ transform(#class{} = Expr) ->
 transform(Expr) ->
   reia_syntax:map_subtrees(fun transform/1, Expr).
     
-transform_class(#class{line=Line, name=Name, superclass=Ancestor, methods=Methods}) ->
+transform_class(#class{line=Line, name=Name, parent=Parent, exprs=Methods}) ->
 	MethodTable = build_method_table(Methods),
 	
 	Initializers = transform_initialize_methods(Name, MethodTable),
 	CallifiedInitializers = [callify_method(Initialize) || Initialize <- Initializers],
-	MethodMissings = transform_method_missings(Ancestor, MethodTable),
+	MethodMissings = transform_method_missings(Parent, MethodTable),
 	
 	MethodTable2 = orddict:erase(initialize, MethodTable),
 	MethodTable3 = orddict:store(method_missing, MethodMissings, MethodTable2),
@@ -33,7 +33,7 @@ transform_class(#class{line=Line, name=Name, superclass=Ancestor, methods=Method
 	Methods3 = [prepare_method(Method) || Method <- lists:flatten(Methods2)],
 	Methods4 = CallifiedInitializers ++ Methods3 ++ [method_missing_thunk()],
 	
-  #class{line=Line, name=Name, methods=Methods4}.
+  #class{line=Line, name=Name, exprs=Methods4}.
 
 % Create a orddict of methods by name
 build_method_table(Methods) ->
@@ -82,7 +82,7 @@ transform_initialize_methods(_Name, MethodTable) ->
 	end, Methods).
 	
 % Transform the method_missing method or create it if it wasn't defined
-transform_method_missings(Ancestor, MethodTable) ->
+transform_method_missings(Parent, MethodTable) ->
 	case orddict:find(method_missing, MethodTable) of
 		{ok, Methods} -> Methods;
 		error -> % Use default (call super) if the method doesn't exist
@@ -94,7 +94,7 @@ transform_method_missings(Ancestor, MethodTable) ->
 				body  = [
 				  #native_call{
 				    line     = 1,
-				    module   = Ancestor,
+				    module   = Parent,
 				    function = call,
 				    args     = [
 							#tuple{

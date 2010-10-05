@@ -57,8 +57,8 @@ Nonterminals
   def_exprs
   def_expr
   body
-  pargs
-  pargs_tail
+  args
+  args_tail
   block_capture
   boolean
   class_inst
@@ -307,47 +307,25 @@ unary_op -> '~'   : '$1'.
 %% Module declarations
 module_decl -> module module_name eol def_exprs 'end' : 
   #module{
-    line      = ?line('$1'), 
-    name      = element(3, '$2'), 
-    functions = '$4'
+    line  = ?line('$1'), 
+    name  = element(3, '$2'), 
+    exprs = '$4'
   }.
   
 %% Class declarations
-class_decl -> class module_name eol def_exprs 'end' : 
+class_decl -> class module_name def_exprs 'end' : 
   #class{
-    line    = ?line('$1'), 
-    name    = ?identifier_name('$2'), 
-    methods = '$4'
+    line  = ?line('$1'), 
+    name  = ?identifier_name('$2'), 
+    exprs = '$3'
   }.
-class_decl -> class module_name '<' module_name eol def_exprs 'end' : 
+class_decl -> class module_name '<' module_name def_exprs 'end' : 
   #class{
-    line       = ?line('$1'), 
-    name       = ?identifier_name('$2'),
-    superclass = ?identifier_name('$4'),
-    methods    = '$6'
+    line   = ?line('$1'), 
+    name   = ?identifier_name('$2'),
+    parent = ?identifier_name('$4'),
+    exprs  = '$5'
   }.
-
-%% Parenthesized arguments
-pargs -> '(' ')'                 : #pargs{}.
-pargs -> '(' eol ')'             : #pargs{}.
-pargs -> '(' expr pargs_tail     : ?pargs_add('$2', '$3').
-pargs -> '(' eol expr pargs_tail : ?pargs_add('$3', '$4').
-pargs -> '(' block_capture ')'   : '$2'.
-
-pargs_tail -> ',' expr pargs_tail         : ?pargs_add('$2', '$3').
-pargs_tail -> ',' eol expr pargs_tail     : ?pargs_add('$3', '$4').
-pargs_tail -> eol ',' expr pargs_tail     : ?pargs_add('$3', '$4').
-pargs_tail -> eol ',' eol expr pargs_tail : ?pargs_add('$4', '$5').
-
-pargs_tail -> ')'     : #pargs{}.
-pargs_tail -> eol ')' : #pargs{}.
-pargs_tail -> ',' block_capture ')'     : '$2'.
-pargs_tail -> eol ',' block_capture ')' : '$3'.
-
-block_capture -> '&' expr         : #pargs{block='$2'}.
-block_capture -> '&' expr eol     : #pargs{block='$2'}.
-block_capture -> eol '&' expr     : #pargs{block='$3'}.
-block_capture -> eol '&' expr eol : #pargs{block='$3'}.
 
 %% Expression lists with interspersed defs (eol delimited)
 def_exprs -> eol : [].
@@ -363,12 +341,12 @@ def_expr -> def_prefix eol body 'end' :
     name = '$1', 
     body = '$3'
   }.
-def_expr -> def_prefix pargs eol body 'end' :
+def_expr -> def_prefix args eol body 'end' :
   #function{
     line  = ?line('$3'), 
     name  = '$1', 
-    args  = '$2'#pargs.args,
-    block = '$2'#pargs.block,
+    args  = '$2'#args.args,
+    block = '$2'#args.block,
     body  = '$4'
   }.
 def_expr -> expr.
@@ -387,22 +365,44 @@ function_identifier -> self  : {identifier, ?line('$1'), self}.
 body -> '$empty'  : [#nil{}].
 body -> expr_list : '$1'.
 
+%% Arguments
+args -> '(' ')'                 : #args{}.
+args -> '(' eol ')'             : #args{}.
+args -> '(' expr args_tail     : ?args_add('$2', '$3').
+args -> '(' eol expr args_tail : ?args_add('$3', '$4').
+args -> '(' block_capture ')'   : '$2'.
+
+args_tail -> ',' expr args_tail         : ?args_add('$2', '$3').
+args_tail -> ',' eol expr args_tail     : ?args_add('$3', '$4').
+args_tail -> eol ',' expr args_tail     : ?args_add('$3', '$4').
+args_tail -> eol ',' eol expr args_tail : ?args_add('$4', '$5').
+
+args_tail -> ')'     : #args{}.
+args_tail -> eol ')' : #args{}.
+args_tail -> ',' block_capture ')'     : '$2'.
+args_tail -> eol ',' block_capture ')' : '$3'.
+
+block_capture -> '&' expr         : #args{block='$2'}.
+block_capture -> '&' expr eol     : #args{block='$2'}.
+block_capture -> eol '&' expr     : #args{block='$3'}.
+block_capture -> eol '&' expr eol : #args{block='$3'}.
+
 %% Class instantiations
-class_inst -> module_name pargs :
+class_inst -> module_name args :
   #class_inst{
     line  = ?line('$1'),
     class = ?identifier_name('$1'),
-    args  = '$2'#pargs.args,
-    block = ?pargs_default_block(#nil{}, '$2')
+    args  = '$2'#args.args,
+    block = ?args_default_block(#nil{}, '$2')
   }.
 
 %% Local function calls
-call -> function_identifier pargs : 
+call -> function_identifier args : 
   #local_call{
     line  = ?line('$1'), 
     name  = ?identifier_name('$1'),
-    args  = '$2'#pargs.args,
-    block = ?pargs_default_block(#nil{}, '$2')
+    args  = '$2'#args.args,
+    block = ?args_default_block(#nil{}, '$2')
   }.
   
 %% Local function calls with blocks
@@ -412,13 +412,13 @@ call -> function_identifier block :
     name  = ?identifier_name('$1'), 
     block = '$2'
   }.
-call -> function_identifier pargs block :
-  case '$2'#pargs.block of
+call -> function_identifier args block :
+  case '$2'#args.block of
     #var{line=1, name='_'} -> % user didn't pass a &block
       #local_call{
         line  = ?line('$1'), 
         name  = ?identifier_name('$1'), 
-        args  = '$2'#pargs.args, 
+        args  = '$2'#args.args, 
         block = '$3'
       };
     _ ->
@@ -772,12 +772,12 @@ Erlang code.
 
 -export([string/1]).
 -include("reia_nodes.hrl").
--record(pargs, {args=[], block={var,1,'_'}}).
+-record(args, {args=[], block={var,1,'_'}}).
 -define(line(Node), element(2, Node)).
 -define(op(Node), element(1, Node)).
 -define(identifier_name(Id), element(3, Id)).
--define(pargs_add(Arg, Pargs), Pargs#pargs{args=[Arg|Pargs#pargs.args]}).
--define(pargs_default_block(Block, Pargs), case (Pargs)#pargs.block of {var,1,'_'} -> Block; _ -> (Pargs)#pargs.block end).
+-define(args_add(Arg, Args), Args#args{args=[Arg|Args#args.args]}).
+-define(args_default_block(Block, Args), case (Args)#args.block of {var,1,'_'} -> Block; _ -> (Args)#args.block end).
 
 %% Parse a given string with nicely formatted errors
 string(String) ->

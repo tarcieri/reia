@@ -56,7 +56,7 @@ compile_expressions(Filename, Exprs, Options) ->
   Header = module_header(Module#module.name, Filename, Options),
   ParentAttr = {attribute, 1, parent, list_to_atom(filename:rootname(Filename))},
   SubmoduleAttr = {attribute, 1, submodules, Submodules2},
-  ErlModule = lists:flatten([Header, ParentAttr, SubmoduleAttr, Module#module.functions]),
+  ErlModule = lists:flatten([Header, ParentAttr, SubmoduleAttr, Module#module.exprs]),
   
   compile:forms(ErlModule, compile_options(Options)).
   
@@ -66,7 +66,7 @@ compile_submodules(Submodules, Filename, Options) ->
 compile_submodule(Module, Filename, Options) ->
   Header = module_header(Module#module.name, Filename, Options),
   ParentAttr = {attribute, 1, parent, list_to_atom(filename:rootname(Filename))},
-  ErlModule = lists:flatten([Header, ParentAttr, Module#module.functions]),
+  ErlModule = lists:flatten([Header, ParentAttr, Module#module.exprs]),
 
   {ok, Name, Bin} = compile:forms(ErlModule, compile_options(Options)),
   {static, Name, Bin}.
@@ -84,14 +84,14 @@ wrapped_module(Filename, Exprs) ->
   Function = {function, 1, toplevel, 0, [
     {clause, 1, [], [], Exprs2}
   ]},
-  Module = #module{line=1, name=Name, functions=[Function]},
+  Module = #module{line=1, name=Name, exprs=[Function]},
   {Module, Submodules}.
   
 unwrapped_module(Exprs) ->
   case Exprs of
     [{module, Line, Name, Functions}] -> 
       {ok, Functions2, Submodules} = reia_modules:replace(Functions, fun module_loader/1),
-      Module = #module{line=Line, name=Name, functions=Functions2},
+      Module = #module{line=Line, name=Name, exprs=Functions2},
       {Module, Submodules};
     _ ->
       throw({error, "code without a toplevel wrapper should define exactly one module"})
