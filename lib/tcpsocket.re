@@ -30,6 +30,8 @@ class TCPSocket
       (:packet, opts[:packet])
     ]
     
+    option_list = [(:recbuf, opts[:recbuf_size]), *option_list] if opts[:recbuf_size]
+    
     case erl.gen_tcp.connect(host.to_list(), port, option_list)
     when (:ok, socket)
       @channel = socket
