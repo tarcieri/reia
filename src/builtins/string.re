@@ -45,6 +45,7 @@ class String
   
   def puts
     "#{self}\n".print()
+    self
   end
   
   def size
