@@ -45,7 +45,8 @@ transform_node(#bindings{
         '_' -> 
           Node;
         _   ->
-          throw({error, {Line, lists:flatten(io_lib:format("unbound variable: '~s'", [Name]))}})
+          Msg = lists:flatten(io_lib:format("no such variable: '~s'", [Name])),
+          reia:throw('NameError', Line, Msg)
       end
   end;
 transform_node(#bindings{node=#bound_var{line=Line, name=Name}}=Bindings) ->
