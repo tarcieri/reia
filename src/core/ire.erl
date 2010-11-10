@@ -51,7 +51,6 @@ read_until_complete(Input, Prompt) ->
   end.
 
 parse(String, Binding) ->
-  io:format("String is: ~p~n", [String]),
   case reia_parse:parse(String) of
     %% Need more tokens
     {_Remaining, _Token, _Idx} ->

@@ -1,0 +1,15 @@
+#!/bin/sh
+
+USAGE="Usage: `basename $0` file.re"
+
+if [ $# -eq 0 ]; then
+	echo $USAGE >&2
+	exit 1
+fi
+
+PROGRAM=$1
+shift
+
+export REIA_HOME=.
+EXTRA_PATHS="-pz ebin -pz ../ebin"
+erl $EXTRA_PATHS -noshell +K true -s reia init -s reia_internal execute_file $PROGRAM -s init stop -extra $*

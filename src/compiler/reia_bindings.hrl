@@ -1,2 +1,2 @@
 % Nodes for Reia's Binding Annotated Format
--record(bindings, {node, entries}).
+-record(bindings, {node, entries, final, output}).

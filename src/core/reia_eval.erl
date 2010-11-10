@@ -9,7 +9,7 @@
 -export([new_binding/0, string/1, string/2, exprs/1, exprs/2]).
 -include("../compiler/reia_nodes.hrl").
 -include("../compiler/reia_bindings.hrl").
--define(return_value_var(Line), #identifier{line=Line, name='__reia_eval_return_value'}).
+-define(return_value_var(Line), #var{line=Line, name='__reia_eval_return_value'}).
 
 % Create a new set of local variable bindings
 new_binding() -> [].
@@ -31,36 +31,49 @@ exprs(Exprs) -> exprs(Exprs, new_binding()).
 
 % Evaluate the given set of expressions with the given bindings
 exprs(Exprs, Bindings) ->
-	io:format("Input Code: ~p~n", [Exprs]),
+	% io:format("Input Code: ~p~n", [Exprs]),
 	Exprs2 = annotate_return_value(Exprs, Bindings),
+  Filename = "reia_eval#" ++ stamp(),
+  Name = list_to_atom(Filename),
 
   {ok, Module} = reia_compiler:compile(
-    temporary_module(),
-    Exprs2,
-    [{toplevel_args, [Var || {Var, _} <- Bindings]}]
+    Filename,
+    [temporary_module(Name, [{var, 1, Var} || {Var, _} <- Bindings], Exprs2)],
+    [{toplevel_wrapper, false}]
   ),
 
-  Args = [Val || {_, Val} <- Bindings],
-  {ok, Name, {Value, NewBindings}} = reia_bytecode:load(Module, Args),
+  Args = list_to_tuple([Val || {_, Val} <- Bindings]),
+  {ok, Name, {Value, NewBindings}} = reia_bytecode:load(Module, [Args, nil]),
 
-	% FIXME: In the future it's possible eval will create things which persist
-	% beyond initial evaluation (e.g. lambdas, processes).  Once these features
-	% are added a different solution will be needed than a simple code:purge.
+	% FIXME: This code:purge is just failing and modules are just accumulating
+	% the code server whenever eval is used.  A "reaper" process is needed to
+	% periodically try to purge these modules until it succeeds.
   code:purge(Name),
+  
   {value, Value, NewBindings}.
 
-% Generate a temporary module name
-temporary_module() ->
-  RawHash = erlang:md5(term_to_binary(make_ref())),
-  HexHash = lists:flatten([io_lib:format("~.16b",[N]) || <<N>> <= RawHash]),
-  "reia_eval#" ++ HexHash.
+% Generate a timestamp to be used in a Reia module name
+% FIXME: atoms are never garbage collected, so a pool of these should be kept
+% and new ones created only when the pool is empty.
+stamp() ->
+  Timestamp = [integer_to_list(N) || N <- tuple_to_list(now())],
+  string:join(Timestamp, "_").
+
+temporary_module(Name, Args, Exprs) ->
+  #module{line=1, name=Name, exprs=[
+    #function{line=1, name=toplevel, args=Args, body=Exprs}
+  ]}.
 
 % Annotate the return value of the expression to include the bindings
 annotate_return_value(Exprs, Bindings) ->
-  [LastExpr|Rest] = lists:reverse(Exprs),
+  Exprs2 = case Exprs of
+    []    -> [#nil{line=1}];
+    [_|_] -> Exprs
+  end,
+  [LastExpr|Rest] = lists:reverse(Exprs2),
   Line = element(2, LastExpr),
   LastExpr2 = #match{line=Line, left=?return_value_var(Line), right=LastExpr},
-  ReturnValue = return_value(output_bindings(Exprs, Bindings), Line),
+  ReturnValue = return_value(output_bindings(Exprs2, Bindings), Line),
   lists:reverse([ReturnValue, LastExpr2 | Rest]).
 
 % Obtain a list of all variables which will be bound when eval is complete
@@ -83,5 +96,5 @@ bindings_list([Name|Rest], Line) ->
 binding_node(Name, Line) ->
   #tuple{line=Line, elements=[
     #atom{line=Line, name=Name},
-    #identifier{line=Line, name=Name}
+    #var{line=Line, name=Name}
   ]}.
