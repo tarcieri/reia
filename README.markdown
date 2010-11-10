@@ -14,7 +14,7 @@ Erlang is available here:
 
 You'll also need Ruby and Rake installed.  To compile Reia, type:
 
- rake
+   rake
 
 After compilation is complete, you'll see the test suite run and if everything
 went well it should hopefully pass.
