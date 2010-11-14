@@ -22,6 +22,7 @@ module ListTest
       join_test(),
       each_test(),
       map_test(),
+      all_test(),
       flatten_test(),
       #parenless_sugar_test(), # FIXME this should work eventually...
       to_list_test(),
@@ -96,6 +97,16 @@ module ListTest
   def map_test
     TestHelper.expect(List, "maps to a block") do
       ([40,41,42], [1,2,3].map { |n| n + 39 })
+    end
+  end
+
+  def all_test
+    TestHelper.expect(List, "can tell when all elements match a cond") do
+      (true, [1,2,3].all? { |x| x < 4 })
+    end
+
+    TestHelper.expect(List, "can tell when all elements match a cond") do
+      (false, [1,2,3].all? { |x| x > 2 })
     end
   end
   

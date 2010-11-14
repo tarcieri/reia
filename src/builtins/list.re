@@ -66,6 +66,12 @@ class List
   def map(&block)
     erl.lists.map(block, self)
   end
+
+  # Takes a conditional block and returns true if all elements meet the
+  # condition, false otherwise
+  def all?(&block)
+    erl.lists.all(block, self)
+  end
   
   # Flatten a deeply nested list
   def flatten
