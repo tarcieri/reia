@@ -72,6 +72,26 @@ class List
   def all?(&block)
     erl.lists.all(block, self)
   end
+
+  # Takes a conditional block and returns true if any element meets the
+  # condition, false otherwise
+  def any?(&block)
+    erl.lists.any(block, self)
+  end
+
+  # Takes a conditional block and returns a new list with only the elements
+  # for which the block evaluates to true
+  def select(&block)
+    erl.lists.filter(block, self)
+  end
+
+  # Takes a conditional block and partitions the list into two lists,
+  # where the first list includes the elements which meet the condition 
+  # and the second list contains the elements which do not meet the 
+  # condition.
+  def partition(&block)
+    erl.lists.partition(block, self)
+  end
   
   # Flatten a deeply nested list
   def flatten

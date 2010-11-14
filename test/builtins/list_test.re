@@ -23,6 +23,9 @@ module ListTest
       each_test(),
       map_test(),
       all_test(),
+      any_test(),
+      select_test(),
+      partition_test(),
       flatten_test(),
       #parenless_sugar_test(), # FIXME this should work eventually...
       to_list_test(),
@@ -109,7 +112,29 @@ module ListTest
       (false, [1,2,3].all? { |x| x > 2 })
     end
   end
-  
+
+  def any_test
+    TestHelper.expect(List, "can tell when an element matches a cond") do
+      (true, [1,2,3].any? { |x| x == 2 })
+    end
+
+    TestHelper.expect(List, "can tell when no elements match a cond") do
+      (false, [4,5,6].any? { |x| x == 2 })
+    end
+  end
+
+  def select_test
+    TestHelper.expect(List, "can select certain elements to form a new list") do
+      ([2,4,6], [1,2,3,4,5,6].select { |x| x % 2 == 0 })
+    end
+  end
+
+  def partition_test
+    TestHelper.expect(List, "can be partitioned") do
+      (([2,4,6],[1,3,5]), [1,2,3,4,5,6].partition { |x| x % 2 == 0 })
+    end
+  end
+
   # flattens from a deep list
   def flatten_test
     TestHelper.expect(List, "flattens from a deep list") do
