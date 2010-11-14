@@ -105,7 +105,7 @@ module ListTest
       (true, [1,2,3].all? { |x| x < 4 })
     end
 
-    TestHelper.expect(List, "can tell when all elements match a cond") do
+    TestHelper.expect(List, "can tell when not all elements match a cond") do
       (false, [1,2,3].all? { |x| x > 2 })
     end
   end
