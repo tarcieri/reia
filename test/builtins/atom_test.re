@@ -12,15 +12,15 @@ module AtomTest
 
   # converts to a string
   def to_s_test
-    TestHelper.expect(Atom, "casts to a string") do
-      ("foo bar", :'foo bar'.to_s())
+    TestCase("Atom casts to a string") do |test|
+      test.assert_equal("foo_bar", :'foo bar'.to_s())
     end
   end
   
   # inspects properly
   def inspect_test
-    TestHelper.expect(Atom, "inspects properly") do
-      (":'foo bar'", :'foo bar'.inspect())
+    TestCase("Atom inspects properly") do |test|
+      test.assert_equal(":'foo bar'", :'foo bar'.inspect())
     end
   end
 end
