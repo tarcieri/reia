@@ -23,7 +23,6 @@ transform_class(#class{line=Line, name=Name, parent=Parent, exprs=Methods}) ->
   MethodTable = build_method_table(Methods),
   
   Initializers = transform_initialize_methods(Name, MethodTable),
-  CallifiedInitializers = [callify_method(Initialize) || Initialize <- Initializers],
   MethodMissings = transform_method_missings(Parent, MethodTable),
   
   MethodTable2 = orddict:erase(initialize, MethodTable),
@@ -31,7 +30,7 @@ transform_class(#class{line=Line, name=Name, parent=Parent, exprs=Methods}) ->
   
   Methods2 = [Meths || {_, Meths} <- orddict:to_list(MethodTable3)],
   Methods3 = [prepare_method(Method) || Method <- lists:flatten(Methods2)],
-  Methods4 = CallifiedInitializers ++ Methods3 ++ [method_missing_thunk()],
+  Methods4 = Initializers ++ Methods3 ++ [method_missing_thunk()],
   
   #class{line=Line, name=Name, exprs=Methods4}.
 
@@ -64,7 +63,7 @@ transform_initialize_methods(_Name, MethodTable) ->
   end,
 
   lists:map(fun(Method) ->
-    Initialize = reia_ivars:mutable_method(Method),
+    Initialize = prepare_initialize_method(Method),
 
     Line = Initialize#function.line,  
     Result = #native_call{
@@ -140,6 +139,12 @@ method_missing_thunk() ->
     ]
   }.
   
+% Prepare the finalized form of an initialize method
+prepare_initialize_method(Method) ->
+  Method2 = reia_ivars:mutable_method(Method),
+  Method3 = transform_method(Method2),
+  callify_method(Method3).
+    
 % Prepare the finalized form of a method
 prepare_method(Method) ->
   Method2 = reia_ivars:immutable_method(Method),
