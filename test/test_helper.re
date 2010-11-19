@@ -10,7 +10,7 @@ class AssertionFailure < StandardError; end
 class TestCase
   def initialize(@name, &block)
     @result = try
-      block()
+      block(self)
     catch ex
       (:error, ex)
     end
