@@ -395,6 +395,14 @@ class_inst -> module_name args :
     args  = '$2'#args.args,
     block = ?args_default_block(#nil{}, '$2')
   }.
+  
+class_inst -> module_name args block :
+  #class_inst{
+    line  = ?line('$1'),
+    class = ?identifier_name('$1'),
+    args  = '$2'#args.args,
+    block = '$3'
+  }.
 
 %% Local function calls
 call -> function_identifier args : 
