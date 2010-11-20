@@ -28,7 +28,40 @@ class List
       replace(index, value)
     end
   end
-  
+
+  # Returns the first element in the list
+  def first
+    erl.lists.nth(1, self)
+  end
+
+  # Returns the first n-elements in the list
+  def first(n)
+    erl.lists.sublist(self, n)
+  end
+
+  # Returns the last element in the list
+  def last
+    erl.lists.nth(size(), self)
+  end
+
+  # returns the last n-elements in the list
+  def last(n)
+    index = [0, (size() - n)].max()
+    erl.lists.nthtail(index,self)
+  end
+
+  # Returns the first element of list that compares less than or equal
+  # to all other elements of list.
+  def min
+    erl.lists.min(self)
+  end
+
+  # Returns the first element of list that compares greater than or equal
+  # to all other elements of list.
+  def max
+    erl.lists.max(self)
+  end
+
   # Number of elements in a list
   def size
     erl.length(self)
@@ -38,7 +71,7 @@ class List
   def reverse
     erl.lists.reverse(self)
   end
-  
+ 
   # Join a list into a string, casting all elements to strings
   def join(separator)
     elements = case self

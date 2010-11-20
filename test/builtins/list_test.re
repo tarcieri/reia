@@ -16,6 +16,12 @@ module ListTest
     [
       size_test(), 
       nth_test(),
+      first_test(),
+      first_n_test(),
+      last_test(),
+      last_n_test(),
+      min_test(),
+      max_test(),
       replace_test(),
       complex_replace_test(),
       reverse_test(), 
@@ -51,6 +57,50 @@ module ListTest
     TestHelper.expect(List, "retrieves the nth element correctly") do    
       list = [1,2,3,4,5]
       (true, list[0] == 1 and list[1] == 2 and list[4] == 5 and list[-1] == 5 and list[-3] == 3 and list[-10] == nil)
+    end
+  end
+
+  def first_test
+    TestHelper.expect(List, "retrieves the first element") do
+      (4, [4,7,9].first())
+    end
+  end
+
+  def first_n_test
+    TestHelper.expect(List, "retrieves the first N elements") do
+      ([4,7], [4,7,9].first(2))
+    end
+
+    TestHelper.expect(List, "retreives whole list if N exceeds list size") do
+      ([4,7,9], [4,7,9].first(1000))
+    end
+  end
+
+  def last_test
+    TestHelper.expect(List, "retreives the last element") do
+      (9, [4,7,9].last())
+    end
+  end
+
+  def last_n_test
+    TestHelper.expect(List, "retreives the last N elements") do
+      ([7,9], [4,7,9].last(2))
+    end
+
+    TestHelper.expect(List, "retreives whole list if N exceeds list size") do
+      ([4,7,9], [4,7,9].last(1000))
+    end
+  end
+
+  def min_test
+    TestHelper.expect(List, "retreives smallest element in the list") do
+      (3, [5,9,3,13,42,7].min())
+    end
+  end
+
+  def max_test
+    TestHelper.expect(List, "retreives largest element in the list") do
+      (42, [5,9,3,13,42,7].max())
     end
   end
   
