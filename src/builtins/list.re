@@ -53,6 +53,12 @@ class List
   def join
     join("")
   end
+
+  # Returns a new list built by concatenating the two lists together to 
+  # produce a third list.
+  def append(other_list)
+    erl.lists.append(self, other_list)
+  end
   
   # Iterate over a list, successively calling the given block and returning
   # the receiver when done

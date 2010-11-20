@@ -20,6 +20,7 @@ module ListTest
       complex_replace_test(),
       reverse_test(), 
       join_test(),
+      append_test(),
       each_test(),
       map_test(),
       all_test(),
@@ -85,6 +86,13 @@ module ListTest
   def join_test
     TestHelper.expect(List, "joins into a string") do
       ("1,2,3", [1,2,3].join(','))
+    end
+  end
+
+  # concatenates two lists together to form a third list
+  def append_test
+    TestHelper.expect(List, "is concatenated with another list") do
+      ([1,2,3,4,5,6], [1,2,3].append([4,5,6]))
     end
   end
   
