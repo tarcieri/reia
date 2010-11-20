@@ -1,9 +1,33 @@
 #
 # TestHelper: Helper functions for Reia's test framework
-# Copyright (C)2008 Tony Arcieri
+# Copyright (C)2008-10 Tony Arcieri
 # 
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
+
+class AssertionFailure < StandardError; end
+
+class TestCase
+  def initialize(@name, &block)
+    @result = try
+      block(self)
+    catch ex
+      (:error, ex)
+    end
+  end
+  
+  def assert_equal(expected, actual)
+    if expected == actual
+      true
+    else
+      throw(AssertionFailure, "expected: #{expected.inspect()}, actual: #{actual.inspect()}")
+    end
+  end
+  
+  # FIXME: should be an attr_readers
+  def name;   @name;   end
+  def result; @result; end
+end
 
 module TestHelper  
   def expect(group, description, &block)
