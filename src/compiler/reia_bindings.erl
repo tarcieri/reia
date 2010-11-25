@@ -253,7 +253,7 @@ revert_node(Node) ->
   reia_syntax:map_subtrees(fun revert_node/1, Node).
     
 process_clauses(Clauses, State) ->
-  % Proceed with the normal SSA transformation on each clause
+  % Annotate each clause
   ClauseBindings = lists:map(fun(Clause) ->
     {[Clause2], St} = reia_syntax:mapfold_subtrees(
       fun transform_node/2,
