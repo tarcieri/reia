@@ -9,6 +9,7 @@
 -export([transform/2]).
 -include("reia_nodes.hrl").
 -include("reia_object.hrl").
+-include("reia_bindings.hrl").
 
 transform(Exprs, _Options) ->
   reia_syntax:map_subtrees(fun transform/1, Exprs).
@@ -166,10 +167,39 @@ callify_method(Method) ->
     name = call,
     args = Args
   }.
+
+transform_method(Method) ->
+  {ok, AnnotatedMethod} = reia_bindings:transform([Method]),
+  [Method2] = reia_syntax:map_subtrees(fun transform_method_expr/1, AnnotatedMethod),
+  Method2.
   
 % Transform local calls to the OO "call" signature
-transform_method(#local_call{line=Line, name=Name, args=Args, block=Block}) ->
-  Expr = #native_call{
+transform_method_expr(#bindings{
+  node=#local_call{name=Name}=Call, 
+  entries=Bindings
+}) ->
+  Call2 = case dict:find(Name, Bindings) of
+    {ok, _Version} ->
+      Call; % Pass through calls to bound variables verbatim
+    error ->
+      transform_local_call(Call)
+  end,
+
+  reia_syntax:map_subtrees(fun transform_method_expr/1, Call2);
+    
+% Transform references to self
+transform_method_expr(#bindings{node=#self{line=Line}}) ->
+  ?self(Line);
+  
+transform_method_expr(#bindings{node=Expr}) ->
+  reia_syntax:map_subtrees(fun transform_method_expr/1, Expr);
+  
+transform_method_expr(Expr) ->
+  reia_syntax:map_subtrees(fun transform_method_expr/1, Expr).
+
+% Transform local calls to dispatch to self
+transform_local_call(#local_call{line=Line, name=Name, args=Args, block=Block}) ->
+  #native_call{
     line     = Line,
     module   = reia_dispatch,
     function = call,
@@ -179,13 +209,4 @@ transform_method(#local_call{line=Line, name=Name, args=Args, block=Block}) ->
       #tuple{line=Line, elements=Args},
       Block
     ]
-  },
-
-  reia_syntax:map_subtrees(fun transform_method/1, Expr);
-    
-% Transform references to self
-transform_method(#self{line=Line}) ->
-  ?self(Line);
-  
-transform_method(Expr) ->
-  reia_syntax:map_subtrees(fun transform_method/1, Expr).
+  }.
