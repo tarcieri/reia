@@ -44,6 +44,12 @@ class Dict
     to_list().empty?()
   end
   
+  def insert(key, value)
+    dict = self
+    dict[key] = value
+    dict
+  end
+  
   def merge(dict, &block)
     if block
       erl.dict.merge(block, self, dict)
