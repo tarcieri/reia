@@ -1,0 +1,42 @@
+json_value <- space? (object / array / string / number / true / false / null) space? `lists:nth(2, Node)`;
+object <- '{' space? head:pair tail:(space? ',' space? pair)* space? '}' / '{' space? '}' 
+`
+case length(Node) of
+  3 -> {struct, []};
+  _ ->
+    Head = proplists:get_value(head, Node),
+    Rest = [lists:nth(4, I) || I <- proplists:get_value(tail, Node)],
+    {struct, [Head|Rest]}
+end
+`;
+pair <- space? key:string space? ':' space? value:json_value space? `{proplists:get_value(key, Node), proplists:get_value(value, Node)}`;
+array <- '[' space? head:json_value tail:(space? ',' space? json_value)* space? ']' / '[' space? ']' 
+`
+case length(Node) of
+  3 -> [];
+  _ -> 
+    Head = proplists:get_value(head, Node),
+    Rest = [lists:nth(4, I) || I <- proplists:get_value(tail, Node)],
+    [Head|Rest]
+end
+`;
+string <- '"' chars:(!'"' ("\\\\" / '\\"' / .))* '"' `lists:flatten(proplists:get_value(chars, Node))`;
+number <- int frac? exp?
+`
+case Node of
+  [Int, [], []] -> list_to_integer(lists:flatten([Int]));
+  [Int, Frac, []] -> list_to_float(lists:flatten([Int, Frac]));
+  [Int, [], Exp] -> list_to_float(lists:flatten([Int, ".0", Exp]));
+  _ -> list_to_float(lists:flatten(Node))
+end
+`;
+int <- '-'? (non_zero_digit digit+) / digit ~;
+frac <- '.' digit+ ~;
+exp <- e digit+ ~;
+e <- [eE] ('+' / '-')? ~;
+non_zero_digit <- [1-9] ~;
+digit <- [0-9] ~;
+true <- 'true' `true`;
+false <- 'false' `false`;
+null <- 'null' `null`;
+space <- [ \t\n\s\r]* ~;

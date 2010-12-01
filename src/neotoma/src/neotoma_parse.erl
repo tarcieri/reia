@@ -1,7 +1,57 @@
 -module(neotoma_parse).
 -export([parse/1,file/1]).
 -compile(nowarn_unused_vars).
--compile({nowarn_unused_function,[p/4, p/5, p_eof/0, p_optional/1, p_not/1, p_assert/1, p_seq/1, p_and/1, p_choose/1, p_zero_or_more/1, p_one_or_more/1, p_label/2, p_string/1, p_anything/0, p_charclass/1]}).
+-compile({nowarn_unused_function,[p/4, p/5, p_eof/0, p_optional/1, p_not/1, p_assert/1, p_seq/1, p_and/1, p_choose/1, p_zero_or_more/1, p_one_or_more/1, p_label/2, p_string/1, p_anything/0, p_charclass/1, line/1, column/1]}).
+
+
+
+escape_quotes(String) ->
+  {ok, RE} = re:compile("\""),
+  re:replace(String, RE, "\\\\\"", [global, {return, list}]).
+
+add_lhs(Symbol, Index) ->
+  case ets:lookup(memo_table_name(), lhs) of
+    [] ->
+      ets:insert(memo_table_name(), {lhs, [{Symbol,Index}]});
+    [{lhs, L}] when is_list(L) ->
+      ets:insert(memo_table_name(), {lhs, [{Symbol,Index}|L]})
+  end.
+
+add_nt(Symbol, Index) ->
+  case ets:lookup(memo_table_name(), nts) of
+    [] ->
+      ets:insert(memo_table_name(), {nts, [{Symbol,Index}]});
+    [{nts, L}] when is_list(L) ->
+      case proplists:is_defined(Symbol, L) of
+        true ->
+          ok;
+        _ ->
+          ets:insert(memo_table_name(), {nts, [{Symbol,Index}|L]})
+      end
+  end.
+
+verify_rules() ->
+  [{lhs, LHS}] = ets:lookup(memo_table_name(), lhs),
+  [{nts, NTs}] = ets:lookup(memo_table_name(), nts),
+  [Root|NonRoots] = lists:reverse(LHS),
+  lists:foreach(fun({Sym,Idx}) ->
+                    case proplists:is_defined(Sym, NTs) of
+                      true ->
+                        ok;
+                      _ ->
+                        io:format("neotoma warning: rule '~s' is unused. ~p~n", [Sym,Idx])
+                    end
+                end, NonRoots),
+  lists:foreach(fun({S,I}) ->
+                    case proplists:is_defined(S, LHS) of
+                      true ->
+                        ok;
+                      _ ->
+                        io:format("neotoma error: nonterminal '~s' has no reduction. (found at ~p) No parser will be generated!~n", [S,I]),
+                        exit({neotoma, {no_reduction, list_to_atom(S)}})
+                    end
+                end, NTs),
+    Root.
 
 file(Filename) -> {ok, Bin} = file:read_file(Filename), parse(binary_to_list(Bin)).
 
@@ -21,7 +71,7 @@ parse(Input) ->
              {code, Block} -> Block;
              _ -> []
          end,
-  [{rules, Rules ++ "\n" ++ Code}, {root, RootRule}, {transform, ets:lookup(?MODULE,gen_transform)}]
+  [{rules, Rules}, {code, Code}, {root, RootRule}, {transform, ets:lookup(memo_table_name(),gen_transform)}]
  end).
 
 'declaration_sequence'(Input, Index) ->
@@ -38,7 +88,7 @@ parse(Input) ->
   Transform = case lists:nth(6,Tail) of
                   {code, CodeBlock} -> CodeBlock;
                   _ ->
-                      ets:insert_new(?MODULE,{gen_transform, true}),
+                      ets:insert_new(memo_table_name(),{gen_transform, true}),
                       "transform('"++Symbol++"', Node, Idx)"
                   end,
   "'"++Symbol++"'"++"(Input, Index) ->\n  " ++
@@ -58,7 +108,7 @@ parse(Input) ->
  end).
 
 'alternative'(Input, Index) ->
-  p(Input, Index, 'alternative', fun(I,D) -> (p_choose([fun 'sequence'/2, fun 'primary'/2]))(I,D) end, fun(Node, Idx) -> Node end).
+  p(Input, Index, 'alternative', fun(I,D) -> (p_choose([fun 'sequence'/2, fun 'labeled_primary'/2]))(I,D) end, fun(Node, Idx) -> Node end).
 
 'primary'(Input, Index) ->
   p(Input, Index, 'primary', fun(I,D) -> (p_choose([p_seq([fun 'prefix'/2, fun 'atomic'/2]), p_seq([fun 'atomic'/2, fun 'suffix'/2]), fun 'atomic'/2]))(I,D) end, fun(Node, Idx) -> 
@@ -73,14 +123,14 @@ end
  end).
 
 'sequence'(Input, Index) ->
-  p(Input, Index, 'sequence', fun(I,D) -> (p_seq([p_label('head', fun 'labeled_sequence_primary'/2), p_label('tail', p_one_or_more(p_seq([fun 'space'/2, fun 'labeled_sequence_primary'/2])))]))(I,D) end, fun(Node, Idx) -> 
+  p(Input, Index, 'sequence', fun(I,D) -> (p_seq([p_label('head', fun 'labeled_primary'/2), p_label('tail', p_one_or_more(p_seq([fun 'space'/2, fun 'labeled_primary'/2])))]))(I,D) end, fun(Node, Idx) -> 
   Tail = [lists:nth(2, S) || S <- proplists:get_value(tail, Node)],
   Statements = [proplists:get_value(head, Node)|Tail],
   "p_seq(["++ string:join(Statements, ", ") ++ "])"
  end).
 
-'labeled_sequence_primary'(Input, Index) ->
-  p(Input, Index, 'labeled_sequence_primary', fun(I,D) -> (p_seq([p_optional(fun 'label'/2), fun 'primary'/2]))(I,D) end, fun(Node, Idx) -> 
+'labeled_primary'(Input, Index) ->
+  p(Input, Index, 'labeled_primary', fun(I,D) -> (p_seq([p_optional(fun 'label'/2), fun 'primary'/2]))(I,D) end, fun(Node, Idx) -> 
   case hd(Node) of
     [] -> lists:nth(2, Node);
     Label -> "p_label('" ++ Label ++ "', "++lists:nth(2, Node)++")"
@@ -151,7 +201,7 @@ end
   p(Input, Index, 'anything_symbol', fun(I,D) -> (p_string("."))(I,D) end, fun(Node, Idx) ->  "p_anything()"  end).
 
 'alpha_char'(Input, Index) ->
-  p(Input, Index, 'alpha_char', fun(I,D) -> (p_charclass("[a-z_]"))(I,D) end, fun(Node, Idx) -> Node end).
+  p(Input, Index, 'alpha_char', fun(I,D) -> (p_charclass("[A-Za-z_]"))(I,D) end, fun(Node, Idx) -> Node end).
 
 'alphanumeric_char'(Input, Index) ->
   p(Input, Index, 'alphanumeric_char', fun(I,D) -> (p_choose([fun 'alpha_char'/2, p_charclass("[0-9]")]))(I,D) end, fun(Node, Idx) -> Node end).
@@ -172,55 +222,6 @@ end
        _   -> {code, lists:flatten(proplists:get_value('code', Node))}
    end
  end).
-
-escape_quotes(String) ->
-  {ok, RE} = re:compile("\""),
-  re:replace(String, RE, "\\\\\"", [global, {return, list}]).
-
-add_lhs(Symbol, Index) ->
-  case ets:lookup(?MODULE, lhs) of
-    [] ->
-      ets:insert(?MODULE, {lhs, [{Symbol,Index}]});
-    [{lhs, L}] when is_list(L) ->
-      ets:insert(?MODULE, {lhs, [{Symbol,Index}|L]})
-  end.
-
-add_nt(Symbol, Index) ->
-  case ets:lookup(?MODULE, nts) of
-    [] ->
-      ets:insert(?MODULE, {nts, [{Symbol,Index}]});
-    [{nts, L}] when is_list(L) ->
-      case proplists:is_defined(Symbol, L) of
-        true ->
-          ok;
-        _ ->
-          ets:insert(?MODULE, {nts, [{Symbol,Index}|L]})
-      end
-  end.
-
-verify_rules() ->
-  [{lhs, LHS}] = ets:lookup(?MODULE, lhs),
-  [{nts, NTs}] = ets:lookup(?MODULE, nts),
-  [Root|NonRoots] = lists:reverse(LHS),
-  lists:foreach(fun({Sym,Idx}) ->
-                    case proplists:is_defined(Sym, NTs) of
-                      true ->
-                        ok;
-                      _ ->
-                        io:format("neotoma warning: rule '~s' is unused. ~p~n", [Sym,Idx])
-                    end
-                end, NonRoots),
-  lists:foreach(fun({S,I}) ->
-                    case proplists:is_defined(S, LHS) of
-                      true ->
-                        ok;
-                      _ ->
-                        io:format("neotoma error: nonterminal '~s' has no reduction. (found at ~p) No parser will be generated!~n", [S,I]),
-                        exit({neotoma, {no_reduction, list_to_atom(S)}})
-                    end
-                end, NTs),
-    Root.
-
 
 
 
@@ -253,19 +254,22 @@ p(Inp, StartIndex, Name, ParseFun, TransformFun) ->
   end.
 
 setup_memo() ->
-  ets:new(?MODULE, [named_table, set]).
+  put(parse_memo_table, ets:new(?MODULE, [set])).
 
 release_memo() ->
-  ets:delete(?MODULE).
+  ets:delete(memo_table_name()).
 
 memoize(Position, Struct) ->
-  ets:insert(?MODULE, {Position, Struct}).
+  ets:insert(memo_table_name(), {Position, Struct}).
 
 get_memo(Position) ->
-  case ets:lookup(?MODULE, Position) of
+  case ets:lookup(memo_table_name(), Position) of
     [] -> dict:new();
     [{Position, Dict}] -> Dict
   end.
+
+memo_table_name() ->
+    get(parse_memo_table).
 
 p_eof() ->
   fun([], Index) -> {eof, [], Index};
@@ -383,6 +387,12 @@ p_charclass(Class) ->
         _ -> {fail,{expected, {character_class, Class}, Index}}
       end
   end.
+
+line({{line,L},_}) -> L;
+line(_) -> undefined.
+
+column({_,{column,C}}) -> C;
+column(_) -> undefined.
 
 p_advance_index(MatchedInput, Index) when is_list(MatchedInput) -> % strings
   lists:foldl(fun p_advance_index/2, Index, MatchedInput);
