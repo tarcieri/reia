@@ -26,11 +26,13 @@ file(InputGrammar, Options) ->
     Parsed = parse_grammar(InputGrammar),
     Rules = proplists:get_value(rules, Parsed),
     Root = proplists:get_value(root, Parsed),
+    Code = proplists:get_value(code, Parsed),
     GenTransform = proplists:get_value(transform, Parsed),
-    ModuleAttrs = generate_module_attrs(ModuleName, Root),
+    ModuleAttrs = generate_module_attrs(ModuleName),
+    EntryFuns = generate_entry_functions(Root),
     TransformFun = create_transform(TransformModule, OutputDir, GenTransform),
-    {ok, PegIncludes} = file:read_file(code:priv_dir(neotoma) ++ "/peg_includes.erl"),
-    file:write_file(OutputFilename, [ModuleAttrs, "\n", Rules, "\n", TransformFun, "\n", PegIncludes]).
+    {ok, PegIncludes} = file:read_file(filename:join([filename:dirname(code:which(neotoma)), "..", "priv", "peg_includes.erl"])),
+    file:write_file(OutputFilename, [ModuleAttrs, "\n", Code, "\n", EntryFuns, "\n", Rules, "\n", TransformFun, "\n", PegIncludes]).
 
 validate_params(InputGrammar, _, _, OutputFile) when InputGrammar =:= OutputFile ->
     throw({badarg, "Input and output file are the same!"});
@@ -48,8 +50,7 @@ validate_params(_,_, TransformModule, OutputFile) ->
         _ -> ok
     end.
 
-generate_module_attrs(ModName, Root) ->
-    {RootRule,_} = Root,
+generate_module_attrs(ModName) ->
     ["-module(",atom_to_list(ModName),").\n",
      "-export([parse/1,file/1]).\n",
      % This option could be problematic if your grammar is broken in
@@ -58,8 +59,11 @@ generate_module_attrs(ModName, Root) ->
      % In a future version we should just emit the used combinators,
      % excluding the rest.
      "-compile(nowarn_unused_vars).\n",
-     "-compile({nowarn_unused_function,[p/4, p/5, p_eof/0, p_optional/1, p_not/1, p_assert/1, p_seq/1, p_and/1, p_choose/1, p_zero_or_more/1, p_one_or_more/1, p_label/2, p_string/1, p_anything/0, p_charclass/1]}).\n\n",
-     "file(Filename) -> {ok, Bin} = file:read_file(Filename), parse(binary_to_list(Bin)).\n\n",
+     "-compile({nowarn_unused_function,[p/4, p/5, p_eof/0, p_optional/1, p_not/1, p_assert/1, p_seq/1, p_and/1, p_choose/1, p_zero_or_more/1, p_one_or_more/1, p_label/2, p_string/1, p_anything/0, p_charclass/1, line/1, column/1]}).\n\n"].
+
+generate_entry_functions(Root) ->
+    {RootRule,_} = Root,
+     ["file(Filename) -> {ok, Bin} = file:read_file(Filename), parse(binary_to_list(Bin)).\n\n",
      "parse(Input) ->\n",
      "  setup_memo(),\n",
      "  Result = case '",RootRule,"'(Input,{{line,1},{column,1}}) of\n",

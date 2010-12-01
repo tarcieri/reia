@@ -1,27 +1,55 @@
--module(neotoma_peg).
--author("Sean Cribbs <seancribbs@gmail.com>").
+-module(arithmetic).
+-export([parse/1,file/1]).
+-compile(nowarn_unused_vars).
+-compile({nowarn_unused_function,[p/4, p/5, p_eof/0, p_optional/1, p_not/1, p_assert/1, p_seq/1, p_and/1, p_choose/1, p_zero_or_more/1, p_one_or_more/1, p_label/2, p_string/1, p_anything/0, p_charclass/1, line/1, column/1]}).
 
-% Thanks to Jeffrey A. Meunier for the original parser.erl library from which I
-% lifted many of these functions, which in turn was based on the Haskell
-% "parsec" library by Erik Meijer.  I've renamed the functions to be more
-% Erlang-y.
 
-%% @type parse_fun() = function(Input::string(), Index::parse_index()) .
-%% @type parse_index() = {{line, integer()},{column,integer()}} .
-%% @type parse_result() = ({fail, Reason} | {Result::any(), Remainder::string(), NewIndex::parse_index()}) .
 
--export([p/4, p/5]).
--export([setup_memo/0, release_memo/0]).
+file(Filename) -> {ok, Bin} = file:read_file(Filename), parse(binary_to_list(Bin)).
 
--export([p_eof/0, p_optional/1, p_not/1, p_assert/1, p_seq/1, p_and/1, p_choose/1, p_zero_or_more/1, p_one_or_more/1, p_label/2, p_string/1, p_anything/0, p_charclass/1]).
+parse(Input) ->
+  setup_memo(),
+  Result = case 'additive'(Input,{{line,1},{column,1}}) of
+             {AST, [], _Index} -> AST;
+             Any -> Any
+           end,
+  release_memo(), Result.
 
-%% @doc Memoizing parsing function wrapper.  This form does not transform the result of a successful parse.
-%% @see p/5.
+'additive'(Input, Index) ->
+  p(Input, Index, 'additive', fun(I,D) -> (p_choose([p_seq([fun 'multitive'/2, p_string("+"), fun 'additive'/2]), fun 'multitive'/2]))(I,D) end, fun(Node, Idx) -> 
+case Node of
+  Int when is_integer(Int) -> Int;
+  [A, "+", B] -> A + B
+end
+ end).
+
+'multitive'(Input, Index) ->
+  p(Input, Index, 'multitive', fun(I,D) -> (p_choose([p_seq([fun 'primary'/2, p_string("*"), fun 'multitive'/2]), fun 'primary'/2]))(I,D) end, fun(Node, Idx) -> 
+case Node of
+  Int when is_integer(Int) -> Int;
+  [A,"*",B] -> A * B
+end
+ end).
+
+'primary'(Input, Index) ->
+  p(Input, Index, 'primary', fun(I,D) -> (p_choose([p_seq([p_string("("), fun 'additive'/2, p_string(")")]), fun 'decimal'/2]))(I,D) end, fun(Node, Idx) -> 
+case Node of
+  Int when is_integer(Int) -> Int;
+  List when is_list(List) -> lists:nth(2,List)
+end
+ end).
+
+'decimal'(Input, Index) ->
+  p(Input, Index, 'decimal', fun(I,D) -> (p_one_or_more(p_charclass("[0-9]")))(I,D) end, fun(Node, Idx) -> list_to_integer(Node) end).
+
+
+
+
+
+
 p(Inp, Index, Name, ParseFun) ->
   p(Inp, Index, Name, ParseFun, fun(N, _Idx) -> N end).
 
-%% @doc Memoizing and transforming parsing function wrapper.
-%% @spec p(Input::string(), StartIndex::parse_index(), Name::atom(), ParseFun::parse_fun(), TransformFun::transform_fun()) -> parse_result()
 p(Inp, StartIndex, Name, ParseFun, TransformFun) ->
   % Grab the memo table from ets
   Memo = get_memo(StartIndex),
@@ -44,32 +72,28 @@ p(Inp, StartIndex, Name, ParseFun, TransformFun) ->
       end
   end.
 
-%% @doc Sets up the packrat memoization table for this parse. Used internally by generated parsers.
-%% @spec setup_memo() -> any()
 setup_memo() ->
-  ets:new(?MODULE, [named_table, set]).
+  put(parse_memo_table, ets:new(?MODULE, [set])).
 
-%% @doc Cleans up the packrat memoization table.  Used internally by generated parsers.
 release_memo() ->
-  ets:delete(?MODULE).
+  ets:delete(memo_table_name()).
 
 memoize(Position, Struct) ->
-  ets:insert(?MODULE, {Position, Struct}).
+  ets:insert(memo_table_name(), {Position, Struct}).
 
 get_memo(Position) ->
-  case ets:lookup(?MODULE, Position) of
+  case ets:lookup(memo_table_name(), Position) of
     [] -> dict:new();
     [{Position, Dict}] -> Dict
   end.
 
-%% @doc Generates a parse function that matches the end of the buffer.
-%% @spec p_eof() -> parse_fun()
+memo_table_name() ->
+    get(parse_memo_table).
+
 p_eof() ->
   fun([], Index) -> {eof, [], Index};
      (_, Index) -> {fail, {expected, eof, Index}} end.
 
-%% @doc Generates a parse function that treats the passed parse function as optional.
-%% @spec p_optional(parse_fun()) -> parse_fun()
 p_optional(P) ->
   fun(Input, Index) ->
       case P(Input, Index) of
@@ -78,8 +102,6 @@ p_optional(P) ->
       end
   end.
 
-%% @doc Generates a parse function that ensures the passed function will not match without consuming any input, that is, negative lookahead.
-%% @spec p_not(parse_fun()) -> parse_fun()
 p_not(P) ->
   fun(Input, Index)->
       case P(Input,Index) of
@@ -89,8 +111,6 @@ p_not(P) ->
       end
   end.
 
-%% @doc Generates a parse function that ensures the passed function will match, without consuming any input, that is, positive lookahead.
-%% @spec p_assert(parse_fun()) -> parse_fun()
 p_assert(P) ->
   fun(Input,Index) ->
       case P(Input,Index) of
@@ -99,13 +119,9 @@ p_assert(P) ->
       end
   end.
 
-%% @doc Alias for p_seq/1.
-%% @see p_seq/1.
 p_and(P) ->
   p_seq(P).
 
-%% @doc Generates a parse function that will match the passed parse functions in order.
-%% @spec p_seq([parse_fun()]) -> parse_fun()
 p_seq(P) ->
   fun(Input, Index) ->
       p_all(P, Input, Index, [])
@@ -118,8 +134,6 @@ p_all([P|Parsers], Inp, Index, Accum) ->
     {Result, InpRem, NewIndex} -> p_all(Parsers, InpRem, NewIndex, [Result|Accum])
   end.
 
-%% @doc Generates a parse function that will match at least one of the passed parse functions (ordered choice).
-%% @spec choose([parse_fun()]) -> parse_fun()
 p_choose(Parsers) ->
   fun(Input, Index) ->
       p_attempt(Parsers, Input, Index, none)
@@ -136,15 +150,11 @@ p_attempt([P|Parsers], Input, Index, FirstFailure)->
     Result -> Result
   end.
 
-%% @doc Generates a parse function that will match any number of the passed parse function in sequence (optional greedy repetition).
-%% @spec p_zero_or_more(parse_fun()) -> parse_fun()
 p_zero_or_more(P) ->
   fun(Input, Index) ->
       p_scan(P, Input, Index, [])
   end.
 
-%% @doc Generates a parse function that will match at least one of the passed parse function in sequence (greedy repetition).
-%% @spec p_one_or_more(parse_fun()) -> parse_fun()
 p_one_or_more(P) ->
   fun(Input, Index)->
       Result = p_scan(P, Input, Index, []),
@@ -157,8 +167,6 @@ p_one_or_more(P) ->
       end
   end.
 
-%% @doc Generates a parse function that will tag the result of the passed parse function with a label when it succeeds.  The tagged result will be a 2-tuple of {Tag, Result}.
-%% @spec p_label(Tag::anything(), P::parse_fun()) -> parse_fun()
 p_label(Tag, P) ->
   fun(Input, Index) ->
       case P(Input, Index) of
@@ -176,8 +184,6 @@ p_scan(P, Inp, Index, Accum) ->
     {Result, InpRem, NewIndex} -> p_scan(P, InpRem, NewIndex, [Result | Accum])
   end.
 
-%% @doc Generates a parse function that will match the passed string on the head of the buffer.
-%% @spec p_string(string()) -> parse_fun()
 p_string(S) ->
   fun(Input, Index) ->
       case lists:prefix(S, Input) of
@@ -186,19 +192,11 @@ p_string(S) ->
       end
   end.
 
-%% @doc Generates a parse function that will match any single character.
-%% @spec anything() -> parse_fun()
 p_anything() ->
   fun([], Index) -> {fail, {expected, any_character, Index}};
      ([H|T], Index) -> {H, T, p_advance_index(H, Index)}
   end.
 
-%% @doc Generates a parse function that will match any single character from the passed "class".  The class should be a PCRE-compatible character class in a string.
-%%   Examples:
-%%     "[a-z]"
-%%     "[0-9]"
-%%     "[^z]" .
-%% @spec charclass(string()) -> parse_fun()
 p_charclass(Class) ->
   fun(Inp, Index) ->
      {ok, RE} = re:compile("^"++Class),
@@ -208,6 +206,12 @@ p_charclass(Class) ->
         _ -> {fail,{expected, {character_class, Class}, Index}}
       end
   end.
+
+line({{line,L},_}) -> L;
+line(_) -> undefined.
+
+column({_,{column,C}}) -> C;
+column(_) -> undefined.
 
 p_advance_index(MatchedInput, Index) when is_list(MatchedInput) -> % strings
   lists:foldl(fun p_advance_index/2, Index, MatchedInput);
