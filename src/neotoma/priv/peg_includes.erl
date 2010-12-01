@@ -29,19 +29,22 @@ p(Inp, StartIndex, Name, ParseFun, TransformFun) ->
   end.
 
 setup_memo() ->
-  ets:new(?MODULE, [named_table, set]).
+  put(parse_memo_table, ets:new(?MODULE, [set])).
 
 release_memo() ->
-  ets:delete(?MODULE).
+  ets:delete(memo_table_name()).
 
 memoize(Position, Struct) ->
-  ets:insert(?MODULE, {Position, Struct}).
+  ets:insert(memo_table_name(), {Position, Struct}).
 
 get_memo(Position) ->
-  case ets:lookup(?MODULE, Position) of
+  case ets:lookup(memo_table_name(), Position) of
     [] -> dict:new();
     [{Position, Dict}] -> Dict
   end.
+
+memo_table_name() ->
+    get(parse_memo_table).
 
 p_eof() ->
   fun([], Index) -> {eof, [], Index};
@@ -159,6 +162,12 @@ p_charclass(Class) ->
         _ -> {fail,{expected, {character_class, Class}, Index}}
       end
   end.
+
+line({{line,L},_}) -> L;
+line(_) -> undefined.
+
+column({_,{column,C}}) -> C;
+column(_) -> undefined.
 
 p_advance_index(MatchedInput, Index) when is_list(MatchedInput) -> % strings
   lists:foldl(fun p_advance_index/2, Index, MatchedInput);

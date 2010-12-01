@@ -1,0 +1,19 @@
+additive <- multitive "+" additive / multitive `
+case Node of
+  Int when is_integer(Int) -> Int;
+  [A, "+", B] -> A + B
+end
+`;
+multitive <- primary "*" Mul:multitive / primary `
+case Node of
+  Int when is_integer(Int) -> Int;
+  [A,"*",{'Mul',B}] -> A * B
+end
+`;
+primary <- par:("(" add:additive ")") / dec:Decimal `
+case Node of
+  {dec,Int} when is_integer(Int) -> Int;
+  {par,List} -> proplists:get_value(add,List)
+end
+`;
+Decimal <- [0-9]+ `list_to_integer(Node)`;

@@ -1,66 +1,59 @@
--module(json).
+-module(csv).
 -export([parse/1,file/1]).
--compile(nowarn_unused_function).
+-compile(nowarn_unused_vars).
+-compile({nowarn_unused_function,[p/4, p/5, p_eof/0, p_optional/1, p_not/1, p_assert/1, p_seq/1, p_and/1, p_choose/1, p_zero_or_more/1, p_one_or_more/1, p_label/2, p_string/1, p_anything/0, p_charclass/1, line/1, column/1]}).
+
+
 
 file(Filename) -> {ok, Bin} = file:read_file(Filename), parse(binary_to_list(Bin)).
 
 parse(Input) ->
-  setup_memo(json),
-  Result = case json_value(Input,{{line,1},{column,1}}) of
+  setup_memo(),
+  Result = case 'rows'(Input,{{line,1},{column,1}}) of
              {AST, [], _Index} -> AST;
              Any -> Any
            end,
   release_memo(), Result.
 
-'json_value'(Input, Index) ->
-  p(Input, Index, 'json_value', fun(I,D) -> (p_seq([p_optional(fun 'space'/2), p_choose([fun 'object'/2, fun 'array'/2, fun 'string'/2, fun 'number'/2, fun 'true'/2, fun 'false'/2, fun 'null'/2]), p_optional(fun 'space'/2)]))(I,D) end, fun(Node, Idx) -> transform('json_value', Node, Idx) end).
+'rows'(Input, Index) ->
+  p(Input, Index, 'rows', fun(I,D) -> (p_choose([p_seq([p_label('head', fun 'row'/2), p_label('tail', p_zero_or_more(p_seq([fun 'crlf'/2, fun 'row'/2])))]), p_string("")]))(I,D) end, fun(Node, Idx) -> 
+case Node of
+  [] -> [];
+  [""] -> [];
+  _ ->
+    Head = proplists:get_value(head, Node),
+    Tail = [R || [_,R] <- proplists:get_value(tail, Node)],
+    [Head|Tail]
+end
+ end).
 
-'object'(Input, Index) ->
-  p(Input, Index, 'object', fun(I,D) -> (p_choose([p_seq([p_string("{"), p_optional(fun 'space'/2), p_label('head', fun 'pair'/2), p_label('tail', p_zero_or_more(p_seq([p_optional(fun 'space'/2), p_string(","), p_optional(fun 'space'/2), fun 'pair'/2]))), p_optional(fun 'space'/2), p_string("}")]), p_seq([p_string("{"), p_optional(fun 'space'/2), p_string("}")])]))(I,D) end, fun(Node, Idx) -> transform('object', Node, Idx) end).
+'row'(Input, Index) ->
+  p(Input, Index, 'row', fun(I,D) -> (p_choose([p_seq([p_label('head', fun 'field'/2), p_label('tail', p_zero_or_more(p_seq([fun 'field_sep'/2, fun 'field'/2])))]), p_string("")]))(I,D) end, fun(Node, Idx) -> 
+case Node of
+  [] -> [];
+  [""] -> [];
+  _ ->
+    Head = proplists:get_value(head, Node),
+    Tail = [F || [_,F] <- proplists:get_value(tail, Node)],
+    [Head|Tail]
+end
+ end).
 
-'pair'(Input, Index) ->
-  p(Input, Index, 'pair', fun(I,D) -> (p_seq([p_optional(fun 'space'/2), p_label('key', fun 'string'/2), p_optional(fun 'space'/2), p_string(":"), p_optional(fun 'space'/2), p_label('value', fun 'json_value'/2), p_optional(fun 'space'/2)]))(I,D) end, fun(Node, Idx) -> transform('pair', Node, Idx) end).
+'field'(Input, Index) ->
+  p(Input, Index, 'field', fun(I,D) -> (p_choose([fun 'quoted_field'/2, p_zero_or_more(p_seq([p_not(p_choose([fun 'field_sep'/2, fun 'crlf'/2])), p_anything()]))]))(I,D) end, fun(Node, Idx) -> lists:flatten(Node) end).
 
-'array'(Input, Index) ->
-  p(Input, Index, 'array', fun(I,D) -> (p_choose([p_seq([p_string("["), p_optional(fun 'space'/2), p_label('head', fun 'json_value'/2), p_label('tail', p_zero_or_more(p_seq([p_optional(fun 'space'/2), p_string(","), p_optional(fun 'space'/2), fun 'json_value'/2]))), p_optional(fun 'space'/2), p_string("]")]), p_seq([p_string("["), p_optional(fun 'space'/2), p_string("]")])]))(I,D) end, fun(Node, Idx) -> transform('array', Node, Idx) end).
+'quoted_field'(Input, Index) ->
+  p(Input, Index, 'quoted_field', fun(I,D) -> (p_seq([p_string("\""), p_label('string', p_zero_or_more(p_choose([p_string("\"\""), p_seq([p_not(p_string("\"")), p_anything()])]))), p_string("\"")]))(I,D) end, fun(Node, Idx) -> 
+  String = proplists:get_value(string, Node),
+  re:replace(String, "[\"]{2}", "\"",[global, {return, list}])
+ end).
 
-'string'(Input, Index) ->
-  p(Input, Index, 'string', fun(I,D) -> (p_seq([p_string("\""), p_label('chars', p_zero_or_more(p_seq([p_not(p_string("\"")), p_choose([p_string("\\\\"), p_string("\\\""), p_anything()])]))), p_string("\"")]))(I,D) end, fun(Node, Idx) -> transform('string', Node, Idx) end).
+'field_sep'(Input, Index) ->
+  p(Input, Index, 'field_sep', fun(I,D) -> (p_string(","))(I,D) end, fun(Node, Idx) -> Node end).
 
-'number'(Input, Index) ->
-  p(Input, Index, 'number', fun(I,D) -> (p_seq([fun 'int'/2, p_optional(fun 'frac'/2), p_optional(fun 'exp'/2)]))(I,D) end, fun(Node, Idx) -> transform('number', Node, Idx) end).
+'crlf'(Input, Index) ->
+  p(Input, Index, 'crlf', fun(I,D) -> (p_choose([p_string("\r\n"), p_string("\n")]))(I,D) end, fun(Node, Idx) -> Node end).
 
-'int'(Input, Index) ->
-  p(Input, Index, 'int', fun(I,D) -> (p_choose([p_seq([p_optional(p_string("-")), p_seq([fun 'non_zero_digit'/2, p_one_or_more(fun 'digit'/2)])]), fun 'digit'/2]))(I,D) end, fun(Node, Idx) -> transform('int', Node, Idx) end).
-
-'frac'(Input, Index) ->
-  p(Input, Index, 'frac', fun(I,D) -> (p_seq([p_string("."), p_one_or_more(fun 'digit'/2)]))(I,D) end, fun(Node, Idx) -> transform('frac', Node, Idx) end).
-
-'exp'(Input, Index) ->
-  p(Input, Index, 'exp', fun(I,D) -> (p_seq([fun 'e'/2, p_one_or_more(fun 'digit'/2)]))(I,D) end, fun(Node, Idx) -> transform('exp', Node, Idx) end).
-
-'e'(Input, Index) ->
-  p(Input, Index, 'e', fun(I,D) -> (p_seq([p_charclass("[eE]"), p_optional(p_choose([p_string("+"), p_string("-")]))]))(I,D) end, fun(Node, Idx) -> transform('e', Node, Idx) end).
-
-'non_zero_digit'(Input, Index) ->
-  p(Input, Index, 'non_zero_digit', fun(I,D) -> (p_charclass("[1-9]"))(I,D) end, fun(Node, Idx) -> transform('non_zero_digit', Node, Idx) end).
-
-'digit'(Input, Index) ->
-  p(Input, Index, 'digit', fun(I,D) -> (p_charclass("[0-9]"))(I,D) end, fun(Node, Idx) -> transform('digit', Node, Idx) end).
-
-'true'(Input, Index) ->
-  p(Input, Index, 'true', fun(I,D) -> (p_string("true"))(I,D) end, fun(Node, Idx) -> transform('true', Node, Idx) end).
-
-'false'(Input, Index) ->
-  p(Input, Index, 'false', fun(I,D) -> (p_string("false"))(I,D) end, fun(Node, Idx) -> transform('false', Node, Idx) end).
-
-'null'(Input, Index) ->
-  p(Input, Index, 'null', fun(I,D) -> (p_string("null"))(I,D) end, fun(Node, Idx) -> transform('null', Node, Idx) end).
-
-'space'(Input, Index) ->
-  p(Input, Index, 'space', fun(I,D) -> (p_zero_or_more(p_charclass("[ \t\n\s\r]")))(I,D) end, fun(Node, Idx) -> transform('space', Node, Idx) end).
-
-transform(Symbol,Node,Index) -> json_tree:transform(Symbol, Node, Index).
 
 
 
@@ -91,22 +84,23 @@ p(Inp, StartIndex, Name, ParseFun, TransformFun) ->
       end
   end.
 
-setup_memo(Name) ->
-  TID = ets:new(Name, [set]),
-  put(ets_table, TID).
+setup_memo() ->
+  put(parse_memo_table, ets:new(?MODULE, [set])).
 
 release_memo() ->
-  ets:delete(get(ets_table)),
-  erase(ets_table).
+  ets:delete(memo_table_name()).
 
 memoize(Position, Struct) ->
-  ets:insert(get(ets_table), {Position, Struct}).
+  ets:insert(memo_table_name(), {Position, Struct}).
 
 get_memo(Position) ->
-  case ets:lookup(get(ets_table), Position) of
+  case ets:lookup(memo_table_name(), Position) of
     [] -> dict:new();
     [{Position, Dict}] -> Dict
   end.
+
+memo_table_name() ->
+    get(parse_memo_table).
 
 p_eof() ->
   fun([], Index) -> {eof, [], Index};
@@ -224,6 +218,12 @@ p_charclass(Class) ->
         _ -> {fail,{expected, {character_class, Class}, Index}}
       end
   end.
+
+line({{line,L},_}) -> L;
+line(_) -> undefined.
+
+column({_,{column,C}}) -> C;
+column(_) -> undefined.
 
 p_advance_index(MatchedInput, Index) when is_list(MatchedInput) -> % strings
   lists:foldl(fun p_advance_index/2, Index, MatchedInput);

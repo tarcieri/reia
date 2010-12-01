@@ -1,3 +1,5 @@
+%% Grammar and transformations
+
 rules <- space? declaration_sequence space? code_block? space?
 `
   RootRule = verify_rules(),
@@ -6,7 +8,7 @@ rules <- space? declaration_sequence space? code_block? space?
              {code, Block} -> Block;
              _ -> []
          end,
-  [{rules, Rules ++ "\n" ++ Code}, {root, RootRule}, {transform, ets:lookup(?MODULE,gen_transform)}]
+  [{rules, Rules}, {code, Code}, {root, RootRule}, {transform, ets:lookup(memo_table_name(),gen_transform)}]
 `;
 
 declaration_sequence <- head:declaration tail:(space declaration)*
@@ -23,7 +25,7 @@ declaration <- nonterminal space '<-' space parsing_expression space? code_block
   Transform = case lists:nth(6,Tail) of
                   {code, CodeBlock} -> CodeBlock;
                   _ ->
-                      ets:insert_new(?MODULE,{gen_transform, true}),
+                      ets:insert_new(memo_table_name(),{gen_transform, true}),
                       "transform('"++Symbol++"', Node, Idx)"
                   end,
   "'"++Symbol++"'"++"(Input, Index) ->\n  " ++
@@ -41,7 +43,7 @@ choice <- head:alternative tail:(space '/' space alternative)+
   "p_choose([" ++ string:join(Statements, ", ") ++ "])"
 `;
 
-alternative <- sequence / primary ~;
+alternative <- sequence / labeled_primary ~;
 
 primary <- prefix atomic / atomic suffix / atomic
 `
@@ -55,14 +57,14 @@ case Node of
 end
 `;
 
-sequence <- head:labeled_sequence_primary tail:(space labeled_sequence_primary)+
+sequence <- head:labeled_primary tail:(space labeled_primary)+
 `
   Tail = [lists:nth(2, S) || S <- proplists:get_value(tail, Node)],
   Statements = [proplists:get_value(head, Node)|Tail],
   "p_seq(["++ string:join(Statements, ", ") ++ "])"
 `;
 
-labeled_sequence_primary <- label? primary
+labeled_primary <- label? primary
 `
   case hd(Node) of
     [] -> lists:nth(2, Node);
@@ -123,7 +125,7 @@ character_class <- '[' characters:(!']' ('\\\\' . / !'\\\\' .))+ ']' `"p_charcla
 
 anything_symbol <- '.' ` "p_anything()" `;
 
-alpha_char <- [a-z_] ~;
+alpha_char <- [A-Za-z_] ~;
 
 alphanumeric_char <- alpha_char / [0-9] ~;
 
@@ -148,29 +150,29 @@ escape_quotes(String) ->
   re:replace(String, RE, "\\\\\"", [global, {return, list}]).
 
 add_lhs(Symbol, Index) ->
-  case ets:lookup(?MODULE, lhs) of
+  case ets:lookup(memo_table_name(), lhs) of
     [] ->
-      ets:insert(?MODULE, {lhs, [{Symbol,Index}]});
+      ets:insert(memo_table_name(), {lhs, [{Symbol,Index}]});
     [{lhs, L}] when is_list(L) ->
-      ets:insert(?MODULE, {lhs, [{Symbol,Index}|L]})
+      ets:insert(memo_table_name(), {lhs, [{Symbol,Index}|L]})
   end.
 
 add_nt(Symbol, Index) ->
-  case ets:lookup(?MODULE, nts) of
+  case ets:lookup(memo_table_name(), nts) of
     [] ->
-      ets:insert(?MODULE, {nts, [{Symbol,Index}]});
+      ets:insert(memo_table_name(), {nts, [{Symbol,Index}]});
     [{nts, L}] when is_list(L) ->
       case proplists:is_defined(Symbol, L) of
         true ->
           ok;
         _ ->
-          ets:insert(?MODULE, {nts, [{Symbol,Index}|L]})
+          ets:insert(memo_table_name(), {nts, [{Symbol,Index}|L]})
       end
   end.
 
 verify_rules() ->
-  [{lhs, LHS}] = ets:lookup(?MODULE, lhs),
-  [{nts, NTs}] = ets:lookup(?MODULE, nts),
+  [{lhs, LHS}] = ets:lookup(memo_table_name(), lhs),
+  [{nts, NTs}] = ets:lookup(memo_table_name(), nts),
   [Root|NonRoots] = lists:reverse(LHS),
   lists:foreach(fun({Sym,Idx}) ->
                     case proplists:is_defined(Sym, NTs) of

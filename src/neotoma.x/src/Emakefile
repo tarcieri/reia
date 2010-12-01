@@ -1,2 +1,0 @@
-{[neotoma_peg, neotoma, neotoma_parse],
-	[{outdir, "../ebin"}, {i, "../../"}, debug_info]}.
