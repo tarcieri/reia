@@ -38,12 +38,28 @@ task :check_erl_version do
   end
 end
 
+# Neotoma (PEG for Erlang)
+NEOTOMA_FILES = %w(neotoma neotoma_parse neotoma_peg)
+task :neotoma => NEOTOMA_FILES.map { |f| "src/neotoma/ebin/#{f}.beam" }
+
+NEOTOMA_FILES.each do |f|
+  input = "src/neotoma/src/#{f}.erl"
+  file "src/neotoma/ebin/#{f}.beam" => input do
+    sh "erlc -o src/neotoma/ebin #{input}"
+  end
+end
+
+# Parser
+file "src/compiler/reia_parse.erl" => "src/compiler/reia_parse.peg" do
+  erl_eval 'neotoma:file("src/compiler/reia_parse.peg")', 'src/neotoma/ebin'
+end
+
 # Generate an output path for the given input file
 def output_file(input_file, dir = 'ebin/', ext = '.beam')
   dir + File.basename(input_file).sub(/\.\w+$/, ext)
 end
 
-GENERATED_SRC = %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
+GENERATED_SRC = %w(src/compiler/reia_parse.erl)
 ERL_SRC = (GENERATED_SRC + FileList.new('src/{compiler,core,builtins,json}/**/*.erl')).uniq
 ERL_DEST = ERL_SRC.map { |input| output_file(input) }
 
@@ -51,9 +67,7 @@ QUIET_SRC = %w(src/compiler/reia_parse.erl)
 
 ERL_SRC.each do |input|
   file output_file(input) => input do
-    opts = ""
-    opts << "+debug_info" unless QUIET_SRC.include? input
-    sh "erlc #{opts} -o ebin #{input}"
+    sh "erlc +debug_info -o ebin #{input}"
   end
 end
 
@@ -68,24 +82,9 @@ REIA_SRC.each do |input|
 end
 
 # Build rules
-task :build   => %w(scanner parser reia)
+task :build   => %w(parser reia)
+task :parser  => %w(neotoma src/compiler/reia_parse.erl)
 task :reia    => ERL_DEST + REIA_DEST
-task :scanner => %w(src/leex/leex.beam src/compiler/reia_scan.erl)
-task :parser  => %w(src/compiler/reia_parse.erl)
-
-# Scanner
-file "src/leex/leex.beam" => "src/leex/leex.erl" do
-  sh "erlc -W0 -o src/leex src/leex/leex.erl"
-end
-
-file "src/compiler/reia_scan.erl" => %w(src/leex/leex.beam src/compiler/reia_scan.xrl) do
-  erl_eval 'leex:file("src/compiler/reia_scan.xrl")', 'src/leex'
-end
-
-# Parser
-file "src/compiler/reia_parse.erl" => %w(src/compiler/reia_parse.yrl) do
-  erl_eval 'yecc:file("src/compiler/reia_parse.yrl", [verbose])'
-end
 
 # Test suite
 task :test => :build do
@@ -107,7 +106,7 @@ task :benchmark => BENCHMARK_DEST do
 end
 
 # Cleaning
-CLEAN.include %w(src/compiler/reia_scan.erl src/compiler/reia_parse.erl)
+CLEAN.include %w(ebin/* src/neotoma/ebin/* src/compiler/reia_parse.erl)
 CLEAN.include %w(**/*.beam **/*.reb)
 CLEAN.include "erl_crash.dump"
 

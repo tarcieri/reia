@@ -1,0 +1,25 @@
+% Toplevel expressions
+expressions <- separator* expr? (separator+ expr)* separator*
+`
+[_, Expr, Exprs, _] = Node,
+lists:flatten([Expr]) ++ [Ex || [_Sep, Ex] <- Exprs]
+`;
+
+expr <- add_expr;
+
+add_expr <- integer add_op add_expr / integer
+`
+case Node of
+  [Left, Op, Right] -> {binary_op, line(Idx), Op, Left, Right};
+  _ -> Node
+end
+`;
+
+separator <- "\n" / ";";
+
+add_op  <- "+" / "-" `list_to_atom(Node)`;
+
+integer <- [0-9]+ `{integer, line(Idx), list_to_integer(Node)}`;
+
+%% Extra functions
+`line({{line, Line},_}) -> Line.`
