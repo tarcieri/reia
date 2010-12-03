@@ -77,7 +77,15 @@ def output_file(input_file, dir = 'ebin/')
 end
 
 GENERATED_SRC = %w(src/compiler/reia_parse.erl)
+<<<<<<< HEAD
 ERL_SRC = (GENERATED_SRC + FileList.new('src/{compiler,core}/**/*.erl')).uniq
+=======
+PARSER_TEST_SRC = %w(test/parser/parser_test.erl)
+ERL_SRC = (GENERATED_SRC + PARSER_TEST_SRC + FileList.new('src/{compiler,core,builtins,json}/**/*.erl')).uniq
+ERL_DEST = ERL_SRC.map { |input| output_file(input) }
+
+QUIET_SRC = %w(src/compiler/reia_parse.erl)
+>>>>>>> Added unit tests for parser
 
 ERL_SRC.each do |input|
   file output_file(input) => input do
@@ -88,7 +96,96 @@ end
 # Build rules
 task :build   => %w(parser reia)
 task :parser  => %w(neotoma src/compiler/reia_parse.erl)
+<<<<<<< HEAD
 task :reia    => ERL_SRC.map { |input_file| output_file(input_file) }
 
 # Cleaning
 CLEAN.include %w(ebin/* src/neotoma/ebin/* src/compiler/reia_parse.erl)
+=======
+task :reia    => ERL_DEST + REIA_DEST
+
+# Test suite
+task :test => :build do
+  erl_eval 'eunit:test(parser_test)', 'ebin'
+  sh "bin/reia test/runner.re"
+end
+
+# Benchmarks
+BENCHMARK_SRC = FileList.new('benchmarks/**/*.erl')
+BENCHMARK_DEST = BENCHMARK_SRC.map { |input| output_file(input, 'benchmarks/ebin/') }
+
+BENCHMARK_SRC.each do |input|
+  file output_file(input, 'benchmarks/ebin/') => input do
+    sh "erlc +debug_info -o benchmarks/ebin #{input}"
+  end
+end
+
+task :benchmark => BENCHMARK_DEST do
+  sh "bin/reia benchmarks/runner.re"
+end
+
+# Cleaning
+CLEAN.include %w(ebin/* src/neotoma/ebin/* src/compiler/reia_parse.erl)
+CLEAN.include %w(**/*.beam **/*.reb)
+CLEAN.include "erl_crash.dump"
+
+#
+# Installing
+#
+
+# Retrieve the directory Erlang libraries are stored in
+def erl_lib_dir
+  $erl_lib_dir ||= `erl -noshell -eval "io:format(code:lib_dir())" -s erlang halt`
+end
+
+
+# Directory to install Reia into
+def reia_install_dir
+  File.join(erl_lib_dir, 'reia', '')
+end
+
+# Munge Reia launcher scripts before installing
+def munge_script(src, dest)
+  str = File.read(src)
+  
+  # Remove REIA_HOME declaration
+  str.gsub!(/^export REIA_HOME=.*$/, '')
+  
+  # Remove EXTRA_PATHS declaration
+  str.gsub!(/^EXTRA_PATHS=.*$/, '')
+  
+  # Remove $EXTRA_PATHS variables
+  str.gsub!(/\$EXTRA_PATHS/, '')
+  
+  # Strip all the extraneous newlines
+  str.gsub!(/\n\n+/m, "\n\n")
+  
+  File.open(dest, "w", 0755) { |file| file << str }
+end
+
+directory BIN_INSTALL_DIR
+
+task :install => [:check_erl_version, :build, BIN_INSTALL_DIR] do
+  reia_dir = reia_install_dir
+  STDERR.puts "*** Installing Reia into: #{reia_dir}"
+  
+  rm_r reia_dir if File.exist?(reia_dir)
+  mkdir reia_dir
+  cp_r "ebin", reia_dir
+  
+  %w[ire reia reiac].each do |script|
+    src = File.expand_path("../bin/#{script}", __FILE__)
+    dst = "#{BIN_INSTALL_DIR}/#{script}"
+    
+    STDERR.puts "Creating #{dst}"
+    munge_script src, dst
+  end
+end
+
+task :uninstall do
+  reia_dir = reia_install_dir
+
+  rm_r reia_dir if File.directory?(reia_dir)
+  %w[ire reia reiac].each { |script| rm_f "#{BIN_INSTALL_DIR}/#{script}" }
+end
+>>>>>>> Added unit tests for parser
