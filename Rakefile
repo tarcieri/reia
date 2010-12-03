@@ -60,7 +60,8 @@ def output_file(input_file, dir = 'ebin/', ext = '.beam')
 end
 
 GENERATED_SRC = %w(src/compiler/reia_parse.erl)
-ERL_SRC = (GENERATED_SRC + FileList.new('src/{compiler,core,builtins,json}/**/*.erl')).uniq
+PARSER_TEST_SRC = %w(test/parser/parser_test.erl)
+ERL_SRC = (GENERATED_SRC + PARSER_TEST_SRC + FileList.new('src/{compiler,core,builtins,json}/**/*.erl')).uniq
 ERL_DEST = ERL_SRC.map { |input| output_file(input) }
 
 QUIET_SRC = %w(src/compiler/reia_parse.erl)
@@ -88,6 +89,7 @@ task :reia    => ERL_DEST + REIA_DEST
 
 # Test suite
 task :test => :build do
+  erl_eval 'eunit:test(parser_test)', 'ebin'
   sh "bin/reia test/runner.re"
 end
 
