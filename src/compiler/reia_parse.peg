@@ -1424,7 +1424,6 @@ when        <-  'when'      sp  ` list_to_atom(part(1,Node)) `;
 -export([string/1]).
 -include("reia_nodes.hrl").
 -record(pargs, {args=[], block={var,1,'_'}}).
--define(ERROR_CONTEXT, 16). % Number of characters context in errors
 -define(line(Node), element(2, Node)).
 -define(op(Node), element(1, Node)).
 %-define(identifier_name(Id), element(3, Id)).  %% gtd - original
@@ -1512,12 +1511,21 @@ build_remote_call(Base, [[".", Call]|Tail])  ->
 string(String) ->
   case reia_parse:parse(String) of
     {_Tokens, Token, {{line, Line}, {column, Column}}} ->
-      Subtoken = string:substr(Token, 1, ?ERROR_CONTEXT),
-      Message = io_lib:format("Parse error near ~p (Column: ~w)", [Subtoken, Column]),
+      Message = io_lib:format("Parse error near ~p (Column: ~w)", [stripper(Token), Column]),
       {error, {Line, lists:flatten(Message)}};
     Exprs when is_list(Exprs) ->
       {ok, Exprs}
   end.
+
+% Newline stripper (and an excuse to name a function stripper)
+stripper(String) -> stripper(String, []).
+
+stripper([], Rstr) ->
+  lists:reverse(Rstr);
+stripper([$\n|_], Rstr) ->
+  lists:reverse(Rstr);
+stripper([Chr|Rest], Rstr) ->
+  stripper(Rest, [Chr|Rstr]).
 
 reserved_word('after')   -> true;
 reserved_word('and')     -> true;
