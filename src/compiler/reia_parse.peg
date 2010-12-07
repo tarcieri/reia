@@ -1424,6 +1424,7 @@ when        <-  'when'      sp  ` list_to_atom(part(1,Node)) `;
 -export([string/1]).
 -include("reia_nodes.hrl").
 -record(pargs, {args=[], block={var,1,'_'}}).
+-define(ERROR_CONTEXT, 16). % Number of characters context in errors
 -define(line(Node), element(2, Node)).
 -define(op(Node), element(1, Node)).
 %-define(identifier_name(Id), element(3, Id)).  %% gtd - original
@@ -1511,7 +1512,8 @@ build_remote_call(Base, [[".", Call]|Tail])  ->
 string(String) ->
   case reia_parse:parse(String) of
     {_Tokens, Token, {{line, Line}, {column, Column}}} ->
-      Message = io_lib:format("Parse error near ~p (Column: ~w)", [Token, Column]),
+      Subtoken = string:substr(Token, 1, ?ERROR_CONTEXT),
+      Message = io_lib:format("Parse error near ~p (Column: ~w)", [Subtoken, Column]),
       {error, {Line, lists:flatten(Message)}};
     Exprs when is_list(Exprs) ->
       {ok, Exprs}
