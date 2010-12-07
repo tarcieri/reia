@@ -1509,24 +1509,13 @@ build_remote_call(Base, [[".", Call]|Tail])  ->
 
 %% Parse a given string with nicely formatted errors
 string(String) ->
-  try
-    case reia_scan:string(String) of
-      {ok, Tokens, _} -> 
-        case reia_parse:parse(Tokens) of
-          {ok, Exprs} ->
-            {ok, Exprs};
-          {error, {_, _, [Message, []]}} ->
-            {error, {eof, lists:flatten([Message, "end of file"])}};
-          {error, {Line, _, [Message, Token]}} ->
-            {error, {Line, lists:flatten([Message, Token])}}
-        end;
-      {error, {Line, _, {Message, Token}}, _} ->
-        {error, {Line, lists:flatten(io_lib:format("~p ~p", [Message, Token]))}}
-    end
-  catch {error, {_Line, _Message}} = Error ->
-    Error
+  case reia_parse:parse(String) of
+    {_Tokens, Token, {{line, Line}, {column, Column}}} ->
+      Message = io_lib:format("Parse error near ~p (Column: ~w)", [Token, Column]),
+      {error, {Line, lists:flatten(Message)}};
+    Exprs when is_list(Exprs) ->
+      {ok, Exprs}
   end.
-
 
 reserved_word('after')   -> true;
 reserved_word('and')     -> true;
