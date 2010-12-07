@@ -22,17 +22,11 @@ parse(String) -> parse(String, "").
 
 % Parse the given string of Reia source code from the given file
 parse(String, Filename) ->
-  case reia_scan:string(String) of
-    {ok, Tokens, _} -> 
-      case reia_parse:parse(Tokens) of
-        {ok, Exprs} -> Exprs;
-        {error, {_, _, [Error, []]}} ->
-          ?parse_error(Filename, eof, lists:flatten([Error, "end of file"]));
-        {error, {Line, _, [Error, Token]}} ->
-          ?parse_error(Filename, Line, lists:flatten([Error, Token]))
-      end;
-    {error, {Line, _, {Error, Token}}, _} ->
-      ?parse_error(Filename, Line, lists:flatten([Error, Token]))
+  case reia_parse:string(String) of
+    {ok, Exprs} -> 
+      Exprs;
+    {error, {Line, Message}} ->
+      ?parse_error(Filename, Line, Message)
   end.
 
 % Compile the given file
