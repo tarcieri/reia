@@ -117,13 +117,7 @@ CLEAN.include "erl_crash.dump"
 
 # Retrieve the directory Erlang libraries are stored in
 def erl_lib_dir
-  $erl_lib_dir ||= begin
-    if ENV['ERL_LIB_DIR']
-      ENV['ERL_LIB_DIR']
-    else
-      `erl -noshell -eval "io:format(code:lib_dir())" -s erlang halt`
-    end
-  end
+  ENV['ERL_LIB_DIR'] ||= `erl -noshell -eval "io:format(code:lib_dir())" -s erlang halt`
 end
 
 
