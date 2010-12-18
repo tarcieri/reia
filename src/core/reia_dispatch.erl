@@ -10,8 +10,10 @@
 -include("reia_types.hrl").
 
 % Dispatch incoming calls
-call(Receiver, Method, Arguments, Block) when is_integer(Receiver) or is_float(Receiver) ->
-  'Numeric':call({Receiver, Method, Arguments}, Block);
+call(Receiver, Method, Arguments, Block) when is_integer(Receiver) ->
+  'Integer':call({Receiver, Method, Arguments}, Block);
+call(Receiver, Method, Arguments, Block) when is_float(Receiver) ->
+  'Float':call({Receiver, Method, Arguments}, Block);  
 call(Receiver, Method, Arguments, Block) when is_list(Receiver) ->
   'List':call({Receiver, Method, Arguments}, Block);
 call(#reia_object{class = Class} = Receiver, Method, Arguments, Block) ->
