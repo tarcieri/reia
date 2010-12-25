@@ -22,7 +22,7 @@
 -record(self,        {line}).
 
 % Modules and Classes
--record(module,      {line, name, exprs}).
+-record(module,      {line, name, attrs=[], exprs}).
 -record(class,       {line, name, parent='Object', exprs}).
 
 % Functions

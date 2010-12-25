@@ -38,8 +38,9 @@ transform(#module{line=Line, name=Name, exprs=Exprs}) ->
   % Modules need some postprocessing, so we leave them in a similar form but
   % with their subtrees converted
   #module{
-    line = Line,
-    name = Name,
+    line  = Line,
+    name  = Name,
+    attrs = [{module_type, module}], 
     exprs = group_clauses([transform(Expr) || Expr <- Exprs])
   };
   
@@ -50,6 +51,7 @@ transform(#class{line=Line, name=Name, exprs=Exprs}) ->
   #module{
     line  = Line,
     name  = Name,
+    attrs = [{module_type, class}],
     exprs = group_clauses([transform(Expr) || Expr <- Exprs])
   };
 
