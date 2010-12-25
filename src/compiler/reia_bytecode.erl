@@ -93,10 +93,9 @@ wrapped_module(Filename, Exprs) ->
   
 unwrapped_module(Exprs) ->
   case Exprs of
-    [{module, Line, Name, Functions}] -> 
-      {ok, Functions2, Submodules} = reia_modules:replace(Functions, fun module_loader/1),
-      Module = #module{line=Line, name=Name, exprs=Functions2},
-      {Module, Submodules};
+    [#module{} = Module] -> 
+      {ok, Functions2, Submodules} = reia_modules:replace(Module#module.exprs, fun module_loader/1),
+      {Module#module{exprs=Functions2}, Submodules};
     _ ->
       throw({error, "code without a toplevel wrapper should define exactly one module"})
   end.
