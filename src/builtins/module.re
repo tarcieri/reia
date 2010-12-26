@@ -10,13 +10,7 @@ module Module
   
   def call(receiver, :to_s, args, block)
     (:reia_module, name) = receiver
-    case erl.code.ensure_loaded(name)
-    when (:module, name)
-      name.to_string()
-    when _
-      throw(NameError, "undefined module #{name}")
-      :error
-    end
+    name.to_string()
   end
   
   def call(receiver, :inspect, args, block)
