@@ -26,14 +26,8 @@ call(#reia_regexp{} = Receiver, Method, Arguments, Block) ->
   'Regexp':call({Receiver, Method, Arguments}, Block);
 call(#reia_range{} = Receiver, Method, Arguments, Block) ->
   'Range':call({Receiver, Method, Arguments}, Block);
-call(#reia_module{name=Name} = Receiver, Method, Arguments, Block) ->
-  case code:ensure_loaded(Name) of
-    {module, Name} ->
-      'Module':call({Receiver, Method, Arguments, Block}, nil);
-    _ ->
-      Message = lists:flatten(io_lib:format("undefined module ~s", [Name])),
-      reia:throw('NameError', Message)
-  end;
+call(#reia_module{} = Receiver, Method, Arguments, Block) ->
+  dispatch_module_call(Receiver, Method, Arguments, Block);
 call(#reia_funref{} = Receiver, Method, Arguments, Block) ->
   'Funref':call({Receiver, Method, Arguments}, Block);
 call(Receiver, Method, Arguments, Block) when is_tuple(Receiver) ->
@@ -56,3 +50,27 @@ call(Receiver, Method, Arguments, Block) when is_port(Receiver) ->
   'Channel':call({Receiver, Method, Arguments}, Block);
 call(Receiver, _, _, _) ->
   throw({error, unknown_receiver, Receiver}).
+  
+dispatch_module_call(#reia_module{name=Name} = Receiver, Method, Arguments, Block) ->
+  case code:ensure_loaded(Name) of
+    {module, Name} ->
+      Attributes = Name:module_info(attributes),
+      case proplists:get_value(module_type, Attributes) of
+        [module] ->
+          'Module':call({Receiver, Method, Arguments, Block}, nil);
+        [class] ->
+          % FIXME: to_s and inspect shouldn't be implemented here!
+          case Method of
+            to_s    -> reia:list_to_string(atom_to_list(Name));
+            inspect -> reia:list_to_string(atom_to_list(Name));
+            _ ->
+              reia:throw('RuntimeError', "class methods not implemented yet, sorry!")
+          end;
+        undefined ->
+          Message = lists:flatten(io_lib:format("missing module_type attribute in ~s", [Name])),
+          reia:throw('RuntimeError', Message)
+      end;
+    _ ->
+      Message = lists:flatten(io_lib:format("undefined module ~s", [Name])),
+      reia:throw('NameError', Message)
+  end.
