@@ -25,13 +25,7 @@ transform_node(#bindings{
   Patterns2 = reia_syntax:map_subtrees(fun transform_node/1, Patterns),
   Exprs = reia_syntax:map_subtrees(fun transform_node/1, BindingExprs),
   
-  UnsafeVariables = enumerate_unsafe_variables(FinalBinding, OutputBinding),
-  Exprs2 = case UnsafeVariables of
-    [] -> Exprs;
-    _  -> annotate_return_value(Exprs, UnsafeVariables)
-  end,
-  
-  #clause{line=Line, patterns=Patterns2, exprs=Exprs2};
+  #clause{line=Line, patterns=Patterns2, exprs=phi(Exprs, FinalBinding, OutputBinding)};
 
 transform_node(#bindings{
   node=#var{line=Line, name=Name}=Node, 
@@ -55,6 +49,15 @@ transform_node(#bindings{node=Node}) ->
   reia_syntax:map_subtrees(fun transform_node/1, Node);
 transform_node(Node) ->
   reia_syntax:map_subtrees(fun transform_node/1, Node).
+
+% Look for version number discrepancies between various clauses and bind all
+% variables to uniform version numbers
+phi(Exprs, FinalBinding, OutputBinding) ->
+  UnsafeVariables = enumerate_unsafe_variables(FinalBinding, OutputBinding),
+  case UnsafeVariables of
+    [] -> Exprs;
+    _  -> annotate_return_value(Exprs, UnsafeVariables)
+  end.
 
 % Generate the SSA name for a given variable, which takes the form name_version
 ssa_name(Name, Version) ->
