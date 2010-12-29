@@ -14,7 +14,7 @@ tests = [
     "range", "regexp", "numeric", "dict", "atom", "fun"
   ]),
   ("core", [
-    "blocks", "branching", "funrefs", "object", #"class", 
+    "blocks", "branching", "funrefs", "object", "class", 
     "operator", "exception", "messaging"
   ]),
   ("lib",  ["json"])
