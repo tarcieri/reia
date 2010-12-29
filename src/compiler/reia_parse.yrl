@@ -42,7 +42,6 @@ Nonterminals
   catch_clauses
   catch_clause
   function_identifier
-  def_prefix
   method_name
   ivar
   bound_var
@@ -351,9 +350,6 @@ def_expr -> def method_name args eol body 'end' :
     body  = '$5'
   }.
 def_expr -> expr : '$1'.
-
-%% Allowable prefixes for defs
-def_prefix -> def method_name : '$1'.
 
 %% Valid method names
 method_name -> function_identifier : ?identifier_name('$1').
