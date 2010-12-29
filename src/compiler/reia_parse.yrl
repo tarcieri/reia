@@ -43,6 +43,7 @@ Nonterminals
   catch_clause
   function_identifier
   def_prefix
+  method_name
   ivar
   bound_var
   rebind_op
@@ -335,26 +336,29 @@ def_exprs -> eol def_exprs : '$2'.
 def_exprs -> def_expr eol def_exprs : ['$1'|'$3'].
 
 %% Function definitions
-def_expr -> def_prefix eol body 'end' : 
+def_expr -> def method_name eol body 'end' : 
   #function{
-    line = ?line('$2'), 
-    name = '$1', 
-    body = '$3'
+    line = ?line('$1'), 
+    name = '$2', 
+    body = '$4'
   }.
-def_expr -> def_prefix args eol body 'end' :
+def_expr -> def method_name args eol body 'end' :
   #function{
-    line  = ?line('$3'), 
-    name  = '$1', 
-    args  = '$2'#args.args,
-    block = '$2'#args.block,
-    body  = '$4'
+    line  = ?line('$1'), 
+    name  = '$2', 
+    args  = '$3'#args.args,
+    block = '$3'#args.block,
+    body  = '$5'
   }.
 def_expr -> expr : '$1'.
 
 %% Allowable prefixes for defs
-def_prefix -> def function_identifier : ?identifier_name('$2').
-def_prefix -> def '[' ']' : '[]'.
-def_prefix -> def '[' ']' '=' : '[]='.
+def_prefix -> def method_name : '$1'.
+
+%% Valid method names
+method_name -> function_identifier : ?identifier_name('$1').
+method_name -> '[' ']' : '[]'.
+method_name -> '[' ']' '=' : '[]='.
 
 %% Function identifiers
 function_identifier -> identifier : '$1'.
