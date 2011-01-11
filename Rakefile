@@ -58,6 +58,7 @@ ERL_SRC.each do |input|
 end
 
 REIA_SRC  = FileList.new('src/{builtins,core}/**/*.re')
+REIA_SRC.include('lib/*.re')
 REIA_DEST = REIA_SRC.map { |input| output_file(input, 'ebin/', '.reb') }
 
 REIA_SRC.each do |input|
