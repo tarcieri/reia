@@ -54,6 +54,7 @@ Nonterminals
   unary_op
   module_decl
   class_decl
+  methods
   functions
   function
   body
@@ -312,22 +313,7 @@ module_decl -> module module_name eol functions 'end' :
     exprs = begin validate_function_body('$4'), '$4' end
   }.
   
-%% Class declarations
-class_decl -> class module_name functions 'end' : 
-  #class{
-    line  = ?line('$1'), 
-    name  = ?identifier_name('$2'),
-    exprs = begin validate_function_body('$3'), '$3' end
-  }.
-class_decl -> class module_name '<' module_name functions 'end' : 
-  #class{
-    line   = ?line('$1'), 
-    name   = ?identifier_name('$2'),
-    parent = ?identifier_name('$4'),
-    exprs  = begin validate_function_body('$5'), '$5' end
-  }.
-
-%% Expression lists with interspersed defs (eol delimited)
+%% Functions
 functions -> eol : [].
 functions -> function : ['$1'].
 functions -> function eol : ['$1'].
@@ -350,6 +336,28 @@ function -> def function_name args eol body 'end' :
     body  = '$5'
   }.
 function -> expr : '$1'.
+  
+%% Class declarations
+class_decl -> class module_name methods 'end' : 
+  #class{
+    line  = ?line('$1'), 
+    name  = ?identifier_name('$2'),
+    exprs = begin validate_function_body('$3'), '$3' end
+  }.
+class_decl -> class module_name '<' module_name methods 'end' : 
+  #class{
+    line   = ?line('$1'), 
+    name   = ?identifier_name('$2'),
+    parent = ?identifier_name('$4'),
+    exprs  = begin validate_function_body('$5'), '$5' end
+  }.
+  
+%% Functions
+methods -> eol : [].
+methods -> function : ['$1'].
+methods -> function eol : ['$1'].
+methods -> eol methods : '$2'.
+methods -> function eol methods : ['$1'|'$3'].
 
 %% Valid method names
 function_name -> function_identifier : ?identifier_name('$1').
