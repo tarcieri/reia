@@ -42,7 +42,7 @@ Nonterminals
   catch_clauses
   catch_clause
   function_identifier
-  method_name
+  function_name
   ivar
   bound_var
   rebind_op
@@ -54,8 +54,8 @@ Nonterminals
   unary_op
   module_decl
   class_decl
-  def_exprs
-  def_expr
+  functions
+  function
   body
   args
   args_tail
@@ -305,7 +305,7 @@ unary_op -> '!'   : '$1'.
 unary_op -> '~'   : '$1'.
 
 %% Module declarations
-module_decl -> module module_name eol def_exprs 'end' : 
+module_decl -> module module_name eol functions 'end' : 
   #module{
     line  = ?line('$1'), 
     name  = element(3, '$2'), 
@@ -313,13 +313,13 @@ module_decl -> module module_name eol def_exprs 'end' :
   }.
   
 %% Class declarations
-class_decl -> class module_name def_exprs 'end' : 
+class_decl -> class module_name functions 'end' : 
   #class{
     line  = ?line('$1'), 
     name  = ?identifier_name('$2'),
     exprs = begin validate_function_body('$3'), '$3' end
   }.
-class_decl -> class module_name '<' module_name def_exprs 'end' : 
+class_decl -> class module_name '<' module_name functions 'end' : 
   #class{
     line   = ?line('$1'), 
     name   = ?identifier_name('$2'),
@@ -328,20 +328,20 @@ class_decl -> class module_name '<' module_name def_exprs 'end' :
   }.
 
 %% Expression lists with interspersed defs (eol delimited)
-def_exprs -> eol : [].
-def_exprs -> def_expr : ['$1'].
-def_exprs -> def_expr eol : ['$1'].
-def_exprs -> eol def_exprs : '$2'.
-def_exprs -> def_expr eol def_exprs : ['$1'|'$3'].
+functions -> eol : [].
+functions -> function : ['$1'].
+functions -> function eol : ['$1'].
+functions -> eol functions : '$2'.
+functions -> function eol functions : ['$1'|'$3'].
 
 %% Function definitions
-def_expr -> def method_name eol body 'end' : 
+function -> def function_name eol body 'end' : 
   #function{
     line = ?line('$1'), 
     name = '$2', 
     body = '$4'
   }.
-def_expr -> def method_name args eol body 'end' :
+function -> def function_name args eol body 'end' :
   #function{
     line  = ?line('$1'), 
     name  = '$2', 
@@ -349,12 +349,12 @@ def_expr -> def method_name args eol body 'end' :
     block = '$3'#args.block,
     body  = '$5'
   }.
-def_expr -> expr : '$1'.
+function -> expr : '$1'.
 
 %% Valid method names
-method_name -> function_identifier : ?identifier_name('$1').
-method_name -> '[' ']' : '[]'.
-method_name -> '[' ']' '=' : '[]='.
+function_name -> function_identifier : ?identifier_name('$1').
+function_name -> '[' ']' : '[]'.
+function_name -> '[' ']' '=' : '[]='.
 
 %% Function identifiers
 function_identifier -> identifier : '$1'.
