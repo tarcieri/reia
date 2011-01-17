@@ -55,6 +55,7 @@ Nonterminals
   module_decl
   class_decl
   methods
+  method
   functions
   function
   body
@@ -352,14 +353,17 @@ class_decl -> class module_name '<' module_name methods 'end' :
     exprs  = begin validate_function_body('$5'), '$5' end
   }.
   
-%% Functions
+%% Methods
 methods -> eol : [].
-methods -> function : ['$1'].
-methods -> function eol : ['$1'].
+methods -> method : ['$1'].
+methods -> method eol : ['$1'].
 methods -> eol methods : '$2'.
-methods -> function eol methods : ['$1'|'$3'].
+methods -> method eol methods : ['$1'|'$3'].
 
-%% Valid method names
+%% Method declarations
+method -> function : '$1'.
+
+%% Valid function names
 function_name -> function_identifier : ?identifier_name('$1').
 function_name -> '[' ']' : '[]'.
 function_name -> '[' ']' '=' : '[]='.
