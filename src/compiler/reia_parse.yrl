@@ -56,6 +56,7 @@ Nonterminals
   class_decl
   methods
   method
+  class_method
   functions
   function
   body
@@ -336,7 +337,6 @@ function -> def function_name args eol body 'end' :
     block = '$3'#args.block,
     body  = '$5'
   }.
-function -> expr : '$1'.
   
 %% Class declarations
 class_decl -> class module_name methods 'end' : 
@@ -362,6 +362,23 @@ methods -> method eol methods : ['$1'|'$3'].
 
 %% Method declarations
 method -> function : '$1'.
+method -> class_method : '$1'.
+
+%% Class methods
+class_method -> def self '.' function_name eol body 'end' : 
+  #class_method{
+    line = ?line('$1'), 
+    name = '$2', 
+    body = '$4'
+  }.
+class_method -> def self '.' function_name args eol body 'end' :
+  #class_method{
+    line  = ?line('$1'), 
+    name  = '$2', 
+    args  = '$3'#args.args,
+    block = '$3'#args.block,
+    body  = '$5'
+  }.
 
 %% Valid function names
 function_name -> function_identifier : ?identifier_name('$1').
