@@ -312,7 +312,7 @@ module_decl -> module module_name eol functions 'end' :
   #module{
     line  = ?line('$1'), 
     name  = element(3, '$2'), 
-    exprs = begin validate_function_body('$4'), '$4' end
+    exprs = begin validate_module_body('$4'), '$4' end
   }.
   
 %% Functions
@@ -343,14 +343,14 @@ class_decl -> class module_name methods 'end' :
   #class{
     line  = ?line('$1'), 
     name  = ?identifier_name('$2'),
-    exprs = begin validate_function_body('$3'), '$3' end
+    exprs = begin validate_class_body('$3'), '$3' end
   }.
 class_decl -> class module_name '<' module_name methods 'end' : 
   #class{
     line   = ?line('$1'), 
     name   = ?identifier_name('$2'),
     parent = ?identifier_name('$4'),
-    exprs  = begin validate_function_body('$5'), '$5' end
+    exprs  = begin validate_class_body('$5'), '$5' end
   }.
   
 %% Methods
@@ -363,6 +363,7 @@ methods -> method eol methods : ['$1'|'$3'].
 %% Method declarations
 method -> function : '$1'.
 method -> class_method : '$1'.
+method -> expr : '$1'.
 
 %% Class methods
 class_method -> def self '.' function_name eol body 'end' : 
@@ -836,13 +837,24 @@ string(String) ->
     Error
   end.
   
-%% Ensure a given function body contains only function defs
-validate_function_body([]) -> ok;
-validate_function_body([#function{}|Exprs]) ->
-  validate_function_body(Exprs);
-validate_function_body([Expr|_]) ->
-  throw({error, {element(2, Expr), "Arbitrary expressions not allowed in class/module bodies"}}).
+%% Ensure a given module body contains only function defs
+validate_module_body([]) -> ok;
+validate_module_body([#function{}|Exprs]) ->
+  validate_module_body(Exprs);
+validate_module_body([Expr|_]) ->
+  Line = element(2, Expr),
+  reia:throw('SyntaxError', Line, "Arbitrary expressions not allowed in module bodies").
   
+%% Ensure a given class body contains only method defs
+validate_class_body([]) -> ok;
+validate_class_body([#class_method{}|Exprs]) ->
+  validate_class_body(Exprs);
+validate_class_body([#function{}|Exprs]) ->
+  validate_class_body(Exprs);
+validate_class_body([Expr|_]) ->
+  Line = element(2, Expr),
+  reia:throw('SyntaxError', Line, "Arbitrary expressions not allowed in class bodies").
+    
 %% Interpolate strings, parsing the contents of #{...} tags
 interpolate_string(#string{line=Line, characters=Chars}) ->
   interpolate_string(Chars, Line, [], []).
