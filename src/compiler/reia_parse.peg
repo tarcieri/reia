@@ -516,7 +516,7 @@ functions       <-  function ws? (functions)?
 `;
 
 
-function    <-  def ws function_id pargs ws body? ws end
+function    <-  def ws function_id pargs? ws body? ws end
 `
     io:format("Function: Node is ~p~n",[Node]),
     case Node of
@@ -1366,7 +1366,7 @@ newline     <-  comment / linend        `[]`;   % various line endings
 
 comment     <-  '#' (!linend .)* linend? `[]`;   % any chars up to line end
 
-linend      <-  ('\r\n' / '\n') sp      `[]`;   % 'conventional' line ending characters
+linend      <-  ('\r\n' / '\n' / ';' ) sp `[]`;   % 'conventional' line ending characters
 
 sp          <-  space*                  `[]`;   % spaces on the same line
 
