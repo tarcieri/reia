@@ -468,6 +468,25 @@ compound_term_test_() -> %==========================================
   ].
 
 
+lambda_test_() ->
+  [ % Lambda Declarations
+    ?_assertEqual([{lambda,1,[],[{integer,1,1}]}],
+                                            parse("fun{1}")),
+    ?_assertEqual([{lambda,1,[],[{integer,1,1}]}],
+                                            parse("fun do 1 end")),
+    ?_assertEqual([{lambda,1,[],[{var,5,abc}]}],
+                                            parse(" fun \n ( \n ) \n { \n abc \n} ")),
+    ?_assertEqual([{lambda,1,[],[{var,3,xyz}]}],
+                                            parse(" fun \ndo \nxyz \nend ")),
+    ?_assertEqual([{lambda,1,[{var,3,a},{var,5,b}],[{var,8,abc}]}],
+                                            parse(" fun \n ( \n a \n , \n b \n ) \n { \n abc \n} ")),
+    ?_assertEqual([{lambda,1,[{var,1,a},{var,1,b}],[{var,1,xyz}]}],
+                                            parse(" fun ( a, b ) do xyz end ")),
+
+    ?_assert(true)
+  ].
+
+
 class_and_module_decl_test_() ->        % FIXME - check out allowance of ws around block definitions
   [ % Class Declarations
     ?_assertEqual([{class,1,'Class','Object',[]}],

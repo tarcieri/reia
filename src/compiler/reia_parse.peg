@@ -298,7 +298,7 @@ call_base   <- class_inst
 `;
 
 max_expr    <-  number              %   [0-9]
-            /   string              %   " / '
+            /   string              %   " or '
             /   tuple               %   (
             /   bracketed_expr      %   (
             /   list_comprehension  %   [
@@ -310,6 +310,7 @@ max_expr    <-  number              %   [0-9]
             /   binary              %   <[
             /   regexp              %   %r/
             /   class_decl          %   class
+            /   lambda              %   fun
             /   module_decl         %   module
             /   module_name         %   [A-Z]
             /   boolean             %   false / true / nil
@@ -1072,6 +1073,36 @@ bit_type    <-  atom (':' integer)?
 %`
 %    Node
 %`;
+
+lambda      <-  fun ws ('(' ws exprs? ws ')' ws )? '{' ws expr_list ws '}' sp
+            /   fun ws ('(' ws exprs? ws ')' ws )?  do ws expr_list ws end sp
+`
+    io:format("lambda: Node = ~p~n",[Node]),
+    case Node of
+%lambda      <-  fun '{' expr_list '}'
+%            /   fun do expr_list 'end'
+        [_, _, [], _, _, Exprs, _, _, _] ->
+            #lambda{
+              line = line(Idx), 
+              body = Exprs
+            };
+%            /   fun '(' ')' '{' expr_list '}'
+%            /   fun '(' ')' do expr_list 'end'
+        [_, _, [_, _, [], _, _, _], _, _, Exprs, _, _, _] ->
+            #lambda{
+              line = line(Idx), 
+              body = Exprs
+            };
+%            /   fun '(' exprs ')' '{' expr_list '}'
+%            /   fun '(' exprs ')' do expr_list 'end'
+        [_, _, [_, _, Args, _, _, _], _, _, Exprs, _, _, _] ->
+            #lambda{
+              line = line(Idx),
+              args = Args,
+              body = Exprs
+            }
+    end
+`;
 
 
 %% Bracketed Expression
