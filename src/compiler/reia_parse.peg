@@ -9,6 +9,9 @@
 
 grammar     <-  ws expr_list? ws
 `
+    io:format("----------Parse finished : Result--------~n~n",[]),
+    io:format("~p~n~n",[part(2, Node)]),
+    io:format("----------- End of Parse Result ---------~n~n",[]),
     part(2, Node)
 `;
 
@@ -26,7 +29,7 @@ expr_list   <-  expr (eol expr_list)?
 
 
 %% Expression lists (comma delimited)
-exprs       <-  expr sp (ws ',' ws !'&' exprs)?    %%% GTD - Not sure why we need the !'&' - it makes 'pargs' work, for some reason
+exprs       <-  expr sp (ws ',' ws !'&' exprs)?    %%% GTD - The !'&' is there to make 'pargs' work.
 `
     case Node of
         [Expr, _, []] ->
@@ -65,7 +68,7 @@ inline_if_expr <- match_expr if sp match_expr
             /   match_expr unless sp match_expr
             /   match_expr
 `
-    io:format("Doing inline_if_expr : Idx = ~p, Node = ~p~n",[Idx, Node]),
+%    io:format("Doing inline_if_expr : Idx = ~p, Node = ~p~n",[Idx, Node]),
     case Node of
         [Expr1, 'if', _, Expr2] ->
             #'if'{line=line(Idx), 
@@ -249,9 +252,9 @@ funref_expr <-  funref
 `;
 
 %% Function Calls
-call_expr   <-  call_base ('.' func_call)* sp ('[' ws expr ws ']')? sp
+call_expr   <-  call_base ('.' func_call)* sp ('['  ws expr ws ']'  )? sp
 `
-    io:format("~ncall_expr ===> Node is ~n~p~n~n",[Node]),
+%    io:format("~ncall_expr ===> Node is ~n~p~n~n",[Node]),
     [Base, Calls, _, Expr, _] = Node,
     Main = build_remote_call(Base,Calls),
     Main
@@ -325,7 +328,10 @@ max_expr    <-  number              %   [0-9]
   
 %% Assignment operators
 match_op    <-  '=' !'='    ws
-`    list_to_atom(part(1,Node)) `;
+`
+    token(part(1,Node),Idx),
+    list_to_atom(part(1,Node))
+`;
 
 rebind_op   <-  '+='    ws
             /   '-='    ws
@@ -338,25 +344,28 @@ rebind_op   <-  '+='    ws
             /   '<<='   ws
             /   '>>='   ws
 `
+    token(part(1,Node),Idx),
     list_to_atom(part(1,Node))
 `;
 
 
 %% Boolean operators
 or_op       <-  '||'    ws
-            /   'or'    ws
+            /   or    ws
 `
+    token(part(1,Node),Idx),
     'or'
 `;
 
 and_op      <-  '&&'    ws
-            /   'and'   ws
+            /   and   ws
 `
+    token(part(1,Node),Idx),
     'and'
 `;
 
 %% Comparison operators
-comp_op     <- '==='    ws
+comp_op     <-  '==='   ws
             /   '=='    ws
             /   '!='    ws
             /   '>='    ws
@@ -364,6 +373,7 @@ comp_op     <- '==='    ws
             /   '<='    ws
             /   '<'     !'<' ws
 `
+    token(part(1,Node),Idx),
     list_to_atom(part(1,Node))
 `;
 
@@ -419,7 +429,7 @@ pow_op      <-  '**' !'='   ws
 
 
 %% Unary boolean operators
-unary_bool_op   <-  'not'   !'=' ws
+unary_bool_op   <-  not   !'=' ws
             /   '!'     !'=' ws
             /   '~'     !'=' ws
 `
@@ -482,31 +492,34 @@ class_decl  <-  class ws module_name ('<' ws module_name)? (eol functions)? ws e
 
 %% Parenthesized arguments
 pargs       <-  '(' ws ')' sp           %%%%%%%%%%%%%%%%%%%%%%%%   WHY IS THIS NEEDED? - DONT UNDERSTAND   %%%%%%%%%%%%%%%%%%%%%%
-            /   '(' ws exprs? ws block_capture? ws ')' sp
+            /   '(' ws exprs? ws (',' ws block_capture)? ws ')' sp
+            /   '(' ws block_capture? ws ')' sp
 `
-    io:format("~npargs: Node is ~p~n",[Node]),
+%    io:format("~npargs: Node is ~p~n",[Node]),
     case Node of
         [_, _, _, _] ->
             #pargs{};
         [_, _, Args, _, [], _, _, _] ->
-            #pargs{args=Args, block={var,line(Idx),'_'}};
-        [_, _, Args, _, Block, _, _, _] ->
-            #pargs{args=Args,block=Block}
+            #pargs{args=Args, block={var,1,'_'}};
+        [_, _, Args, _, [_, _, Block], _, _, _] ->
+            #pargs{args=Args,block=Block};
+        [_, _, Block, _, _, _] ->
+            #pargs{block=Block}
     end
 `;
 
 
 
-block_capture   <-  ',' ws '&' expr
+block_capture   <-  '&' expr
 `
-    part(4,Node)
+    part(2,Node)
 `;
 
 
 %% Functions
 functions       <-  function ws? (functions)?
 `
-    io:format("Functions: Node is ~p~n",[Node]),
+%    io:format("Functions: Node is ~p~n",[Node]),
     case Node of
         [Func, _, []] ->
             [Func];
@@ -518,7 +531,7 @@ functions       <-  function ws? (functions)?
 
 function    <-  def ws function_id pargs? ws body? ws end
 `
-    io:format("Function: Node is ~p~n",[Node]),
+%    io:format("Function: Node is ~p~n",[Node]),
     case Node of
         [_, _, Name, [], _, [], _, _] ->
             #function{
@@ -564,17 +577,17 @@ function_id <-  '[]='    sp
 `;
 
 
-function_identifier    <-   class
-            /  self
-            /  identifier
-            /  punctuated_identifier
+function_identifier     <-   class
+                        /    self
+                        /    punctuated_identifier
+                        /    identifier
 `
-    io:format("F_identifier: Node is ~p~n",[Node]),
+%    io:format("func_identifier: Node is ~p~n",[Node]),
     case Node of
-        'class'         ->
-            {identifier, line(Idx), 'class'};
-        {'self',Line}   ->
-            {identifier, line(Idx), 'self'};
+        'class'         ->  'class';
+%            {identifier, line(Idx), 'class'};
+        {'self',Line}   ->  'self';
+%            {identifier, line(Idx), 'self'};
         Identifier      ->
             Identifier#var.name
     end
@@ -583,7 +596,7 @@ function_identifier    <-   class
 
 body        <-  expr_list
 `
-    io:format("body: Node is ~p~n",[Node]),
+%    io:format("body: Node is ~p~n",[Node]),
     case Node of
         []   -> [#nil{}];
         List -> List
@@ -606,7 +619,7 @@ class_inst    <- module_name ws pargs
 local_call  <-  function_identifier pargs block?
             /   function_identifier block
 `
-    io:format("~nlocal_call ===> Node is ~n~p~n~n",[Node]),
+%    io:format("~nlocal_call ===> Node is ~n~p~n~n",[Node]),
     case Node of
         [Identifier, Pargs, []] ->      %  function_identifier pargs
             #local_call{
@@ -697,7 +710,7 @@ func_call   <-  function_identifier sp '(' ws exprs? ws ')' sp block? sp
             /   function_identifier sp block sp
             /   function_identifier sp '[' ws expr ws ']' sp
 `
-    io:format("~nfunc_call ===> Node is ~n~p~n~n",[Node]),
+%    io:format("~nfunc_call ===> Node is ~n~p~n~n",[Node]),
     case Node of
         [Identifier, _, _, _, Exprs, _, _, _, Block, _] ->
             #local_call{
@@ -764,7 +777,7 @@ func_call   <-  function_identifier sp '(' ws exprs? ws ')' sp block? sp
 %% Native Erlang function calls
 native_call <-  erl '.' function_identifier ('.' function_identifier)? sp '(' ws exprs? ws ')' sp
 `
-    io:format("~nnative_call ===> Node is ~n~p~n~n",[Node]),
+%    io:format("~nnative_call ===> Node is ~n~p~n~n",[Node]),
     case Node of
         [_, _, Function, [], _, _, _, Exprs, _, _, _] ->
             #native_call{
@@ -831,17 +844,17 @@ funref      <-  call_expr '.' function_identifier
 %    args='$3',
 %    body='$5'
 %  }.
-block       <-  '{' ( ws '|' ws block_args ws '|' )? ws expr_list? '}' sp
-            /   do  ( ws '|' ws block_args ws '|' )? ws expr_list? end sp
+block       <-  '{' ( ws '|' ws block_args ws '|' )? ws expr_list? ws '}' sp
+            /   do  ( ws '|' ws block_args ws '|' )? ws expr_list? ws end sp
 `
 %    io:format("~nblock ===> Node is ~p~n~n",[Node]),
     case Node of
-        [_, [], _, Exprs, _, _] ->
+        [_, [], _, Exprs, _, _, _] ->
             #lambda{
               line=line(Idx), 
               body=Exprs
             };
-        [_, [_, _, _, Args, _, _], _, Exprs, _, _] ->
+        [_, [_, _, _, Args, _, _], _, Exprs, _, _, _] ->
             #lambda{
               line=line(Idx), 
               args=Args, 
@@ -856,6 +869,7 @@ block_args  <-  max_expr (ws ',' ws max_expr)* ws
 %            /   max_expr ',' block_args
             % : ['$1'|'$3'].
 `
+%    io:format("block_args:|~p~n|",[Node]),
     case Node of
         [Expr, [], _] ->
             [Expr];
@@ -919,7 +933,7 @@ splat       <-  '*' ws expr ws ']' sp
 %% List comprehensions
 list_comprehension  <-  '[' ws expr ws for ws lc_exprs ws ']' sp
 `
-    io:format("~nlc ===> Node is ~n~p~n~n",[Node]),
+%    io:format("~nlc ===> Node is ~n~p~n~n",[Node]),
     #lc{
         line=line(Idx), 
         expr=part(3,Node), 
@@ -929,7 +943,7 @@ list_comprehension  <-  '[' ws expr ws for ws lc_exprs ws ']' sp
 
 lc_exprs    <-  lc_expr sp (',' ws lc_exprs)? sp
 `
-    io:format("~nlc_exprs ===> Node is ~n~p~n~n",[Node]),
+%    io:format("~nlc_exprs ===> Node is ~n~p~n~n",[Node]),
     case Node of
         [Expr, _, [], _] ->
             [Expr];
@@ -938,10 +952,10 @@ lc_exprs    <-  lc_expr sp (',' ws lc_exprs)? sp
     end
 `;
 
-lc_expr     <-  expr ws 'in' ws expr
+lc_expr     <-  expr ws in ws expr
             /   expr
 `
-    io:format("~nlc_expr ===> Node is ~n~p~n~n",[Node]),
+%    io:format("~nlc_expr ===> Node is ~n~p~n~n",[Node]),
     case Node of
         [Expr1, _, _, _, Expr2] ->  
             #generate{line=line(Idx), 
@@ -1117,8 +1131,9 @@ bound_var   <-  '^' identifier
 
 
 %% Case expressions
-case_expr   <-  case ws expr eol clauses? eol else_clause? ws end sp
+case_expr   <-  case ws expr ws clauses? ws else_clause? ws end sp
 `
+%    io:format("Doing case : Idx = ~p, Node = ~p~n",[Idx, Node]),
     case Node of
         [_, _, Expr, _, Clauses, _, [], _, _, _] ->
             #'case'{
@@ -1213,8 +1228,8 @@ else_clause     <-  else ws expr_list
 
   
 %% Receive expressions
-receive_expr    <-  'receive' ws clauses ws after_clause? ws 'end'
-                /   'receive' ws after_clause ws 'end'
+receive_expr    <-  receive ws clauses ws after_clause? ws end
+                /   receive ws after_clause ws end
 `
     case Node of
         [_, _, Clauses, _, After, _, _] ->
@@ -1225,7 +1240,7 @@ receive_expr    <-  'receive' ws clauses ws after_clause? ws 'end'
 `;
 
 
-after_clause    <-  'after' ws expr eol expr_list
+after_clause    <-  after ws expr eol expr_list
 `
     #'after'{line=line(Idx), timeout=part(3,Node), exprs=part(5,Node)}
 `;
@@ -1252,7 +1267,7 @@ throw_expr  <-  throw ws '(' (ws module_name sp ',')? ws expr ws ')' sp
 
 
 %% Try expressions
-try_expr    <-  'try' ws expr_list ws catch_clauses ws 'end' sp
+try_expr    <-  try ws expr_list ws catch_clauses ws end sp
 `
         #'try'{
           line    = line(Idx), 
@@ -1273,7 +1288,7 @@ catch_clauses   <-  catch_clause (ws catch_clauses)?
 `;
 
 
-catch_clause    <-  'catch' ws expr eol expr_list
+catch_clause    <-  catch ws expr eol expr_list
 `
 #'catch'{
       line    = line(Idx), 
@@ -1287,29 +1302,43 @@ catch_clause    <-  'catch' ws expr eol expr_list
 
 %% Module and Variable Names
 module_name <-  upper (lower / upper / digit / "_")* sp
-`   #module_name{line=line(Idx), name=list_to_atom(lists:flatten(Node))} `;
+`
+    token("Mod:"++lists:flatten(Node),Idx),
+    #module_name{line=line(Idx), name=list_to_atom(lists:flatten(Node))}
+`;
 
 identifier  <-  !(reserved_word !lower ) (lower / "_") (lower / upper / digit / "_")* sp
 `
-    io:format("Doing identifier : Idx = ~p, Node = ~p~n",[Idx, Node]),
+%    io:format("Doing identifier : Idx = ~p, Node = ~p~n",[Idx, Node]),
+    token("ID:"++lists:flatten(Node),Idx),
     Atom = list_to_atom(lists:flatten(Node)),
     case reserved_word(Atom) of
-        true -> {Atom, line(Idx)};
-        false -> #var{line=line(Idx), name=Atom}
+        true ->
+            io:format("...and got true!!!!!!!!!!!!~n",[]),
+            {Atom, line(Idx)};
+        false -> 
+%            io:format("...and got false~n",[]),
+            #var{line=line(Idx), name=Atom}
     end
 `;
 
-punctuated_identifier <-  (lower / "_") (lower / upper / digit / "_")* [?!] sp
+punctuated_identifier <-  !(reserved_word !lower ) (lower / "_") (lower / upper / digit / "_")* [?!] sp
 %`   #identifier{line=line(Idx), name=list_to_atom(lists:flatten(Node))}    `;
-`   lists:flatten(Node)    `;
+%`   lists:flatten(Node)    `;
+`
+    token("ID:"++lists:flatten(Node),Idx),
+    Atom = list_to_atom(lists:flatten(Node)),
+    #var{line=line(Idx), name=Atom}
+`;
 
 %% Atoms
-atom        <-  ":" (lower / upper / "_") (lower / upper / digit / "_")* sp
-            /   ":" string sp
+atom        <-  ':' (lower / upper / '_') (lower / upper / digit / '_')* sp
+            /   ':' string sp
 `
+    token(lists:flatten(Node),Idx),
     case Node of
         [_, Head, Tail, _] ->
-            #atom{line=line(Idx), name=list_to_atom([Head|Tail])};
+            #atom{line=line(Idx), name=list_to_atom(lists:flatten([Head|Tail]))};
         [_, #string{line=Line, characters=Chars}, _] ->
             #atom{line=Line, name=list_to_atom(Chars)}
     end
@@ -1317,10 +1346,14 @@ atom        <-  ":" (lower / upper / "_") (lower / upper / digit / "_")* sp
 
 %% Numbers
 float       <-  [+-]? digit+ "." digit+ sp
-`   #float{line = line(Idx), value = list_to_float(lists:flatten(Node))}    `;
+`
+    token("float:"++lists:flatten(Node),Idx),
+    #float{line = line(Idx), value = list_to_float(lists:flatten(Node))}    `;
 
 integer     <-  [+-]? digit+ sp
-`   #integer{line = line(Idx), value = list_to_integer(lists:flatten(Node))}    `;
+`
+    token("int:"++lists:flatten(Node),Idx),
+    #integer{line = line(Idx), value = list_to_integer(lists:flatten(Node))}    `;
 
 %% Strings
 string      <-  quot_string
@@ -1332,8 +1365,8 @@ string      <-  quot_string
 quot_string <- '"' quot_string_char* '"' sp
 `    #string{line = line(Idx), characters=unescape_string(lists:flatten(part(2,Node)))} `;
 
-quot_d_string <- '"' (quot_string_char+ string_exp?)* '"' sp
-`    #dstring{line = line(Idx), elements=build_string(Idx, part(2,Node))}   `;
+quot_d_string <- '"' quot_string_char* (string_exp quot_string_char*)+  '"' sp
+`    #dstring{line = line(Idx), elements=build_string(Idx, part(2,Node), part(3,Node))}   `;
 
 quot_string_char <- ( !'"' !"#{" ( !"\\" . / "\\" . ) )
 `    lists:flatten(Node)    `;
@@ -1341,8 +1374,8 @@ quot_string_char <- ( !'"' !"#{" ( !"\\" . / "\\" . ) )
 apos_string <- "'" apos_string_char* "'" sp
 `    #string{line = line(Idx), characters=unescape_string(lists:flatten(part(2,Node)))} `;
 
-apos_d_string <- "'" (apos_string_char+ string_exp?)* "'" sp
-`    #dstring{line = line(Idx), elements=build_string(Idx, part(2,Node))}   `;
+apos_d_string <- "'" apos_string_char* (string_exp apos_string_char*)+ "'" sp
+`    #dstring{line = line(Idx), elements=build_string(Idx, part(2,Node), part(3,Node))}   `;
 
 apos_string_char <- ( !"'" !"#{" ( !"\\" . / "\\" . ) )
 `    lists:flatten(Node)    `;
@@ -1360,7 +1393,7 @@ regexp      <-  '%r/' ('\\^' . / '\\' . / [^/])* '/' sp
 %% Only ws, eol and sp are used outside this group
 ws          <-  (space / newline)*      `[]`;   % whiteSpace allows newlines too
 
-eol         <-  (newline sp)+           `[]`;   % required end of line
+eol         <-  sp? (newline sp)+       `token('eol',Idx),[]`;  % required end of line
 
 newline     <-  comment / linend        `[]`;   % various line endings
 
@@ -1379,41 +1412,72 @@ lower       <-  [a-z]    ;
 
 
 %% Reserved Words
-reserved_word <- after / and / begin / case / catch / class / def / do / end
-            / elseif / else /  erl / false / for / fun / if / in / module / nil 
-            / not / or / receive / self / throw / true / try / unless / when
+%reserved_word <- after / and / begin / case / catch / class / def / do / end
+%            / elseif / else /  erl / false / for / fun / if / in / module / nil 
+%            / not / or / receive / self / throw / true / try / unless / when
+reserved_word <- 'after' / 'and' / 'begin' / 'case' / 'catch' / 'class' / 'def' / 'do' / 'end'
+            / 'elseif' / 'else' / 'erl' / 'false' / 'for' / 'fun' / 'if' / 'in' / 'module' / 'nil' 
+            / 'not' / 'or' / 'receive' / 'self' / 'throw' / 'true' / 'try' / 'unless' / 'when'
 `
     Node
 `;
 
-after       <-  'after'     sp  ` list_to_atom(part(1,Node)) `;
-and         <-  'and'       sp  ` list_to_atom(part(1,Node)) `;
-begin       <-  'begin'     sp  ` list_to_atom(part(1,Node)) `;
-case        <-  'case'      sp  ` list_to_atom(part(1,Node)) `;
-catch       <-  'catch'     sp  ` list_to_atom(part(1,Node)) `;
-class       <-  'class'     sp  ` list_to_atom(part(1,Node)) `;
-def         <-  'def'       sp  ` list_to_atom(part(1,Node)) `;
-do          <-  'do'        sp  ` list_to_atom(part(1,Node)) `;
-end         <-  'end'       sp  ` list_to_atom(part(1,Node)) `;
-else        <-  'else'      sp  ` list_to_atom(part(1,Node)) `;
-elseif      <-  'elseif'    sp  ` list_to_atom(part(1,Node)) `;
-erl         <-  'erl'       sp  ` list_to_atom(part(1,Node)) `;
-false       <-  'false'     sp  ` list_to_atom(part(1,Node)) `;
-for         <-  'for'       sp  ` list_to_atom(part(1,Node)) `;
-fun         <-  'fun'       sp  ` list_to_atom(part(1,Node)) `;
-if          <-  'if'        sp  ` list_to_atom(part(1,Node)) `;
-in          <-  'in'        sp  ` list_to_atom(part(1,Node)) `;
-module      <-  'module'    sp  ` list_to_atom(part(1,Node)) `;
-nil         <-  'nil'       sp  ` list_to_atom(part(1,Node)) `;
-not         <-  'not'       sp  ` list_to_atom(part(1,Node)) `;
-or          <-  'or'        sp  ` list_to_atom(part(1,Node)) `;
-receive     <-  'receive'   sp  ` list_to_atom(part(1,Node)) `;
+%after       <-  'after'     sp  ` list_to_atom(part(1,Node)) `;
+after       <-  'after'     sp  ` token('after',Idx) `;
+%and         <-  'and'       sp  ` list_to_atom(part(1,Node)) `;
+and         <-  'and'       sp  ` token('and',Idx) `;
+%begin       <-  'begin'     sp  ` list_to_atom(part(1,Node)) `;
+begin       <-  'begin'     sp  ` token('begin',Idx) `;
+%case        <-  'case'      sp  ` io:format("Got reserved word 'case' at ~p~n",[Idx]),list_to_atom(part(1,Node))     `;
+case        <-  'case'      sp  ` token('case',Idx) `;
+%catch       <-  'catch'     sp  ` list_to_atom(part(1,Node)) `;
+catch       <-  'catch'     sp  ` token('catch',Idx) `;
+%class       <-  'class'     sp  ` list_to_atom(part(1,Node)) `;
+class       <-  'class'     sp  ` token('class',Idx) `;
+%def         <-  'def'       sp  ` list_to_atom(part(1,Node)) `;
+def         <-  'def'       sp  ` token('def',Idx) `;
+%do          <-  'do'        sp  ` list_to_atom(part(1,Node)) `;
+do          <-  'do'        sp  ` token('do',Idx) `;
+%end         <-  'end'       sp  ` list_to_atom(part(1,Node)) `;
+end         <-  'end'       sp  ` token('end',Idx) `;
+%else        <-  'else'      sp  ` list_to_atom(part(1,Node)) `;
+else        <-  'else'      sp  ` token('else',Idx) `;
+%elseif      <-  'elseif'    sp  ` list_to_atom(part(1,Node)) `;
+elseif      <-  'elseif'    sp  ` token('elseif',Idx) `;
+%erl         <-  'erl'       sp  ` list_to_atom(part(1,Node)) `;
+erl         <-  'erl'       sp  ` token('erl',Idx) `;
+%false       <-  'false'     sp  ` list_to_atom(part(1,Node)) `;
+false       <-  'false'     sp  ` token('false',Idx) `;
+%for         <-  'for'       sp  ` list_to_atom(part(1,Node)) `;
+for         <-  'for'       sp  ` token('for',Idx) `;
+%fun         <-  'fun'       sp  ` list_to_atom(part(1,Node)) `;
+fun         <-  'fun'       sp  ` token('fun',Idx) `;
+%if          <-  'if'        sp  ` list_to_atom(part(1,Node)) `;
+if          <-  'if'        sp  ` token('if',Idx) `;
+%in          <-  'in'        sp  ` list_to_atom(part(1,Node)) `;
+in          <-  'in'        sp  ` token('in',Idx) `;
+%module      <-  'module'    sp  ` list_to_atom(part(1,Node)) `;
+module      <-  'module'    sp  ` token('module',Idx) `;
+%nil         <-  'nil'       sp  ` list_to_atom(part(1,Node)) `;
+nil         <-  'nil'       sp  ` token('nil',Idx) `;
+%not         <-  'not'       sp  ` list_to_atom(part(1,Node)) `;
+not         <-  'not'       sp  ` token('not',Idx) `;
+%or          <-  'or'        sp  ` list_to_atom(part(1,Node)) `;
+or          <-  'or'        sp  ` token('or',Idx) `;
+%receive     <-  'receive'   sp  ` list_to_atom(part(1,Node)) `;
+receive     <-  'receive'   sp  ` token('receive',Idx) `;
+%self        <-  'self'      sp  ` {'self', line(Idx)} `;
 self        <-  'self'      sp  ` {'self', line(Idx)} `;
-throw       <-  'throw'     sp  ` list_to_atom(part(1,Node)) `;
-true        <-  'true'      sp  ` list_to_atom(part(1,Node)) `;
-try         <-  'try'       sp  ` list_to_atom(part(1,Node)) `;
-unless      <-  'unless'    sp  ` list_to_atom(part(1,Node)) `;
-when        <-  'when'      sp  ` list_to_atom(part(1,Node)) `;
+%throw       <-  'throw'     sp  ` list_to_atom(part(1,Node)) `;
+throw       <-  'throw'     sp  ` token('throw',Idx) `;
+%true        <-  'true'      sp  ` list_to_atom(part(1,Node)) `;
+true        <-  'true'      sp  ` token('true',Idx) `;
+%try         <-  'try'       sp  ` list_to_atom(part(1,Node)) `;
+try         <-  'try'       sp  ` token('try',Idx) `;
+%unless      <-  'unless'    sp  ` list_to_atom(part(1,Node)) `;
+unless      <-  'unless'    sp  ` token('unless',Idx) `;
+%when        <-  'when'      sp  ` list_to_atom(part(1,Node)) `;
+when        <-  'when'      sp  ` token('when',Idx) `;
 
 %% ==================== Extra functions ====================
 `
@@ -1453,12 +1517,14 @@ part(N, [H|T]) when N > 0 ->
   
 
 %% Builds a list of interpolated string elements
-build_string(Idx, List)                         -> build_string(Idx, List, []).
-build_string(Idx, [], Result)                   -> lists:reverse(Result);
-build_string(Idx, [[Chars, []]|Tail], Result)   ->
-    build_string(Idx, Tail, [#string{line=line(Idx), characters=lists:flatten(Chars)}|Result]);
-build_string(Idx, [[Chars, Expr]|Tail], Result) ->
-    build_string(Idx, Tail, [Expr,#string{line=line(Idx), characters=lists:flatten(Chars)}|Result]).
+build_string(Idx, [],    List)  -> build_string2(Idx, List, []);
+build_string(Idx, Chars, List)  -> build_string2(Idx, List, [#string{line=line(Idx), characters=lists:flatten(Chars)}]).
+
+build_string2(Idx, [], Result)                   -> lists:reverse(Result);
+build_string2(Idx, [[Expr, []]|Tail], Result)   ->
+    build_string2(Idx, Tail, [Expr|Result]);
+build_string2(Idx, [[Expr, Chars]|Tail], Result) ->
+    build_string2(Idx, Tail, [#string{line=line(Idx), characters=lists:flatten(Chars)},Expr|Result]).
 
 % remove escapes from a plain (uninterpolated) string
 unescape_string(String) -> unescape_string(String, []).
@@ -1494,7 +1560,7 @@ build_binary_op (Idx, Leftop, [[Op,Expr]|T]) ->
 %% Builds a tree of remote function calls
 build_remote_call(Base, [])                 -> Base;
 build_remote_call(Base, [[".", Call]|Tail])  ->
-    io:format("~nbuild_remote_call ===> ~n~p~n~p~n~p~n~n",[Base, Call, Tail]),
+%    io:format("~nbuild_remote_call ===> ~n~p~n~p~n~p~n~n",[Base, Call, Tail]),
     build_remote_call(
         #remote_call{
             line     = Call#local_call.line,
@@ -1526,6 +1592,11 @@ stripper([$\n|_], Rstr) ->
   lists:reverse(Rstr);
 stripper([Chr|Rest], Rstr) ->
   stripper(Rest, [Chr|Rstr]).
+
+% Reports the finding of a token (and returns the token)
+token(Word, Idx) ->
+    io:format("~p : got token '~p'~n",[Idx, Word]),
+    Word.
 
 reserved_word('after')   -> true;
 reserved_word('and')     -> true;
