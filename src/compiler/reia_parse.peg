@@ -1338,7 +1338,7 @@ module_name <-  upper (lower / upper / digit / "_")* sp
     #module_name{line=line(Idx), name=list_to_atom(lists:flatten(Node))}
 `;
 
-identifier  <-  !(reserved_word !lower ) (lower / "_") (lower / upper / digit / "_")* sp
+identifier  <-  !(reserved_word !(lower / upper / digit / '_') ) (lower / '_') (lower / upper / digit / '_')* sp
 `
 %    io:format("Doing identifier : Idx = ~p, Node = ~p~n",[Idx, Node]),
     token("ID:"++lists:flatten(Node),Idx),
@@ -1353,7 +1353,7 @@ identifier  <-  !(reserved_word !lower ) (lower / "_") (lower / upper / digit / 
     end
 `;
 
-punctuated_identifier <-  !(reserved_word !lower ) (lower / "_") (lower / upper / digit / "_")* [?!] sp
+punctuated_identifier <-  !(reserved_word !(lower / upper / digit / '_') ) (lower / '_') (lower / upper / digit / '_')* [?!] sp
 %`   #identifier{line=line(Idx), name=list_to_atom(lists:flatten(Node))}    `;
 %`   lists:flatten(Node)    `;
 `
