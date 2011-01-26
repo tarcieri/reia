@@ -342,7 +342,7 @@ basic_term_test_() -> %==========================================
     ?_assertEqual([{ivar,1,'ident'}],       parse("@ident ")),
     % bound variable
     ?_assertEqual([{bound_var,1,'ident'}],  parse("^ident ")),
-    % identifier
+    % identifier                            FIXME test identifiers which start with a reserved word
     ?_assertEqual([{var,1,ident}],          parse("ident ")),
     ?_assertEqual([{var,1,ident_name}],     parse("ident_name ")),
     ?_assertEqual([{var,1,ident_3}],        parse("ident_3 ")),
