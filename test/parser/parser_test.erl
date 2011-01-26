@@ -41,16 +41,20 @@ root_test_() ->
   ].
 
 expr_test_() ->    % NOTE: All depend on 'integer' already working
+    % META-NOTE: The above note used to be true as I used integers for all the terms in the following.
+    %            However, this caused certain problems to be overlooked, and so after developing all the
+    %            basic expressions (i.e. all the entries of max_expr down to the last 'identifier') 
+    %            I have changed a few of the elements to be variables (mostly abc and xyz ;-)  )
     % each group of tests consists of:
     % a precedence test checking that one of the group is of lower precedence than the group above
     % an associativity test (where associativity is defined) with a circular relationship of the elements
     
   [ % inline_if
-    ?_assertEqual([{'if',1,[{clause,1,[{integer,1,7}],[{integer,1,1}]}]}],
-                                            parse(" 1 if 7 ")),
+    ?_assertEqual([{'if',1,[{clause,1,[{var,1,xyz}],[{integer,1,1}]}]}],
+                                            parse(" 1 if xyz ")),
     ?_assertEqual([{'if',1,[{clause,1,[{unary_op,1,'not',{integer,1,7}}],
-                                      [{integer,1,1}] }] }],
-                                            parse(" 1 unless 7 ")),
+                                      [{var,1,abc}] }] }],
+                                            parse(" abc unless 7 ")),
     % match
     ?_assertEqual([{match,1,{integer,1,1},
                             {match,1,{integer,1,2},
@@ -59,8 +63,8 @@ expr_test_() ->    % NOTE: All depend on 'integer' already working
     % rebind
     ?_assertEqual([{match,1,{integer,1,3},{binary_op,1,'+=',{integer,1,1},{integer,1,2}}}],  
                                             parse("3 = 1 += 2")),
-    ?_assertEqual([{binary_op,1,'+=',{integer,1,1},{integer,1,2}}],  parse("1 += 2")),
-    ?_assertEqual([{binary_op,1,'-=',{integer,1,1},{integer,1,2}}],  parse("1 -= 2")),
+    ?_assertEqual([{binary_op,1,'+=',{var,1,abc},{integer,1,2}}],    parse("abc += 2")),
+    ?_assertEqual([{binary_op,1,'-=',{var,1,abc},{var,1,xyz}}],      parse("abc -= xyz")),
     ?_assertEqual([{binary_op,1,'*=',{integer,1,1},{integer,1,2}}],  parse("1 *= 2")),
     ?_assertEqual([{binary_op,1,'/=',{integer,1,1},{integer,1,2}}],  parse("1 /= 2")),
     ?_assertEqual([{binary_op,1,'**=',{integer,1,1},{integer,1,2}}], parse("1 **= 2")),
@@ -73,10 +77,10 @@ expr_test_() ->    % NOTE: All depend on 'integer' already working
 
     % ternary
     ?_assertEqual([{match,1,
-                    {'if',1,[{clause,1,[{integer,1,1}],
-                                     [{integer,1,2}]},
+                    {'if',1,[{clause,1,[{var,1,abc}],
+                                     [{var,1,stu}]},
                            {clause,1,[{true,1}],
-                                     [{integer,1,3}]}
+                                     [{var,1,xyz}]}
                           ]
                     },
                     {'if',1,[{clause,1,[{integer,1,4}],
@@ -86,7 +90,7 @@ expr_test_() ->    % NOTE: All depend on 'integer' already working
                           ]
                      }
                    }],
-                                                                    parse("1 ? 2 : 3 = 4 ? 5 : 6 ")),
+                                                                    parse("abc ? stu : xyz = 4 ? 5 : 6 ")),
     ?_assertEqual([{'if',1,[{clause,1,[{integer,1,1}],
                                       [{integer,1,2}]},
                             {clause,1,[{true,1}
@@ -97,18 +101,18 @@ expr_test_() ->    % NOTE: All depend on 'integer' already working
                                                [{integer,1,5}]}]}]}]}],
                                                                     parse("1 ? 2 : 3 ? 4 : 5 ")),
     % send
-    ?_assertEqual([{'if',1,[{clause,1,[{send,1,{integer,1,1},{integer,1,2}}],
+    ?_assertEqual([{'if',1,[{clause,1,[{send,1,{var,1,abc},{integer,1,2}}],
                                       [{send,1,{integer,1,3},{integer,1,4}}]},
                             {clause,1,[{true,1}],
-                                      [{send,1,{integer,1,5},{integer,1,6}}]}
+                                      [{send,1,{integer,1,5},{var,1,xyz}}]}
                            ]}],
-                                                                    parse("1 ! 2 ? 3 ! 4 : 5 ! 6 ")),
+                                                                    parse("abc ! 2 ? 3 ! 4 : 5 ! xyz ")),
     ?_assertEqual([{send,1,{integer,1,1},{send,1,{integer,1,2},{integer,1,3}}}],
                                                                     parse("1 ! 2 ! 3")),
     % or ||
     ?_assertEqual([{send,1,{binary_op,1,'or',{integer,1,1},{integer,1,2}},
-                           {binary_op,1,'or',{integer,1,3},{integer,1,4}}}],
-                                                                    parse("1 or 2 ! 3 or 4")),
+                           {binary_op,1,'or',{var,1,abc},{var,1,xyz}}}],
+                                                                    parse("1 or 2 ! abc or xyz")),
     ?_assertEqual([{binary_op,1,'or',{binary_op,1,'or',{binary_op,1,'or',{integer,1,1},
                                                                          {integer,1,2}},
                                                        {integer,1,3}},
@@ -208,16 +212,18 @@ expr_test_() ->    % NOTE: All depend on 'integer' already working
                                                                     parse(" ! ~ ! 4 ")),
 
     % receive
-    ?_assertEqual([{'receive',1,[{clause,2,[{integer,2,1},{integer,2,2}],[{integer,3,3}]}],[]}],
-                                            parse(" receive \n when 1 , 2 \n 3 \n end")),
-    ?_assertEqual([{'receive',1,[],{'after',2,{integer,2,1},[{integer,3,2}]}}],
-                                            parse(" receive \n after 1 \n 2 \n end")),
+    ?_assertEqual([{'receive',1,[{clause,2,[{var,2,abc},{var,2,xyz}],[{integer,3,3}]}],[]}],
+                                            parse(" receive \n when abc , xyz \n 3 \n end")),
+    ?_assertEqual([{'receive',1,[],{'after',2,{var,2,abc},[{var,3,xyz}]}}],
+                                            parse(" receive \n after abc \n xyz \n end")),
     ?_assertEqual([{'receive',1,[{clause,2,[{integer,2,1}],[{integer,3,2},{integer,4,3}]}],{'after',5,{integer,5,4},[{integer,6,5}]}}],
                                             parse(" receive \n when 1 \n 2 \n 3 \n after 4 \n 5 \n end")),
 
     % throw
     ?_assertEqual([{'throw',1,'RuntimeError',{integer,1,1}}],
                                             parse(" throw ( 1 ) ")),
+    ?_assertEqual([{'throw',1,'RuntimeError',{var,1,abc}}],
+                                            parse(" throw ( abc ) ")),
     ?_assertEqual([{'throw',1,'Modname',{integer,1,1}}],
                                             parse(" throw ( Modname , 1 ) ")),
 
@@ -225,6 +231,9 @@ expr_test_() ->    % NOTE: All depend on 'integer' already working
     ?_assertEqual([{'try',1,[{integer,2,1}],
                             [{'catch',3,{integer,3,4},[{integer,4,5}]}]}],
                                             parse(" try \n 1 \n catch 4 \n 5 \n end ")),
+    ?_assertEqual([{'try',1,[{var,2,abc}],
+                            [{'catch',3,{var,3,stu},[{var,4,xyz}]}]}],
+                                            parse(" try \n abc \n catch stu \n xyz \n end ")),
     ?_assertEqual([{'try',1,[{integer,1,1},{integer,2,2}],
                             [{'catch',3,{integer,3,4},[{integer,4,5}]}]}],
                                             parse(" try 1 \n 2 \n catch 4 \n 5 \n end ")),
@@ -312,6 +321,7 @@ basic_term_test_() -> %==========================================
     ?_assertEqual([{atom,1,abc}],           parse(":'abc' ")),
     ?_assertEqual([{atom,1,'a\'bc'}],       parse(":'a\\'bc' ")),
     ?_assertEqual([{atom,1,'a"bc'}],        parse(":\"a\\\"bc\" ")),
+    ?_assertEqual([{atom,1,'a7_0M'}],        parse(":a7_0M")),
     % boolean values
     ?_assertEqual([{true,1}],               parse("true ")),
     ?_assertEqual([{false,1}],              parse("false ")),
@@ -375,7 +385,7 @@ compound_term_test_() -> %==========================================
                     [   {string,1,"ab"},
                         {binary_op,1,'+',{integer,1,1},{integer,1,2}},
                         {string,1,"cd"}]
-                    }],       
+                    }],
                                             parse("\"ab#{1+2}cd\" \n\n")),
     ?_assertEqual([{dstring,1,
                     [ {string,1,"ab"},
@@ -386,7 +396,7 @@ compound_term_test_() -> %==========================================
                         ]
                       },
                       {string,1,"cd"}]
-                    }],       
+                    }],
                                             parse("\"ab#{\"wx#{1+2}yz\"}cd\"")),
     ?_assertEqual([{dstring,1,
                     [ {string,1,"This is an "},
@@ -399,6 +409,12 @@ compound_term_test_() -> %==========================================
                       {string,1," string"}]
                     }],       
                                             parse("'This is an #{\"embedded #{1+1}-level expression\"} string' \n")),
+    ?_assertEqual([{dstring,1,  [ {var,1,from},
+                                  {string,1,".."},
+                                  {var,1,to}]
+                  }],       
+                                            parse("\"#{from}..#{to}\"")),
+
     % tuple
     ?_assertEqual([{tuple,1,[]}],           parse(" ( ) ")),
     ?_assertEqual([{tuple,1,[{integer,1,1}]}],
@@ -452,7 +468,7 @@ compound_term_test_() -> %==========================================
   ].
 
 
-class_and_module_decl_test_() ->
+class_and_module_decl_test_() ->        % FIXME - check out allowance of ws around block definitions
   [ % Class Declarations
     ?_assertEqual([{class,1,'Class','Object',[]}],
                                             parse(" class Class \n end ")),
@@ -464,14 +480,14 @@ class_and_module_decl_test_() ->
                                                             end
                                                         end ")),
     ?_assertEqual([{class,1,'Class','Banjo',[{function,2,'[]',[{var,2,parm}],
-                                                              {var,2,'_'},
+                                                              {var,1,'_'},
                                                               [{nil,2}] }] }],
                                             parse("class Class < Banjo
                                                             def [] ( parm )
                                                             end
                                                         end ")),
     ?_assertEqual([{class,1,'Class','Object',[{function,2,'[]=',[{var,2,parm1},{var,2,parm2}],
-                                                                {var,2,'_'},
+                                                                {var,1,'_'},
                                                                 [{integer,3,17}] },
                                              {function,5,'func',[],
                                                                {var,1,'_'}, % should be line 5?
@@ -492,9 +508,9 @@ class_and_module_decl_test_() ->
                                                              def method ()
                                                              end
                                                          end ")),
+          % FIXME - Add functions named 'class' and 'self'
     ?_assert(true)
   ].
-
 
 
 function_calls_test_() ->
@@ -513,6 +529,8 @@ function_calls_test_() ->
                                             parse(" func1 ( 27 ) { 69 } ")),
     ?_assertEqual([{local_call,1,func1,[],{lambda,1,[],[{integer,1,77}]}}],
                                             parse(" func1 do 77 end ")),
+    ?_assertEqual([{local_call,1,func1,[],{lambda,1,[],[{integer,2,77}]}}],
+                                            parse(" func1 do \n 77 \n end \n ")),
     % Native Calls
     ?_assertEqual([{native_call,1,erlang,func1,[]}],
                                             parse(" erl.func1() ")),
@@ -595,6 +613,41 @@ function_calls_test_() ->
         % Multi-level calls
     ?_assertEqual([{remote_call,1,{remote_call,1,{local_call,1,func1,[],{nil,1}},func2,[],{nil,1}},func3,[],{nil,1}}],
                                             parse(" func1().func2().func3() ")),
+
+    ?_assert(true)
+  ].
+
+
+combinations_test_() ->
+  [ % Module + Case
+    ?_assertEqual([{module,1,'Mod',[]}],    parse(" module Mod \n end ")),
+    ?_assertEqual([{module,1,'NewMod',[{function,2,method,[],{var,1,'_'},
+                                        [{'case',3,{integer,3,2},[{clause,4,[{integer,4,7}],[{nil,4}]}]}]
+                                       }]}],
+                                            parse(" module NewMod
+                                                             def method
+                                                                 case 2
+                                                                   when 7
+                                                                 end
+                                                             end
+                                                         end ")),
+    ?_assertEqual([{module,1,'NewMod',[{function,2,method,[],{var,1,'_'},
+                                        [{'case',3,{var,3,abc},[{clause,4,[{var,4,xyz}],[{nil,4}]}]}]
+                                       }]}],
+                                            parse(" module NewMod
+                                                             def method ()
+                                                                 case abc
+                                                                   when xyz
+                                                                 end
+                                                             end
+                                                         end ")),
+%    FIXME - Correct the following expected result and un-comment test
+%    ?_assertEqual([{module,1,'NewMod',[{function,2,method,[],{var,1,'_'},
+%                                        [{'case',3,{var,3,abc},[{clause,4,[{var,4,xyz}],[{nil,4}]}]}]
+%                                       }]}],
+%                                            parse("ivar_str = instance_variables().to_list().map do |(var, val)|
+%                                                        \"@#{var}=#{val.inspect()}\"
+%                                                      end.join(\" \")")),
 
     ?_assert(true)
   ].
