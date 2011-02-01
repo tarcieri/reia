@@ -606,7 +606,7 @@ body        <-  expr_list
 
 
 %% Class instantiations
-class_inst    <- module_name ws pargs
+class_inst    <- module_name sp pargs
 `
     #class_inst{
         line  = line(Idx),
@@ -1428,9 +1428,11 @@ eol         <-  sp? (newline sp)+       `token('eol',Idx),[]`;  % required end o
 
 newline     <-  comment / linend        `[]`;   % various line endings
 
-comment     <-  '#' (!linend .)* linend? `[]`;   % any chars up to line end
+comment     <- '#' (!hard_linend .)* hard_linend? `[]`;   % any chars up to line end
 
-linend      <-  ('\r\n' / '\n' / ';' ) sp `[]`;   % 'conventional' line ending characters
+linend      <-  (hard_linend / ';' ) sp `[]`;   % 'conventional' line ending characters
+
+hard_linend <-  ('\r\n' / '\n' ) sp     `[]`;   % 'conventional' line ending characters
 
 sp          <-  space*                  `[]`;   % spaces on the same line
 
