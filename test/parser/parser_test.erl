@@ -5,6 +5,7 @@ parse(S) ->
     io:format("Parsing string '~s'~n",[S]),
     reia_parse:parse(S).
 
+%    FIXME add test for ';' in comment
 p_empty_test() ->                           parse("").
 p_empty_parse_test() ->                     [] = parse("").
 p_space_parse_test() ->                     [] = parse(" ").
