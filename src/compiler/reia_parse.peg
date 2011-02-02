@@ -1,8 +1,15 @@
+%
+% reia_parse.peg: PEG (Parsing Expression Grammar) for the Reia language
+% Copyright (C)2011 Graeme Defty
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
 %% NOTE
 %% ====
 %% The rules are written so that each basic token scoops up all the following
-%% whitespace on the assumption that this will be most efficient. This is intuitive
-%% but I have no evidence to back it up, and it may turn out to be false.
+%% whitespace. This was originally done on the assumption that it would be
+%% most efficient. This was an intuitive guess, and I now have doubts, as to
+%% whether it is true, but it seems to be the convention in PEGs anyway.
 %% 
 
 % Toplevel expressions
@@ -511,7 +518,7 @@ pargs       <-  '(' ws ')' sp           %%%%%%%%%%%%%%%%%%%%%%%%   WHY IS THIS N
         [_, _, Args, _, [], _, _, _] ->
             #pargs{args=Args, block={var,1,'_'}};
         [_, _, Args, _, [_, _, Block], _, _, _] ->
-            #pargs{args=Args,block=Block};
+            #pargs{args=Args,block=Block};lab
         [_, _, Block, _, _, _] ->
             #pargs{block=Block}
     end
@@ -1085,7 +1092,7 @@ bit_type    <-  atom (':' integer)?
 lambda      <-  fun ws ('(' ws exprs? ws ')' ws )? '{' ws expr_list ws '}' sp
             /   fun ws ('(' ws exprs? ws ')' ws )?  do ws expr_list ws end sp
 `
-    io:format("lambda: Node = ~p~n",[Node]),
+%    io:format("lambda: Node = ~p~n",[Node]),
     case Node of
 %lambda      <-  fun '{' expr_list '}'
 %            /   fun do expr_list 'end'
@@ -1640,7 +1647,7 @@ stripper([Chr|Rest], Rstr) ->
 
 % Reports the finding of a token (and returns the token)
 token(Word, Idx) ->
-    io:format("~p : got token '~p'~n",[Idx, Word]),
+%    io:format("~p : got token '~p'~n",[Idx, Word]),
     Word.
 
 reserved_word('after')   -> true;

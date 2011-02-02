@@ -1,3 +1,9 @@
+%
+% parser_test: Unit tests for the Reia PEG parser
+% Copyright (C)2011 Graeme Defty
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
 -module(parser_test).
 -include_lib("eunit/include/eunit.hrl").
 
@@ -5,7 +11,6 @@ parse(S) ->
     io:format("Parsing string '~s'~n",[S]),
     reia_parse:parse(S).
 
-%    FIXME add test for ';' in comment
 p_empty_test() ->                           parse("").
 p_empty_parse_test() ->                     [] = parse("").
 p_space_parse_test() ->                     [] = parse(" ").
@@ -23,6 +28,7 @@ p_one_comment_eof_parse_test() ->           [] = parse("# comment 1").
 p_one_comment_parse_test() ->               [] = parse(" # comment 1\n").
 p_two_comments_eof_parse_test() ->          [] = parse("\n# comment 1\n# comment 2").
 p_two_comments_parse_test() ->              [] = parse(" \n # comment 1\n# comment 2\n").
+p_semi_colon_in_comment_parse_test() ->     [] = parse(" \n # comment; 1\n# comment 2;\n").
 
 root_test_() ->
   [ % 'grammar' and 'exp_list'
@@ -246,7 +252,13 @@ expr_test_() ->    % NOTE: All depend on 'integer' already working
                              {'catch',5,{integer,5,6},[{integer,6,7}]}]}],
                                             parse(" try 1 \n 2 \n catch 4 \n 5 \n catch 6 \n 7 \n end ")),
 
-%    FIXME add tests for :  {binary_op,[],...}
+    % []
+    ?_assertEqual([{binary_op,1,'[]',{var,1,abc},{var,1,xyz}}],
+                                            parse(" abc [ xyz ] ")),
+    ?_assertEqual([{binary_op,1,'[]',{var,1,abc},{var,2,xyz}}],
+                                            parse(" abc [ \n xyz \n ] ")),
+    ?_assertEqual([{binary_op,1,'[]',{var,1,abc},{binary_op,1,'+',{var,1,stu},{var,1,xyz}}}],
+                                            parse(" abc [ stu + xyz ] ")),
 
     ?_assert(true)
   ].
@@ -345,12 +357,18 @@ basic_term_test_() -> %==========================================
     ?_assertEqual([{ivar,1,'ident'}],       parse("@ident ")),
     % bound variable
     ?_assertEqual([{bound_var,1,'ident'}],  parse("^ident ")),
-    % identifier                            FIXME test identifiers which start with a reserved word (esp class and self)
+    % identifier
     ?_assertEqual([{var,1,ident}],          parse("ident ")),
     ?_assertEqual([{var,1,ident_name}],     parse("ident_name ")),
     ?_assertEqual([{var,1,ident_3}],        parse("ident_3 ")),
     ?_assertEqual([{var,1,iDeNt_4_}],       parse("iDeNt_4_")),
     ?_assertEqual([{var,1,'_ident_name'}],  parse("_ident_name")),
+    ?_assertEqual([{var,1,'class_y_name'}], parse("class_y_name")),
+    ?_assertEqual([{var,1,'self_ish'}],     parse("self_ish")),
+    ?_assertEqual([{var,1,'classLess'}],    parse("classLess")),
+    ?_assertEqual([{var,1,'selfAbuse'}],    parse("selfAbuse")),
+    ?_assertEqual([{var,1,'class8fied'}],   parse("class8fied")),
+    ?_assertEqual([{var,1,'self1ted'}],     parse("self1ted")),
     % apostrophe string - simple
     ?_assertEqual([{string,1,""}],          parse("'' ")),
     ?_assertEqual([{string,1,"abc"}],       parse("'abc' ")),
@@ -492,7 +510,7 @@ lambda_test_() ->
   ].
 
 
-class_and_module_decl_test_() ->        % FIXME - check out allowance of ws around block definitions
+class_and_module_decl_test_() ->
   [ % Class Declarations
     ?_assertEqual([{class,1,'Class','Object',[]}],
                                             parse(" class Class \n end ")),
@@ -525,6 +543,30 @@ class_and_module_decl_test_() ->        % FIXME - check out allowance of ws arou
                                                                 47 
                                                             end 
                                                         end ")),
+    ?_assertEqual([{class,1,'Class','Object',[{function,2,'[]=',[{var,3,parm1},{var,5,parm2}],
+                                                                {var,1,'_'},
+                                                                [{integer,7,17}] }
+                                             ] }],
+                                            parse("class Class
+                                                            def []=  (
+                                                                      parm1
+                                                                      ,
+                                                                      parm2
+                                                                      ) 
+                                                                17 
+                                                            end
+                                                        end ")),
+    ?_assertEqual([{class,1,'Class','Object',[{function,2,'[]=',[{var,2,parm1},{var,2,parm2}],
+                                                                {var,3,blk},
+                                                                [{integer,5,17}] }
+                                             ] }],
+                                            parse("class Class
+                                                            def []=  ( parm1, parm2 ,
+                                                                       &blk
+                                                                      ) 
+                                                                17 
+                                                            end
+                                                        end ")),
     % Module Declarations
     ?_assertEqual([{module,1,'Mod',[]}],    parse(" module Mod \n end ")),
     ?_assertEqual([{module,1,'NewMod',[{function,2,method,[],{var,1,'_'},[{nil,2}]}]}],
@@ -532,7 +574,17 @@ class_and_module_decl_test_() ->        % FIXME - check out allowance of ws arou
                                                              def method ()
                                                              end
                                                          end ")),
-          % FIXME - Add functions named 'class' and 'self'
+    ?_assertEqual([{module,1,'NewMod',[{function,2,class,[],{var,1,'_'},[{nil,2}]}]}],
+                                            parse(" module NewMod
+                                                             def class
+                                                             end
+                                                         end ")),
+    ?_assertEqual([{module,1,'NewMod',[{function,2,'self',[],{var,1,'_'},[{nil,2}]}]}],
+                                            parse(" module NewMod
+                                                             def self ()
+                                                             end
+                                                         end ")),
+
     ?_assert(true)
   ].
 

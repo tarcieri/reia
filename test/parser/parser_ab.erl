@@ -1,3 +1,9 @@
+%
+% parser_ab: A/B test driver for the Reia PEG parser
+% Copyright (C)2011 Graeme Defty
+% 
+% Redistribution is permitted under the MIT license.  See LICENSE for details.
+%
 -module(parser_ab).
 -include_lib("kernel/include/file.hrl").
 -include("../../src/compiler/reia_nodes.hrl").
@@ -54,8 +60,8 @@ runtest(Mod) ->
     case reia_parse_old:string(Source) of
         {ok,Rslt1} ->
             Rslt2 = reia_parse:parse(Source),
-            io:format("Result 1 is ~p~n",[Rslt1]),
-            io:format("Result 2 is ~p~n",[Rslt2]),
+%            io:format("Result 1 is ~p~n",[Rslt1]),
+%            io:format("Result 2 is ~p~n",[Rslt2]),
             case compare(Rslt1,Rslt2) of
                 ok ->
                     "Success";
