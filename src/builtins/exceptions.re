@@ -40,7 +40,7 @@ end
 class StandardError < Exception; end
 
 # Errors arising from within the Erlang environment
-class NativeError   < Excpetion; end
+class NativeError   < Exception; end
 
 #
 # Core language errors

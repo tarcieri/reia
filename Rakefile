@@ -60,7 +60,7 @@ def output_file(input_file, dir = 'ebin/', ext = '.beam')
 end
 
 GENERATED_SRC = %w(src/compiler/reia_parse.erl)
-PARSER_TEST_SRC = %w(test/parser/parser_test.erl)
+PARSER_TEST_SRC = %w(test/parser/parser_test.erl test/parser/parser_ab.erl)
 ERL_SRC = (GENERATED_SRC + PARSER_TEST_SRC + FileList.new('src/{compiler,core,builtins,json}/**/*.erl')).uniq
 ERL_DEST = ERL_SRC.map { |input| output_file(input) }
 

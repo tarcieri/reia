@@ -77,7 +77,7 @@ module OperatorTest
   
   def bitwise_not_test
     TestHelper.expect("Operator", "~ bitwise nots") do
-      (42, ~-43)
+      (-44, ~43)
     end
   end
   
