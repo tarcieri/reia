@@ -9,9 +9,9 @@
 
 grammar     <-  ws expr_list? ws
 `
-    io:format("----------Parse finished : Result--------~n~n",[]),
-    io:format("~p~n~n",[part(2, Node)]),
-    io:format("----------- End of Parse Result ---------~n~n",[]),
+%    io:format("----------Parse finished : Result--------~n~n",[]),
+%    io:format("~p~n~n",[part(2, Node)]),
+%    io:format("----------- End of Parse Result ---------~n~n",[]),
     part(2, Node)
 `;
 
@@ -255,9 +255,17 @@ funref_expr <-  funref
 call_expr   <-  call_base ('.' func_call)* sp ('['  ws expr ws ']'  )? sp
 `
 %    io:format("~ncall_expr ===> Node is ~n~p~n~n",[Node]),
-    [Base, Calls, _, Expr, _] = Node,
-    Main = build_remote_call(Base,Calls),
-    Main
+    case Node of
+        [Base, Calls, _, [], _] ->
+            build_remote_call(Base,Calls);
+        [Base, Calls, _, [_, _, Expr, _, _], _] ->
+	        #binary_op{
+              line = line(Idx),
+              type = '[]',
+              left = build_remote_call(Base,Calls),
+              right = Expr
+            }
+    end
 %            /   function_identifier block
 %  #remote_call{
 %    line     = ?line('$2'), 
@@ -1550,16 +1558,18 @@ part(N, [H|T]) when N > 0 ->
   
 
 %% Builds a list of interpolated string elements
-build_string(Idx, [],    List)  -> build_string2(Idx, List, []);
-build_string(Idx, Chars, List)  -> build_string2(Idx, List, [#string{line=line(Idx), characters=lists:flatten(Chars)}]).
+build_string(Idx, [],    List)  ->
+    build_string2(Idx, List, []);
+build_string(Idx, Chars, List)  ->
+    build_string2(Idx, List, [#string{line=line(Idx), characters=unescape_string(lists:flatten(Chars))}]).
 
 build_string2(Idx, [], Result)                   -> lists:reverse(Result);
 build_string2(Idx, [[Expr, []]|Tail], Result)   ->
     build_string2(Idx, Tail, [Expr|Result]);
 build_string2(Idx, [[Expr, Chars]|Tail], Result) ->
-    build_string2(Idx, Tail, [#string{line=line(Idx), characters=lists:flatten(Chars)},Expr|Result]).
+    build_string2(Idx, Tail, [#string{line=line(Idx), characters=unescape_string(lists:flatten(Chars))},Expr|Result]).
 
-% remove escapes from a plain (uninterpolated) string
+% remove escapes from a plain (uninterpolated) string (segment)
 unescape_string(String) -> unescape_string(String, []).
 
 unescape_string([], Output) ->
@@ -1628,7 +1638,7 @@ stripper([Chr|Rest], Rstr) ->
 
 % Reports the finding of a token (and returns the token)
 token(Word, Idx) ->
-    io:format("~p : got token '~p'~n",[Idx, Word]),
+%    io:format("~p : got token '~p'~n",[Idx, Word]),
     Word.
 
 reserved_word('after')   -> true;

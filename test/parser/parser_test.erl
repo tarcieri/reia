@@ -246,6 +246,8 @@ expr_test_() ->    % NOTE: All depend on 'integer' already working
                              {'catch',5,{integer,5,6},[{integer,6,7}]}]}],
                                             parse(" try 1 \n 2 \n catch 4 \n 5 \n catch 6 \n 7 \n end ")),
 
+%    FIXME add tests for :  {binary_op,[],...}
+
     ?_assert(true)
   ].
 
@@ -353,10 +355,12 @@ basic_term_test_() -> %==========================================
     ?_assertEqual([{string,1,""}],          parse("'' ")),
     ?_assertEqual([{string,1,"abc"}],       parse("'abc' ")),
     ?_assertEqual([{string,1,"a#bc"}],      parse("'a#bc'")),
+    ?_assertEqual([{string,1,"a\nbc"}],     parse("'a\\nbc'")),
     % quote string - simple
     ?_assertEqual([{string,1,""}],          parse("\"\" ")),
     ?_assertEqual([{string,1,"abc"}],       parse("\"abc\"")),
     ?_assertEqual([{string,1,"a#bc"}],      parse("\"a#bc\"")),
+    ?_assertEqual([{string,1,"a\nbc"}],     parse("\"a\\nbc\"")),
     ?_assert(true)
   ].
 
@@ -365,40 +369,40 @@ compound_term_test_() -> %==========================================
   [ % basic
     % apostrophe string - interpolated
     ?_assertEqual([{dstring,1,
-                    [   {string,1,"ab"},
+                    [   {string,1,"a\nb"},
                         {binary_op,1,'+',{integer,1,1},{integer,1,2}},
                         {string,1,"cd"}]
                     }],       
-                                            parse("'ab#{1+2}cd' ")),
+                                            parse("\'a\\nb#{1+2}cd\' ")),
     ?_assertEqual([{dstring,1,
                     [ {string,1,"ab"},
                       {dstring,1,
                         [ {string,1,"wx"},
                           {binary_op,1,'+',{integer,1,1},{integer,1,2}},
-                          {string,1,"yz"}
+                          {string,1,"y\nz"}
                         ]
                       },
                       {string,1,"cd"}]
                     }],       
-                                            parse("'ab#{'wx#{1+2}yz'}cd'")),
+                                            parse("'ab#{'wx#{1+2}y\\nz'}cd'")),
     % quote string - interpolated
     ?_assertEqual([{dstring,1,
-                    [   {string,1,"ab"},
+                    [   {string,1,"a\nb"},
                         {binary_op,1,'+',{integer,1,1},{integer,1,2}},
                         {string,1,"cd"}]
                     }],
-                                            parse("\"ab#{1+2}cd\" \n\n")),
+                                            parse("\"a\\nb#{1+2}cd\" \n\n")),
     ?_assertEqual([{dstring,1,
                     [ {string,1,"ab"},
                       {dstring,1,
                         [ {string,1,"wx"},
                           {binary_op,1,'+',{integer,1,1},{integer,1,2}},
-                          {string,1,"yz"}
+                          {string,1,"y\nz"}
                         ]
                       },
                       {string,1,"cd"}]
                     }],
-                                            parse("\"ab#{\"wx#{1+2}yz\"}cd\"")),
+                                            parse("\"ab#{\"wx#{1+2}y\\nz\"}cd\"")),
     ?_assertEqual([{dstring,1,
                     [ {string,1,"This is an "},
                       {dstring,1,
