@@ -1271,6 +1271,8 @@ receive_expr    <-  receive ws clauses ws after_clause? ws end
                 /   receive ws after_clause ws end
 `
     case Node of
+        [_, _, Clauses, _, [], _, _] ->
+            #'receive'{line=line(Idx), clauses=Clauses};
         [_, _, Clauses, _, After, _, _] ->
             #'receive'{line=line(Idx), clauses=Clauses, after_clause=After};
         [_, _, After, _, _] ->
@@ -1474,7 +1476,7 @@ case        <-  'case'      sp  ` token('case',Idx) `;
 %catch       <-  'catch'     sp  ` list_to_atom(part(1,Node)) `;
 catch       <-  'catch'     sp  ` token('catch',Idx) `;
 %class       <-  'class'     sp  ` list_to_atom(part(1,Node)) `;
-class       <-  'class'     sp  ` token('class',Idx) `;
+class       <-  'class' !( lower / upper / digit / '_')  sp  ` token('class',Idx) `;
 %def         <-  'def'       sp  ` list_to_atom(part(1,Node)) `;
 def         <-  'def'       sp  ` token('def',Idx) `;
 %do          <-  'do'        sp  ` list_to_atom(part(1,Node)) `;
@@ -1508,7 +1510,7 @@ or          <-  'or'        sp  ` token('or',Idx) `;
 %receive     <-  'receive'   sp  ` list_to_atom(part(1,Node)) `;
 receive     <-  'receive'   sp  ` token('receive',Idx) `;
 %self        <-  'self'      sp  ` {'self', line(Idx)} `;
-self        <-  'self'      sp  ` {'self', line(Idx)} `;
+self        <-  'self' !( lower / upper / digit / '_')     sp  ` {'self', line(Idx)} `;
 %throw       <-  'throw'     sp  ` list_to_atom(part(1,Node)) `;
 throw       <-  'throw'     sp  ` token('throw',Idx) `;
 %true        <-  'true'      sp  ` list_to_atom(part(1,Node)) `;
@@ -1638,7 +1640,7 @@ stripper([Chr|Rest], Rstr) ->
 
 % Reports the finding of a token (and returns the token)
 token(Word, Idx) ->
-%    io:format("~p : got token '~p'~n",[Idx, Word]),
+    io:format("~p : got token '~p'~n",[Idx, Word]),
     Word.
 
 reserved_word('after')   -> true;

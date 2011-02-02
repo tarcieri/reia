@@ -213,7 +213,7 @@ expr_test_() ->    % NOTE: All depend on 'integer' already working
                                                                     parse(" ! ~ ! 4 ")),
 
     % receive
-    ?_assertEqual([{'receive',1,[{clause,2,[{var,2,abc},{var,2,xyz}],[{integer,3,3}]}],[]}],
+    ?_assertEqual([{'receive',1,[{clause,2,[{var,2,abc},{var,2,xyz}],[{integer,3,3}]}],void}],
                                             parse(" receive \n when abc , xyz \n 3 \n end")),
     ?_assertEqual([{'receive',1,[],{'after',2,{var,2,abc},[{var,3,xyz}]}}],
                                             parse(" receive \n after abc \n xyz \n end")),
@@ -345,7 +345,7 @@ basic_term_test_() -> %==========================================
     ?_assertEqual([{ivar,1,'ident'}],       parse("@ident ")),
     % bound variable
     ?_assertEqual([{bound_var,1,'ident'}],  parse("^ident ")),
-    % identifier                            FIXME test identifiers which start with a reserved word
+    % identifier                            FIXME test identifiers which start with a reserved word (esp class and self)
     ?_assertEqual([{var,1,ident}],          parse("ident ")),
     ?_assertEqual([{var,1,ident_name}],     parse("ident_name ")),
     ?_assertEqual([{var,1,ident_3}],        parse("ident_3 ")),
