@@ -18,6 +18,9 @@
 ]).
 -include("reia_types.hrl").
 
+% Enable or disable use of compiled .reb files if available
+-define(USE_BIN_CACHE, false).
+
 % Walk the Reia load path attempting to load the given file
 load([], _Filename) ->
     {error, enoent};
@@ -35,7 +38,7 @@ load([BasePath|Rest], Filename) ->
           
           % Ensure changes haven't been made to the sources
           if
-            BinMtime > SourceMtime ->
+            BinMtime > SourceMtime and ?USE_BIN_CACHE ->
               void;
             true ->
               reia_internal:compile(SourcePath, BinPath)
