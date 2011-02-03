@@ -56,6 +56,12 @@ compile_expressions(Filename, Exprs, Options) ->
   SubmoduleAttr = {attribute, 1, submodules, Submodules2},
   ErlModule = lists:flatten([Header, SubmoduleAttr, Module#module.exprs]),
   
+  % Trying to debug the Reia compiler and want to see the raw code that's
+  % getting passed to the Erlang compiler? Uncomment the lines below.
+  % io:format("--------------- Reia Compiler Output ------------~n"),
+  % io:format("~p~n", [ErlModule]),
+  % io:format("----------- End of Reia Compiler Output ---------~n"),
+  
   compile:forms(ErlModule, compile_options(Options)).
   
 compile_submodules(Submodules, Filename, Options) ->
