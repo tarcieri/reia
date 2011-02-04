@@ -36,7 +36,7 @@ expr_list   <-  expr (eol expr_list)?
 
 
 %% Expression lists (comma delimited)
-exprs       <-  expr sp (ws ',' ws !'&' exprs)?    %%% GTD - The !'&' is there to make 'pargs' work.
+exprs       <-  expr sp (ws ',' ws !'&' exprs)?    %%% GTD - The !'&' is there to make 'args' work.
 `
     case Node of
         [Expr, _, []] ->
@@ -453,7 +453,7 @@ unary_bool_op   <-  not   !'=' ws
 `;
 
 %% Module declarations
-module_decl <-  module ws module_name (ws def_exprs)? ws end
+module_decl <-  module ws module_name (ws functions)? ws end
 `
     case Node of
         [_, _, ModName, [], _, _] ->
@@ -473,7 +473,7 @@ module_decl <-  module ws module_name (ws def_exprs)? ws end
 
 
 %% Class declarations
-class_decl  <-  class ws module_name ('<' ws module_name)? (eol def_exprs)? ws end
+class_decl  <-  class ws module_name ('<' ws module_name)? (eol methods)? ws end
 `
     case Node of
         [_, _, ModName, [], [], _, _] ->
@@ -507,20 +507,20 @@ class_decl  <-  class ws module_name ('<' ws module_name)? (eol def_exprs)? ws e
 
 
 %% Parenthesized arguments
-pargs       <-  '(' ws ')' sp           %%%%%%%%%%%%%%%%%%%%%%%%   WHY IS THIS NEEDED? - DONT UNDERSTAND   %%%%%%%%%%%%%%%%%%%%%%
+args        <-  '(' ws ')' sp           %%%%%%%%%%%%%%%%%%%%%%%%   WHY IS THIS NEEDED? - DONT UNDERSTAND   %%%%%%%%%%%%%%%%%%%%%%
             /   '(' ws exprs? ws (',' ws block_capture)? ws ')' sp
             /   '(' ws block_capture? ws ')' sp
 `
-%    io:format("~npargs: Node is ~p~n",[Node]),
+%    io:format("~nargs: Node is ~p~n",[Node]),
     case Node of
         [_, _, _, _] ->
-            #pargs{};
+            #args{};
         [_, _, Args, _, [], _, _, _] ->
-            #pargs{args=Args, block={var,1,'_'}};
+            #args{args=Args, block={var,1,'_'}};
         [_, _, Args, _, [_, _, Block], _, _, _] ->
-            #pargs{args=Args,block=Block};
+            #args{args=Args,block=Block};
         [_, _, Block, _, _, _] ->
-            #pargs{block=Block}
+            #args{block=Block}
     end
 `;
 
@@ -532,10 +532,10 @@ block_capture   <-  '&' expr
 `;
 
 
-%% List of expressions & function definitions
-def_exprs       <-  (function / expr) ws? (def_exprs)?
+%% Functions
+functions       <-  (function) ws? (functions)?
 `
-%    io:format("def_exprs: Node is ~p~n",[Node]),
+%    io:format("functions: Node is ~p~n",[Node]),
     case Node of
         [Func, _, []] ->
             [Func];
@@ -544,8 +544,57 @@ def_exprs       <-  (function / expr) ws? (def_exprs)?
     end
 `;
 
+%% Methods
+methods       <-  (method) ws? (methods)?
+`
+%    io:format("methods: Node is ~p~n",[Node]),
+    case Node of
+        [Method, _, []] ->
+            [Method];
+        [Method, _, Methods] ->
+            [Method | Methods]
+    end
+`;
 
-function    <-  def ws function_id pargs? ws body? ws end
+method      <-  class_method 
+            /   function ~;
+
+%% Class methods
+class_method    <-  def ws self '.' function_name args? ws body? ws end
+`
+    case Node of
+        [_, _, _, _, Name, [], _, [], _, _] ->
+            #class_method{
+              line  = line(Idx),
+              name  = Name,
+              body  = [{nil,line(Idx)}]
+            };
+        [_, _, _, _, Name, [], _, Body, _, _] ->
+            #class_method{
+              line  = line(Idx),
+              name  = Name,
+              body  = Body
+            };
+        [_, _, _, _, Name, Args, _, [], _, _] ->
+            #class_method{
+              line  = line(Idx),
+              name  = Name,
+              args  = Args#args.args,
+              block = Args#args.block,
+              body  = [{nil,line(Idx)}]
+            };
+        [_, _, _, _, Name, Args, _, Body, _, _] ->
+            #class_method{
+              line  = line(Idx),
+              name  = Name,
+              args  = Args#args.args,
+              block = Args#args.block,
+              body  = Body
+            }
+    end
+`;
+
+function    <-  def ws function_name args? ws body? ws end
 `
 %    io:format("Function: Node is ~p~n",[Node]),
     case Node of
@@ -561,29 +610,29 @@ function    <-  def ws function_id pargs? ws body? ws end
               name  = Name,
               body  = Body
             };
-        [_, _, Name, Pargs, _, [], _, _] ->
+        [_, _, Name, Args, _, [], _, _] ->
             #function{
               line  = line(Idx),
               name  = Name,
-              args  = Pargs#pargs.args,
-              block = Pargs#pargs.block,
+              args  = Args#args.args,
+              block = Args#args.block,
               body  = [{nil,line(Idx)}]
             };
-        [_, _, Name, Pargs, _, Body, _, _] ->
+        [_, _, Name, Args, _, Body, _, _] ->
             #function{
               line  = line(Idx),
               name  = Name,
-              args  = Pargs#pargs.args,
-              block = Pargs#pargs.block,
+              args  = Args#args.args,
+              block = Args#args.block,
               body  = Body
             }
     end
 `;
 
 
-function_id <-  '[]='    sp
-            /   '[]'   sp
-            /   function_identifier
+function_name   <-  '[]='    sp
+                /   '[]'   sp
+                /   function_identifier
 `
     case Node of
         ["[]", _]   -> '[]';
@@ -621,36 +670,36 @@ body        <-  expr_list
 
 
 %% Class instantiations
-class_inst    <- module_name sp pargs
+class_inst    <- module_name sp args
 `
     #class_inst{
         line  = line(Idx),
         class = (part(1,Node))#module_name.name,
-        args  = (part(3,Node))#pargs.args,
-        block = ?pargs_default_block(#nil{}, part(3,Node))
+        args  = (part(3,Node))#args.args,
+        block = ?args_default_block(#nil{}, part(3,Node))
     }
 `;
 
 %% Local function calls
-local_call  <-  function_identifier pargs block?
+local_call  <-  function_identifier args block?
             /   function_identifier block
 `
 %    io:format("~nlocal_call ===> Node is ~n~p~n~n",[Node]),
     case Node of
-        [Identifier, Pargs, []] ->      %  function_identifier pargs
+        [Identifier, Args, []] ->      %  function_identifier args
             #local_call{
                 line  = line(Idx), 
                 name  = Identifier,
-                args  = Pargs#pargs.args,
-                block = ?pargs_default_block(#nil{}, Pargs)
+                args  = Args#args.args,
+                block = ?args_default_block(#nil{}, Args)
             };
-        [Identifier, Pargs, Block] ->   %  function_identifier pargs block
-            case Pargs#pargs.block of
+        [Identifier, Args, Block] ->   %  function_identifier args block
+            case Args#args.block of
                 #var{line=1, name='_'} -> % user didn't pass a &block
                     #local_call{
                         line  = line(Idx), 
                         name  = Identifier,
-                        args  = Pargs#pargs.args,
+                        args  = Args#args.args,
                         block = Block
                     };
                 _ ->
@@ -1538,13 +1587,13 @@ when        <-  'when'      !id_mid   sp  ` token('when',Idx) `;
 
 -export([string/1]).
 -include("reia_nodes.hrl").
--record(pargs, {args=[], block={var,1,'_'}}).
+-record(args, {args=[], block={var,1,'_'}}).
 -define(line(Node), element(2, Node)).
 -define(op(Node), element(1, Node)).
 %-define(identifier_name(Id), element(3, Id)).  %% gtd - original
 -define(identifier_name(Node), Node).
--define(pargs_add(Arg, Pargs), Pargs#pargs{args=[Arg|Pargs#pargs.args]}).
--define(pargs_default_block(Block, Pargs), case (Pargs)#pargs.block of {var,1,'_'} -> Block; _ -> (Pargs)#pargs.block end).
+-define(args_add(Arg, Args), Args#args{args=[Arg|Args#args.args]}).
+-define(args_default_block(Block, Args), case (Args)#args.block of {var,1,'_'} -> Block; _ -> (Args)#args.block end).
 
 % Erlang Code  original to gtd
 
