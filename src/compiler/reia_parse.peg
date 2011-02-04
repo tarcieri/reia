@@ -453,7 +453,7 @@ unary_bool_op   <-  not   !'=' ws
 `;
 
 %% Module declarations
-module_decl <-  module ws module_name (ws functions)? ws end
+module_decl <-  module ws module_name (ws def_exprs)? ws end
 `
     case Node of
         [_, _, ModName, [], _, _] ->
@@ -473,7 +473,7 @@ module_decl <-  module ws module_name (ws functions)? ws end
 
 
 %% Class declarations
-class_decl  <-  class ws module_name ('<' ws module_name)? (eol functions)? ws end
+class_decl  <-  class ws module_name ('<' ws module_name)? (eol def_exprs)? ws end
 `
     case Node of
         [_, _, ModName, [], [], _, _] ->
@@ -518,7 +518,7 @@ pargs       <-  '(' ws ')' sp           %%%%%%%%%%%%%%%%%%%%%%%%   WHY IS THIS N
         [_, _, Args, _, [], _, _, _] ->
             #pargs{args=Args, block={var,1,'_'}};
         [_, _, Args, _, [_, _, Block], _, _, _] ->
-            #pargs{args=Args,block=Block};lab
+            #pargs{args=Args,block=Block};
         [_, _, Block, _, _, _] ->
             #pargs{block=Block}
     end
@@ -532,10 +532,10 @@ block_capture   <-  '&' expr
 `;
 
 
-%% Functions
-functions       <-  function ws? (functions)?
+%% List of expressions & function definitions
+def_exprs       <-  (function / expr) ws? (def_exprs)?
 `
-%    io:format("Functions: Node is ~p~n",[Node]),
+%    io:format("def_exprs: Node is ~p~n",[Node]),
     case Node of
         [Func, _, []] ->
             [Func];
@@ -1349,13 +1349,13 @@ catch_clause    <-  catch ws expr eol expr_list
 %% ================ Scanner Definitions ============================================
 
 %% Module and Variable Names
-module_name <-  upper (lower / upper / digit / "_")* sp
+module_name <-  mod_start id_mid* sp
 `
     token("Mod:"++lists:flatten(Node),Idx),
     #module_name{line=line(Idx), name=list_to_atom(lists:flatten(Node))}
 `;
 
-identifier  <-  !(reserved_word !(lower / upper / digit / '_') ) (lower / '_') (lower / upper / digit / '_')* sp
+identifier  <-  !reserved_word id_start id_mid* sp
 `
 %    io:format("Doing identifier : Idx = ~p, Node = ~p~n",[Idx, Node]),
     token("ID:"++lists:flatten(Node),Idx),
@@ -1370,7 +1370,7 @@ identifier  <-  !(reserved_word !(lower / upper / digit / '_') ) (lower / '_') (
     end
 `;
 
-punctuated_identifier <-  !(reserved_word !(lower / upper / digit / '_') ) (lower / '_') (lower / upper / digit / '_')* [?!] sp
+punctuated_identifier <-  !reserved_word id_start id_mid* [?!] sp
 %`   #identifier{line=line(Idx), name=list_to_atom(lists:flatten(Node))}    `;
 %`   lists:flatten(Node)    `;
 `
@@ -1380,7 +1380,7 @@ punctuated_identifier <-  !(reserved_word !(lower / upper / digit / '_') ) (lowe
 `;
 
 %% Atoms
-atom        <-  ':' (lower / upper / '_') (lower / upper / digit / '_')* sp
+atom        <-  ':' atom_start id_mid* sp
             /   ':' string sp
 `
     token(lists:flatten(Node),Idx),
@@ -1456,78 +1456,79 @@ sp          <-  space*                  `[]`;   % spaces on the same line
 space       <-  [ \t]                   `[]`;   % spaces characters
 
 %% Character Classes
-digit       <-  [0-9]    ;
-upper       <-  [A-Z]    ;
-lower       <-  [a-z]    ;
+digit       <-  [0-9]       ;
+id_start    <-  [a-z_]      ;
+mod_start   <-  [A-Z]       ;
+atom_start  <-  [a-zA-Z_]   ;
+id_mid      <-  [a-zA-Z0-9_];
 
-
-%% Reserved Words
-%reserved_word <- after / and / begin / case / catch / class / def / do / end
-%            / elseif / else /  erl / false / for / fun / if / in / module / nil 
-%            / not / or / receive / self / throw / true / try / unless / when
-reserved_word <- 'after' / 'and' / 'begin' / 'case' / 'catch' / 'class' / 'def' / 'do' / 'end'
-            / 'elseif' / 'else' / 'erl' / 'false' / 'for' / 'fun' / 'if' / 'in' / 'module' / 'nil' 
-            / 'not' / 'or' / 'receive' / 'self' / 'throw' / 'true' / 'try' / 'unless' / 'when'
+% Reserved Words
+reserved_word <- after / and / begin / case / catch / class / def / do / end
+            / elseif / else /  erl / false / for / fun / if / in / module / nil 
+            / not / or / receive / self / throw / true / try / unless / when
+%reserved_word <- 'after' / 'and' / 'begin' / 'case' / 'catch' / 'class' / 'def' / 'do' / 'end'
+%            / 'elseif' / 'else' / 'erl' / 'false' / 'for' / 'fun' / 'if' / 'in' / 'module' / 'nil' 
+%            / 'not' / 'or' / 'receive' / 'self' / 'throw' / 'true' / 'try' / 'unless' / 'when'
 `
     Node
 `;
 
 %after       <-  'after'     sp  ` list_to_atom(part(1,Node)) `;
-after       <-  'after'     sp  ` token('after',Idx) `;
+after       <-  'after'     !id_mid   sp  ` token('after',Idx) `;
 %and         <-  'and'       sp  ` list_to_atom(part(1,Node)) `;
-and         <-  'and'       sp  ` token('and',Idx) `;
-%begin       <-  'begin'     sp  ` list_to_atom(part(1,Node)) `;
-begin       <-  'begin'     sp  ` token('begin',Idx) `;
+and         <-  'and'       !id_mid   sp  ` token('and',Idx) `;
+%begin       <-  'begin'    !id_mid    sp  ` list_to_atom(part(1,Node)) `;
+begin       <-  'begin'     !id_mid   sp  ` token('begin',Idx) `;
 %case        <-  'case'      sp  ` io:format("Got reserved word 'case' at ~p~n",[Idx]),list_to_atom(part(1,Node))     `;
-case        <-  'case'      sp  ` token('case',Idx) `;
+case        <-  'case'      !id_mid   sp  ` token('case',Idx) `;
 %catch       <-  'catch'     sp  ` list_to_atom(part(1,Node)) `;
-catch       <-  'catch'     sp  ` token('catch',Idx) `;
+catch       <-  'catch'     !id_mid   sp  ` token('catch',Idx) `;
 %class       <-  'class'     sp  ` list_to_atom(part(1,Node)) `;
-class       <-  'class' !( lower / upper / digit / '_')  sp  ` token('class',Idx) `;
+class       <-  'class'     !id_mid   sp  ` token('class',Idx) `;
 %def         <-  'def'       sp  ` list_to_atom(part(1,Node)) `;
-def         <-  'def'       sp  ` token('def',Idx) `;
+def         <-  'def'       !id_mid   sp  ` token('def',Idx) `;
 %do          <-  'do'        sp  ` list_to_atom(part(1,Node)) `;
-do          <-  'do'        sp  ` token('do',Idx) `;
+do          <-  'do'        !id_mid   sp  ` token('do',Idx) `;
 %end         <-  'end'       sp  ` list_to_atom(part(1,Node)) `;
-end         <-  'end'       sp  ` token('end',Idx) `;
+end         <-  'end'       !id_mid   sp  ` token('end',Idx) `;
 %else        <-  'else'      sp  ` list_to_atom(part(1,Node)) `;
-else        <-  'else'      sp  ` token('else',Idx) `;
+else        <-  'else'      !id_mid   sp  ` token('else',Idx) `;
 %elseif      <-  'elseif'    sp  ` list_to_atom(part(1,Node)) `;
-elseif      <-  'elseif'    sp  ` token('elseif',Idx) `;
+elseif      <-  'elseif'    !id_mid   sp  ` token('elseif',Idx) `;
 %erl         <-  'erl'       sp  ` list_to_atom(part(1,Node)) `;
-erl         <-  'erl'       sp  ` token('erl',Idx) `;
+erl         <-  'erl'       !id_mid   sp  ` token('erl',Idx) `;
 %false       <-  'false'     sp  ` list_to_atom(part(1,Node)) `;
-false       <-  'false'     sp  ` token('false',Idx) `;
+false       <-  'false'     !id_mid   sp  ` token('false',Idx) `;
 %for         <-  'for'       sp  ` list_to_atom(part(1,Node)) `;
-for         <-  'for'       sp  ` token('for',Idx) `;
+for         <-  'for'       !id_mid   sp  ` token('for',Idx) `;
 %fun         <-  'fun'       sp  ` list_to_atom(part(1,Node)) `;
-fun         <-  'fun'       sp  ` token('fun',Idx) `;
+fun         <-  'fun'       !id_mid   sp  ` token('fun',Idx) `;
 %if          <-  'if'        sp  ` list_to_atom(part(1,Node)) `;
-if          <-  'if'        sp  ` token('if',Idx) `;
+if          <-  'if'        !id_mid   sp  ` token('if',Idx) `;
 %in          <-  'in'        sp  ` list_to_atom(part(1,Node)) `;
-in          <-  'in'        sp  ` token('in',Idx) `;
+in          <-  'in'        !id_mid   sp  ` token('in',Idx) `;
 %module      <-  'module'    sp  ` list_to_atom(part(1,Node)) `;
-module      <-  'module'    sp  ` token('module',Idx) `;
+module      <-  'module'    !id_mid   sp  ` token('module',Idx) `;
 %nil         <-  'nil'       sp  ` list_to_atom(part(1,Node)) `;
-nil         <-  'nil'       sp  ` token('nil',Idx) `;
+nil         <-  'nil'       !id_mid   sp  ` token('nil',Idx) `;
 %not         <-  'not'       sp  ` list_to_atom(part(1,Node)) `;
-not         <-  'not'       sp  ` token('not',Idx) `;
+not         <-  'not'       !id_mid   sp  ` token('not',Idx) `;
 %or          <-  'or'        sp  ` list_to_atom(part(1,Node)) `;
-or          <-  'or'        sp  ` token('or',Idx) `;
+or          <-  'or'        !id_mid   sp  ` token('or',Idx) `;
 %receive     <-  'receive'   sp  ` list_to_atom(part(1,Node)) `;
-receive     <-  'receive'   sp  ` token('receive',Idx) `;
+receive     <-  'receive'   !id_mid   sp  ` token('receive',Idx) `;
 %self        <-  'self'      sp  ` {'self', line(Idx)} `;
-self        <-  'self' !( lower / upper / digit / '_')     sp  ` {'self', line(Idx)} `;
+self        <-  'self'      !id_mid   sp  ` {'self', line(Idx)} `;
 %throw       <-  'throw'     sp  ` list_to_atom(part(1,Node)) `;
-throw       <-  'throw'     sp  ` token('throw',Idx) `;
+throw       <-  'throw'     !id_mid   sp  ` token('throw',Idx) `;
 %true        <-  'true'      sp  ` list_to_atom(part(1,Node)) `;
-true        <-  'true'      sp  ` token('true',Idx) `;
+true        <-  'true'      !id_mid   sp  ` token('true',Idx) `;
 %try         <-  'try'       sp  ` list_to_atom(part(1,Node)) `;
-try         <-  'try'       sp  ` token('try',Idx) `;
+try         <-  'try'       !id_mid   sp  ` token('try',Idx) `;
 %unless      <-  'unless'    sp  ` list_to_atom(part(1,Node)) `;
-unless      <-  'unless'    sp  ` token('unless',Idx) `;
+unless      <-  'unless'    !id_mid   sp  ` token('unless',Idx) `;
 %when        <-  'when'      sp  ` list_to_atom(part(1,Node)) `;
-when        <-  'when'      sp  ` token('when',Idx) `;
+when        <-  'when'      !id_mid   sp  ` token('when',Idx) `;
 
 %% ==================== Extra functions ====================
 `
