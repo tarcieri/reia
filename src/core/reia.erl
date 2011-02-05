@@ -10,7 +10,8 @@
   init/0, 
   load/1,
   parse/1,
-  eval/2,
+  eval/1, eval/2,
+  apply/3, apply/4,
   inst/2, inst/3,
   invoke/3, invoke/4,
   throw/2, throw/3,
@@ -41,18 +42,36 @@ parse(String) ->
   reia_compiler:parse(String).
 
 % Evaluate the given string of Reia source code
+eval(String) ->
+  eval(String, []).
 eval(String, Binding) ->
   reia_eval:exprs(parse(String), Binding).
   
+% Call a function within a Reia module
+apply(Module, Function, Arguments) -> apply(Module, Function, Arguments, nil).
+apply(Module, Function, Arguments, Block) ->
+  Arguments2 = if
+    is_tuple(Arguments) -> Arguments;
+    is_list(Arguments)  -> list_to_tuple(Arguments);
+    true -> throw({error, "invalid type for arguments"})
+  end,
+  Module:Function(Arguments2, Block).
+    
 % Create a new instance of the given class
 inst(Class, Arguments) -> inst(Class, Arguments, nil).
 inst(Class, Arguments, Block) ->
-  % FIXME: initial object construction should thunk to the metaclass, not be
-  % spelled out explicitly here.
-  Object = #reia_object{class=Class, ivars=dict:new()},
-  Class:call({Object, initialize, Arguments}, Block).
+  % FIXME: initial object construction should be factored into class objects
   
-% Invoke the given method on the given object
+  case Class of
+    % Special hax for creating new UUIDs since they have no literal syntax
+    'UUID' ->
+      erlang:make_ref();
+    _ ->
+      Object = #reia_object{class=Class, ivars=dict:new()},
+      Class:call({Object, initialize, Arguments}, Block)
+  end.
+
+% Invoke a method on the given object
 invoke(Receiver, Method, Arguments) -> invoke(Receiver, Method, Arguments, nil).
 invoke(Receiver, Method, Arguments, Block) ->
   Arguments2 = if

@@ -48,6 +48,8 @@ call(Receiver, Method, Arguments, Block) when is_pid(Receiver) ->
   'Pid':call({Receiver, Method, Arguments}, Block);
 call(Receiver, Method, Arguments, Block) when is_port(Receiver) ->
   'Channel':call({Receiver, Method, Arguments}, Block);
+call(Receiver, Method, Arguments, Block) when is_reference(Receiver) ->
+  'UUID':call({Receiver, Method, Arguments}, Block);
 call(Receiver, _, _, _) ->
   throw({error, unknown_receiver, Receiver}).
   
