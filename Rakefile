@@ -127,7 +127,8 @@ end
 
 # Cleaning
 CLEAN.include %w(ebin/* src/neotoma/ebin/* src/compiler/reia_parse.erl)
-CLEAN.include %w(src/compiler/reia_scan.erl src/compiler/reia_yecc_parse.erl)
+CLEAN.include %w(src/compiler/reia_scan.erl)
+CLEAN.include %w(src/compiler/reia_yecc_parse.yrl src/compiler/reia_yecc_parse.erl)
 CLEAN.include %w(**/*.beam **/*.reb)
 CLEAN.include "erl_crash.dump"
 

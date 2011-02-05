@@ -56,12 +56,12 @@ runtest(Mod) ->
     io:format("Testing ~s~n",[Mod]),
     {ok,BinSource} = file:read_file(Mod),
     Source = binary_to_list(BinSource),
-%    io:format("Source is ~s~n",[Source]),
+%    io:format("Source is :~n~s~n",[Source]),
     case reia_yecc_parse:string(Source) of
         {ok,Rslt1} ->
             Rslt2 = reia_parse:parse(Source),
-%            io:format("Result 1 is ~p~n",[Rslt1]),
-%            io:format("Result 2 is ~p~n",[Rslt2]),
+%            io:format("Result 1 is :~n~p~n",[Rslt1]),
+%            io:format("Result 2 is :~n~p~n",[Rslt2]),
             case compare(Rslt1,Rslt2) of
                 ok ->
                     "Success";

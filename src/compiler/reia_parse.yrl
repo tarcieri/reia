@@ -822,7 +822,7 @@ string(String) ->
   try
     case reia_scan:string(String) of
       {ok, Tokens, _} -> 
-        case reia_parse:parse(Tokens) of
+        case reia_yecc_parse:parse(Tokens) of
           {ok, Exprs} ->
             {ok, Exprs};
           {error, {_, _, [Message, []]}} ->
@@ -887,7 +887,7 @@ extract_fragment(Continuation, [$}|String], Line) ->
   {more, Continuation2} = reia_scan:tokens(Continuation, [$}], Line),
   case Continuation2 of
     {tokens, _, _, _, _, [{'}', _}|Tokens], _, _} ->
-      case reia_parse:parse(lists:reverse(Tokens)) of
+      case reia_yecc_parse:parse(lists:reverse(Tokens)) of
         {ok, [Expr]} ->
           {String, Expr};
         %% Need more tokens
