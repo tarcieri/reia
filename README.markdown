@@ -4,6 +4,11 @@ Reia
 Welcome to Reia (pronounced RAY-uh), a Ruby-like scripting language for the 
 Erlang virtual machine (BEAM).
 
+Want to know more about Reia? Syntax examples and that sort of thing? Please
+visit the home page at:
+
+[http://reia-lang.org](http://reia-lang.org)
+
 Compiling Reia
 --------------
 

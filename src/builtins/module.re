@@ -8,23 +8,17 @@
 module Module
   def class; Module; end
   
-  def call(fake_self, :to_s, args, block)
-    (:reia_module, name) = fake_self
-    case erl.code.ensure_loaded(name)
-    when (:module, name)
-      name.to_string()
-    when _
-      throw(NameError, "undefined module #{name}")
-      :error
-    end
+  def call(receiver, :to_s, args, block)
+    (:reia_module, name) = receiver
+    name.to_string()
   end
   
-  def call(fake_self, :inspect, args, block)
-    fake_self.to_s()
+  def call(receiver, :inspect, args, block)
+    receiver.to_s()
   end
 
-  def call(fake_self, method, args, block)
-    (:reia_module, name) = fake_self
+  def call(receiver, method, args, block)
+    (:reia_module, name) = receiver
     erl.apply(name, method, [args, block])
   end
 end

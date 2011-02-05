@@ -1,7 +1,7 @@
 require 'rake/clean'
 
 # Path on the local filesystem to install reia/ire scripts to
-BIN_INSTALL_DIR = "/usr/local/bin"
+BIN_INSTALL_DIR = ENV['REIA_BIN_DIR'] || "/usr/local/bin"
 
 task :default => %w(check_erl_version build test)
 
@@ -73,6 +73,7 @@ ERL_SRC.each do |input|
 end
 
 REIA_SRC  = FileList.new('src/{builtins,core}/**/*.re')
+REIA_SRC.include('lib/*.re')
 REIA_DEST = REIA_SRC.map { |input| output_file(input, 'ebin/', '.reb') }
 
 REIA_SRC.each do |input|
@@ -118,7 +119,7 @@ CLEAN.include "erl_crash.dump"
 
 # Retrieve the directory Erlang libraries are stored in
 def erl_lib_dir
-  $erl_lib_dir ||= `erl -noshell -eval "io:format(code:lib_dir())" -s erlang halt`
+  ENV['ERL_LIB_DIR'] ||= `erl -noshell -eval "io:format(code:lib_dir())" -s erlang halt`
 end
 
 

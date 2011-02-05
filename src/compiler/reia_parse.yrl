@@ -42,7 +42,7 @@ Nonterminals
   catch_clauses
   catch_clause
   function_identifier
-  def_prefix
+  function_name
   ivar
   bound_var
   rebind_op
@@ -54,8 +54,11 @@ Nonterminals
   unary_op
   module_decl
   class_decl
-  def_exprs
-  def_expr
+  methods
+  method
+  class_method
+  functions
+  function
   body
   args
   args_tail
@@ -305,56 +308,83 @@ unary_op -> '!'   : '$1'.
 unary_op -> '~'   : '$1'.
 
 %% Module declarations
-module_decl -> module module_name eol def_exprs 'end' : 
+module_decl -> module module_name eol functions 'end' : 
   #module{
     line  = ?line('$1'), 
     name  = element(3, '$2'), 
-    exprs = begin validate_function_body('$4'), '$4' end
+    exprs = begin validate_module_body('$4'), '$4' end
+  }.
+  
+%% Functions
+functions -> eol : [].
+functions -> function : ['$1'].
+functions -> function eol : ['$1'].
+functions -> eol functions : '$2'.
+functions -> function eol functions : ['$1'|'$3'].
+
+%% Function definitions
+function -> def function_name eol body 'end' : 
+  #function{
+    line = ?line('$1'), 
+    name = '$2', 
+    body = '$4'
+  }.
+function -> def function_name args eol body 'end' :
+  #function{
+    line  = ?line('$1'), 
+    name  = '$2', 
+    args  = '$3'#args.args,
+    block = '$3'#args.block,
+    body  = '$5'
   }.
   
 %% Class declarations
-class_decl -> class module_name def_exprs 'end' : 
+class_decl -> class module_name methods 'end' : 
   #class{
     line  = ?line('$1'), 
     name  = ?identifier_name('$2'),
-    exprs = begin validate_function_body('$3'), '$3' end
+    exprs = begin validate_class_body('$3'), '$3' end
   }.
-class_decl -> class module_name '<' module_name def_exprs 'end' : 
+class_decl -> class module_name '<' module_name methods 'end' : 
   #class{
     line   = ?line('$1'), 
     name   = ?identifier_name('$2'),
     parent = ?identifier_name('$4'),
-    exprs  = begin validate_function_body('$5'), '$5' end
+    exprs  = begin validate_class_body('$5'), '$5' end
+  }.
+  
+%% Methods
+methods -> eol : [].
+methods -> method : ['$1'].
+methods -> method eol : ['$1'].
+methods -> eol methods : '$2'.
+methods -> method eol methods : ['$1'|'$3'].
+
+%% Method declarations
+method -> function : '$1'.
+method -> class_method : '$1'.
+method -> expr : '$1'.
+
+%% Class methods
+class_method -> def self '.' function_name eol body 'end' : 
+  #class_method{
+    line = ?line('$1'), 
+    name = '$2', 
+    body = '$4'
+  }.
+class_method -> def self '.' function_name args eol body 'end' :
+  #class_method{
+    line  = ?line('$1'), 
+    name  = '$2', 
+    args  = '$3'#args.args,
+    block = '$3'#args.block,
+    body  = '$5'
   }.
 
-%% Expression lists with interspersed defs (eol delimited)
-def_exprs -> eol : [].
-def_exprs -> def_expr : ['$1'].
-def_exprs -> def_expr eol : ['$1'].
-def_exprs -> eol def_exprs : '$2'.
-def_exprs -> def_expr eol def_exprs : ['$1'|'$3'].
-
-%% Function definitions
-def_expr -> def_prefix eol body 'end' : 
-  #function{
-    line = ?line('$2'), 
-    name = '$1', 
-    body = '$3'
-  }.
-def_expr -> def_prefix args eol body 'end' :
-  #function{
-    line  = ?line('$3'), 
-    name  = '$1', 
-    args  = '$2'#args.args,
-    block = '$2'#args.block,
-    body  = '$4'
-  }.
-def_expr -> expr : '$1'.
-
-%% Allowable prefixes for defs
-def_prefix -> def function_identifier : ?identifier_name('$2').
-def_prefix -> def '[' ']' : '[]'.
-def_prefix -> def '[' ']' '=' : '[]='.
+%% Valid function names
+function_name -> function_identifier : ?identifier_name('$1').
+function_name -> '[' ']' : '[]'.
+function_name -> '[' ']' '=' : '[]='.
 
 %% Function identifiers
 function_identifier -> identifier : '$1'.
@@ -807,13 +837,24 @@ string(String) ->
     Error
   end.
   
-%% Ensure a given function body contains only function defs
-validate_function_body([]) -> ok;
-validate_function_body([#function{}|Exprs]) ->
-  validate_function_body(Exprs);
-validate_function_body([Expr|_]) ->
-  throw({error, {element(2, Expr), "Arbitrary expressions not allowed in class/module bodies"}}).
+%% Ensure a given module body contains only function defs
+validate_module_body([]) -> ok;
+validate_module_body([#function{}|Exprs]) ->
+  validate_module_body(Exprs);
+validate_module_body([Expr|_]) ->
+  Line = element(2, Expr),
+  reia:throw('SyntaxError', Line, "Arbitrary expressions not allowed in module bodies").
   
+%% Ensure a given class body contains only method defs
+validate_class_body([]) -> ok;
+validate_class_body([#class_method{}|Exprs]) ->
+  validate_class_body(Exprs);
+validate_class_body([#function{}|Exprs]) ->
+  validate_class_body(Exprs);
+validate_class_body([Expr|_]) ->
+  Line = element(2, Expr),
+  reia:throw('SyntaxError', Line, "Arbitrary expressions not allowed in class bodies").
+    
 %% Interpolate strings, parsing the contents of #{...} tags
 interpolate_string(#string{line=Line, characters=Chars}) ->
   interpolate_string(Chars, Line, [], []).

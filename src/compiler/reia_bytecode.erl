@@ -1,6 +1,6 @@
 %
 % reia_bytecode: Generate bytecode from compiled Reia AST
-% Copyright (C)2009 Tony Arcieri
+% Copyright (C)2009-10 Tony Arcieri
 % 
 % Redistribution is permitted under the MIT license.  See LICENSE for details.
 %
@@ -35,7 +35,7 @@ load(Bin, Args) ->
 compile(Filename, Exprs) ->
   compile(Filename, Exprs, #compile_options{}).
 
-compile(Filename, Exprs, Options) ->
+compile(Filename, Exprs, Options) ->  
   case compile_expressions(Filename, Exprs, Options) of
     {ok, _Module, Bin} ->
       Module = #reia_module{filename=Filename, base_module=Bin},
@@ -50,13 +50,11 @@ compile_expressions(Filename, Exprs, Options) ->
     true  -> wrapped_module(Filename, Exprs);
     false -> unwrapped_module(Exprs)
   end,
-  
+    
+  Header = module_header(Module#module.name, Filename, Module#module.attrs, Options),
   Submodules2 = compile_submodules(Submodules, Filename, Options),
-  
-  Header = module_header(Module#module.name, Filename, Options),
-  ParentAttr = {attribute, 1, parent, list_to_atom(filename:rootname(Filename))},
   SubmoduleAttr = {attribute, 1, submodules, Submodules2},
-  ErlModule = lists:flatten([Header, ParentAttr, SubmoduleAttr, Module#module.exprs]),
+  ErlModule = lists:flatten([Header, SubmoduleAttr, Module#module.exprs]),
   
   compile:forms(ErlModule, compile_options(Options)).
   
@@ -64,18 +62,24 @@ compile_submodules(Submodules, Filename, Options) ->
   [compile_submodule(Submodule, Filename, Options) || Submodule <- Submodules].
   
 compile_submodule(Module, Filename, Options) ->
-  Header = module_header(Module#module.name, Filename, Options),
-  ParentAttr = {attribute, 1, parent, list_to_atom(filename:rootname(Filename))},
-  ErlModule = lists:flatten([Header, ParentAttr, Module#module.exprs]),
+  Header = module_header(Module#module.name, Filename, Module#module.attrs, Options),
+  ErlModule = Header ++ Module#module.exprs,
 
   {ok, Name, Bin} = compile:forms(ErlModule, compile_options(Options)),
   {static, Name, Bin}.
 
-module_header(Name, Filename, Options) ->
+module_header(Name, Filename, CustomAttrs, Options) ->
+  ParentAttr = {attribute, 1, parent, list_to_atom(filename:rootname(Filename))},
+  ErlAttrs = lists:map(
+    fun({AttrName, Value}) -> {attribute, 1, AttrName, Value} end,
+    CustomAttrs
+  ),
+    
   [
     {attribute, 1, module, Name},
     {attribute, 1, file, {Filename, 1}},
-    {attribute, 1, code, Options#compile_options.code}  
+    {attribute, 1, code, Options#compile_options.code},
+    ParentAttr|ErlAttrs
   ].
   
 wrapped_module(Filename, Exprs) ->
@@ -89,10 +93,9 @@ wrapped_module(Filename, Exprs) ->
   
 unwrapped_module(Exprs) ->
   case Exprs of
-    [{module, Line, Name, Functions}] -> 
-      {ok, Functions2, Submodules} = reia_modules:replace(Functions, fun module_loader/1),
-      Module = #module{line=Line, name=Name, exprs=Functions2},
-      {Module, Submodules};
+    [#module{} = Module] -> 
+      {ok, Functions2, Submodules} = reia_modules:replace(Module#module.exprs, fun module_loader/1),
+      {Module#module{exprs=Functions2}, Submodules};
     _ ->
       throw({error, "code without a toplevel wrapper should define exactly one module"})
   end.
