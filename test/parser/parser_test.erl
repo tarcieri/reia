@@ -569,18 +569,18 @@ class_and_module_decl_test_() ->
                                                         end ")),
 
     % Module Declarations
-    ?_assertEqual([{module,1,'Mod',[]}],    parse(" module Mod \n end ")),
-    ?_assertEqual([{module,1,'NewMod',[{function,2,method,[],{var,1,'_'},[{nil,2}]}]}],
+    ?_assertEqual([{module,1,'Mod',[],[]}], parse(" module Mod \n end ")),
+    ?_assertEqual([{module,1,'NewMod',[],[{function,2,method,[],{var,1,'_'},[{nil,2}]}]}],
                                             parse(" module NewMod
                                                              def method ()
                                                              end
                                                          end ")),
-    ?_assertEqual([{module,1,'NewMod',[{function,2,class,[],{var,1,'_'},[{nil,2}]}]}],
+    ?_assertEqual([{module,1,'NewMod',[],[{function,2,class,[],{var,1,'_'},[{nil,2}]}]}],
                                             parse(" module NewMod
                                                              def class
                                                              end
                                                          end ")),
-    ?_assertEqual([{module,1,'NewMod',[{function,2,'self',[],{var,1,'_'},[{nil,2}]}]}],
+    ?_assertEqual([{module,1,'NewMod',[],[{function,2,'self',[],{var,1,'_'},[{nil,2}]}]}],
                                             parse(" module NewMod
                                                              def self ()
                                                              end
@@ -717,8 +717,8 @@ function_calls_test_() ->
 
 combinations_test_() ->
   [ % Module + Case
-    ?_assertEqual([{module,1,'Mod',[]}],    parse(" module Mod \n end ")),
-    ?_assertEqual([{module,1,'NewMod',[{function,2,method,[],{var,1,'_'},
+    ?_assertEqual([{module,1,'Mod',[],[]}],    parse(" module Mod \n end ")),
+    ?_assertEqual([{module,1,'NewMod',[],[{function,2,method,[],{var,1,'_'},
                                         [{'case',3,{integer,3,2},[{clause,4,[{integer,4,7}],[{nil,4}]}]}]
                                        }]}],
                                             parse(" module NewMod
@@ -728,7 +728,7 @@ combinations_test_() ->
                                                                  end
                                                              end
                                                          end ")),
-    ?_assertEqual([{module,1,'NewMod',[{function,2,method,[],{var,1,'_'},
+    ?_assertEqual([{module,1,'NewMod',[],[{function,2,method,[],{var,1,'_'},
                                         [{'case',3,{var,3,abc},[{clause,4,[{var,4,xyz}],[{nil,4}]}]}]
                                        }]}],
                                             parse(" module NewMod
@@ -739,7 +739,7 @@ combinations_test_() ->
                                                              end
                                                          end ")),
 %    FIXME - Correct the following expected result and un-comment test
-%    ?_assertEqual([{module,1,'NewMod',[{function,2,method,[],{var,1,'_'},
+%    ?_assertEqual([{module,1,'NewMod',[],[{function,2,method,[],{var,1,'_'},
 %                                        [{'case',3,{var,3,abc},[{clause,4,[{var,4,xyz}],[{nil,4}]}]}]
 %                                       }]}],
 %                                            parse("ivar_str = instance_variables().to_list().map do |(var, val)|
