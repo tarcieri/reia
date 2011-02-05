@@ -670,14 +670,26 @@ body        <-  expr_list
 
 
 %% Class instantiations
-class_inst    <- module_name sp args
+class_inst    <- module_name args block?
 `
-    #class_inst{
-        line  = line(Idx),
-        class = (part(1,Node))#module_name.name,
-        args  = (part(3,Node))#args.args,
-        block = ?args_default_block(#nil{}, part(3,Node))
-    }
+%    io:format("class_inst: Node is ~p~n",[Node]),
+    case Node of
+        [Name, Args, []] ->
+            #class_inst{
+                line  = line(Idx),
+                class = Name#module_name.name,
+                args  = Args#args.args,
+                block = ?args_default_block(#nil{}, Args)
+            };
+        [Name, Args, Block] ->
+            #class_inst{
+                line  = line(Idx),
+                class = Name#module_name.name,
+                args  = Args#args.args,
+                block = Block
+            }
+    end
+
 `;
 
 %% Local function calls

@@ -310,8 +310,8 @@ structured_expr_test_() -> %==========================================
   ].
 
 structure_test_() -> %==========================================
-  [ % funref
-    % class_inst and pargs
+  [ % funref                 FIXME add tests for funciton references
+    % class_inst and pargs : FIXME add tests for instantiation with a block
     ?_assertEqual([{class_inst,1,'Mod_name',[],{nil,1}}],
                                             parse("Mod_name ( ) ")),
     ?_assertEqual([{class_inst,1,'Mod_name',[{integer,1,1}],{nil,1}}],
