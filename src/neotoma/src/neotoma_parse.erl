@@ -243,12 +243,12 @@ p(Inp, StartIndex, Name, ParseFun, TransformFun) ->
       case ParseFun(Inp, StartIndex) of
         % If it fails, memoize the failure
         {fail,_} = Failure ->
-          memoize(StartIndex, dict:store(Name, Failure, Memo)),
+%          memoize(StartIndex, dict:store(Name, Failure, Memo)),
           Failure;
         % If it passes, transform and memoize the result.
         {Result, InpRem, NewIndex} ->
           Transformed = TransformFun(Result, StartIndex),
-          memoize(StartIndex, dict:store(Name, {Transformed, InpRem, NewIndex}, Memo)),
+%          memoize(StartIndex, dict:store(Name, {Transformed, InpRem, NewIndex}, Memo)),
           {Transformed, InpRem, NewIndex}
       end
   end.
