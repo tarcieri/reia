@@ -57,7 +57,7 @@ runtest(Mod) ->
     {ok,BinSource} = file:read_file(Mod),
     Source = binary_to_list(BinSource),
 %    io:format("Source is ~s~n",[Source]),
-    case reia_parse_old:string(Source) of
+    case reia_yecc_parse:string(Source) of
         {ok,Rslt1} ->
             Rslt2 = reia_parse:parse(Source),
 %            io:format("Result 1 is ~p~n",[Rslt1]),

@@ -1,7 +1,7 @@
 require 'rake/clean'
 
 # Path on the local filesystem to install reia/ire scripts to
-BIN_INSTALL_DIR = "/usr/local/bin"
+BIN_INSTALL_DIR = ENV['REIA_BIN_DIR'] || "/usr/local/bin"
 
 task :default => %w(check_erl_version build test)
 
@@ -49,9 +49,24 @@ NEOTOMA_FILES.each do |f|
   end
 end
 
+# yecc/leex Scanner
+file "src/leex/leex.beam" => "src/leex/leex.erl" do
+  sh "erlc -W0 -o src/leex src/leex/leex.erl"
+end
+
+file "src/compiler/reia_scan.erl" => %w(src/leex/leex.beam src/compiler/reia_scan.xrl) do
+  erl_eval 'leex:file("src/compiler/reia_scan.xrl")', 'src/leex'
+end
+
 # Parser
 file "src/compiler/reia_parse.erl" => "src/compiler/reia_parse.peg" do
   erl_eval 'neotoma:file("src/compiler/reia_parse.peg")', 'src/neotoma/ebin'
+end
+
+# yecc/leex Parser
+file "src/compiler/reia_yecc_parse.erl" => %w(src/compiler/reia_parse.yrl) do
+  `cp src/compiler/reia_parse.yrl src/compiler/reia_yecc_parse.yrl`
+  erl_eval 'yecc:file("src/compiler/reia_yecc_parse.yrl", [verbose])'
 end
 
 # Generate an output path for the given input file
@@ -59,7 +74,7 @@ def output_file(input_file, dir = 'ebin/', ext = '.beam')
   dir + File.basename(input_file).sub(/\.\w+$/, ext)
 end
 
-GENERATED_SRC = %w(src/compiler/reia_parse.erl)
+GENERATED_SRC = %w(src/compiler/reia_parse.erl src/compiler/reia_scan.erl src/compiler/reia_yecc_parse.erl)
 PARSER_TEST_SRC = %w(test/parser/parser_test.erl test/parser/parser_ab.erl)
 ERL_SRC = (GENERATED_SRC + PARSER_TEST_SRC + FileList.new('src/{compiler,core,builtins,json}/**/*.erl')).uniq
 ERL_DEST = ERL_SRC.map { |input| output_file(input) }
@@ -73,6 +88,7 @@ ERL_SRC.each do |input|
 end
 
 REIA_SRC  = FileList.new('src/{builtins,core}/**/*.re')
+REIA_SRC.include('lib/*.re')
 REIA_DEST = REIA_SRC.map { |input| output_file(input, 'ebin/', '.reb') }
 
 REIA_SRC.each do |input|
@@ -83,8 +99,10 @@ REIA_SRC.each do |input|
 end
 
 # Build rules
-task :build   => %w(parser reia)
-task :parser  => %w(neotoma src/compiler/reia_parse.erl)
+task :build   => %w(scanner parser reia)
+task :scanner => %w(src/leex/leex.beam src/compiler/reia_scan.erl)
+#task :parser  => %w(src/compiler/reia_parse.erl)
+task :parser  => %w(neotoma src/compiler/reia_parse.erl src/compiler/reia_yecc_parse.erl)
 task :reia    => ERL_DEST + REIA_DEST
 
 # Test suite
@@ -109,6 +127,7 @@ end
 
 # Cleaning
 CLEAN.include %w(ebin/* src/neotoma/ebin/* src/compiler/reia_parse.erl)
+CLEAN.include %w(src/compiler/reia_scan.erl src/compiler/reia_yecc_parse.erl)
 CLEAN.include %w(**/*.beam **/*.reb)
 CLEAN.include "erl_crash.dump"
 
@@ -118,7 +137,7 @@ CLEAN.include "erl_crash.dump"
 
 # Retrieve the directory Erlang libraries are stored in
 def erl_lib_dir
-  $erl_lib_dir ||= `erl -noshell -eval "io:format(code:lib_dir())" -s erlang halt`
+  ENV['ERL_LIB_DIR'] ||= `erl -noshell -eval "io:format(code:lib_dir())" -s erlang halt`
 end
 
 
