@@ -369,16 +369,16 @@ method -> expr : '$1'.
 class_method -> def self '.' function_name eol body 'end' : 
   #class_method{
     line = ?line('$1'), 
-    name = '$2', 
-    body = '$4'
+    name = '$4', 
+    body = '$6'
   }.
 class_method -> def self '.' function_name args eol body 'end' :
   #class_method{
     line  = ?line('$1'), 
-    name  = '$2', 
-    args  = '$3'#args.args,
-    block = '$3'#args.block,
-    body  = '$5'
+    name  = '$4', 
+    args  = '$5'#args.args,
+    block = '$5'#args.block,
+    body  = '$7'
   }.
 
 %% Valid function names
