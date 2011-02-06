@@ -65,7 +65,7 @@ end
 
 # yecc/leex Parser
 file "src/compiler/reia_yecc_parse.erl" => %w(src/compiler/reia_parse.yrl) do
-  `cp src/compiler/reia_parse.yrl src/compiler/reia_yecc_parse.yrl`
+  sh "cp src/compiler/reia_parse.yrl src/compiler/reia_yecc_parse.yrl"
   erl_eval 'yecc:file("src/compiler/reia_yecc_parse.yrl", [verbose])'
 end
 
@@ -109,6 +109,7 @@ task :reia    => ERL_DEST + REIA_DEST
 task :test => :build do
   erl_eval 'eunit:test(parser_test)', 'ebin'
   sh "bin/reia test/runner.re"
+  erl_eval 'parser_ab:run()', 'ebin'
 end
 
 # Benchmarks

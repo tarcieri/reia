@@ -53,7 +53,7 @@ testfile(File) ->
         
 
 runtest(Mod) ->
-    io:format("Testing ~s~n",[Mod]),
+    io:format("Verifying parse for ~s~n",[Mod]),
     {ok,BinSource} = file:read_file(Mod),
     Source = binary_to_list(BinSource),
 %    io:format("Source is :~n~s~n",[Source]),
