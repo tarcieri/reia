@@ -20,14 +20,14 @@ case length(Node) of
     [Head|Rest]
 end
 `;
-string <- '"' chars:(!'"' ("\\\\" / '\\"' / .))* '"' `lists:flatten(proplists:get_value(chars, Node))`;
+string <- '"' chars:(!'"' ("\\\\" / '\\"' / .))* '"' `iolist_to_binary(proplists:get_value(chars, Node))`;
 number <- int frac? exp?
 `
 case Node of
-  [Int, [], []] -> list_to_integer(lists:flatten([Int]));
-  [Int, Frac, []] -> list_to_float(lists:flatten([Int, Frac]));
-  [Int, [], Exp] -> list_to_float(lists:flatten([Int, ".0", Exp]));
-  _ -> list_to_float(lists:flatten(Node))
+  [Int, [], []] -> list_to_integer(binary_to_list(iolist_to_binary(Int)));
+  [Int, Frac, []] -> list_to_float(binary_to_list(iolist_to_binary([Int, Frac])));
+  [Int, [], Exp] -> list_to_float(binary_to_list(iolist_to_binary([Int, ".0", Exp])));
+  _ -> list_to_float(binary_to_list(iolist_to_binary(Node)))
 end
 `;
 int <- '-'? (non_zero_digit digit+) / digit ~;

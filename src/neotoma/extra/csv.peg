@@ -21,11 +21,11 @@ case Node of
     [Head|Tail]
 end
 `;
-field <- quoted_field / (!(field_sep / crlf) .)* `lists:flatten(Node)`;
+field <- quoted_field / (!field_sep !crlf .)* `iolist_to_binary(Node)`;
 quoted_field <- '"' string:('""' / (!'"' .))* '"'
 `
   String = proplists:get_value(string, Node),
-  re:replace(String, "[\"]{2}", "\"",[global, {return, list}])
+  re:replace(String, "[\"]{2}", "\"",[global, {return, binary}])
 `;
 field_sep <- ',' ~;
-crlf <- "\r\n" / "\n" ~;
+crlf <- [\r]? [\n] ~;

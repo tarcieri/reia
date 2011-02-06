@@ -10,20 +10,20 @@ p(Inp, StartIndex, Name, ParseFun, TransformFun) ->
   % Grab the memo table from ets
   Memo = get_memo(StartIndex),
   % See if the current reduction is memoized
-  case dict:find(Name, Memo) of
+  case proplists:lookup(Name, Memo) of
     % If it is, return the result
-    {ok, Result} -> Result;
+    {Name, Result} -> Result;
     % If not, attempt to parse
     _ ->
       case ParseFun(Inp, StartIndex) of
         % If it fails, memoize the failure
         {fail,_} = Failure ->
-          memoize(StartIndex, dict:store(Name, Failure, Memo)),
+          memoize(StartIndex, [{Name, Failure}|Memo]),
           Failure;
         % If it passes, transform and memoize the result.
         {Result, InpRem, NewIndex} ->
           Transformed = TransformFun(Result, StartIndex),
-          memoize(StartIndex, dict:store(Name, {Transformed, InpRem, NewIndex}, Memo)),
+          memoize(StartIndex, [{Name, {Transformed, InpRem, NewIndex}}|Memo]),
           {Transformed, InpRem, NewIndex}
       end
   end.
@@ -39,15 +39,15 @@ memoize(Position, Struct) ->
 
 get_memo(Position) ->
   case ets:lookup(memo_table_name(), Position) of
-    [] -> dict:new();
-    [{Position, Dict}] -> Dict
+    [] -> [];
+    [{Position, PList}] -> PList
   end.
 
 memo_table_name() ->
     get(parse_memo_table).
 
 p_eof() ->
-  fun([], Index) -> {eof, [], Index};
+  fun(<<>>, Index) -> {eof, [], Index};
      (_, Index) -> {fail, {expected, eof, Index}} end.
 
 p_optional(P) ->
@@ -140,28 +140,35 @@ p_scan(P, Inp, Index, Accum) ->
     {Result, InpRem, NewIndex} -> p_scan(P, InpRem, NewIndex, [Result | Accum])
   end.
 
+p_string(S) when is_list(S) -> p_string(list_to_binary(S));
 p_string(S) ->
-  fun(Input, Index) ->
-      case lists:prefix(S, Input) of
-        true -> {S, lists:sublist(Input, length(S)+1, length(Input)), p_advance_index(S,Index)};
-        _ -> {fail, {expected, {string, S}, Index}}
+    Length = erlang:byte_size(S),
+    fun(Input, Index) ->
+      try
+          <<S:Length/binary, Rest/binary>> = Input,
+          {S, Rest, p_advance_index(S, Index)}
+      catch
+          error:{badmatch,_} -> {fail, {expected, {string, S}, Index}}
       end
-  end.
+    end.
 
 p_anything() ->
-  fun([], Index) -> {fail, {expected, any_character, Index}};
-     ([H|T], Index) -> {H, T, p_advance_index(H, Index)}
+  fun(<<>>, Index) -> {fail, {expected, any_character, Index}};
+     (Input, Index) when is_binary(Input) ->
+          <<C/utf8, Rest/binary>> = Input,
+          {<<C/utf8>>, Rest, p_advance_index(<<C/utf8>>, Index)}
   end.
 
 p_charclass(Class) ->
-  fun(Inp, Index) ->
-     {ok, RE} = re:compile("^"++Class),
-      case re:run(Inp, RE) of
-        {match, _} ->
-          {hd(Inp), tl(Inp), p_advance_index(hd(Inp), Index)};
-        _ -> {fail,{expected, {character_class, Class}, Index}}
-      end
-  end.
+    {ok, RE} = re:compile(Class, [unicode, dotall]),
+    fun(Inp, Index) ->
+            case re:run(Inp, RE, [anchored]) of
+                {match, [{0, Length}|_]} ->
+                    {Head, Tail} = erlang:split_binary(Inp, Length),
+                    {Head, Tail, p_advance_index(Head, Index)};
+                _ -> {fail, {expected, {character_class, Class}, Index}}
+            end
+    end.
 
 line({{line,L},_}) -> L;
 line(_) -> undefined.
@@ -169,8 +176,8 @@ line(_) -> undefined.
 column({_,{column,C}}) -> C;
 column(_) -> undefined.
 
-p_advance_index(MatchedInput, Index) when is_list(MatchedInput) -> % strings
-  lists:foldl(fun p_advance_index/2, Index, MatchedInput);
+p_advance_index(MatchedInput, Index) when is_list(MatchedInput) orelse is_binary(MatchedInput)-> % strings
+  lists:foldl(fun p_advance_index/2, Index, unicode:characters_to_list(MatchedInput));
 p_advance_index(MatchedInput, Index) when is_integer(MatchedInput) -> % single characters
   {{line, Line}, {column, Col}} = Index,
   case MatchedInput of

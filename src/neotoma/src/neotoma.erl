@@ -31,7 +31,7 @@ file(InputGrammar, Options) ->
     ModuleAttrs = generate_module_attrs(ModuleName),
     EntryFuns = generate_entry_functions(Root),
     TransformFun = create_transform(TransformModule, OutputDir, GenTransform),
-    {ok, PegIncludes} = file:read_file(filename:join([filename:dirname(code:which(neotoma)), "..", "priv", "peg_includes.erl"])),
+    {ok, PegIncludes} = file:read_file(code:priv_dir(neotoma) ++ "/peg_includes.erl"),
     file:write_file(OutputFilename, [ModuleAttrs, "\n", Code, "\n", EntryFuns, "\n", Rules, "\n", TransformFun, "\n", PegIncludes]).
 
 validate_params(InputGrammar, _, _, OutputFile) when InputGrammar =:= OutputFile ->
@@ -63,11 +63,12 @@ generate_module_attrs(ModName) ->
 
 generate_entry_functions(Root) ->
     {RootRule,_} = Root,
-     ["file(Filename) -> {ok, Bin} = file:read_file(Filename), parse(binary_to_list(Bin)).\n\n",
-     "parse(Input) ->\n",
+     ["file(Filename) -> {ok, Bin} = file:read_file(Filename), parse(Bin).\n\n",
+     "parse(List) when is_list(List) -> parse(list_to_binary(List));\n",
+     "parse(Input) when is_binary(Input) ->\n",
      "  setup_memo(),\n",
      "  Result = case '",RootRule,"'(Input,{{line,1},{column,1}}) of\n",
-     "             {AST, [], _Index} -> AST;\n",
+     "             {AST, <<>>, _Index} -> AST;\n",
      "             Any -> Any\n"
      "           end,\n",
      "  release_memo(), Result.\n"].
