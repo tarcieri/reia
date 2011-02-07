@@ -125,9 +125,9 @@ terminal <- quoted_string / character_class / anything_symbol ~;
 
 quoted_string <- single_quoted_string / double_quoted_string
 `
-  ["p_string(",
-   io_lib:format("~p",[iolist_to_binary(proplists:get_value(string, Node))]),
-   ")"]
+  lists:flatten(["p_string(",
+   escape_string(binary_to_list([iolist_to_binary(proplists:get_value(string, Node))]),
+   ")"])
 `;
 
 double_quoted_string <- '"' string:(!'"' ("\\\\" / '\\"' / .))* '"' ~;
@@ -137,7 +137,7 @@ single_quoted_string <- "'" string:(!"'" ("\\\\" / "\\'" / .))* "'" ~;
 character_class <- '[' characters:(!']' ('\\\\' . / !'\\\\' .))+ ']'
 `
 ["p_charclass(<<\"[",
-  escape_quotes(io_lib:format("~s", [iolist_to_binary(proplists:get_value(characters, Node))])),
+   escape_string(binary_to_list([iolist_to_binary(proplists:get_value(characters, Node))]),
  "]\">>)"]
 `;
 
@@ -165,9 +165,28 @@ code_block <- ( '%{' code:('\\%' / '$%' / !'%}' .)+ '%}' ) /
 
 %% Extra functions
 `
-escape_quotes(String) ->
-  {ok, RE} = re:compile("\""),
-  re:replace(String, RE, "\\\\\"", [global, {return, binary}]).
+% insert escapes into a string
+escape_string(String) -> escape_string(String, []).
+
+escape_string([], Output) ->
+  lists:reverse(Output);
+escape_string([H|T], Output) ->
+  escape_string(T,
+    case H of
+        $/  -> [$/,$\\|Output]; 
+        $\" -> [$\",$\\|Output];     % " comment inserted to help some editors with highlighting the generated parser
+        $\' -> [$\',$\\|Output];     % ' comment inserted to help some editors with highlighting the generated parser
+        $\b -> [$b,$\\|Output];
+        $\d -> [$d,$\\|Output];
+        $\e -> [$e,$\\|Output];
+        $\f -> [$f,$\\|Output];
+        $\n -> [$n,$\\|Output];
+        $\r -> [$r,$\\|Output];
+        $\s -> [$s,$\\|Output];
+        $\t -> [$t,$\\|Output];
+        $\v -> [$v,$\\|Output];
+        _   -> [H|Output]
+    end).
 
 add_lhs(Symbol, Index) ->
   case ets:lookup(memo_table_name(), lhs) of
@@ -212,4 +231,6 @@ verify_rules() ->
                     end
                 end, NTs),
     Root.
+
+
 `
