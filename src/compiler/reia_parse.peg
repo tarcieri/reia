@@ -346,7 +346,7 @@ max_expr    <-  number              %   [0-9]
 match_op    <-  '=' !'='    ws
 `
     token(part(1,Node),Idx),
-    list_to_atom(part(1,Node))
+    binary_to_atom(part(1,Node),?ENCODING)
 `;
 
 rebind_op   <-  '+='    ws
@@ -361,7 +361,7 @@ rebind_op   <-  '+='    ws
             /   '>>='   ws
 `
     token(part(1,Node),Idx),
-    list_to_atom(part(1,Node))
+    binary_to_atom(part(1,Node),?ENCODING)
 `;
 
 
@@ -390,7 +390,7 @@ comp_op     <-  '==='   ws
             /   '<'     !'<' ws
 `
     token(part(1,Node),Idx),
-    list_to_atom(part(1,Node))
+    binary_to_atom(part(1,Node),?ENCODING)
 `;
 
 %% Range operator
@@ -401,7 +401,7 @@ range_op    <-  '..'    ws
 bitor_op    <-  '|'     !'=' !'|' ws
             /   '^'     !'=' ws
 `
-    list_to_atom(part(1,Node))
+    binary_to_atom(part(1,Node),?ENCODING)
 `;
 
 %% BitAnd operators
@@ -412,14 +412,14 @@ bitand_op   <-  '&'     !'=' !'&'   ws
 shift_op    <-  '<<'    !'=' ws
             /   '>>'    !'=' ws
 `
-    list_to_atom(part(1,Node))
+    binary_to_atom(part(1,Node),?ENCODING)
 `;
 
 %% Additive operators
 add_op      <-  '+'     !'=' ws
             /   '-'     !'=' ws
 `
-    list_to_atom(part(1,Node))
+    binary_to_atom(part(1,Node),?ENCODING)
 `;
 
 %% Multiplicative operators
@@ -427,20 +427,20 @@ mult_op     <-  '*'     !'=' !'*'   ws
             /   '/'     !'='        ws
             /   '%'     !'='        ws
 `
-    list_to_atom(part(1,Node))
+    binary_to_atom(part(1,Node),?ENCODING)
 `;
 
 %% Unary additive operators
 unary_add_op    <-  '+'     !'=' ws
             /   '-'     !'=' ws
 `
-    list_to_atom(part(1,Node))
+    binary_to_atom(part(1,Node),?ENCODING)
 `;
 
 %% Exponentation operator
 pow_op      <-  '**' !'='   ws
 `
-    list_to_atom(part(1,Node))
+    binary_to_atom(part(1,Node),?ENCODING)
 `;
 
 
@@ -449,7 +449,7 @@ unary_bool_op   <-  not   !'=' ws
             /   '!'     !'=' ws
             /   '~'     !'=' ws
 `
-    list_to_atom(part(1,Node))
+    binary_to_atom(part(1,Node),?ENCODING)
 `;
 
 %% Module declarations
@@ -635,9 +635,9 @@ function_name   <-  '[]='    sp
                 /   function_identifier
 `
     case Node of
-        ["[]", _]   -> '[]';
-        ["[]=", _]  -> '[]=';
-        Identifier  -> Identifier
+        [<<"[]">>, _]   -> '[]';
+        [<<"[]=">>, _]  -> '[]=';
+        Identifier      -> Identifier
     end
 `;
 
@@ -1412,15 +1412,15 @@ catch_clause    <-  catch ws expr eol expr_list
 %% Module and Variable Names
 module_name <-  mod_start id_mid* sp
 `
-    token("Mod:"++lists:flatten(Node),Idx),
-    #module_name{line=line(Idx), name=list_to_atom(lists:flatten(Node))}
+    token("Mod:"++binary_to_list(iolist_to_binary(Node)),Idx),
+    #module_name{line=line(Idx), name=iolist_to_atom([part(1,Node),part(2,Node)])}
 `;
 
 identifier  <-  !reserved_word id_start id_mid* sp
 `
 %    io:format("Doing identifier : Idx = ~p, Node = ~p~n",[Idx, Node]),
-    token("ID:"++lists:flatten(Node),Idx),
-    Atom = list_to_atom(lists:flatten(Node)),
+    token("ID:"++binary_to_list(iolist_to_binary(Node)),Idx),
+    Atom = iolist_to_atom([part(2,Node),part(3,Node)]),
     case reserved_word(Atom) of
         true ->
             io:format("...and got true!!!!!!!!!!!!~n",[]),
@@ -1432,11 +1432,11 @@ identifier  <-  !reserved_word id_start id_mid* sp
 `;
 
 punctuated_identifier <-  !reserved_word id_start id_mid* [?!] sp
-%`   #identifier{line=line(Idx), name=list_to_atom(lists:flatten(Node))}    `;
+%`   #identifier{line=line(Idx), name=iolist_to_atom([part(2,Node),part(3,Node)])}    `;
 %`   lists:flatten(Node)    `;
 `
-    token("ID:"++lists:flatten(Node),Idx),
-    Atom = list_to_atom(lists:flatten(Node)),
+    token("ID:"++binary_to_list(iolist_to_binary(Node)),Idx),
+    Atom = iolist_to_atom([part(2,Node),part(3,Node),part(4,Node)]),
     #var{line=line(Idx), name=Atom}
 `;
 
@@ -1447,22 +1447,22 @@ atom        <-  ':' atom_start id_mid* sp
     token(lists:flatten(Node),Idx),
     case Node of
         [_, Head, Tail, _] ->
-            #atom{line=line(Idx), name=list_to_atom(lists:flatten([Head|Tail]))};
+            #atom{line=line(Idx), name=iolist_to_atom([Head|Tail])};
         [_, #string{line=Line, characters=Chars}, _] ->
-            #atom{line=Line, name=list_to_atom(Chars)}
+            #atom{line=Line, name=iolist_to_atom(Chars)}
     end
 `;
 
 %% Numbers
 float       <-  [+-]? digit+ "." digit+ sp
 `
-    token("float:"++lists:flatten(Node),Idx),
-    #float{line = line(Idx), value = list_to_float(lists:flatten(Node))}    `;
+    token("float:"++binary_to_list(iolist_to_binary(Node)),Idx),
+    #float{line = line(Idx), value = list_to_float(binary_to_list(iolist_to_binary(Node)))}    `;
 
 integer     <-  [+-]? digit+ sp
 `
-    token("int:"++lists:flatten(Node),Idx),
-    #integer{line = line(Idx), value = list_to_integer(lists:flatten(Node))}    `;
+    token("int:"++binary_to_list(iolist_to_binary(Node)),Idx),
+    #integer{line = line(Idx), value = list_to_integer(binary_to_list(iolist_to_binary(Node)))}    `;
 
 %% Strings
 string      <-  quot_string
@@ -1472,49 +1472,53 @@ string      <-  quot_string
 `    Node   `;
 
 quot_string <- '"' quot_string_char* '"' sp
-`    #string{line = line(Idx), characters=unescape_string(lists:flatten(part(2,Node)))} `;
+`    #string{line = line(Idx), characters=unescape_string(binary_to_list(iolist_to_binary(part(2,Node))))} `;
 
 quot_d_string <- '"' quot_string_char* (string_exp quot_string_char*)+  '"' sp
-`    #dstring{line = line(Idx), elements=build_string(Idx, part(2,Node), part(3,Node))}   `;
+`
+    #dstring{line = line(Idx), elements=build_string(Idx, part(2,Node), part(3,Node))}    `;
 
 quot_string_char <- ( !'"' !"#{" ( !"\\" . / "\\" . ) )
-`    lists:flatten(Node)    `;
+`    Node    `;
 
 apos_string <- "'" apos_string_char* "'" sp
-`    #string{line = line(Idx), characters=unescape_string(lists:flatten(part(2,Node)))} `;
+`
+    #string{line = line(Idx), characters=unescape_string(binary_to_list(iolist_to_binary(part(2,Node))))} `;
 
 apos_d_string <- "'" apos_string_char* (string_exp apos_string_char*)+ "'" sp
-`    #dstring{line = line(Idx), elements=build_string(Idx, part(2,Node), part(3,Node))}   `;
+`
+    #dstring{line = line(Idx), elements=build_string(Idx, part(2,Node), part(3,Node))}   `;
 
 apos_string_char <- ( !"'" !"#{" ( !"\\" . / "\\" . ) )
-`    lists:flatten(Node)    `;
+`    Node    `;
 
 string_exp  <- '#{' expr '}'
 `    part(2,Node)   `;
 
 regexp      <-  '%r/' ('\\^' . / '\\' . / [^/])* '/' sp
-`    #regexp{line=line(Idx), pattern=unescape_string(lists:flatten(part(2,Node)))}  `;
+`
+    #regexp{line=line(Idx), pattern=unescape_string(binary_to_list(iolist_to_binary(part(2,Node))))}  `;
 
 
 %% Operators and Punctuation
 
 %% Newline & other whitespace
 %% Only ws, eol and sp are used outside this group
-ws          <-  (space / newline)*      `[]`;   % whiteSpace allows newlines too
+ws          <-  (space / newline)*      `token('ws',Idx),[]`;   % whiteSpace allows newlines too
 
 eol         <-  sp? (newline sp)+       `token('eol',Idx),[]`;  % required end of line
 
-newline     <-  comment / linend        `[]`;   % various line endings
+newline     <-  comment / linend        `token('newline',Idx),[]`;   % various line endings
 
-comment     <- '#' (!hard_linend .)* hard_linend? `[]`;   % any chars up to line end
+comment     <- '#' (!hard_linend .)* hard_linend? `token('comment',Idx),[]`;   % any chars up to line end
 
-linend      <-  (hard_linend / ';' ) sp `[]`;   % 'conventional' line ending characters
+linend      <-  (hard_linend / ';' ) sp `token('linend',Idx),[]`;   % 'conventional' line ending characters
 
-hard_linend <-  ('\r\n' / '\n' ) sp     `[]`;   % 'conventional' line ending characters
+hard_linend <-  ('\r\n' / '\n' ) sp     `token('hard_linend',Idx),[]`;   % 'conventional' line ending characters
 
-sp          <-  space*                  `[]`;   % spaces on the same line
+sp          <-  space*                  `token('sp',Idx),[]`;   % spaces on the same line
 
-space       <-  [ \t]                   `[]`;   % spaces characters
+space       <-  [ \t]                   `token('space',Idx),[]`;   % spaces characters
 
 %% Character Classes
 digit       <-  [0-9]       ;
@@ -1534,66 +1538,39 @@ reserved_word <- after / and / begin / case / catch / class / def / do / end
     Node
 `;
 
-%after       <-  'after'     sp  ` list_to_atom(part(1,Node)) `;
 after       <-  'after'     !id_mid   sp  ` token('after',Idx) `;
-%and         <-  'and'       sp  ` list_to_atom(part(1,Node)) `;
 and         <-  'and'       !id_mid   sp  ` token('and',Idx) `;
-%begin       <-  'begin'    !id_mid    sp  ` list_to_atom(part(1,Node)) `;
 begin       <-  'begin'     !id_mid   sp  ` token('begin',Idx) `;
-%case        <-  'case'      sp  ` io:format("Got reserved word 'case' at ~p~n",[Idx]),list_to_atom(part(1,Node))     `;
 case        <-  'case'      !id_mid   sp  ` token('case',Idx) `;
-%catch       <-  'catch'     sp  ` list_to_atom(part(1,Node)) `;
 catch       <-  'catch'     !id_mid   sp  ` token('catch',Idx) `;
-%class       <-  'class'     sp  ` list_to_atom(part(1,Node)) `;
 class       <-  'class'     !id_mid   sp  ` token('class',Idx) `;
-%def         <-  'def'       sp  ` list_to_atom(part(1,Node)) `;
 def         <-  'def'       !id_mid   sp  ` token('def',Idx) `;
-%do          <-  'do'        sp  ` list_to_atom(part(1,Node)) `;
 do          <-  'do'        !id_mid   sp  ` token('do',Idx) `;
-%end         <-  'end'       sp  ` list_to_atom(part(1,Node)) `;
 end         <-  'end'       !id_mid   sp  ` token('end',Idx) `;
-%else        <-  'else'      sp  ` list_to_atom(part(1,Node)) `;
 else        <-  'else'      !id_mid   sp  ` token('else',Idx) `;
-%elseif      <-  'elseif'    sp  ` list_to_atom(part(1,Node)) `;
 elseif      <-  'elseif'    !id_mid   sp  ` token('elseif',Idx) `;
-%erl         <-  'erl'       sp  ` list_to_atom(part(1,Node)) `;
 erl         <-  'erl'       !id_mid   sp  ` token('erl',Idx) `;
-%false       <-  'false'     sp  ` list_to_atom(part(1,Node)) `;
 false       <-  'false'     !id_mid   sp  ` token('false',Idx) `;
-%for         <-  'for'       sp  ` list_to_atom(part(1,Node)) `;
 for         <-  'for'       !id_mid   sp  ` token('for',Idx) `;
-%fun         <-  'fun'       sp  ` list_to_atom(part(1,Node)) `;
 fun         <-  'fun'       !id_mid   sp  ` token('fun',Idx) `;
-%if          <-  'if'        sp  ` list_to_atom(part(1,Node)) `;
 if          <-  'if'        !id_mid   sp  ` token('if',Idx) `;
-%in          <-  'in'        sp  ` list_to_atom(part(1,Node)) `;
 in          <-  'in'        !id_mid   sp  ` token('in',Idx) `;
-%module      <-  'module'    sp  ` list_to_atom(part(1,Node)) `;
 module      <-  'module'    !id_mid   sp  ` token('module',Idx) `;
-%nil         <-  'nil'       sp  ` list_to_atom(part(1,Node)) `;
 nil         <-  'nil'       !id_mid   sp  ` token('nil',Idx) `;
-%not         <-  'not'       sp  ` list_to_atom(part(1,Node)) `;
 not         <-  'not'       !id_mid   sp  ` token('not',Idx) `;
-%or          <-  'or'        sp  ` list_to_atom(part(1,Node)) `;
 or          <-  'or'        !id_mid   sp  ` token('or',Idx) `;
-%receive     <-  'receive'   sp  ` list_to_atom(part(1,Node)) `;
 receive     <-  'receive'   !id_mid   sp  ` token('receive',Idx) `;
-%self        <-  'self'      sp  ` {'self', line(Idx)} `;
-self        <-  'self'      !id_mid   sp  ` {'self', line(Idx)} `;
-%throw       <-  'throw'     sp  ` list_to_atom(part(1,Node)) `;
+self        <-  'self'      !id_mid   sp  ` token('self',Idx), {'self', line(Idx)} `;
 throw       <-  'throw'     !id_mid   sp  ` token('throw',Idx) `;
-%true        <-  'true'      sp  ` list_to_atom(part(1,Node)) `;
 true        <-  'true'      !id_mid   sp  ` token('true',Idx) `;
-%try         <-  'try'       sp  ` list_to_atom(part(1,Node)) `;
 try         <-  'try'       !id_mid   sp  ` token('try',Idx) `;
-%unless      <-  'unless'    sp  ` list_to_atom(part(1,Node)) `;
 unless      <-  'unless'    !id_mid   sp  ` token('unless',Idx) `;
-%when        <-  'when'      sp  ` list_to_atom(part(1,Node)) `;
 when        <-  'when'      !id_mid   sp  ` token('when',Idx) `;
 
 %% ==================== Extra functions ====================
 `
 -include_lib("eunit/include/eunit.hrl").
+-define(ENCODING,utf8).
 
 % Erlang Code  From .YRL File
 
@@ -1607,38 +1584,26 @@ when        <-  'when'      !id_mid   sp  ` token('when',Idx) `;
 -define(args_add(Arg, Args), Args#args{args=[Arg|Args#args.args]}).
 -define(args_default_block(Block, Args), case (Args)#args.block of {var,1,'_'} -> Block; _ -> (Args)#args.block end).
 
-% Erlang Code  original to gtd
-
 part(N, [H|T]) when N > 0 ->
     case N of
         1   ->  H;
         _   ->  part(N-1, T)
     end.
 
-% Erlang Code  From .XRL File
-
-%build_integer([$-|Chars], Line) ->
-%  {token, #integer{line = Line, value = -list_to_integer(Chars)}};
-%build_integer(Chars, Line) ->
-%  {token, #integer{line = Line, value =  list_to_integer(Chars)}}.
-
-%build_float([$-|Chars], Line) ->
-%  {token, #float{line = Line, value = -list_to_float(Chars)}};
-%build_float(Chars, Line) ->
-%  {token, #float{line = Line, value =  list_to_float(Chars)}}.
-  
+iolist_to_atom(Data) ->
+    binary_to_atom(iolist_to_binary(Data),?ENCODING).
 
 %% Builds a list of interpolated string elements
 build_string(Idx, [],    List)  ->
     build_string2(Idx, List, []);
 build_string(Idx, Chars, List)  ->
-    build_string2(Idx, List, [#string{line=line(Idx), characters=unescape_string(lists:flatten(Chars))}]).
+    build_string2(Idx, List, [#string{line=line(Idx), characters=unescape_string(binary_to_list(iolist_to_binary(Chars)))}]).
 
 build_string2(Idx, [], Result)                   -> lists:reverse(Result);
 build_string2(Idx, [[Expr, []]|Tail], Result)   ->
     build_string2(Idx, Tail, [Expr|Result]);
 build_string2(Idx, [[Expr, Chars]|Tail], Result) ->
-    build_string2(Idx, Tail, [#string{line=line(Idx), characters=unescape_string(lists:flatten(Chars))},Expr|Result]).
+    build_string2(Idx, Tail, [#string{line=line(Idx), characters=unescape_string(binary_to_list(iolist_to_binary(Chars)))},Expr|Result]).
 
 % remove escapes from a plain (uninterpolated) string (segment)
 unescape_string(String) -> unescape_string(String, []).
@@ -1649,8 +1614,8 @@ unescape_string([$\\, Escaped | Rest], Output) ->
   Char = case Escaped of
     $\\ -> $\\;
     $/  -> $/; 
-    $\" -> $\";
-    $\' -> $\';
+    $\" -> $\";     % " comment inserted to help some editors with highlighting
+    $\' -> $\';     % ' comment inserted to help some editors with highlighting
     $b  -> $\b;
     $d  -> $\d;
     $e  -> $\e;
@@ -1673,7 +1638,7 @@ build_binary_op (Idx, Leftop, [[Op,Expr]|T]) ->
 
 %% Builds a tree of remote function calls
 build_remote_call(Base, [])                 -> Base;
-build_remote_call(Base, [[".", Call]|Tail])  ->
+build_remote_call(Base, [[<<".">>, Call]|Tail])  ->
 %    io:format("~nbuild_remote_call ===> ~n~p~n~p~n~p~n~n",[Base, Call, Tail]),
     build_remote_call(
         #remote_call{
