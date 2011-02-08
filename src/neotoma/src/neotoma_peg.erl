@@ -215,7 +215,7 @@ p_charclass(Class) ->
                 {match, [{0, Length}|_]} ->
                     {Head, Tail} = erlang:split_binary(Inp, Length),
                     {Head, Tail, p_advance_index(Head, Index)};
-                _ -> {fail, {expected, {character_class, Class}, Index}}
+                _ -> {fail, {expected, {character_class, binary_to_list(Class)}, Index}}
             end
     end.
 

@@ -172,6 +172,24 @@ comp(R1=#function{},R2=#function{}) ->
       false -> [{function,R1#function.line,line,R1#function.line,R2#function.line}]
     end;
 
+comp(R1=#local_call{},R2=#local_call{}) ->
+    case R1#local_call.line >= R2#local_call.line of
+      true -> 
+        case R1#local_call.name == R2#local_call.name of
+          true -> 
+            case comp(R1#local_call.args,R2#local_call.args) of
+              ok -> 
+                case comp(R1#local_call.block, R2#local_call.block) of
+                  ok    -> ok;
+                  Terms -> [{local_call,R1#local_call.line}|Terms]
+                end;
+              Terms -> [{local_call,R1#local_call.line}|Terms]
+            end;
+          false -> [{local_call,R1#local_call.line,name,R1#local_call.name,R1#local_call.name}]
+        end;
+      false -> [{local_call,R1#local_call.line,line,R1#local_call.line,R2#local_call.line}]
+    end;
+
 comp(R1=#module{},R2=#module{}) ->
     case R1#module.line == R2#module.line of
       true -> 
@@ -188,6 +206,20 @@ comp(R1=#module{},R2=#module{}) ->
           false -> [{module,R1#module.line}]
         end;
       false -> [{module,R1#module.line}]
+    end;
+
+comp(R1=#'receive'{},R2=#'receive'{}) ->
+    case R1#'receive'.line == R2#'receive'.line of
+      true -> 
+        case comp(R1#'receive'.clauses, R2#'receive'.clauses) of
+          ok -> 
+            case comp(R1#'receive'.after_clause, R2#'receive'.after_clause) of
+              ok -> ok;
+              Terms -> [{'receive',R1#'receive'.line}|Terms]
+            end;
+          Terms -> [{'receive',R1#'receive'.line}|Terms]
+        end;
+      false -> [{'receive',R1#'receive'.line}]
     end;
 
 comp(R1=#nil{},R2=#nil{}) ->

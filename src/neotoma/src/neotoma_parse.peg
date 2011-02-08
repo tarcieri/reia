@@ -125,9 +125,9 @@ terminal <- quoted_string / character_class / anything_symbol ~;
 
 quoted_string <- single_quoted_string / double_quoted_string
 `
-  lists:flatten(["p_string(",
-   escape_string(binary_to_list([iolist_to_binary(proplists:get_value(string, Node))]),
-   ")"])
+  lists:flatten(["p_string(<<\"",
+   escape_string(binary_to_list(iolist_to_binary(proplists:get_value(string, Node)))),
+   "\">>)"])
 `;
 
 double_quoted_string <- '"' string:(!'"' ("\\\\" / '\\"' / .))* '"' ~;
@@ -137,7 +137,7 @@ single_quoted_string <- "'" string:(!"'" ("\\\\" / "\\'" / .))* "'" ~;
 character_class <- '[' characters:(!']' ('\\\\' . / !'\\\\' .))+ ']'
 `
 ["p_charclass(<<\"[",
-   escape_string(binary_to_list([iolist_to_binary(proplists:get_value(characters, Node))]),
+   escape_string(binary_to_list(iolist_to_binary(proplists:get_value(characters, Node)))),
  "]\">>)"]
 `;
 
