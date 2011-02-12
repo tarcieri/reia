@@ -28,6 +28,36 @@ class List
       replace(index, value)
     end
   end
+  
+  # Takes a conditional block and returns true if all elements meet the
+  # condition, false otherwise
+  def all?(&block)
+    erl.lists.all(block, self)
+  end
+
+  # Takes a conditional block and returns true if any element meets the
+  # condition, false otherwise
+  def any?(&block)
+    erl.lists.any(block, self)
+  end
+  
+  # Returns a new list built by concatenating the two lists together to 
+  # produce a third list.
+  def append(other_list)
+    erl.lists.append(self, other_list)
+  end
+  
+  # Iterate over a list, successively calling the given block and returning
+  # the receiver when done
+  def each(&block)
+    erl.lists.foreach(block, self)
+    self
+  end
+  
+  # Is the list empty?
+  def empty?
+    self == []
+  end
 
   # Returns the first element in the list
   def first
@@ -38,40 +68,17 @@ class List
   def first(n)
     erl.lists.sublist(self, n)
   end
-
-  # Returns the last element in the list
-  def last
-    erl.lists.nth(size(), self)
-  end
-
-  # returns the last n-elements in the list
-  def last(n)
-    index = [0, (size() - n)].max()
-    erl.lists.nthtail(index,self)
-  end
-
-  # Returns the first element of list that compares less than or equal
-  # to all other elements of list.
-  def min
-    erl.lists.min(self)
-  end
-
-  # Returns the first element of list that compares greater than or equal
-  # to all other elements of list.
-  def max
-    erl.lists.max(self)
-  end
-
-  # Number of elements in a list
-  def size
-    erl.length(self)
+  
+  # Flatten a deeply nested list
+  def flatten
+    erl.lists.flatten(self)
   end
   
-  # Reverse the order of a list
-  def reverse
-    erl.lists.reverse(self)
+  # Generate a string representative of a list's contents
+  def inspect
+    to_s()
   end
- 
+  
   # Join a list into a string, casting all elements to strings
   def join(separator)
     elements = case self
@@ -87,41 +94,33 @@ class List
     join("")
   end
 
-  # Returns a new list built by concatenating the two lists together to 
-  # produce a third list.
-  def append(other_list)
-    erl.lists.append(self, other_list)
-  end
-  
-  # Iterate over a list, successively calling the given block and returning
-  # the receiver when done
-  def each(&block)
-    erl.lists.foreach(block, self)
-    self
+  # Returns the last element in the list
+  def last
+    erl.lists.nth(size(), self)
   end
 
+  # returns the last n-elements in the list
+  def last(n)
+    index = [0, (size() - n)].max()
+    erl.lists.nthtail(index,self)
+  end
+  
   # Iterate over a list, building a new list of values returned from the
   # given block when called with each element in the list
   def map(&block)
     erl.lists.map(block, self)
   end
 
-  # Takes a conditional block and returns true if all elements meet the
-  # condition, false otherwise
-  def all?(&block)
-    erl.lists.all(block, self)
+  # Returns the first element of list that compares greater than or equal
+  # to all other elements of list.
+  def max
+    erl.lists.max(self)
   end
-
-  # Takes a conditional block and returns true if any element meets the
-  # condition, false otherwise
-  def any?(&block)
-    erl.lists.any(block, self)
-  end
-
-  # Takes a conditional block and returns a new list with only the elements
-  # for which the block evaluates to true
-  def select(&block)
-    erl.lists.filter(block, self)
+  
+  # Returns the first element of list that compares less than or equal
+  # to all other elements of list.
+  def min
+    erl.lists.min(self)
   end
 
   # Takes a conditional block and partitions the list into two lists,
@@ -132,29 +131,30 @@ class List
     erl.lists.partition(block, self)
   end
   
-  # Flatten a deeply nested list
-  def flatten
-    erl.lists.flatten(self)
-  end
-  
-  # Generate a string representative of a list's contents
-  def inspect
-    to_s()
+  # Reverse the order of a list
+  def reverse
+    erl.lists.reverse(self)
   end
 
-  # Cast to a tuple
-  def to_tuple
-    erl.list_to_tuple(self)
-  end
-
-  # Cast a list of 2-tuples to a dict
-  def to_dict
-    erl.dict.from_list(self)
+  # Takes a conditional block and returns a new list with only the elements
+  # for which the block evaluates to true
+  def select(&block)
+    erl.lists.filter(block, self)
   end
   
+  # Number of elements in a list
+  def size
+    erl.length(self)
+  end
+
   # Cast to a binary
   def to_binary
     erl.list_to_binary(self)
+  end
+  
+  # Cast a list of 2-tuples to a dict
+  def to_dict
+    erl.dict.from_list(self)
   end
   
   # Cast to a list, returning the identity
@@ -181,14 +181,9 @@ class List
     "[#{map { |e| e.inspect() }.join(',')}]"
   end
   
-  # Is the list empty?
-  def empty?
-    case self
-    when []
-      true
-    when _
-      false
-    end
+  # Cast to a tuple
+  def to_tuple
+    erl.list_to_tuple(self)
   end
 
   # FIXME: implement private
