@@ -6,13 +6,9 @@
 # Redistribution is permitted under the MIT license.  See LICENSE for details.
 #
 
-class UUID
-  def initialize
-    @ref = erl.make_ref()
-  end
-  
+class UUID  
   def to_s()
-    "#<UUID:#{erl.ref_to_list(@ref).to_string().sub('#Ref<', '')}"
+    "#<UUID:#{erl.ref_to_list(self).to_string().sub('#Ref<', '')}"
   end
   
   def inspect(); to_s(); end
