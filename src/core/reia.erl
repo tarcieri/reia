@@ -47,6 +47,16 @@ eval(String) ->
 eval(String, Binding) ->
   reia_eval:exprs(parse(String), Binding).
   
+% Call a function within a Reia module
+apply(Module, Function, Arguments) -> apply(Module, Function, Arguments, nil).
+apply(Module, Function, Arguments, Block) ->
+  Arguments2 = if
+    is_tuple(Arguments) -> Arguments;
+    is_list(Arguments)  -> list_to_tuple(Arguments);
+    true -> throw({error, "invalid type for arguments"})
+  end,
+  Module:Function(Arguments2, Block).
+    
 % Create a new instance of the given class
 inst(Class, Arguments) -> inst(Class, Arguments, nil).
 inst(Class, Arguments, Block) ->
@@ -60,16 +70,6 @@ inst(Class, Arguments, Block) ->
       Object = #reia_object{class=Class, ivars=dict:new()},
       Class:call({Object, initialize, Arguments}, Block)
   end.
-
-% Call a function within a Reia module
-apply(Module, Function, Arguments) -> apply(Module, Function, Arguments, nil).
-apply(Module, Function, Arguments, Block) ->
-  Arguments2 = if
-    is_tuple(Arguments) -> Arguments;
-    is_list(Arguments)  -> list_to_tuple(Arguments);
-    true -> throw({error, "invalid type for arguments"})
-  end,
-  Module:Function(Arguments2, Block).
 
 % Invoke a method on the given object
 invoke(Receiver, Method, Arguments) -> invoke(Receiver, Method, Arguments, nil).
