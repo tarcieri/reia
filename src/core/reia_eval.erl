@@ -52,12 +52,10 @@ exprs(Exprs, Bindings) ->
   
   {value, Value, NewBindings}.
 
-% Generate a timestamp to be used in a Reia module name
-% FIXME: atoms are never garbage collected, so a pool of these should be kept
-% and new ones created only when the pool is empty.
+% Generate a unique module name. Base it off the current PID
 stamp() ->
-  Timestamp = [integer_to_list(N) || N <- tuple_to_list(now())],
-  string:join(Timestamp, "_").
+  SplitPid = re:split(pid_to_list(self()), "\\."),
+  string:join([binary_to_list(Num) || Num <- SplitPid], "_").
 
 temporary_module(Name, Args, Exprs) ->
   #module{line=1, name=Name, exprs=[
