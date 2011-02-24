@@ -54,8 +54,7 @@ exprs(Exprs, Bindings) ->
 
 % Generate a unique module name. Base it off the current PID
 stamp() ->
-  SplitPid = re:split(pid_to_list(self()), "\\."),
-  string:join([binary_to_list(Num) || Num <- SplitPid], "_").
+  string:join(string:tokens(pid_to_list(self()), "."), "_").
 
 temporary_module(Name, Args, Exprs) ->
   #module{line=1, name=Name, exprs=[
