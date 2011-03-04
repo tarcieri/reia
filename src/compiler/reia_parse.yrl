@@ -886,7 +886,7 @@ extract_fragment(_Continuation, [$"|_], Line) ->
 extract_fragment(Continuation, [$}|String], Line) ->
   {more, Continuation2} = reia_scan:tokens(Continuation, [$}], Line),
   case Continuation2 of
-    {tokens, _, _, _, _, [{'}', _}|Tokens], _, _} ->
+    {tokens, _, _, _, _, _, [{'}', _}|Tokens], _, _} ->
       case reia_parse:parse(lists:reverse(Tokens)) of
         {ok, [Expr]} ->
           {String, Expr};
@@ -896,7 +896,7 @@ extract_fragment(Continuation, [$}|String], Line) ->
         Error ->
           throw(Error)
       end;
-    {skip_tokens, _, _, _, _, {_, _, Error}, _, _} ->
+    {skip_tokens, _, _, _, _, _, {_, _, Error}, _, _} ->
       throw({error, {Line, Error}})
   end;
 extract_fragment(Continuation, [Char|String], Line) ->
