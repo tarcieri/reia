@@ -70,16 +70,11 @@ end
 # Build rules
 task :build   => %w(scanner parser reia)
 task :reia    => ERL_DEST + REIA_DEST
-task :scanner => %w(src/leex/leex.beam src/compiler/reia_scan.erl)
+task :scanner => %w(src/compiler/reia_scan.erl)
 task :parser  => %w(src/compiler/reia_parse.erl)
 
-# Scanner
-file "src/leex/leex.beam" => "src/leex/leex.erl" do
-  sh "erlc -W0 -o src/leex src/leex/leex.erl"
-end
-
-file "src/compiler/reia_scan.erl" => %w(src/leex/leex.beam src/compiler/reia_scan.xrl) do
-  erl_eval 'leex:file("src/compiler/reia_scan.xrl")', 'src/leex'
+file "src/compiler/reia_scan.erl" => %w(src/compiler/reia_scan.xrl) do
+  erl_eval 'leex:file("src/compiler/reia_scan.xrl")'
 end
 
 # Parser
