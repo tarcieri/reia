@@ -54,6 +54,7 @@ Nonterminals
   unary_op
   module_decl
   class_decl
+  role_decl
   methods
   method
   class_method
@@ -90,7 +91,7 @@ Nonterminals
 Terminals
   '(' ')' '[' ']' '{' '}' '<[' ']>' def eol
   float integer string atom regexp true false nil self
-  module class module_name identifier punctuated_identifier erl 
+  module class role module_name identifier punctuated_identifier erl 
   'case' 'when' 'end' 'if' 'unless' 'elseif' 'else' fun do throw
   'and' 'or' 'not' 'try' 'catch' for in 'receive' 'after'
   '+' '-' '*' '/' '%' '**' ',' '.' '..' '@'
@@ -251,6 +252,7 @@ max_expr -> try_expr     : '$1'.
 max_expr -> module_name  : '$1'.
 max_expr -> module_decl  : '$1'.
 max_expr -> class_decl   : '$1'.
+max_expr -> role_decl    : '$1'.
 max_expr -> ivar         : '$1'.
 max_expr -> bound_var    : '$1'.
 max_expr -> identifier   : #var{line=?line('$1'), name=?identifier_name('$1')}.
@@ -347,6 +349,21 @@ class_decl -> class module_name methods 'end' :
   }.
 class_decl -> class module_name '<' module_name methods 'end' : 
   #class{
+    line   = ?line('$1'), 
+    name   = ?identifier_name('$2'),
+    parent = ?identifier_name('$4'),
+    exprs  = begin validate_class_body('$5'), '$5' end
+  }.
+  
+%% Role declarations
+role_decl -> role module_name methods 'end' : 
+  #role{
+    line  = ?line('$1'), 
+    name  = ?identifier_name('$2'),
+    exprs = begin validate_class_body('$3'), '$3' end
+  }.
+role_decl -> role module_name '<' module_name methods 'end' : 
+  #role{
     line   = ?line('$1'), 
     name   = ?identifier_name('$2'),
     parent = ?identifier_name('$4'),
