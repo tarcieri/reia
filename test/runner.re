@@ -10,12 +10,12 @@ System.load("test/test_helper.re")
 
 tests = [
   ("builtins", [
-    "binary", "boolean", "list", "tuple", "string", 
-    "range", "regexp", "numeric", "dict", "atom", "fun"
+    "binary", "boolean", "list", "tuple", "string", "range", "regexp", 
+    "numeric", "dict", "atom", "fun"
   ]),
   ("core", [
-    "blocks", "branching", "funrefs", "object", #"class", 
-    "operator", "exception", "messaging"
+    "blocks", "branching", "funrefs", "operator", "exception", "messaging",
+    "object" #, "class", "role"
   ]),
   ("lib",  ["json"])
 ]

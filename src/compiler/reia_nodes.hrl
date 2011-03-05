@@ -24,6 +24,7 @@
 % Modules and Classes
 -record(module,       {line, name, attrs=[], exprs}).
 -record(class,        {line, name, parent='Object', exprs}).
+-record(role,         {line, name, parent='Actor', exprs}).
 
 % Methods and functions
 -record(class_method, {line, name, args=[], block=#var{line=1,name='_'}, body}).
