@@ -16,6 +16,9 @@ transform(Exprs, _Options) ->
   
 transform(#class{} = Expr) ->
   reia_syntax:map_subtrees(fun transform/1, transform_class(Expr));
+    
+transform(#role{} = Expr) ->
+  reia_syntax:map_subtrees(fun transform/1, transform_role(Expr));
       
 transform(Expr) ->
   reia_syntax:map_subtrees(fun transform/1, Expr).
@@ -34,6 +37,21 @@ transform_class(#class{line=Line, name=Name, parent=Parent, exprs=Methods}) ->
   Methods4 = Initializers ++ Methods3 ++ [method_missing_thunk()],
   
   #class{line=Line, name=Name, exprs=Methods4}.
+  
+transform_role(#role{line=Line, name=Name, parent=Parent, exprs=Methods}) ->
+  MethodTable = build_method_table(Methods),
+
+  Initializers = transform_initialize_methods(Name, MethodTable),
+  MethodMissings = transform_method_missings(Parent, MethodTable),
+
+  MethodTable2 = orddict:erase(initialize, MethodTable),
+  MethodTable3 = orddict:store(method_missing, MethodMissings, MethodTable2),
+
+  Methods2 = [Meths || {_, Meths} <- orddict:to_list(MethodTable3)],
+  Methods3 = [prepare_method(Method) || Method <- lists:flatten(Methods2)],
+  Methods4 = Initializers ++ Methods3 ++ [method_missing_thunk()],
+
+  #role{line=Line, name=Name, exprs=Methods4}.
 
 % Create a orddict of methods by name
 build_method_table(Methods) ->
