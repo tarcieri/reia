@@ -90,7 +90,7 @@ immutable_method_ivars(Expr) ->
 	reia_syntax:map_subtrees(fun immutable_method_ivars/1, Expr).
 		
 immutable_match_context(#ivar{line=Line}) ->
-	throw({error, {Line, "illegal usage of an instance variable in match context"}});
+	reia:throw('SyntaxError', Line, "illegal instance variable match");
 	
 immutable_match_context(Expr) ->
 	reia_syntax:map_subtrees(fun immutable_match_context/1, Expr).
