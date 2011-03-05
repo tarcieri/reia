@@ -15,7 +15,7 @@ tests = [
   ]),
   ("core", [
     "blocks", "branching", "funrefs", "operator", "exception", "messaging",
-    "object" #, "class", "role"
+    "object", "role" #, "class"
   ]),
   ("lib",  ["json"])
 ]
