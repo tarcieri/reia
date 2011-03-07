@@ -32,11 +32,10 @@ transform_class(#class{line=Line, name=Name, parent=Parent, exprs=Methods}) ->
   MethodTable2 = orddict:erase(initialize, MethodTable),
   MethodTable3 = orddict:store(method_missing, MethodMissings, MethodTable2),
   
-  Methods2 = [Meths || {_, Meths} <- orddict:to_list(MethodTable3)],
-  Methods3 = [prepare_method(Method) || Method <- lists:flatten(Methods2)],
-  Methods4 = Initializers ++ Methods3 ++ [method_missing_thunk()],
+  Methods2 = prepare_methods(MethodTable3, fun prepare_immutable_method/1),
+  Methods3 = Initializers ++ Methods2 ++ [method_missing_thunk()],
   
-  #class{line=Line, name=Name, exprs=Methods4}.
+  #class{line=Line, name=Name, exprs=Methods3}.
   
 transform_role(#role{line=Line, name=Name, parent=Parent, exprs=Methods}) ->
   MethodTable = build_method_table(Methods),
@@ -47,11 +46,10 @@ transform_role(#role{line=Line, name=Name, parent=Parent, exprs=Methods}) ->
   MethodTable2 = orddict:erase(initialize, MethodTable),
   MethodTable3 = orddict:store(method_missing, MethodMissings, MethodTable2),
 
-  Methods2 = [Meths || {_, Meths} <- orddict:to_list(MethodTable3)],
-  Methods3 = [prepare_method(Method) || Method <- lists:flatten(Methods2)],
-  Methods4 = Initializers ++ Methods3 ++ [method_missing_thunk()],
+  Methods2 = prepare_methods(MethodTable3, fun prepare_mutable_method/1),
+  Methods3 = Initializers ++ Methods2 ++ [method_missing_thunk()],
 
-  #role{line=Line, name=Name, exprs=Methods4}.
+  #role{line=Line, name=Name, exprs=Methods3}.
 
 % Create a orddict of methods by name
 build_method_table(Methods) ->
@@ -82,7 +80,7 @@ transform_initialize_methods(_Name, MethodTable) ->
   end,
 
   lists:map(fun(Method) ->
-    Initialize = prepare_initialize_method(Method),
+    Initialize = prepare_mutable_method(Method),
 
     Line = Initialize#function.line,  
     Result = #native_call{
@@ -157,18 +155,22 @@ method_missing_thunk() ->
       }
     ]
   }.
+
+prepare_methods(MethodTable, MethodPreparer) ->
+  Methods = [Meths || {_, Meths} <- orddict:to_list(MethodTable)],
+  [MethodPreparer(Method) || Method <- lists:flatten(Methods)].
   
-% Prepare the finalized form of an initialize method
-prepare_initialize_method(Method) ->
-  Method2 = reia_ivars:mutable_method(Method),
-  Method3 = transform_method(Method2),
-  callify_method(Method3).
+% Prepare the finalized form of a method with mutable ivars
+prepare_mutable_method(Method) ->
+  prepare_method(reia_ivars:mutable_method(Method)).
     
-% Prepare the finalized form of a method
+% Prepare the finalized form of a method with immutable ivars
+prepare_immutable_method(Method) ->
+  prepare_method(reia_ivars:immutable_method(Method)).
+  
+% Prepare the finalized form of a method after ivar transformations
 prepare_method(Method) ->
-  Method2 = reia_ivars:immutable_method(Method),
-  Method3 = transform_method(Method2),
-  callify_method(Method3).
+  callify_method(transform_method(Method)).
   
 % Change the method into a clause of the call function
 callify_method(Method) ->
