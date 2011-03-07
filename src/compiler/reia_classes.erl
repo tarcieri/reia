@@ -80,22 +80,24 @@ transform_initialize_methods(_Name, MethodTable) ->
   end,
 
   lists:map(fun(Method) ->
-    Initialize = prepare_mutable_method(Method),
-
-    Line = Initialize#function.line,  
-    Result = #native_call{
-      line     = Line,
-      module   = erlang,
-      function = setelement,
-      args = [
-        #integer{line=Line, value=3},
-        ?self(Line),
-        ?ivars(Line)
-      ] 
-    },
-      
-    Initialize#function{body = Initialize#function.body ++ [Result]}
+    transform_initialize_method_return(prepare_mutable_method(Method))    
   end, Methods).
+  
+% Return the new immutable object from the initialize function
+transform_initialize_method_return(Initialize) ->
+  Line = Initialize#function.line,  
+  Result = #native_call{
+    line     = Line,
+    module   = erlang,
+    function = setelement,
+    args = [
+      #integer{line=Line, value=3},
+      ?self(Line),
+      ?ivars(Line)
+    ] 
+  },
+    
+  Initialize#function{body = Initialize#function.body ++ [Result]}.
   
 % Transform the method_missing method or create it if it wasn't defined
 transform_method_missings(Parent, MethodTable) ->
