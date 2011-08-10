@@ -1,6 +1,16 @@
 Reia
 ====
 
+FYI: Reia is defunct. No additional work on it is planned. If you are
+interested in the ideas behind Reia, I strongly suggest you check out
+the Elixir language, which is now in a more mature stage of development
+than Reia:
+
+[https://github.com/josevalim/elixir](https://github.com/josevalim/elixir)
+
+About
+-----
+
 Welcome to Reia (pronounced RAY-uh), a Ruby-like scripting language for the 
 Erlang virtual machine (BEAM).
 
