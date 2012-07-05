@@ -6,7 +6,7 @@ interested in the ideas behind Reia, I strongly suggest you check out
 the Elixir language, which is now in a more mature stage of development
 than Reia:
 
-[https://github.com/josevalim/elixir](https://github.com/josevalim/elixir)
+[https://github.com/elixir-lang/elixir](https://github.com/elixir-lang/elixir)
 
 About
 -----
